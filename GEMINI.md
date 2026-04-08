@@ -6,7 +6,7 @@ If you are a different agent, you are free to read it but it does not contain in
 
 ## Google Gemini-Specific Information
 
-There are currently no Claude Code-specific information.
+There are currently no Gemini-specific information.
 Some could be added in the future.
 
 
