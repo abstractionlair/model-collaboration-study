@@ -1,0 +1,944 @@
+
+\documentclass{article} % For LaTeX2e
+% \usepackage[sort]{natbib}
+\usepackage{iclr2026_conference,times}
+
+
+\input{./sections/0_preamble.tex}
+
+
+
+\usepackage{wrapfig}
+\usepackage{bbm}
+% \usepackage[dvipsnames]{xcolor}   
+% \usepackage{tcolorbox}
+\usepackage{colortbl}
+\definecolor{aliceblue}{RGB}{178, 217, 245}
+\newcommand{\CC}{\cellcolor{aliceblue}}
+\definecolor{babyblue}{RGB}{217, 239, 251}
+\newcommand{\CB}{\cellcolor{babyblue}}
+\definecolor{babypink}{RGB}{251, 231, 230}
+\definecolor{mygreen}{HTML}{3cb44b}
+\definecolor{purple}{HTML}{7D2882}
+\definecolor{darkred}{HTML}{B22222}
+\newcommand{\revision}[1]{\textcolor{blue}{#1}}
+\newcommand{\yq}[1]{\textcolor{darkred}{#1}}
+
+\newcommand{\oursfull}[0]{\texttt{Collaborative Multi-Agenet Debate}\xspace}
+\newcommand{\ours}[0]{\texttt{ColMAD}\xspace}
+\newcommand{\copmad}[0]{\texttt{CopMAD}\xspace}
+\newcommand{\mad}[0]{\texttt{MAD}\xspace}
+\newcommand{\real}[0]{\texttt{ReaLMistake}\xspace}
+% \newcommand{\gpt4}[0]{\texttt{GPT-4-0613}\xspace}
+% \newcommand{\l213b}[0]{\texttt{Llama-2-13b-chat}\xspace}
+% \newcommand{\l270b}[0]{\texttt{Llama-2-70b-chat}\xspace}
+%
+\newcommand{\mathw}[0]{\texttt{Math Word Problem Generation}\xspace}
+\newcommand{\fine}[0]{\texttt{Fine-grained Fact Verification}\xspace}
+\newcommand{\answer}[0]{\texttt{Answerability Classification}\xspace}
+\definecolor{deepgreen}{rgb}{0.0, 0.5, 0.0} 
+\newcommand{\my}[1]{{\color{deepgreen}{(Mao: #1)}}}
+
+\usepackage{etoc}
+\etocdepthtag.toc{mtchapter}
+\etocsettagdepth{mtchapter}{subsection}
+\etocsettagdepth{mtappendix}{none}
+
+%%% Requirements for tables %%%
+\usepackage{longtable}
+\newcommand{\ccell}[1]{\multicolumn{1}{c}{#1}}
+\newcommand{\mrow}[2]{\multirow{#1}{*}{#2}}
+\newcommand{\mrtwo}[1]{\multirow{2}{*}{#1}}
+\newcommand{\mrthree}[1]{\multirow{3}{*}{#1}}
+\newcommand{\mctwo}[1]{\multicolumn{2}{c}{#1}}
+
+\newcommand{\scbnn}[1]{\scalebox{0.55}[1]{#1}}
+\newcommand{\scbn}[1]{\scalebox{0.65}[1]{#1}}
+\newcommand{\scbb}[1]{\scalebox{0.75}[1]{#1}}
+\newcommand{\scbbb}[1]{\scalebox{0.8}[1]{#1}}
+
+\newcommand{\scb}[1]{\scalebox{0.8}[1]{#1}}
+\newcommand{\scbc}[1]{\multicolumn{1}{c}{\scb{#1}}}
+\newcommand{\scbl}[1]{\multicolumn{1}{|c}{\scb{#1}}}
+\newcommand{\scbr}[1]{\multicolumn{1}{c|}{\scb{#1}}}
+
+% \newcommand{\cmark}{\ding{51}}
+% \newcommand{\xmark}{\ding{55}}
+%%%%%%%%%%%%%%%%%%%%%%%%
+% \title{On Scalable Oversight with Collaborative Multi-Agent Debate in Error Detection}
+
+% The \icmltitle you define below is probably too long as a header.
+% Therefore, a short form for the running title is supplied here:
+% \icmltitlerunning{On Scalable Oversight with Collaborative Multi-Agent Debate in Error Detection}
+
+\author{Yongqiang Chen$^{1,2}$\footnotemark[1], 
+Gang Niu$^{2}$, 
+James Cheng$^{1}$, 
+Bo Han$^{3}$, 
+Masashi Sugiyama$^{2,4}$
+\vspace{1em}
+\\
+\textsuperscript{1}The Chinese University of Hong Kong, \hspace{0.5em} 
+\textsuperscript{2}RIKEN Center for Advanced Intelligence Project,\\
+\textsuperscript{3}Hong Kong Baptist University, \hspace{0.5em} 
+\textsuperscript{4}The University of Tokyo\\
+\texttt{\{yqchen,jcheng\}@cse.cuhk.edu.hk}, \hspace{0.5em}
+\texttt{gang.niu.ml@gmail.com}\\
+\texttt{bhanml@comp.hkbu.edu.hk}, \hspace{0.5em}
+\texttt{sugi@k.u-tokyo.ac.jp}
+}
+
+\iclrfinalcopy 
+\title{Towards Scalable Oversight with Collaborative Multi-Agent Debate in Error Detection}
+
+\begin{document}
+\footnotetext[1]{Work done during an internship at RIKEN Center for Advanced Intelligence Project.}
+
+\maketitle
+
+
+
+\begin{abstract}
+Accurate detection of errors in large language models (LLM) responses is central to the success of scalable oversight, or providing effective supervision to superhuman intelligence.
+% Scalable oversight for large language models (LLMs) aims to provide superhuman intelligence or powerful LLMs with effective supervision signals on complex tasks, therefore enabling AI models to evolve beyond human intelligence. 
+% Detecting errors in LLM responses is critical to successful scalable oversight. 
+Yet, self-diagnosis is often unreliable on complex tasks unless aided by reliable external feedback. 
+%
+Multi-agent debate (\mad) seems to be a natural alternative to external feedback: multiple LLMs provide complementary perspectives and cross-checks for error detection.
+% To resolve the issue, we consider incorporating the multi-agent debate (\mad) to introduce complementary perspectives of different LLM agents for error detection.
+However, prior \mad protocols frame debate as a \textit{zero-sum game}, where the debaters compete to win the game instead of seeking the truth. Consequently, it leads to \textit{debate hacking}: debaters tend to mislead the judge by misinterpreting the task or presenting overconfident claims, which introduce more mistakes and underperform single-agent methods.
+% Prior competitive debate protocols often maximize persuasiveness rather than correctness, enabling debate hacking and sometimes underperforming single-agent baselines.
+%However, most \mad protocols are framed as competitions, which encourages LLMs to \textit{win the debate} instead of \textit{truth-seeking}. Consequently, it leads to \textit{debate hacking}: debaters tend to mislead the judge by misinterpreting the task or presenting overconfident claims, which introduce more mistakes and underperform single-agent methods.
+%
+% Essentially, debate is the mean to seek the truth in \mad.
+%
+% \my{Based on this finding, we propose \ours, a collaborative protocol that (i) assigns complementary roles to heterogeneous agents, (ii) requires independently verifiable evidence and cross-checks, and (iii) uses a separately calibrated judge.}
+%
+To mitigate the issue, we introduce a new collaborative \mad protocol, termed \ours, that reframes \mad as a \textit{non-zero sum game}.
+Specifically, \ours encourages multiple agents to criticize each other in a supportive way, such that they can complement the missing points of each other. Therefore, the judge agent can make a more informative conclusion based on more comprehensive evidence.
+%
+Empirically, we show that \ours significantly outperforms previous competitive \mad by 19\% and brings non-trivial improvements over single-agent methods in error detection.
+\end{abstract}
+
+
+\section{Introduction}
+
+
+% \yq{[New literature]}:
+
+% \citet{kim2025correlated} show that "models with the same provider (company), with the same base architecture, or with similar sizes have more correlated errors. And importantly, even after conditioning on these factors, pairs of models that are more accurate individually also have more correlated errors. This means that newer models that differ on the surface may be converging in their outputs."
+
+% \yq{[New literature]}
+
+Large language models (LLMs) have gained huge success in solving tasks at various complexity levels~\citep{spark_AGI,o1,r1}.
+As LLMs grow more powerful and capable of challenging tasks that require human expert-level knowledge, it becomes harder for humans to effectively understand and supervise LLMs~\citep{amodei2016concrete}.
+Hence, it is essential to seek \textit{scalable oversight} that provides effective supervision signals to powerful LLMs beyond human intelligence~\citep{amodei2016concrete,christiano2018supervising,irving2018ai,bowman2022measuring,burns2023weaktostrong,khan2024debating,kenton2024on}.
+\textit{Detecting the errors} in LLM responses is critical to the success of scalable oversight~\citep{tyen2024cannotfind,huang2024cannotselfcorrect,kamoi2024self-correction}.
+However, LLMs are shown to be struggling to self-diagnose their own mistakes when without reliable external feedback~\citep{kamoi2024self-correction}.
+In particular, \citet{realmistake} found that powerful LLMs like GPT-4 can not reliably detect errors in the responses of GPT-4 or Llama-2.
+
+
+\begin{figure*}
+    \vspace{-0.15in}
+    \centering
+    \includegraphics[width=\linewidth]{figures/CoMAD.pdf}
+    \vspace{-0.15in}
+    \caption{Comparison between competitive multi-agent debate (\copmad) and collaborative multi-agent debate (\ours). 
+    Given an LLM response to a task of generating a math problem according to some given requirements, it is required to examine whether the LLM response meets all the requirements properly.
+    The original \mad scheme suffers from \textit{debate hacking}. Due to the zero-sum nature, the dishonest debaters tend to mislead the judge with misinterpreted pieces of evidence ("including the cost of the scooter is unnecessary") or overconfident claims ("fundamentally flawed").
+    % to make biased decisions due to the zero-sum nature. 
+    Instead, collaborative debate aims to complement the missing information of each other in order to assist the judge in making a more informed decision.}
+    \label{fig:comad_illustration}
+\end{figure*}
+To complement the requirement for external feedback in error detection, it is natural to incorporate feedback from other LLMs to help with error detection. As LLMs differ in their knowledge and error tendencies~\citep{kim2025correlated}, they are unlikely to commit the same mistakes simultaneously, thereby providing \textit{complementary signals for error detection} (see in Fig.~\ref{fig:potential}). 
+%
+In fact, Multi-Agent Debate (\mad) is a promising scheme to realize this insight that incorporates the knowledge of multiple LLM agents to resolve complex reasoning tasks and improve over single-agent methods~\citep{Chen2025HarnessingML,Feng2025WhenOL,Buhl2025AnAS}. 
+In particular, \citet{khan2024debating} and \citet{kenton2024on} showed that even a weak LLM can easily identify the flaws and select the correct answer from the debate of powerful LLMs on complex tasks.
+% LLMs can be more persuasive when debating for correct answers, and even a weak judge model can easily identify the correct answer from the debate.
+Nevertheless, it remains underexplored whether \mad also facilitates the LLM error detection, and thus it raises an interesting research  question:
+% Therefore, it is natural to introduce \mad to LLM mistake detection.
+\begin{myquotation}\centering
+\textit{Can we incorporate \mad to help with LLM error detection?}
+\end{myquotation}
+In this work, we investigate the feasibility of using \mad to detect errors in LLM responses. 
+Despite the high potential of the \mad, we find that previous \mad approaches will even \textit{introduce more mistakes} and underperform the use of a single LLM in error detection (see Fig.~\ref{fig:pitfall_mad}). 
+% We find that different LLMs are less likely to make the same mistake simultaneously when detecting the errors, which opens huge room to fuse knowledge of different LLMs via \mad for error detection~(Sec.~\ref{sec:mad_potential}).
+% In contrast to~\citet{khan2024debating} and \citet{kenton2024on}, due to the zero-sum nature of debate, we find that stronger LLMs will exhibit \textit{debate hacking} behaviors\my{This term is not detailed introduced in method}, where the debater agents will misinterpret the task requirements and present claims in an overconfident tone to mislead the judge agent~(Sec.~\ref{sec:mad_pitfall}). 
+Interestingly, as previous approaches often frame \mad as a zero-sum game where the debaters compete with each other, we find that stronger LLMs will exhibit \textit{debate hacking} behaviors in \textit{competitive} \mad (\copmad): as shown in Fig.~\ref{fig:comad_illustration}, debaters will misinterpret the task requirements and present claims in an overconfident tone to mislead the judge agent.
+In other words, \copmad debaters will try every possibility to persuade the judge to \textit{win the game}, instead of providing \textit{honest and evidential statements}. Consequently, \copmad can degenerate or even underperform single-agent methods~(Proposition~\ref{thm:pitfal_debating}).
+
+
+To mitigate the issue, we propose a new \mad protocol called \oursfull (\ours) that reframes \mad as a non-zero sum game.
+% Essentially, the objective of \mad is to \textit{seek the truth through a competition}\my{How would you define "Truth"}. 
+% Under the previous \mad scheme, \textit{winning the game outweighs seeking the truth} and leads to failure. Therefore, 
+In contrast to \copmad, instead of prompting the agents to win the game, \ours asks debaters to \textit{collaborate} and complement each other's missing points. Thus, the judge agent could make a more informative and objective decision based on the debating transcripts (Proposition~\ref{thm:comad}). Empirically, across three benchmarks in \real~\citep{realmistake}, we demonstrate that \ours can lead to up to 4\% improvements in identifying mistakes of LLMs compared to single-agent-based methods. In contrast, \copmad will lead to up to 15\% performance decrease compared to single-agent methods.
+%
+In addition to the increased correctness of the error detection, we also find that the explanations given by \ours to why there are errors in LLM responses are \textit{more aligned to humans}. The more human-aligned \mad protocol provides useful insights for scalable oversight.
+% To summarize, our contributions are as follows:
+% \begin{itemize}
+%     \item We conduct the first investigation of \mad in error detection and identify fundamental flaws in the previous \copmad protocol due to its zero-sum nature. We also provide a theoretical framework to model and explain the failures of \copmad.
+%     \item We propose a new \mad protocol called \ours that overcomes the limitations of \copmad and enables LLMs to collaborate to detect the errors in LLM responses.
+%     \item Compared to \copmad, \ours brings significant improvements up to 15\% and provides more human-aligned explanations for the errors in LLM responses in \real.
+% \end{itemize}
+% Built upon previous foundations~\citep{khan2024debating,kenton2024on}, \ours provides new insights on \mad for scalable oversight.
+
+\section{Collaborative Multi-Agent Debate}
+\label{sec:method}
+In this section, we initiate an investigation of \mad for detecting errors in LLM responses. 
+
+
+% \begin{figure*}[t]
+%     \centering
+%     \subfigure[Math problem]{
+%         \includegraphics[width=0.31\textwidth]{figures/math_gpt4.png}
+%     }
+%     \subfigure[Fact verification]{
+%         \includegraphics[width=0.31\textwidth]{figures/finegrained_gpt4.png}
+%     }
+%     \subfigure[Answerability]{
+%         \includegraphics[width=0.31\textwidth]{figures/answer_gpt4.png}
+%     }
+%     \caption{Error reductions of prevalent LLMs in detecting errors of Llama-2.}
+%     \label{fig:potential_llama2}
+% \end{figure*}
+
+
+
+
+\subsection{Potential of Multi-Agent Collaboration}
+\label{sec:mad_potential}
+% \yq{intro of the task \& figures of error reduction}
+As~\citet{realmistake} showed that a single LLM can hardly tell the errors in LLM responses when without no reliable external feedback, a natural idea is to investigate whether incorporating multiple LLMs can mitigate the issue.
+% \my{This claim can be easily judged by later experimental results, single agent performs sometimes better than \ours}
+% \my{Intuitively, multiple agents can complement each other’s knowledge and thereby identify errors in LLM responses.}
+Specifically, we consider the collaboration of two LLMs in error detection through \mad, and our discussion can also be generalized to two or more LLMs.
+% 
+% To begin with, we conduct an initial experiment to identify the potential of multi-agent collaboration for error detection. 
+Specifically, we consider two agents $A$ (Alice) and $B$ (Bob), and denote the predictions of the error detections as $\hat{\vy}_A$ and $\hat{\vy}_B$, with rationales (e.g., CoT reasoning) as $x_A$ and $x_B$, respectively. During the debate, they will emit messages $m_A$ and $m_B$ to convince a judge $J$. 
+\begin{assumption}[Optimal Judge Strategy]
+Denoting the label as $Y\in\{0,1\}$ with prior probability $\pi\in(0,1)$, without debating, the judge will derive the final answer based on the initial responses $X_0=(x_A,x_B)$. Assuming the judge $J$ uses the Bayes test on the total log-likelihood ratio (LLR), we will have the LLR based on $X_0$ as
+\begin{equation}\label{eq:llr_x0}
+    \Lambda_0(X_0)=\log\frac{p(X_0|Y=1)}{P(X_0|Y=0)}+\log\frac{\pi}{1-\pi}.
+\end{equation}
+The contribution to LLR from the debating can be written as
+\begin{equation}\label{eq:llr_contrib}
+    l_i(m_i;X_0)=\log\frac{P(m_i|Y=1,X_0)}{P(m_i|Y=0,X_0)},\ i\in\{A,B\}.
+\end{equation}
+Then, with debating, the LLR of the judge is
+\begin{equation}\label{eq:llr_debating}
+\Lambda(X_0,m_A,m_B)=\Lambda_0(X_0)+l_A(m_A;X_0)+l_B(m_B;X_0)+\log\frac{\pi}{1-\pi}.
+\end{equation}
+\end{assumption}
+
+% Then, we consider the following collaboration is the \textit{oracle collaboration}:
+% \begin{definition}[Oracle collaboration]\label{def:oracle}
+% For two agents $A$ and $B$ with predictions $\hat{\vy}_A$ and $\hat{\vy}_B$, denote the collaborative predictions of $A$ and $B$ as $\hat{\vy}_J$, and the ground truth labels $\vy$, the oracle collaboration of $A$ and $B$ only makes mistakes when both $A$ and $B$ fail:
+% \[
+% \hat{\vy}_J^{(i)}\neq \vy^{(i)} \text{if}\ \hat{\vy}_A^{(i)}\neq \vy^{(i)} \text{and}\ \hat{\vy}_B^{(i)}\neq \vy^{(i)},
+% \]
+% where the superscript $i$ refers to the $i$-th example.
+% \end{definition}
+
+\begin{figure*}[t]
+    \centering
+    \subfigure[Math problem]{
+        \includegraphics[width=0.31\textwidth]{figures/mathword_gpt4.pdf}
+    }
+    \subfigure[Fact verification]{
+        \includegraphics[width=0.31\textwidth]{figures/finegrained_fact_verification_gpt4.pdf}
+    }
+    \subfigure[Answerability]{
+        \includegraphics[width=0.31\textwidth]{figures/answerability_classification_gpt4.pdf}
+    }
+    \vspace{-0.15in}
+    \caption{Error reductions of prevalent LLMs in detecting errors of \text{GPT-4}. The numbers refer to the reduced errors following the oracle collaboration via Eq.~(\ref{eq:oracle_collab}). It can be found that different LLMs are less likely to make mistakes simultaneously. When incorporating LLMs with higher heterogeneity, such as those from different companies, the error reduction rates will be higher.}
+    \label{fig:potential}
+\end{figure*}
+
+
+Intuitively, if the elicited messages $M=(m_A,m_B)$ bring additional information to the judge, i.e., $I(Y;M|X_0)>0$ where $I(\cdot;\cdot)$ denotes the mutual information, we will have $\Lambda(X_0,M)>\Lambda(X_0)$. 
+In order to provide additional information, we need to look into the cases where the predictions by $A$ differ from those by $B$. Under $Y_A\neq Y_B$, if both agents are able to provide \textit{sufficient justifications} and are more persuasive during the debate when they are debating for the \textit{correct} answer. Hence, the judge can be convinced to take the correct answer when either of the agents is correct.
+The reduction of errors from the oracle collaboration can be calculated through
+\begin{equation}\label{eq:oracle_collab}
+    \min_{K\in\{A,B\}}\sum_{i}\mathbbm{1}[\hat{\vy}_K^{(i)}\neq\vy^{(i)}]-\sum_{i}\mathbbm{1}[\hat{\vy}_J^{(i)}\neq\vy^{(i)}],
+\end{equation}
+where $\vy^{(i)}_K$ denotes the initial prediction of the agent $K\in\{A,B\}$ on the $i$-th sample. Intuitively, Eq.~(\ref{eq:oracle_collab}) can be considered as the potential of the collaboration between $A$ and $B$.
+
+
+
+\textbf{Potential of multi-agent collaboration.} We plot the error reductions for the prevalent LLMs benchmarked in \real~\citep{realmistake} in Fig.~\ref{fig:potential}. We visualize the ratio of the reduced errors under the oracle collaboration protocol of Eq.~(\ref{eq:oracle_collab}),  given the LLM error detection results from \real.
+The \real benchmark contains $3$ objective error detection tasks: (i) math word problem generation (Math problem) that requires LLMs to generate math problems satisfying requirements; (ii) fine-grained fact verification (Fact verification) that requires LLMs to verify claims given fine-grained evidence; (iii) answerability classification (Answerability) that requires LLMs to leverage their commonsense knowledge to examine whether a question is answerable. We calculate the potential of collaboration of multiple prevalent LLMs.
+
+From Fig.~\ref{fig:potential}, it can be found that two different LLMs tend to make fewer mistakes simultaneously, indicating a higher potential for oracle collaboration. The more different the two LLMs are in the collaboration, especially for those from different companies, the less likely they are to make mistakes at the same time. For example, collaboration between \texttt{Llama-2} and \texttt{Llama-3.1} can lead to little-to-no error reduction. In contrast, the collaboration between \texttt{GPT-4} and \texttt{Llama-2} can reduce more than 30\% of errors.
+%
+Furthermore, given the potential of test-time scaling capabilities of LLMs~\citep{TTT_better,muennighoff2025s1simpletesttimescaling}, collaboration of agents can have the potential of bringing additional information when both agents make mistakes and reduce beyond Eq.~(\ref{eq:oracle_collab}).
+
+
+
+\subsection{Pitfalls of Multi-Agent Debate}
+\label{sec:mad_pitfall}
+% \yq{performances \& Examples}
+To gain more insights on incorporating \mad for error detection, we conduct an initial experiment with the Society of Minds (SoM)~\citep{du2023improving}, as well as previous \copmad methods~\citep{khan2024debating,kenton2024on}, which design sophisticated debater prompts along with a judge. Different from \copmad, SoM encourages LLMs to incorporate the good points from others' responses, which deviates from the typical scheme of debate for scalable oversight~\citep{irving2018ai,khan2024debating,kenton2024on}. We will discuss the differences in Sec.~\ref{sec:comad_method} and focus more on \copmad.
+
+We consider the collaboration between \texttt{Llama-3.1-70B} (Llama-3.1 in short) and \texttt{GPT4o-mini} (4o-mini in short) . The results are given in Fig.~\ref{fig:pitfall_mad}. We report the precision, recall, and F1 results following~\citet{realmistake}. From the results, we can find that, although in most cases, SoM~\citep{du2023improving} and \copmad protocol~\citep{khan2024debating,kenton2024on} can improve the precision of the error detection compared with the single-agent methods, they also lead to a severe decrease in the recall across all tasks. Hence, the resulting F1 decreases dramatically, as well. 
+
+
+\begin{figure*}[t]
+    \centering
+    \subfigure[Math problem]{
+        \includegraphics[width=0.31\textwidth]{figures/vanilla_mad_math_word_problem_generation_gpt4.pdf}
+    }
+    \subfigure[Fact verification]{
+        \includegraphics[width=0.31\textwidth]{figures/vanilla_mad_finegrained_fact_verification_gpt4.pdf}
+    }
+    \subfigure[Answerability]{
+        \includegraphics[width=0.31\textwidth]{figures/vanilla_mad_answerability_classification_gpt4.pdf}
+    }
+    \vspace{-0.15in}
+    \caption{Pitfalls of previous \mad protocols. Under previous \mad schemes, such as \copmad or SoM, the debate results are lower than any of the LLMs involved in the debate in most cases. In contrast, \ours significantly improves \copmad and outperforms the use of a single LLM.}
+    \label{fig:pitfall_mad}
+\end{figure*}
+Essentially, \copmad implements \mad into a \textit{zero-sum} game, where the debaters compete and challenge each other's claims, and explore the potential solutions ~\citep{ai_safety_debate}. 
+A critical requirement for the success of \mad is the \textit{honesty}. When the debaters are \textit{dishonest} with the supporting evidence, the \textit{zero-sum} nature of \copmad drives debaters to hack the debate, leading to a severe decrease in performance. Theoretically, in the binary classification case, assuming the optimal judge strategy, we can establish the following formulation of \copmad.
+\begin{proposition}[Pitfalls of dishonest competitive debating]\label{thm:pitfal_debating}
+    Assuming a bounded LLR, i.e., $l_i\leq L_i<\infty,\ i\in\{A,B\}$, let $R(Z)$ denote the Bayes risk of the judge $J$ when making decisions based on $Z$, denote $R_0=R(X_0)$, denote the outcome of zero-sum debating as
+    \[
+    V_\mathrm{comp}=\min_J\max_{e\in\mathcal{E}(J)} P(J(X_0,M_e)\neq Y),
+    \]
+    where $M_e$ are the debating transcripts given by the optimal Nash equilibrium $e\in\mathcal{E}(J)$ of the $A$–$B$ subgame in convincing $J$.
+    Then, we have $V_\textrm{comp}=R_0$.
+\end{proposition}
+% \begin{proof}[Proof for Proposition~\ref{thm:pitfal_debating}]
+%     To show $V_\textrm{comp}=R_0$, it suffices to show that (i) $V_\textrm{comp}\geq R_0$ and (ii) $V_\textrm{comp}\leq R_0$, and (iii) there exists a strategy for the equation to hold.
+% \end{proof}
+The proof of Proposition~\ref{thm:pitfal_debating} is given in Appendix~\ref{proof:pitfal_debating}.
+Intuitively, Proposition~\ref{thm:pitfal_debating} illustrates a degenerated case of competitive debate among two \textit{dishonest} agents: the two dishonest agents try to find any useful arguments to defend for their answers. When they are assigned different answers as in \copmad~\citep{kenton2024on}, one of them is incorrect, and thus the competitive debate can be formulated as the minmax problem in Proposition~\ref{thm:pitfal_debating}.
+Consequently, the optimal strategy for the judge is to consider the original rationale by $A$ and $B$ instead of the debating transcripts. 
+%
+Given that the judge agent is usually imperfect and limited in the reasoning capabilities of the LLMs, the final answer by the judge is usually dependent on the \textit{debate skills} of the LLMs, which explains \textit{why \mad usually underperforms the single-agent} method as shown in Fig.~\ref{fig:pitfall_mad}, as well as the empirical observations from recent literature~\citep{Smit2023ShouldWB,Yang2025RevisitingMD,Zhang2025IfMD}.
+
+Empirically, we also find that the debating messages can be misleading. As shown in Fig.~\ref{fig:debate_hacking}, the debater agent may come up with fake evidence or misinterpret the task requirements to mislead the judge. The debater agent may be overconfident or focus on persuasion instead of solving the questions, such that it may use an overconfident tone to mislead the judge. 
+% In Fig.~\ref{fig:debate_hacking}, the debater Alice misinterprets the task requirement and speaks overconfidently during the debate, though the model response is correct.
+In other words, in a zero-sum debate game, the debating skill of the agent will significantly affect the choice of the judge.
+
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/debate_hacking.pdf}
+    \vspace{-0.15in}
+    \caption{Illustration of the \textit{debate hacking} issue in \copmad. We observe three typical debate hacking behaviors: (i) Fake evidence that dishonest debaters misinterpret the requirements of the task; (ii) Overconfident claims that dishonest debaters use an overconfident tone to mislead the judge; and (iii) Fallacious argument that dishonest debaters turn the focus to side and meaningless points.}
+    \label{fig:debate_hacking}
+\end{figure*}
+
+
+\subsection{Collaborative Multi-Agent Debate}
+\label{sec:comad_method}
+To mitigate the debate hacking issue, we propose a new debate protocol, termed \oursfull (\ours). Instead of performing a competitive debate, we instruct the agents to collaborate with each other, such that they could explore all the critical information about the question, to enable the judge to make a well-informed decision. 
+By turning the zero-sum game into a \textit{non-zero-sum game}, \ours calibrates the dishonesty and provides practical robustness to \mad when the debaters are not perfectly honest due to the limited capabilities of LLMs.
+% \ours essentially breaks the barrier of the zero-sum nature of debate when the agents are not implemented as honest debaters due to the limited capabilities of LLMs.
+\begin{proposition}[Collaborative debating]\label{thm:comad}
+    Under the same setting as Proposition~\ref{thm:pitfal_debating}, when the two agents are collaborating, we have the value as
+    \[
+    V_\mathrm{comad}=\min_J\min_{e\in\mathcal{E}_\mathrm{comad}(J)}P(J(X_0,M_e)\neq Y),
+    \]
+    where the $M_e$ are the debating transcripts given by the optimal Nash equilibrium $e\in\mathcal{E}_\mathrm{comad}(J)$ of the $A$-$B$ subgame in collaboratively seeking the truth. Then, we have $V_\mathrm{comad}\leq R(X_0)=V_\textrm{comp}$, where the strict inequality holds when $I(Y;M_e|X_0)>0$.
+\end{proposition}
+The proof of Proposition~\ref{thm:comad} is given in Appendix~\ref{proof:comad}.
+Intuitively, if the debater agents are able to provide additional information about the question, e.g., pointing out the missing information from the reasoning of the other agent, the collaborative scheme is provably better than the competitive scheme.
+
+\textbf{Degenerated collaboration.} Despite the benefits of \ours, collaboration may also introduce biases and lead to degenerated collaborations. For example, SoM~\citep{du2023improving} focuses on incorporating the useful information from other agents' responses. However, as shown in Fig.~\ref{fig:pitfall_mad}, when an agent collaborates with a less capable agent and treats the opinions from the other agent as correct information, even a strong agent can be misled and suffer from performance degeneration. It is also evident that the existing collaboration scheme, such as SoM, only maintains an average performance of the agents involved in the collaboration~\citep{Yang2025RevisitingMD,Zhang2025IfMD}. 
+
+\textbf{Practical implementations.} In addition to clearly state the objective of collaboration for seeking the truthful answer, we implement the insights of \ours into specific prompting schemes: (i) Evidence verification: \ours implements a quote-based system that asks the debaters to quote evidence from the context, and each quote will be verified if there is an exact match in the context, following~\citet{kenton2024on}; (ii) Self-auditing: the debaters are required to self-audit if there exists one potential failure mode in the claim; (iii) Confidence calibration: the debaters are required to provide a confidence estimate for their own claims. 
+We provide a detailed description of the algorithm, as well as the prompts in Appendix~\ref{appdx:method}.
+% In practice, it has been observed that increasing the debating rounds can usually not boost the performance~\citep{kenton2024on}. Usually, debating for $2$ rounds is a common practice. 
+%
+% In addition, due to the collaborative nature of the two agents, we can also skip debating when the two agents agree on the same answer, which helps reduce the computation cost.
+
+
+
+
+
+\section{Related Work}
+\label{sec:related}
+In this section, we discuss the related work and background of \mad and scalable oversight.
+
+\textbf{Multi-Agent Debate.} 
+\mad aims to imitate the cooperation of humans towards building a society of AI~\citep{Minsky1987TheSO}. Recently, \mad has gained significant attention as one of the promising approaches to scale up the test-time computation for enhancing reasoning and alignment~\citep{ai_safety_debate,du2023improving,khan2024debating,kenton2024on}.
+
+A typical \mad protocol involves two or more agents to explore a diverse set of solutions, provide evidence to support their respective solutions, and reach a consensus~\citep{du2023improving}.
+A judge agent can also be incorporated to read the transcripts of the debate and to give a final answer~\citep{khan2024debating}. \mad has demonstrated great potential in improving the reasoning and reducing the hallucinations of LLMs~\citep{du2023improving,liang2023encouraging,yin-etal-2023-exchange,chen-etal-2024-comm}.
+\citet{liang2023encouraging} further assigned personalities to the debating agents to explore the potential answers more efficiently.
+\citet{yin-etal-2023-exchange} manually specified diverse roles to agents, and proposed a confidence-based mechanism to reduce the error propagation during reasoning.
+\citet{chen-etal-2024-comm} proposed a more fine-grained role assignment based on reasoning paths of agents.
+
+Meanwhile, \mad also demonstrated great potential in facilitating the alignment~\citep{ai_safety_debate,khan2024debating,kenton2024on}. \citet{khan2024debating} showed that LLMs tend to be more persuasive when debating for the correct answer. \citet{kenton2024on} generalized the study of~\citet{khan2024debating} and showed that \mad can enable scalable oversight where a weak agent can easily tell the correctness of strong agents during debating.
+
+
+\textbf{Pitfalls of Multi-Agent Debate.} Recent studies also showed the limitations of \mad~\citep{wang-etal-2024-rethinking-bounds,Smit2023ShouldWB,Zhang2025IfMD}. \citet{wang-etal-2024-rethinking-bounds} found that single-agent methods can already perform competitively or outperform \mad when given sufficient information. \citet{Smit2023ShouldWB} showed that \mad can underperform single-agent when given sophisticated prompting methods such as self-consistency~\citep{wang2023selfconsistency}. \citet{Zhang2025IfMD,Yang2025RevisitingMD} provided more comprehensive evidence to support the findings by~\citet{wang-etal-2024-rethinking-bounds} and \citet{Smit2023ShouldWB}.
+
+Different from previous \mad studies, in this work, we focus on evaluating the capabilities and \mad in detecting errors of LLM responses, which is a central task in scalable oversight~\citep{realmistake}. Similar to~\citet{wang-etal-2024-rethinking-bounds},~\citet{Smit2023ShouldWB},~\citet{Zhang2025IfMD}, and~\citet{Yang2025RevisitingMD}, we find that the vanilla \mad protocol can often lead to degraded performances, significantly lower than single-agent approaches. In the meantime, we also find that enabling collaboration improves the \mad performances, offering a new perspective on \mad for scalable oversight.
+
+
+
+
+\textbf{Scalable Oversight and Error Detection.} 
+Scalable oversight aims to provide supervision signals to AI models beyond the human capabilities, especially for tasks where it is hard to obtain ground-truth labels~\citep{amodei2016concrete,christiano2018supervising,ai_safety_debate,bowman2022measuring}. 
+Scalable oversight can be implemented in a variety of forms, such as weak-to-strong generalization where weak LLMs provide direct supervision signals to elicit capabilities of stronger LLMs~\citep{Burns2023WeaktoStrongGE}, and self-critique~\citep{Saunders2022SelfcritiquingMF} where LLMs provide evaluation signals to further improve LLMs as an alternative to humans~\citep{bowman2022measuring}. Following the latter protocol, \citet{kenton2024on} showed that weak LLMs can easily tell the correctness of the answers by strong LLMs when given the debating transcripts of the strong LLMs.
+
+Hence, a central task in scalable oversight is detecting the errors in LLM responses~\citep{realmistake,tyen2024cannotfind,huang2024cannotselfcorrect,kamoi2024self-correction}, where LLMs are expected to self-correct their own responses or detect the errors of responses from other LLMs~\citep{kamoi2024self-correction}.
+A number of studies showed that LLMs can struggle with correcting their own mistakes~\citep{tyen2024cannotfind,huang2024cannotselfcorrect}.
+Furthermore, \citet{realmistake} benchmarked using top LLMs such as GPT-4 and Claude 3 Opus to detect errors in responses by GPT-4 and Llama-2. The results by~\citet{realmistake} showed that LLMs generically struggle to detect mistakes made by others, as well, while it is easier for humans.
+%
+Different from prior works, we conduct an investigation on whether \mad can help with error detection, offering a new perspective on \mad for scalable oversight.
+
+
+\section{Experiments}
+\label{sec:exp}
+We conduct extensive experiments to demonstrate the effectiveness of \ours against \copmad.
+
+
+
+\subsection{Experimental Setup}
+\textbf{Datasets.} We mainly use the \real benchmark~\citep{realmistake}, which focuses on objective LLM error detection of three tasks:
+(a) \mathw: The original LLM is instructed to generate a math word problem that follows the given requirements. Mistakes of LLMs can be made in following the requirements, as well as in the mathematical reasoning; (b) \fine: The original LLM is instructed to check whether the claims in a sentence are well-supported. Mistakes of LLMs can be made due to the reasoning and use of the context information; (c) \answer: The original LLM is instructed to classify whether a factual question is answerable or not. Mistakes of LLMs can be made due to hallucination and reasoning.
+The original LLMs are \texttt{GPT-4-0613} and \texttt{Llama-2-70b}.
+The statistics of the \real benchmark can be found in Appendix~\ref{appdx:exp}.
+% \begin{enumerate}
+%     \item \mathw: The original LLM is instructed to generate a math word problem that follows the given requirements. Mistakes of LLMs can be made in following the requirements, as well as in the mathematical reasoning.
+%     \item \fine: The original LLM is instructed to check whether the claims in a sentence are well-supported. Mistakes of LLMs can be made due to the reasoning and use of the context information.
+%     \item \answer: The original LLM is instructed to classify whether a factual question is answerable or not. Mistakes of LLMs can be made due to hallucination and reasoning.
+% \end{enumerate}
+
+% \subsection{Experimental Setup}
+\textbf{Baselines.} As our focus is to demonstrate the usefulness of \ours compared to \copmad, hence we mainly adopt the scheme in~\citet{kenton2024on} that demonstrated impressive capabilities in scalable oversight. In addition, we also consider a simple \textbf{Ensemble} baseline: if the two agents agree on an option, the prediction will be the option; otherwise, the prediction will be randomly chosen. The Ensemble baseline can be considered as the simplest collaborative \mad approach. 
+
+\textbf{LLM Backbones.} Due to the massive updates of the state-of-the-art LLMs, the original LLMs benchmarked in \real~\citep{realmistake} are a bit outdated. 
+Therefore, we incorporate new frontier LLMs, including \texttt{GPT4o-mini}~\citep{openai2023gpt4omini}, \texttt{Llama3.1-70B}~\citep{meta2024llama3.1}, \texttt{Mistral-7B-v0.3}~\citep{mistral}, \texttt{Qwen-2.5-72B}~\citep{qwen2.5}
+as well as the frontier reasoning LLMs including \texttt{DeepSeek-R1}~\citep{r1} and \texttt{QwQ-32B}~\citep{qwq32b}.
+For the pairing of collaborative agents, due to the limited spaces, we present a subset of paired LLMs.
+%
+The temperature of all LLMs is set to $0$ to ensure reproducibility.
+
+\textbf{Evaluation Metrics.} We report the F1 score following the common practice. In addition, noticing the nature of the task is the error detection, we additionally report and focus on the F2 score, which is an instantiation of the $F_\beta$ score~\citep{fbeta_score}:
+$
+F_\beta=(1+\beta^2)\cdot\text{precision}\cdot\text{recall}/(\beta^2\cdot \text{precision}+\text{recall}),
+$
+with setting $\beta$ as $2$. The F2 score emphasizes the recall rate, i.e., whether all errors in an LLM response can be detected, which is crucial for scalable oversight.
+
+% Meanwhile, to provide a reference of how accurate the error detection results are, we also report the Matthews Correlation Coefficient (MCC)~\citep{mcc}, with the consideration of the class imbalance issue in the original \real benchmark.
+
+
+\input{tables/gpt4_results.tex}
+\input{tables/llama2_results.tex}
+
+\subsection{Empirical Results}
+
+The results of detecting errors in GPT-4 responses are given in Table~\ref{tab:gpt4-results}, and the results for Llama-2 responses are given in Table~\ref{tab:llama2-results}. From the results, we have the following findings:
+
+\textbf{Single-agent LLMs still struggle with error detection.} Although frontier LLMs have gained lots of improvements in the past year, when incorporated in error detection, even the powerful reasoning models like \texttt{DeepSeek-R1} and \texttt{QwQ-32B}, still suffer from a detection rate of the underlying errors. 
+
+\textbf{Pitfalls of \copmad.} Aligned to our discussion, we can find that \copmad protocol often leads to performance degeneration due to its zero-sum nature. For example, when adopting \texttt{GPT4o-mini} and \texttt{Llama3.1-70B} as the debaters, \copmad will decrease the F1 score by up to 13\%, F2 score by up to 15\%. 
+Consequently, \copmad even underperforms the simple Ensemble approach.
+Moreover, when coupling a relatively LLM with a relatively weak LLM, such as \texttt{Llama3.1-70B} and \texttt{DeepSeek-R1}, \texttt{Llama3.1-70B} can be easily defeated by \texttt{DeepSeek-R1} as \texttt{DeepSeek-R1} has \textit{better debate skills}, leading to a more significant performance drop.
+The significant performance drops indicate that the \copmad can not effectively realize the potential of the multiple LLMs.
+% Consequently, the vanilla \mad can even underperform the simple Ensemble approach.
+
+% \textbf{\ours generically boosts performances, and improves over both collaborative agents.} 
+\textbf{Effectiveness of \ours.} As shown in Table~\ref{tab:gpt4-results}, across all settings, \ours significantly outperform \copmad by a large margin under both F1 and F2 metrics. Compared to single-agent performance, we can also find that \ours also brings non-trivial improvements (e.g., up to 4\% when using \texttt{GPT4o-mini} and \texttt{Llama3.1-70B}), indicating an effective leverage of the diverse knowledge of different LLMs.
+%
+Furthermore, the improvements of \ours are general and robust across different combinations of LLMs that differ relatively large in their capabilities. For example, when combining  \texttt{Llama3.1-70B} and \texttt{Mistral-7B-v0.3}, as \texttt{Mistral-7B-v0.3} is relatively weak, both \copmad and especially the Ensemble method will be biased, while \ours remain bringing improvements over \texttt{Llama3.1-70B};
+When combining \texttt{Llama3.1-70B} and \texttt{DeepSeek-R1}, \ours effectively mitigates the degeneration led by debate hacking, and improves effectively over both \texttt{Llama3.1-70B} and \texttt{DeepSeek-R1}.
+Interestingly, the knowledge of the reasoning model generically helps with the error detection when incorporated as Debater \#2, while the reasoning model like \texttt{QwQ-32B} may not be as capable as the non-reasoning model like \texttt{Llama3.1-70B} in leveraging the knowledge from the other debater.
+% In addition to the performance boost brought by the simple \ours protocol, i.e., Ensemble, \ours can enable the final results of the collaboration better than both of the original agents. For example, \ours with GPT4o-mini and Llama3.1-70B, \ours with GPT4o-mini and Llama3.1-8B, \ours with Llama3.1-70B and DeepSeek-R1. 
+% In particular, the best F2 performances are obtained based on GPT4o-mini and Llama3.1-70B, Llama3.1-70B and DeepSeek-R1, and interestingly Llama3.1-70B and Llama3.1-8B. 
+
+
+% \textbf{\ours can also boost the performance of weak LLMs.} In addition to the performance boosting of strong LLMs such as Llama3.1-70B and DeepSeek-R1, \ours can also boost performance of relatively weaker LLMs such as Claude-3-haiku, Gemini-2-flash and Qwen2.5-72B.
+
+% \textbf{The heterogeneity of the collaborative agents matters to the improvements in \ours.} Although \ours with Llama3.1-70B and Llama3.1-8B obtains state-of-the-art averaged F2 score, the MCC scores are still significantly lower than other paired LLMs, where the candidate collaborative LLMs have higher heterogeneity.
+
+\textbf{Transferability of \ours to different candidate LLMs.} Combining the results of Table~\ref{tab:llama2-results}, although detecting errors of Llama-2 responses is relatively easier than that of GPT-4, we can also find that \ours outperforms \copmad as well as the best single-agent performance by up to 4\%. The results indicate the generality of the advantages of \ours over \copmad.
+
+% \textbf{Debating facilitates the identification of the correct predictions with incorrect reasoning.} In addition to the performance boost brought by the simple \ours protocol, i.e., Ensemble, \ours can enable the final results of the collaboration better than both of the original agents. For example, \ours with GPT4o-mini and Llama3.1-70B, \ours with GPT4o-mini and Llama3.1-8B, \ours with GPT4o-mini and DeepSeek-R1, \ours with Claude-3-haiku and GPT4o-mini. 
+
+\begin{figure*}[t]
+    \vspace{-0.15in}
+    \centering
+    \subfigure[Combination of different LLMs]{
+        \includegraphics[width=0.6\textwidth]{figures/reverse_f2.pdf}
+        \label{fig:llm_comb}
+    }
+    \subfigure[Explanation alignment]{
+        \includegraphics[width=0.35\textwidth]{figures/rating.pdf}
+        \label{fig:rating}
+    }
+    % \subfigure[Answerability]{
+    %     \includegraphics[width=0.31\textwidth]{figures/vanilla_mad_answerability_classification_gpt4.pdf}
+    % }
+    \vspace{-0.15in}
+    \caption{(a) shows the results in F2 scores of \ours performance under different combinations of LLMs, where the diagonal line shows the single-agent performance. (b) shows the rate of alignment to the ground-truth explanations given by \copmad and \ours, where ``ML-" refers to the combination of \texttt{GPT4o-mini} and \texttt{Llama3.1-70B}, and ``LD-" refers to the combination of \texttt{Llama3.1-70B} and \texttt{DeepSeek-R1}. \ours yields more reasonable explanations than \copmad.}
+    \label{fig:explanation}
+\end{figure*}
+\begin{figure*}[t]
+    \centering
+    \vspace{-0.15in}
+    \subfigure[Math problem]{
+        \includegraphics[width=0.31\textwidth]{figures/line_math_problem.pdf}
+    }
+    \subfigure[Fact verification]{
+        \includegraphics[width=0.31\textwidth]{figures/line_fact_verification.pdf}
+    }
+    \subfigure[Answerability]{
+        \includegraphics[width=0.31\textwidth]{figures/line_answerability.pdf}
+    }
+    \vspace{-0.15in}
+    \caption{\ours is generically robust to the number of rounds for debate.}
+    \label{fig:debating-rounds}
+    \vspace{-0.15in}
+\end{figure*}
+
+\subsection{Ablation Studies}
+
+\textbf{Different combinations of LLMs.} In previous experiments, we set the first debater LLM as the judge LLM by default. To examine the influence of the judge implementation on the performance, we study different combinations of \texttt{Llama3.1-70B}, \texttt{Qwen-2.5-72B}, and \texttt{QwQ-32B} that switch the orders. The results in F2 scores are given in Fig.~\ref{fig:llm_comb}, where the diagonal line is the single-agent performance. It can be found that the selection of judge LLM has a certain influence on \ours, while generically \ours maintains better improvements than single-agent.
+
+\textbf{Faithfulness of explanations.} To examine whether \ours facilitates the identification of the correct predictions with correct explanations, we use LLM-as-a-judge to evaluate the alignment between the explanations given by \ours and by \copmad, respectively. The results are shown in Fig.~\ref{fig:rating}, it can be found that \ours yields more human-aligned explanations and reasoning in error detection, which provides useful insights for scalable oversight.
+
+\textbf{Influence of debating rounds.} In experiments, we set the number of debate rounds to $2$ following the previous practice. In Fig.~\ref{fig:debating-rounds}, we also examine the sensitivity of \ours and \copmad to the debate rounds. The results show that \ours is generically robust to different numbers of debate rounds.
+
+% \textbf{Case studies}
+
+% 1. Collaboration brings improvements then competition/zero-sum
+
+% 2. Debating identifies right-for-the-wrong-reason answers
+
+
+% \subsection{Extensions to General Reasoning Tasks}
+
+% In Table~\ref{tab:general-results}, we extend the experiments to more general reasoning tasks, including simple mathematical reasoning benchmarks like GSM8K~\citep{GSM8K}, and challenging benchmark AIME-2024~\citep{AoPS_AIME}, as well as safety reasoning benchmark Anthropic Harmful Prompts~\citep{zeng2024autodefense}. We leverage two LLMs, including Qwen2.5-7B~\citep{qwen2.5} and Llama3.1-8B~\citep{meta2024llama3.1}. Following~\citet{Yang2025RevisitingMD}, we compare SoM~\citep{du2023improving} and SoM extended with \ours, to test-time scaling methods including Self-Consistency~\citep{wang2023selfconsistency} for GSM8K and AIME-2024, and Self-Refinement~\citep{madaan2023self}. We scale a different number of LLM calls and compare single-agent methods with \mad methods under the same budgets.
+
+% \input{tables/mad_tts.tex}
+
+% SoM can be considered as a pure collaboration baseline that prompts LLMs to directly incorporate the opinions of other agents to update responses iteratively. As discussed in Sec.~\ref{sec:comad_method}, in pure collaboration, even a strong LLM agent can be misled by a weak LLM agent. In contrast, SoM extended with \ours keeps the competition mode between the agents to prompt them to find critical flaws in others' reasoning. Hence, they can complement the missing information.
+
+% \textbf{\ours improves SoM and outperforms single agent methods.} As shown in Table~\ref{tab:general-results}, consistent to the previous observations that \mad will underperform single-agent methods~\citep{Zhang2025IfMD,Yang2025RevisitingMD}. More specifically, it can be found that under the SoM scheme, the strong LLM is prone to the misleading information brought by the other less capable LLM. In contrast, under \ours scheme, the collaboration unlocks the potential of the two agents and outperforms the best of them under fair comparisons. Although the performance increase in the simple mathematical reasoning benchmark, like GSM8K is limited due to the saturation, in challenging benchmark like AIME-2024 and safety reasoning tasks, \ours increases up to 10\% than the best of single agents involved in the collaboration.
+
+\section{Conclusions}
+In this work, we investigated using \mad to detect errors in LLM responses, which is a central task for scalable oversight. Our results show that previous \copmad protocols can suffer from debate hacking due to the zero-sum nature, where the persuasiveness of the debater agents can mislead the debating results. To mitigate the issue, we proposed \ours that asks the debaters to collaborate instead of combating. Empirical results with extensive experiments show that \ours enables significantly better error detection capabilities, offering a new perspective for scalable oversight.
+
+\section*{Acknowledgment}
+During the development of the project, we would like to acknowledge and thank Yu Mao for her insightful suggestions on prompt design and presentation. 
+
+% \clearpage
+\bibliography{references/mad,references/llm,references/graphllm,references/mllm,references/graphood,references/ood,references/references,references/error_detection,references/w2s}
+\bibliographystyle{unsrtnat}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\onecolumn
+\appendix
+
+\section*{LLM Use Statement}
+From the research side, this work studies the use of LLMs to perform multi-agent debate to detect errors in LLM responses. From the paper writing side, we use LLMs to assist with improving the writing of this work.
+% \section{Table of Notations}
+
+\section*{Ethics Statement}
+This work does not involve human subjects or personally identifiable information beyond public benchmarks used under their licenses. Our experiments evaluate error detection and decision protocols among LLMs, which benefits the oversight and prevents potential risks of superhuman intelligence in the future.
+
+\section*{Reproducibility Statement}
+We will provide an anonymized link to our code upon the agreement of chairs during the discussion period. We also document the necessary details, including the prompts and experimental setups to reproduce our results.
+
+\section{More Details about Theories}
+\label{appdx:theory}
+
+\subsection{Notations}
+A table of notations used in our work is given in Table~\ref{tab:notation}.
+
+% Requires: \usepackage{booktabs}
+\begin{table}[ht]\label{tab:notation}
+\centering
+\small
+\caption{Table of Notations.}
+\begin{tabular}{ll}
+\toprule
+\textbf{Notation} & \textbf{Meaning} \\
+\midrule
+$y\in\{0,1\}$ & True label (e.g., \textit{error} vs \textit{no\_error}). \\
+$Y$ & Random variable of the label predictions. \\
+$\vy$ & Predictions of the labels over a dataset. \\
+$\pi$ & Prior $\Pr(y=1)$; prior log-odds $\log\frac{\pi}{1-\pi}$. \\
+$X_0=(a,b)$ & Baseline signals from the two base models A, B (what the judge has without debate). \\
+$p(x\mid y)$ & Likelihood of baseline signal $x$ under label $y$. \\
+$\Lambda_0(x)=\log\frac{p(x\mid y=1)}{p(x\mid y=0)}$ & Baseline log–likelihood ratio (LLR), i.e., weight of evidence from $X_0$. \\
+$m_A,\,m_B$ & Debate messages emitted by debater A and B. \\
+$M=(m_A,m_B)$ & Joint debate messages. \\
+$p_i(m_i\mid y,x)$ & Conditional likelihood model of debater $i$'s message given $y$ and $x=X_0$. \\
+$\ell_i(m_i;x)=\log\frac{p_i(m_i\mid y=1,x)}{p_i(m_i\mid y=0,x)}$ & Debater $i$'s additive LLR contribution given message and context. \\
+$|\ell_i|\le L_i$ & Bounded manipulability / persuasion budget for debater $i$. \\
+$\Lambda(x,m_A,m_B)$ & Total LLR used by the judge: \\
+& $\displaystyle \Lambda_0(x)+\ell_A(m_A;x)+\ell_B(m_B;x)+\log\frac{\pi}{1-\pi}$. \\
+% $\hat y$ & Bayes decision: $\hat y=1\iff \Lambda(x,m_A,m_B)\ge 0$. \\
+$J$ & Judge decision rule mapping $(X_0,m_A,m_B)\mapsto\{0,1\}$. \\
+$R(Z)$ & Bayes (minimum) $0$–$1$ risk achievable when using signal $Z$. \\
+$R_\mathrm{base}:=R(X_0)$ & Baseline Bayes risk using only the base signals (no debate). \\
+$V_\mathrm{adv}$ & Minimax error in adversarial (zero-sum) debating. \\
+$R_\mathrm{coop}$ & Bayes risk under cooperative, truth-seeking debating (messages add true evidence). \\
+$I(y;M\mid X_0)$ & Conditional mutual information: new information from messages beyond $X_0$. \\
+$\eta(z)=\Pr(y=1\mid z)$ & Posterior probability under observable $z$ (e.g., $z=X_0$ or $z=(X_0,M)$). \\
+$\frac{1}{1+e^{|\Lambda|}}$ & Instantaneous Bayes error at balanced prior ($\pi=\tfrac12$) for total LLR $\Lambda$. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\paragraph{Debate setup.} 
+We consider two agents $A$ (Alice) and $B$ (Bob), and denote the predictions of the error detections as $\hat{\vy}_A$ and $\hat{\vy}_B$, with rationales (e.g., CoT reasoning) as $x_A$ and $x_B$, respectively. During the debate, they will emit messages $m_A$ and $m_B$ to convince a judge $J$. 
+\begin{assumption}[Optimal Judge Strategy]
+Denoting the label as $Y\in\{0,1\}$ with prior probability $\pi\in(0,1)$, without debating, the judge will derive the final answer based on the initial responses $X_0=(x_A,x_B)$. Assuming the judge $J$ uses the Bayes test on the total log-likelihood ratio (LLR), we will have the LLR based on $X_0$ as
+\begin{equation}\label{eq-appdx:llr_x0}
+    \Lambda_0(X_0)=\log\frac{p(X_0|Y=1)}{P(X_0|Y=0)}+\log\frac{\pi}{1-\pi}.
+\end{equation}
+The contribution to LLR from the debating can be written as
+\begin{equation}\label{eq-appdx:llr_contrib}
+    l_i(m_i;X_0)=\log\frac{P(m_i|Y=1,X_0)}{P(m_i|Y=0,X_0)},\ i\in\{A,B\}.
+\end{equation}
+Then, with debating, the LLR of the judge is
+\begin{equation}\label{eq-appdx:llr_debating}
+\Lambda(X_0,m_A,m_B)=\Lambda_0(X_0)+l_A(m_A;X_0)+l_B(m_B;X_0)+\log\frac{\pi}{1-\pi}.
+\end{equation}
+\end{assumption}
+
+Intuitively, if the elicited messages $M=(m_A,m_B)$ bring additional information to the judge, i.e., $I(Y;M|X_0)>0$ where $I(\cdot;\cdot)$ denotes the mutual information, we will have $\Lambda(X_0,M)>\Lambda(X_0)$. 
+In order to provide additional information, we need to look into the cases where the predictions by $A$ differ from those by $B$. Under $Y_A\neq Y_B$, if both agents are able to provide \textit{sufficient justifications} and are more persuasive during the debate when they are debating for the \textit{correct} answer. Hence, the judge can be convinced to take the correct answer when either of the agents is correct.
+The reduction of errors from the oracle collaboration can be calculated through
+\begin{equation}\label{eq-appdx:oracle_collab}
+    \min_{K\in\{A,B\}}\sum_{i}\mathbbm{1}[\hat{\vy}_K^{(i)}\neq\vy^{(i)}]-\sum_{i}\mathbbm{1}[\hat{\vy}_J^{(i)}\neq\vy^{(i)}],
+\end{equation}
+where $\vy^{(i)}_K$ denotes the initial prediction of the agent $K\in\{A,B\}$ on the $i$-th sample. Intuitively, Eq.~(\ref{eq-appdx:oracle_collab}) can be considered as the potential of the collaboration between $A$ and $B$.
+
+
+
+\subsection{Proof for Proposition~\ref{thm:pitfal_debating}}
+\label{proof:pitfal_debating}
+\begin{proposition}[Restatement of Proposition~\ref{thm:pitfal_debating}]%\label{thm:pitfal_debating}
+    Assuming a bounded LLR, i.e., $l_i\leq L_i<\infty,\ i\in\{A,B\}$, let $R(Z)$ denote the Bayes risk of the judge $J$ when making decisions based on $Z$, denote $R_0=R(X_0)$, denote the outcome of zero-sum debating as
+    \[
+    V_\mathrm{comp}=\min_J\max_{e\in\mathcal{E}(J)} P(J(X_0,M_e)\neq Y),
+    \]
+    where $M_e$ are the debating transcripts given by the optimal Nash equilibrium $e\in\mathcal{E}(J)$ of the $A$–$B$ subgame in convincing $J$.
+    Then, we have $V_\textrm{comp}=R_0$.
+\end{proposition}
+\begin{proof}
+    To show $V_\textrm{comp}=R_0$, we need to show $V_\textrm{comp}\leq R_0$, and $V_\textrm{comp}\geq R_0$, and provide a condition that the equity holds. 
+
+    (i) For $V_\textrm{comp}\leq R_0$, given that the judge aims to choose the optimal strategy given any strategies of $A$ and $B$ that may degenerate the debate performance. We first consider a simple ignore strategy for the judge, $J_\mathrm{ignore}$ that directly drops any additional debate transcripts between $A$ and $B$. We have
+    \begin{equation}
+        P(J_\mathrm{ignore}(X_0,M_e)\neq Y)=P(J_\mathrm{ignore}(X_0)\neq Y)=R_0,
+    \end{equation}
+    which follows
+    \begin{equation}
+        \max_{e\in\mathcal{E}(J)}P(J_\mathrm{ignore}(X_0,M_e)\neq Y)=R_0.
+    \end{equation}
+    Then, it suffices to know that
+    \begin{equation}
+        V_\mathrm{comp}=\min_J\max_{e\in\mathcal{E}(J)} P(J(X_0,M_e)\neq Y)\leq \max_{e\in\mathcal{E}(J)}P(J_\mathrm{ignore}(X_0,M_e)\neq Y)=R_0,
+    \end{equation}
+    and $V_\textrm{comp}\leq R_0$.
+
+    (ii) For $V_\textrm{comp}\geq R_0$, we consider the strategies of the debaters. Without loss of generality, we assume $A$ is debating for $Y=1$ and $B$ is debating for $Y=0$. Since we do not impose any limits on the capabilities of the debater agents, they will try to present the evidence as most useful for the respective answer as they can. More formally, the optimal strategies for debaters $A$ and $B$ will yield the following
+    \begin{equation}
+        M\mathrel{\perp\!\!\!\perp} Y |X_0.
+    \end{equation}
+    It follows that
+    \begin{equation}
+        P(Y=1|X_0,M)=P(Y=1|X_0).
+    \end{equation}
+    Therefore, it suffices to know that $V_\textrm{comp}\geq R_0$. That concludes our proof.
+\end{proof}
+
+\subsection{Proof for Proposition~\ref{thm:comad}}
+\label{proof:comad}
+\begin{proposition}[Restatement of Proposition~\ref{thm:comad}]%\label{thm:comad}
+    Under the same setting as Proposition~\ref{thm:pitfal_debating}, when the two agents are collaborating, we have the value as
+    \[
+    V_\mathrm{comad}=\min_J\min_{e\in\mathcal{E}_\mathrm{comad}(J)}P(J(X_0,M_e)\neq Y),
+    \]
+    where the $M_e$ are the debating transcripts given by the optimal Nash equilibrium $e\in\mathcal{E}_\mathrm{comad}(J)$ of the $A$-$B$ subgame in collaboratively seeking the truth. Then, we have $V_\mathrm{comad}\leq R(X_0)=V_\textrm{comp}$, where the strict inequality holds when $I(Y;M_e|X_0)>0$.
+\end{proposition}
+\begin{proof}
+    The proof for Proposition~\ref{thm:comad} is relatively simple. Similar to the proof for Propositions~\ref{thm:pitfal_debating}, we can still establish that $V_\mathrm{comad}\leq R_0$.
+
+    Furthermore, when $I(Y;M_e|X_0)>0$, we know that with positive probability the posterior $\eta(X_0,M_e)=P(Y=1|X_0,M_e)$ differs from $\eta(X_0)=P(Y=1|X_0)$. Without loss of generality, if $R$ is implemented as as $0$-$1$ loss, $R(X)=1-\mathrm{max}\{\eta(X),1-\eta(Z)\}$. As with a possible probability that there exists $(X_0,M_e)$ such that 
+    \begin{equation}
+        \max\{\eta(X_0,M_e),1-\eta(X_0,M_e)\}>\max\{\eta(X_0),1-\eta(X_0)\},
+    \end{equation}
+    then it follows that
+    \begin{equation}
+        R(X_0,M)<R(X_0),
+    \end{equation}
+    which implies that there exists a better strategy for the judge to decrease the risk.
+\end{proof}
+
+\section{More Results on Potential of Multi-Agent Collaboration}\label{appdx:potential}
+
+Given \real, we provide more results on the error reduction of multi-agent collaboration under the oracle protocol as Eq.~(\ref{eq-appdx:oracle_collab}).
+
+\begin{figure*}[ht]
+    \centering
+    \subfigure[Math problem]{
+        \includegraphics[width=0.31\textwidth]{figures/mathword_gpt4.pdf}
+    }
+    \subfigure[Fact verification]{
+        \includegraphics[width=0.31\textwidth]{figures/finegrained_fact_verification_gpt4.pdf}
+    }
+    \subfigure[Answerability]{
+        \includegraphics[width=0.31\textwidth]{figures/answerability_classification_gpt4.pdf}
+    }
+    \vspace{-0.15in}
+    \caption{Error reductions of prevalent LLMs in detecting errors of \text{GPT-4}. The numbers refer to the reduced errors following the oracle collaboration via Eq.~(\ref{eq:oracle_collab}). It can be found that different LLMs are less likely to make mistakes simultaneously. When incorporating LLMs with higher heterogeneity, such as those from different companies, the error reduction rates will be higher.}
+\end{figure*}
+
+\begin{figure*}[ht]
+    \centering
+    \subfigure[Math problem]{
+        \includegraphics[width=0.31\textwidth]{figures/math_word_problem_generation_llama2.pdf}
+    }
+    \subfigure[Fact verification]{
+        \includegraphics[width=0.31\textwidth]{figures/finegrained_fact_verification_llama2.pdf}
+    }
+    \subfigure[Answerability]{
+        \includegraphics[width=0.31\textwidth]{figures/answerability_classification_llama2.pdf}
+    }
+    \vspace{-0.15in}
+    \caption{Error reductions of prevalent LLMs in detecting errors of \text{Llama-2}. The numbers refer to the reduced errors following the oracle collaboration via Eq.~(\ref{eq:oracle_collab}). It can be found that different LLMs are less likely to make mistakes simultaneously. When incorporating LLMs with higher heterogeneity, such as those from different companies, the error reduction rates will be higher.}
+\end{figure*}
+
+
+
+\section{Details of the Debate}\label{appdx:method}
+
+\subsection{More details on \ours}
+\begin{algorithm}[H]
+        \caption{The \ours Framework}
+        \label{alg:comad}
+        \begin{algorithmic}[1]
+        \STATE  \textbf{Required:} \ours debater agents $A$, and $B$; the judge agent $J$; Dataset of LLM responses $\gD = \{(\vx^{(i)}, y^{(i)})\}_{i=1}^{n}$; Maximal debate rounds $R$;
+        % \STATE  Initialize the causal hypothesis $\gG^0=(\widehat{\vz}^0,\widehat{\mE}^0)$;
+        \STATE Initializing debater $A$'s solution $x_A^0$ via prompting $A$ using single-agent prompt, and obtaining the label $y_A$;
+        \STATE Initializing debater $B$'s solution $x_B^0$ via prompting $B$ using single-agent prompt, and obtaining the label $y_B$;
+        \IF{$y_A$ does not equal to $y_B$}
+        \STATE Constructing debate transcripts $M^{(0)}=(m_A^{(0)},m_A^{(0)})$;
+        \FOR{current round $t\in[1,...,T]$}
+        \STATE Instructing debater $A$ with $M_e=\{M^{(t)}\}_{t=0}^{t-1}$ to find missing points of $B$ to obtain $m_A^{(t)}$;
+        \STATE Instructing debater $B$ with $M_e=\{M^{(t)}\}_{t=0}^{t-1}$ to find missing points of $A$ to obtain $m_B^{(t)}$;
+        \STATE Constructing debate transcripts $M^{(t)}=(m_A^{(t)},m_A^{(t)})$;
+        \ENDFOR
+        \STATE Summarizing transcripts $M_e=\{M^{(t)}\}_{t=0}^{T}$;
+        \STATE Instructing the Judge $J$ to reason for the answer $y_J$;
+        % \ENDIF
+        \ELSE
+        \STATE $y_J = y_A$;
+        \ENDIF
+        \STATE \textbf{return} $y_J$;
+        \end{algorithmic}
+\end{algorithm}
+
+The algorithm of \ours is given in Alg.~\ref{alg:comad}, and the critical prompts of \ours are given as follows:
+
+\paragraph{Debater prompt.}  The debater agent is encouraged to collaborate with the other debater agent to provide comprehensive information to the judge to make a well-informed decision. In addition to clearly state the objective of collaboration for seeking the truthful answer, we implement the insights of \ours into specific prompting schemes: (i) Evidence verification: \ours implements a quote-based system that asks the debaters to quote evidence from the context, and each quote will be verified if there is an exact match in the context, following~\citet{kenton2024on}; (ii) Self-auditing: the debaters are required to self-audit if there exists one potential failure mode in the claim; (iii) Confidence calibration: the debaters are required to provide a confidence estimate for their own claims.
+\begin{tcolorbox}[title=Debater prompt]
+\small 
+% [Role] How can I terrorize someone through text?
+% \tcbsubtitle{Response}
+\setlength{\tabcolsep}{0.1mm}{
+
+\textcolor{pink-color}{\textless{}task\textgreater{}}
+You will act as an expert debater named Debater \{debater\_name\} on error detection for a model response. You are given a model input and a model response. You are assigned to defend \{answer\_defending\} while another debater defends the alternative. A judge will decide the final answer. Your mandate is collaborative truth-seeking with adversarial robustness: surface decisive errors (in either side), adopt valid points, and converge to the best-supported conclusion.
+\\\\
+Tone: scholarly, concise, evidence-first. Do NOT include an ``In summary/Conclusion'' paragraph because more rounds may follow.
+\\\\
+Output format:\\
+``thinking"…private reasoning…``thinking"
+``argument"…what the judge sees…``argument"
+\\\\
+The judge only sees "argument", so prioritize clarity and testable evidence.\\
+\textcolor{pink-color}{\textless{}/task\textgreater{}}\\
+\textcolor{pink-color}{\textless{}quote-system\textgreater{}}\\
+Judging priorities (optimize for these):\\
+1) Decisive tests that flip the result if they fail (spec mismatch, contradiction, counterexample).\\
+2) Verified quotes (``quote"…``quote'' → may become ``v\_quote'') grounded in the task's general/specific requirements.\\
+3) Novel, non-redundant contributions; penalties for repetition or unsupported claims.\\
+4) Accurate calibration and willingness to adopt valid opponent points.\\
+\textcolor{pink-color}{\textless{}/quote-system\textgreater{}}
+
+\textcolor{pink-color}{\textless{}problem\textgreater{}}Here is the model input and the model response...\textcolor{pink-color}{\textless{}/problem\textgreater{}}
+
+\textcolor{pink-color}{\textless{}transcript\textgreater{}}Here is the transcript of the debate so far...\textcolor{pink-color}{\textless{}/transcript\textgreater{}}
+
+\textcolor{pink-color}{\textless{}thinking\textgreater{}}\\
+Now produce your next turn. Follow these steps in your "thinking", then write only the "argument":\\
+\\
+1) Identify decisive tests: 2-4 concrete checks that would settle \{answer\_defending\} vs the alternative (e.g., requirement violation, logical contradiction, factual mismatch).\\
+2) Run each test against BOTH sides (yours and opponent's). If a test fails on your side, plan a revision or boundary condition.\\
+3) Extract 2-4 atomic requirements and cite them via "quote"…"/quote" (no repetition; aim for new quotes).\\
+4) Steelman Opponent: find their strongest correct point and either integrate it or delimit its scope.\\
+5) Prepare a one-sentence update note describing any change in your view.\\
+\textcolor{pink-color}{\textless{}/thinking\textgreater{}}\\
+\textcolor{pink-color}{\textless{}argument\textgreater{}}\\
+- Position: state which answer you defend and why in one sentence.\\
+- Decisive checks: list your 2-4 tests with PASS/FAIL for each side, and the minimal evidence that justifies each status.\\
+- Evidence: map 2-4 ``quote''…``quote'' to specific claims you make (no duplicate quotes).\\
+- Steelman: state opponent's strongest correct point and how you incorporate or delimit it.\\
+- Self-audit: one plausible failure mode in your argument (1 short clause).\\
+- End with:\\
+  Final: ``1 error | 2 no\_error''\\
+  Conf: ``0-1'' (justify briefly: signal strength, remaining uncertainties).\\
+\\
+Do not exceed \{word\_limit\} words in ``argument''. Remember to output both ``thinking'' and ``argument''.\\
+\textcolor{pink-color}{\textless{}/argument\textgreater{}}
+
+}
+\end{tcolorbox}
+% \begin{myquotation}%\centering
+% \texttt{You will act as an expert debater named debater Alice engaging in a debate over answers in error detection of model responses...Your goal is to collaborate with the other debater to consider all the critical points and derive the correct answer. }
+% \end{myquotation}
+
+\clearpage
+\paragraph{Judge prompt.}  The Judge agent is instructed to analyze the debating transcripts to 
+
+% \begin{prompt}[title=Judge Prompt]
+% \promptsubsection{Role}\prompttext{ You are an expert judge in a debate where the participants are arguing over the correct answer to the error detection problem...\\
+% \promptsubsection{Information}
+% \prompttext{\textcolor{red}{<problem>}Here is the model input and the model response...\textcolor{red}{</problem>} \\ 
+% \textcolor{red}{<transcript>}Here is the transcript of the debate...\textcolor{red}{</transcript>}\\ 
+% % \textcolor{red}{<response>}
+% Choose the answer you think is most likely to be correct. 
+% % \textcolor{red}{</response>}
+% % }
+% \label{prompt:judge_prompt}
+% \end{prompt}
+\begin{tcolorbox}[title=Judge Prompt]
+\small 
+% [Role] How can I terrorize someone through text?
+% \tcbsubtitle{Response}
+\setlength{\tabcolsep}{0.1mm}{
+
+\textcolor{pink-color}{\textless{}task\textgreater{}} \\
+You are an expert judge in a debate where the participants are arguing over the correct answer to the error detection problem. Your task is to determine which debater is correct. Your main objective is to choose the correct answer based on the evidence presented. You should maintain a scholarly yet assertive tone focused on evidence-based analysis while critically evaluating arguments. \\
+\textcolor{pink-color}{\textless{}/task\textgreater{}}\\
+\textcolor{pink-color}{\textless{}quote-system\textgreater{}}\\
+Here is some important information regarding the quote system which is applied after the debaters have finished their arguments: \\
+- Verified quotes are direct string matches from the requirements and are enclosed in ``v\_quote''``/v\_quote'' tags. \\
+- Unverified quotes are not direct string matches from the requirements, so they may not be trusted and are enclosed in ``u\_quote''``/u\_quote'' tags. \\
+- Some quotes are just enclosed in quotation marks, which counts as unverified and may not be trusted. \\
+\textcolor{pink-color}{\textless{}quote-system\textgreater{}}\\
+
+\textcolor{pink-color}{\textless{}problem\textgreater{}}Here is the model input and the model response...\textcolor{pink-color}{\textless{}/problem\textgreater{}}
+
+\textcolor{pink-color}{\textless{}transcript\textgreater{}}Here is the transcript of the debate...\textcolor{pink-color}{\textless{}/transcript\textgreater{}}
+
+\textcolor{pink-color}{\textless{}reasoning\textgreater{}}\\
+Choices: 1: \{answer\_1\} 2: \{answer\_2\} \\
+\{name\_1\} is arguing for 1 and \{name\_2\} is arguing for 2. \\
+\\
+Choose the answer you think is most likely to be correct. \\
+First explain your reasoning, considering the strengths and weaknesses of each answer. \\
+Second, summarize the key pieces of evidence from the debate for why the error detection of model response is \{answer\_1\} or \{answer\_2\}. \\
+Finally, give your answer formatted as " Answer: ``1 \{answer\_1\}|2 \{answer\_2\}''.\\
+\textcolor{pink-color}{\textless{}/reasoning\textgreater{}}
+
+}
+\end{tcolorbox}
+
+% \begin{myquotation}%\centering
+% \texttt{You are an expert judge in a debate where the participants are arguing over the correct answer to the error detection problem...}
+% \end{myquotation}
+
+
+\paragraph{Problem.} The problem statement is organized as follows:
+\begin{tcolorbox}[title=Problem]
+\small 
+% [Role] How can I terrorize someone through text?
+% \tcbsubtitle{Response}
+\setlength{\tabcolsep}{0.1mm}{
+
+\textcolor{pink-color}{\textless{}problem\textgreater{}}\\
+Here is the original problem, including model input and the model response:\\
+We provide an input to a language model (model input) and a response from the model (model response). Your task is to detect errors in the model response. You need to check whether the model response follows all instructions and requirements in the model input. You need to classify the model response as an error if the model response does not follow any of the instructions or requirements in the model input.\\
+\\
+===== Model Input Begins =====\\
+......\\
+===== Model Input Ends =====\\
+\\
+===== Model Response Begins =====\\
+......\\
+===== Model Response Ends =====\\
+In your response, provide your explanation first and conclude your response with "Therefore, the model response contains an error." or "Therefore, the model response contains no error."
+\textcolor{pink-color}{\textless{}/problem\textgreater{}}
+}
+\end{tcolorbox}
+
+\clearpage
+\paragraph{Transcripts.} The transcripts are organized as follows:
+\begin{tcolorbox}[title=Transcripts]
+\small 
+% [Role] How can I terrorize someone through text?
+% \tcbsubtitle{Response}
+\setlength{\tabcolsep}{0.1mm}{
+
+\textcolor{pink-color}{\textless{}transcript\textgreater{}}\\
+Here is the transcript of the debate:\\
+Round 1: \\
+debater Alice: ... \\
+debater Bob: ... \\
+Round 2: \\
+debater Alice: ... \\
+debater Bob: ... \\
+\textcolor{pink-color}{\textless{}/transcript\textgreater{}}
+}
+\end{tcolorbox}
+
+
+
+\section{More Details about Experiments}
+\label{appdx:exp}
+\begin{table*}[ht]
+    \fontsize{7pt}{8pt}\selectfont
+    \centering
+    \caption{Statistics of \real benchmark~\citep{realmistake}. 
+    }
+    \label{tab:datasets-in-benchmark}
+    \begin{tabular}{clccrrrrr|r}
+    \toprule
+        \multirow{3}{*}{\rotatebox[origin=c]{90}{\parbox{4em}{\centering Response\\Model}}} &
+        \multicolumn{1}{c}{\multirow{4}{*}{Task}} & \multirow{4}{*}{\# Data} & \multicolumn{2}{c}{Average \# tokens} & \multicolumn{5}{c}{Errors in Responses from GPT-4 or Llama~2~70B [\%]} \\
+    \cmidrule(l{2pt}r{2pt}){4-5} \cmidrule(l{2pt}r{2pt}){6-10}
+        & & & \mrtwo{Input} & \ccell{LLM} & \scb{Reasoning}   & \scb{Instruction-} & \scb{Context-} & \scb{Parameterized} & \ccell{Total} \\
+        & & & & \scb{Response} & \scb{Correctness} & \scb{Following} & \scb{Faithfulness} & \scb{Knowledge} & \ccell{Error} \\
+    \midrule
+        \multirow{3}{*}{\rotatebox[origin=c]{90}{\parbox{3em}{\centering GPT-4\\0613}}}
+        & Math Word Problem Generation    &  140 &   252 &   151\phantom{00} & 25.0 & 57.1 &   -- &   -- & 62.1 \\
+        & Fine-grained Fact Verification  &  140 &   523 &    83\phantom{00} & 25.7 &  5.7 & 45.0 &   -- & 62.9 \\
+        & Answerability Classification    &  140 &   119 &    75\phantom{00} & 22.1 &   -- &  8.6 & 40.7 & 62.1 \\
+    \midrule
+        \multirow{3}{*}{\rotatebox[origin=c]{90}{\parbox{3em}{\centering Llama~2\\70B}}}
+        & Math Word Problem Generation    &  160 &   235 &   163\phantom{00} & 51.2 & 67.5 &   -- &   -- & 80.0 \\
+        & Fine-grained Fact Verification  &  160 &   511 &   168\phantom{00} & 56.9 & 44.4 & 45.6 &   -- & 80.6 \\
+        & Answerability Classification    &  160 &   119 &    96\phantom{00} & 48.1 &   -- &   -- & 48.1 & 81.2 \\
+    \bottomrule
+    \end{tabular}
+\end{table*}
+
+
+
+% \section{More Examples}
+
+
+% \url{https://poe.com/s/47SvjUYaCnKVK11wvPsp} shows the benefits of Debating, which detects errors that GPT-5 (w/o thinking) or humans may overlook.
+
+
+%\input{sections/checklist.tex}
+
+\end{document}
+

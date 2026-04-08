@@ -1,0 +1,473 @@
+% This must be in the first 5 lines to tell arXiv to use pdfLaTeX, which is strongly recommended.
+\pdfoutput=1
+% In particular, the hyperref package requires pdfLaTeX in order to break URLs across lines.
+
+\documentclass[11pt]{article}
+
+% Change "review" to "final" to generate the final (sometimes called camera-ready) version.
+% Change to "preprint" to generate a non-anonymous version with page numbers.
+\usepackage[final]{acl}
+
+% Standard package includes
+\usepackage{times}
+\usepackage{latexsym}
+
+% For definitions
+\usepackage{enumitem}
+
+% Column colors
+\usepackage[normalem]{ulem}
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+
+
+\newcommand{\draftcomment}[3]{{\textcolor{#3}{[#1]#2}}}
+
+%\renewcommand{\commenthuji}[3]{}  % uncomment for submission
+\newcommand{\com}[1]{}
+
+\newcommand{\marker}[1]{$_{#1}$}
+
+\newcommand{\resolved}[1]{}
+
+\newcommand{\amirt}[1]{\draftcomment{#1}{\marker{AMIRT}}{blue}}
+\newcommand{\amirtst}[1]{\amirt{\sout{#1}}}
+\newcommand{\amirtsrep}[2]{\amirtst{\sout{#1} #2}}
+
+%\newcommand{\gal}[1]{\draftcomment{#1}{\marker{GAL}}{red}}
+\newcommand{\gal}[1]{\draftcomment{#1}{\marker{GAL}}{red}}
+\newcommand{\galst}[1]{\gal{\sout{#1}}}
+\newcommand{\galsrep}[2]{\galst{\sout{#1} #2}}
+
+\definecolor{caribbeangreen}{rgb}{0.0, 0.8, 0.6}
+\newcommand{\zg}[1]{ \textcolor{caribbeangreen}{[ZG: #1]}}
+
+\definecolor{lavender}{rgb}{0.58, 0.34, 0.92}
+\newcommand{\tom}[1]{\draftcomment{#1}{\marker{TOM}}{lavender}}
+
+\newcommand{\eranofek}[1]{\draftcomment{#1}{\marker{ERAN}}{purple}}
+
+\newcommand{\af}[1]{ \textcolor{orange}{[AF: #1]}}
+
+
+\newcommand{\nl}[1]{``\textit{#1}''}
+
+\newcommand{\R}{\mathbb{R}} 
+
+
+
+
+\newtheorem{result}{Theorem} %informal main statement
+\newtheorem{theorem}{Theorem}[section] %formal statement
+\newtheorem{definition}[theorem]{Definition}
+
+
+% For proper rendering and hyphenation of words containing Latin characters (including in bib files)
+\usepackage[T1]{fontenc}
+% For Vietnamese characters
+% \usepackage[T5]{fontenc}
+% See https://www.latex-project.org/help/documentation/encguide.pdf for other character sets
+
+% This assumes your files are encoded as UTF8
+\usepackage[utf8]{inputenc}
+
+% This is not strictly necessary, and may be commented out,
+% but it will improve the layout of the manuscript,
+% and will typically save some space.
+\usepackage{microtype}
+
+% This is also not strictly necessary, and may be commented out.
+% However, it will improve the aesthetics of text in
+% the typewriter font.
+\usepackage{inconsolata}
+
+%Including images in your LaTeX document requires adding
+%additional package(s)
+\usepackage{graphicx}
+
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{multirow} 
+\usepackage{makecell}
+\usepackage{arydshln} % For dotted/dashed lines
+
+% If the title and author information does not fit in the area allocated, uncomment the following
+%
+%\setlength\titlebox{<dim>}
+%
+% and set <dim> to something 5cm or larger.
+
+\title{Confidence Improves Self-Consistency in LLMs}
+
+\author{
+\vspace{-0.2em} \\  % Adjust spacing
+ \textbf{Amir Taubenfeld\textsuperscript{*12}},
+ \textbf{Tom Sheffer\textsuperscript{*12}},
+ \textbf{Eran Ofek\textsuperscript{1}},
+ \textbf{Amir Feder\textsuperscript{13}},
+ \textbf{Ariel Goldstein\textsuperscript{2}},
+ \vspace{0.5em} \\  % Adjust spacing
+ \textbf{Zorik Gekhman\textsuperscript{1}},
+ \textbf{Gal Yona\textsuperscript{1}}
+\\
+\\
+ \textsuperscript{1}Google Research,
+ \textsuperscript{2}The Hebrew University of Jerusalem,
+ \textsuperscript{3}Columbia University
+\\
+\vspace{-0.5em} \\  % Adjust spacing
+\begin{abstract}
+
+Self-consistency decoding enhances LLMs' performance on reasoning tasks by sampling diverse reasoning paths and selecting the most frequent answer. However, it is computationally expensive, as sampling many of these (lengthy) paths is required to increase the chances that the correct answer emerges as the most frequent one.
+To address this, we introduce \emph{Confidence-Informed Self-Consistency (CISC)}. CISC performs a \emph{weighted} majority vote based on confidence scores obtained directly from the model.
+By prioritizing high-confidence paths, it can identify the correct answer with a significantly smaller sample size. 
+When tested on nine models and four datasets, CISC outperforms self-consistency in nearly all configurations, reducing the required number of reasoning paths by over 40\% on average.
+In addition, we introduce the notion of \emph{within-question confidence evaluation}, after showing that standard evaluation methods are poor predictors of success in distinguishing correct and incorrect answers to the same question. In fact, the most calibrated confidence method proved to be the least effective for CISC.
+Lastly, beyond these practical implications, our results and analyses show that LLMs can effectively judge the correctness of their own outputs, contributing to the ongoing debate on this topic.
+\end{abstract}
+
+
+\section{Introduction}
+\label{sec:intro}
+
+Modern large language models (LLMs) demonstrate strong reasoning capabilities \cite{bubeck2023sparks, guo2025deepseek}, 
+driven in part by their capacity to generate a sequence of intermediate reasoning steps that lead them toward a final answer
+\cite{wei2022chain, jaech2024openai}. 
+Self-consistency \cite{wang2022self} is a popular decoding strategy that further improves LLMs' reasoning performance by sampling a diverse set of reasoning paths and selecting the most frequent answer as the final output. Despite its effectiveness, this approach is also computationally expensive, as it requires generating a large number of (long) reasoning paths to increase the chances that the correct answer emerges as the most frequent one.
+
+Motivated by recent evidence that LLMs possess the ability to judge the correctness of their own outputs \cite{kadavath2022language, zhang2024small}, we hypothesize that self-consistency could be made significantly more efficient if the model could \emph{review} each generated reasoning path before selecting a final answer. We therefore introduce \textbf{Confidence-Informed Self-Consistency} (CISC), a lightweight extension of self-consistency. As illustrated in Figure \ref{fig:high-level}, CISC uses the model to generate a self-assessment score for each path and employs these scores in a weighted majority vote.
+
+We conducted a comprehensive comparison of CISC and self-consistency, spanning nine LLMs of various sizes, four datasets covering a wide range of mathematical and commonsense reasoning tasks, and three popular methods for deriving self-assessment confidence scores from the model.
+Our results demonstrate that CISC outperforms self-consistency in virtually all the examined configurations. Using the best-performing confidence estimation method, CISC achieves comparable performance to self-consistency while reducing the required number of reasoning paths by over 40\% on average (See Figure \ref{fig:first-figure} for an example).
+
+
+Surprisingly, the most calibrated confidence method is actually the least useful for CISC. We offer a potential explanation:
+existing confidence evaluation metrics measure the usefulness of confidence scores for comparing answers across different questions, while CISC requires distinguishing correct and incorrect answers for the same question.
+To address this, we propose the Within-Question Discrimination (WQD) metric that specifically measures this ability, and demonstrate that it can predict the relative performance of CISC with different confidence methods.
+
+Finally, we conduct a qualitative-analysis and find a significant agreement between model confidence scores and human assessments of the reasoning-paths' quality.  Specifically, responses identified by the model as low-confidence were also significantly more likely to be flagged by human evaluators as exhibiting signs of low-quality reasoning patterns.
+
+To summarize, we contribute practical methods and foundational insights:
+\begin{itemize}
+    \item We propose CISC, a decoding strategy that can be used as a drop-in replacement to self-consistency, achieving comparable accuracy at a significantly lower computational cost.
+    \item We introduce the concept of within-question confidence evaluation, after showing that standard evaluation methods are poor predictors of success in distinguishing correct and incorrect answers to the same question.
+    \item We present empirical evidence supporting the idea that LLMs are capable of self-assessing their responses, contributing to the ongoing debate regarding this capability \cite{gero2023self, huang2023large, li2024confidence, stechly2024self}
+    \item We open-source our implementation of CISC to facilitate further research\footnote{Our code is available at \url{https://github.com/google-research/google-research/tree/master/cisc}.}.
+\end{itemize}
+
+
+\section{Notations}
+
+We consider an auto-regressive language model $M$ with parameters $\theta$. We use $p_\theta(\cdot \vert x)$ to denote $M$'s distribution over the next token given the provided context $x$. 
+Given a question $q$ (e.g., \nl{Jane had 4 apples and ate half of her apples. How many apples she has now?}), we denote the model's response as $(\textbf{r}, \textbf{a})$,
+where $\textbf{a}$ is the answer (e.g., \nl{2}) and $\textbf{r}$ is a \emph{reasoning path} (or chain-of-thought),  a sequence of logical steps supposedly leading up to this answer (e.g., \nl{If Jane ate half her apples, this means she ate 2 apples. 4 minus 2 is 2.}).
+
+\section{Confidence-Informed Self-Consistency}
+\label{sec:cisc}
+
+In this section we present \textit{Confidence-Informed Self-Consistency} (CISC). 
+When designing CISC, we hypothesized that it is possible to reduce self-consistency's computational costs by generating a \emph{confidence score} for each reasoning path, and performing a weighted majority vote.
+
+As an intuitive example, consider a hypothetical setting where there exist only two possible answers, one correct and one incorrect. For a model that responds with the correct answer $60\%$ of the time, standard majority voting will require \emph{40 samples} to reach $90\%$ accuracy\footnote{Calculated using the binomial distribution. All the technical details are included in Appendix \ref{appendix:example}}. However, a weighted majority vote that weights correct answers twice as much as incorrect ones, will achieve 90\% accuracy with less than \emph{10 samples}. 
+
+With this motivation in mind, we build on recent findings suggesting that LLMs are capable of judging the correctness of their own outputs \cite{kadavath2022language, tian2023just, zhang2024small}, and incorporate the model’s self-assessment of its reasoning paths into the final answer selection:
+
+\begin{definition}[Confidence-Informed Self-Consistency]
+\label{def:cisc}
+Given a question $q$ and responses $\{(\textbf{r}_1, \textbf{a}_1), \dots, (\textbf{r}_m, \textbf{a}_m) \}$, CISC involves:
+
+\begin{itemize}
+    \item \textbf{Confidence Extraction}: A self-assessed confidence score $c_i\in\R$ is derived for each $(\textbf{r}_i, \textbf{a}_i)$.
+    \item \textbf{Confidence Normalization}: The confidence scores are normalized
+    using Softmax: $\tilde{c}_i = \frac{\exp\!\bigl(\frac{c_i}{T}\bigr)}{\sum_{j=1}^m \exp\!\bigl(\tfrac{c_j}{T}\bigr)}$, where $T$ is a tunable temperature hyper-parameter (see discussion below).
+    \item \textbf{Aggregation}:  The final answer is selected using a confidence-weighted majority vote: $\hat{a}_{CISC} = \arg\max_a\sum_{i=1}^m \textbf{1}[\textbf{a}_i = a]\cdot \tilde{c}_i$. 
+\end{itemize}
+\end{definition}
+
+The temperature parameter $T$ controls the relative importance of the answer frequency versus the confidence scores. Namely, as $T\to \infty$, the distribution of normalized confidence scores approaches the uniform distribution, and CISC collapses to vanilla self-consistency. Conversely, as $T\to 0$,  the softmax normalization approaches the hard maximum function, prioritizing the single response with the highest confidence and disregarding the overall frequency of answers. This may lead CISC to select a different answer than self-consistency (see Figure \ref{fig:high-level}). 
+
+\section{Experimental Setup}
+\label{sec:setup}
+
+We compare CISC and self-consistency across a range of confidence extraction methods (\S\ref{sec:conf-methods}), reasoning tasks (\S\ref{sec:datasets}) and models (\S\ref{sec:models}).
+
+\subsection{Confidence Extraction Methods}
+\label{sec:conf-methods}
+
+We use the following methods: 
+
+\begin{itemize}[itemsep=1pt, topsep=2pt,leftmargin=*]
+\item \textbf{Response Probability} \cite{wang2022self}: The confidence in a response $(\textbf{r}, \textbf{a})$  is taken to be the model's (length-normalized) probability of generating $(\textbf{r}, \textbf{a})=(x_1, \dots, x_n)$ given the question:$$p_\theta(\textbf{r}, \textbf{a}) = \left[\Pi_{i=1}^n p_\theta (x_i \vert x_1\dots x_{i-1}, q)\right]^\frac{1}{n}$$
+
+\item \textbf{Verbal Confidence} \cite{lin2022teaching}: After sampling $(\textbf{r},\textbf{a})$ from the model, we prompt it to rate its confidence in its previously generated output. We implement two variants: (1) \textbf{Verbal Binary} instructs the model to output either 0 or 1, and (2) \textbf{Verbal 0-100} instructs the model to output a score on a scale of 0-100.
+
+\item \textbf{P(True)} \citet{kadavath2022language}: We prompt the model to rate its confidence in $(\textbf{r},\textbf{a})$ in binary format (either 0 or 1), and compute the probability that the model assigns to the token $1$.%. 
+
+\end{itemize}
+
+
+\paragraph{Efficient and Consistent Confidence Prompting.}
+
+Our implementation of the prompt-based methods employs a \emph{two-step} prompting procedure (as depicted in Figure \ref{fig:high-level}).
+Given a question prompt $q$, we first use the model to generate the reasoning chain and answer $(r,a)$. We then concatenate a confidence extraction prompt $e$ (e.g., \nl{Now I will rate my confidence...}), and continue the generation on $(q,r,a,e)$. This serves two important purposes. First, it ensures that when comparing self-consistency and CISC, the reasoning chains are identical. Second, the fact that the prefix $(q,r,a)$ remains unchanged after concatenating the confidence extraction prompt $e$ means it does not require reprocessing by the LLM. Consequently, the additional cost of the confidence extraction step consists only of encoding $\text{len}(e)\approx 20$ tokens and generating a single token. Since a single $(q,r,a)$ typically contains hundreds of tokens, the confidence extraction step adds only a negligible computational overhead to self-consistency. Further overhead reduction can be achieved through prompt optimization or by using the single-step procedure described in Appendix \ref{sec:appendix-prompting}. The precise prompts used and additional technical details are also provided in Appendix \ref{sec:appendix-prompting}.
+
+\subsection{Datasets}
+\label{sec:datasets}
+
+We used four large reasoning benchmarks:\footnote{Other than the popular GSM8K, the other datasets were chosen as the three largest datasets in the Hugging Face Leaderboard \cite{leaderboard} (as of December 1st, 2024).}
+
+\begin{itemize}[itemsep=1pt, topsep=2pt,leftmargin=*]
+\item  \textbf{GSM8K} \cite{cobbe2021gsm8k}: A dataset of grade-school level math word problems. We evaluate on the entire validation set (1320 questions). %All the answers are integers.
+\item \textbf{MATH} \cite{hendrycksmath2021}: A more challenging dataset of math word problems. We used the entire test set (5K questions). %Answers are given in TeX equation format, and we used the code snippet given in \cite{lewkowycz2022solving} to parse them.
+\item \textbf{MMLU-Pro} \cite{wang2024mmlu}: A more challenging version of the Multitask Language Understanding (MMLU)  benchmark, testing language models' general knowledge and reasoning abilities with a wide range of topics such as science and history. We randomly sampled 5K questions.
+\item \textbf{Big-Bench-Hard} \cite{suzgun2022challenging}: A challenging selection of tasks from the big-bench benchmark \cite{srivastava2023beyond}, comprises a variety of reasoning tasks that pose challenges to LLMs, such as counting objects. We selected 20 out of 23 tasks (5,761 examples), eliminating three sub-tasks that required designated answer extraction methods.
+\end{itemize}
+
+\subsection{Models}
+\label{sec:models}
+
+We use nine instruction-tuned open-weights LLMs from 3 different families:
+
+\begin{itemize}[itemsep=1pt, topsep=2pt,leftmargin=*]
+\item \textbf{GEMMA2} \cite{team2024gemma}: A Google AI model family, including 2B, 9B, and 27B parameter models. 
+\item \textbf{QWEN2.5} \cite{yang2024qwen2}: A model family from Alibaba AI, with 7 models ranging from 0.5B to 72B parameters. We selected three models: 3B, 14B, and 72B.
+\item \textbf{Mistral} \cite{mistral}: We used three of the latest models available - Ministral-8B-Instruct-2410, Mistral-Small-Instruct-2409, mistralai/Mistral-Large-Instruct-2411 - with 8B, 22B, 123B parameters respectively.
+\end{itemize}
+
+\subsection{Metrics}
+\label{sec:metrics}
+
+We compare CISC against self-consistency using the following metrics:
+
+\begin{itemize}[itemsep=1pt, topsep=2pt,leftmargin=*]
+
+\item \textbf{\% Cost Reduction}: The percentage of computational cost saved by using CISC. We fix the compute budget for CISC (5 or 10 model responses) and measure the number of responses\footnote{If self-consistency failed to reach CISC's accuracy using up to 30 responses, we use a maximal value of 31 for this metric.} required for self-consistency to achieve equivalent accuracy:
+$$100 \times \left(1 - \frac{\text{CISC budget}}{\text{\# Comparable SC responses}}\right)$$
+
+\item \textbf{\% Accuracy Improvement}: The relative accuracy gain of CISC over self-consistency when both methods utilize the same number of responses per question: 
+$$100 \times \left(\frac{\text{CISC Acc}}{\text{SC Acc}} - 1\right)$$
+\end{itemize}
+
+\subsection{Temperature Scaling}
+\label{sec:temperature}
+
+As discussed in \S\ref{sec:cisc}, CISC re-scales the confidence values using a softmax transformation, parameterized by a temperature $T > 0$. We tune the temperature separately for each model and confidence extraction method using a 10\% held-out set, aggregated across all four datasets (\S\ref{sec:datasets}). The fact that CISC only employees a single dataset-agnostic hyper-parameter, makes the tuning process light-weight and robust. More details and the optimal temperature values for each configuration are in appendix \ref{sec:appendix-temperature}.
+
+\subsection{Bootstrap}
+\label{sec:bootstrap}
+
+To compute the performance of a decoding strategy $s$ (either self-consistency or a variant of CISC) with a sample budget of $b \in [1,...,30]$, we perform bootstrap sampling. We first sample $30$ different reasoning paths from the model. 
+Next, we draw $n=500$ sets of $b$ paths for each question, apply $s$ to each set, and compute the accuracy per set. We then average the results across all bootstrap samples to obtain the final score.
+
+\section{Main Results}
+
+\label{sec:results}
+
+\begin{table*}[!ht]
+\centering
+\begin{tabular}{lcccc}
+\toprule
+&  \multicolumn{2}{c}{Cost Reduction} & \multicolumn{2}{c}{Acc Improvement} \\
+\cmidrule(lr){2-3} \cmidrule(l){4-5} 
+Confidence Method & Budget 5 & Budget 10 & Budget 5 & Budget 10 \\
+\midrule
+Verbal Binary & 18\% \small{(6.1)} & 10\% \small{(11.1)} & 0.4\% & 0.2\% \\[4pt]
+Verbal 1-100 & 22\% \small{(6.4)} & 30\% \small{(14.4)} & 0.8\% & 0.4\% \\[4pt]
+Response Probability & 22\% \small{(6.5)} & 31\% \small{(14.6)} & 1.1\% & 0.8\% \\[4pt]
+P(True) & \textbf{41\% \small{(8.4)}} & \textbf{46\% \small{(18.6)}} & \textbf{1.6\%} & \textbf{1.1\%} \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{CISC performance (macro-averaged over all datasets and models) per confidence method.}  
+CISC performs better than standard self-consistency in terms of both efficiency gains and accuracy improvements across all confidence methods. Specifically, the \textbf{P-True} method achieves the best results. For instance, self-consistency must use 18.6 sampled responses on average to match the accuracy obtained by CISC using only 10 samples, representing a 46\% reduction in computational costs. }
+\label{table:aggregated-results}
+\end{table*}
+
+This section demonstrates CISC's (\S\ref{def:cisc}) substantial performance advantage over self-consistency. We compare CISC, using fixed compute budgets of 5 and 10 responses per question, based on the metrics defined in \S\ref{sec:metrics}.
+
+\paragraph{CISC outperforms self-consistency across virtually all models and datasets.}
+Table \ref{table:aggregated-results} presents 
+the \textit{Cost Reduction} and \textit{Accuracy Improvement} (see \S\ref{sec:metrics}) achieved by CISC with each confidence method. The results are macro-averaged across all models and datasets. CISC outperforms self-consistency with every confidence method.  
+
+The \textit{P(True)} method yields the best results, achieving an average Cost Reduction of 41\% and 46\% with budgets of 5 and 10 responses, respectively. Figure \ref{fig:intrinsic-binary-results} presents a detailed breakdown of CISC's performance using \textit{P(True)} across all models and datasets. Notably, CISC is effective across nearly all configurations, with some exceeding 67\% cost reduction.
+
+We provide additional results in Appendix \ref{sec:appendix-more-results}. In particular, Table \ref{tab:apendix-all-results} shows a per-dataset breakdown of Table \ref{table:aggregated-results}, and Table \ref{table:micro-results} shows the Accuracy Improvement metric micro-averaged across configurations, which enables the computation of confidence intervals. These demonstrate that the observed improvements of CISC (for each confidence method examined) are strongly statistically significant.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{latex/figures/breakdown-map-hor.pdf}
+    \caption{Results breakdown for CISC using the P(True) method and a budget of 10 responses per question. Each cell is annotated with the Cost Reduction (Percentage; \S\ref{sec:metrics}) of CISC compared to self-consistency. As can be seen, CISC improves performance across almost all model families and datasets. In many cases, even 30 samples are not enough for self-consistency to reach CISC performance, leading to Cost Reduction of over 67\%. }.
+    \label{fig:intrinsic-binary-results}
+\end{figure}
+
+\paragraph{Confidence Normalization improves CISC's performance.} We drill down into the importance of the within-question confidence normalization step in CISC. In Table \ref{table:norm-table}, we compare CISC's performance with and without confidence normalization. We see that for every confidence method examined, CISC with normalization (softmax with a tunable temperature value) outperforms its unnormalized counterpart. However, as shown in Supplementary Table \ref{table:norm-table-ext}, normalization is effective only when using appropriate temperature hyper-parameters. Because different confidence extraction methods produce scores on different scales, their optimal temperatures vary considerably (values are provided in Supplementary Figure \ref{fig:temperatures-map}). For instance, the P(True) method yields confidence values with high similarity, thus requiring lower temperatures to distinguish between them.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lc}
+\toprule
+Confidence Method & \makecell{Cost Reduction @ 10} \\
+\toprule
+P(True) (w/o normalization) & 32\% \small{(14.8)} \\
+P(True) (w/ normalization) & \textbf{46\% \small{(18.6)}} \\
+\midrule
+SP (w/o normalization) & 24\% \small{(13.1)} \\
+SP (w/ normalization) & \textbf{31\% \small{(14.6)}} \\
+\midrule
+Verbal (w/o normalization) & 20\% \small{(12.5)} \\
+Verbal (w/ normalization) & \textbf{30\% \small{(14.4)}} \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{CISC performance with and without confidence normalization} (bottom and top rows, respectively). We see that while  
+CISC demonstrates substantial cost reductions even without normalization, employing normalization (Softmax and temperature scaling) significantly enhances performance, across all three confidence methods.}
+\label{table:norm-table}
+\end{table}
+\section{Within-Question Confidence Evaluation}
+
+\label{sec:pairwise}
+
+
+\definecolor{lightgraycisc}{gray}{0.97}
+
+\begin{table}[!ht]
+\centering
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{l c c c >{\columncolor{lightgraycisc}}c}
+\toprule
+\makecell{Confidence \\ Method} & ECE-t $\downarrow$ & Brier-t $\downarrow$ & \makecell{WQD $\uparrow$} & \makecell{CISC Cost\\ Reduction $\uparrow$} \\
+\midrule
+Verbal Binary & \textbf{0.005} & 0.187 & 52.2\%  & 10\% \\[4pt]
+Verbal 0-100 & 0.046 & \textbf{0.173} & 56.1\%   & 30\% \\[4pt]
+Response Prob. & 0.090 & 0.192 & 59.0\%    & 31\% \\[4pt]
+P(True) & 0.030 & 0.182 & \textbf{62.3\%}        & \textbf{46\%} \\[4pt]
+\bottomrule
+\end{tabular}
+}
+\caption{\textbf{Comparison of different confidence extraction methods in terms of between-question and within-question confidence evaluation metrics}. 
+We see that between-question metrics (ECE-t, Brier-t) are poor indicators of effective confidence extraction for CISC, while our novel WQD metric (\ref{def:wqd}) effectively predicts which confidence extraction method yields the best CISC performance.
+}
+\label{tab:confidence-methods}
+\end{table}
+
+
+Recent work demonstrated that verbal confidence methods significantly outperform P(True) in terms of \emph{calibration} \cite{tyen2023llms}, which is the de-facto approach to evaluate the quality of confidence measures. Yet, perhaps surprisingly, CISC is more effective with P(True) than with verbal confidence methods (Table \ref{table:aggregated-results}). In this section we settle these differences, and explain why well-calibrated confidence measures can still be less useful for CISC.
+
+We argue that existing evaluation metrics, whether \emph{calibration} based \cite{kadavath2022language, tian2023just} or \emph{discrimination} based \cite{kuhn2023semantic, nguyen2024direct} examine the confidence behavior \emph{between} the input questions. However, for CISC to work well, we want the confidence scores to be able to distinguish correct and incorrect responses \emph{to the same question}. 
+
+To gain an intuition for the difference between \emph{within-question}
+and \emph{between-question} confidence evaluation, consider the following simple example. Imagine a model $M$ and a dataset with two types of questions: questions that $M$ finds \nl{easy} (e.g., answers correctly 95\% of the time) and questions that $M$ finds \nl{hard} (e.g., answers correctly 5\% of the time). Consider a confidence measure that assigns every answer to an \nl{easy} question a confidence of $0.95$ and every answer to a hard question a confidence of $0.05$. This confidence signal is useless for CISC, as it does not make any distinctions between answers to the same question. On the other hand, it scores well under existing metrics (e.g., it is perfectly calibrated).
+
+The above thought experiment shows that the fact that well-calibrated confidence scores can be derived from a model does not necessarily imply the model possesses a capacity to self-assess its own responses. To isolate this specific ability, we design a metric that measures whether the confidence scores can distinguish correct and incorrect responses to the same question:
+
+\begin{definition}[Within-Question Discrimination]
+\label{def:wqd}
+Given a dataset of questions, for each question $q$, denote the sampled responses by $R_q = \{(\textbf{r}_i, \textbf{a}_i)\}_{i=1}^m$, and let $R^+_q,R^-_q \subseteq R_q$ be the subsets of correct and incorrect responses respectively. We evaluate the Within-Question Discrimination (WQD) of a confidence method $c: (r,a) \mapsto \R$ as:
+\begin{multline*}
+    \text{WQD}(c) \equiv \\ 
+    \frac{1}{N} \cdot \sum_{q} \sum_{(r, a)\in R^+_q} \sum_{(r', a')\in R^-_q} [c(r,a) > c(r',a')]
+\end{multline*}
+where $N = \sum_q |R_q^+| \cdot |R_q^-|$.
+\end{definition}
+
+That is, we compute the fraction of cases where the higher confidence response is indeed the correct response, out of pairs of responses \emph{to the same question} (exactly one of which is correct). In our work, we use $m = 30$ (as described in \S\ref{sec:bootstrap}).
+
+To emphasize the importance of \emph{within-question evaluation}, we test if WQD is more predictive of CISC's success than standard \emph{between-question} confidence metrics. We compare each confidence method from \S\ref{sec:conf-methods} in terms of: (i) standard metrics, such as ECE \cite{pmlr-v70-guo17a} and Brier Score \cite{brier1950verification}, (ii) WQD, (iii) CISC performance at a budget of 10 samples. We follow previous work \cite{tyen2023llms} and report the standard metrics after applying temperature scaling \cite{ovadia2019can}, a technique that fits a single temperature parameter $T$ to the model's confidences to minimize the negative log-likelihood on the data. We use ECE-t and Brier-t to denote the scaled scores.
+
+The results of this comparison, averaged across all datasets (\S\ref{sec:datasets}) and models (\S\ref{sec:models}), are summarized in Table \ref{tab:confidence-methods}.  
+Indeed, we see that the verbal confidence methods obtain the best ECE-t and Brier-t scores while also achieving the worst performance in CISC. On the other hand, the WQD metric is able to perfectly predict the relative scores of each confidence method in CISC. This emphasizes the limitations of relying solely on traditional confidence evaluation methods for evaluating the models ability to self-assess its reasoning.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=1\linewidth]{latex/figures/pairwise-heatmap-small.pdf}
+    \caption{Within-Question Discrimination score (indicated by color) increases smoothly as a function of the confidence gap (percentiles, x-axis). Here we use the P(True) method, Gemma2-9B and the MATH dataset. 
+    } %\gal{Update metric name}
+\label{fig:pairwise-heatmap}
+\end{figure}
+
+The WQD metric prioritizes interpretability, focusing on the discrimination ability of the confidence scores irrespective of the relative magnitude of the confidence values $c(r,a)$ and $c(r', a')$. However, examining the relationship between WQD and the confidence gap $|c(r,a) - c(r',a')|$ offers additional insights. Figure \ref{fig:pairwise-heatmap} illustrates a near monotonic relationship: the within-question discrimination ability (indicated by color) smoothly increases with the confidence gap (x-axis).
+These findings suggest a fine-grained self-assessment mechanism, where even small differences in confidence scores reflect significant variations in the probability of a response being correct
+
+Taken together, our findings provide a compelling evidence that LLMs indeed posses an intrinsic ability to reassess their own responses.
+
+\section{Qualitative Analysis}
+\label{sec:qualitative}
+
+
+In \S\ref{sec:results} we showed that CISC has clear 
+performance advantages over standard self-consistency, and argued that this suggests LLMs are capable of self-assessing their confidence in responses to the same question. To facilitate a better understanding of this phenomenon, we asked human evaluators to identify indicators of \emph{low-quality model responses} (i.e., logical patterns that reduced the evaluators' confidence in the correctness of the LLM response). Our analysis revealed a strong correlation between the prevalence of these indicators and lower confidence scores assigned by the LLM.
+
+\paragraph{Sampling Process.} We performed the analysis on MMLU-Pro (\S\ref{sec:datasets}), using three representative models, one from each model family.  
+
+To reduce the evaluation burden we limited it to three LLM responses per question. We selected these triplets based on two criteria: (1) CISC and SC produced different results, where one method yielded a correct answer and the other did not, and (2) the final answers of the three responses were not all distinct, which would otherwise degenerate self-consistency's majority voting. 
+
+Out of the remaining triplets, we randomly chose 45 for which SC was correct and 45 where SC was wrong. Then, for each triplet, we randomly took either the response with highest relative-confidence or the response with lowest relative-confidence. This ensured an equal number of low relative-confidence responses that were correct and incorrect, mitigating potential bias of answer correctness on our analysis. The process resulted in 90 responses for human evaluation.
+
+\paragraph{Human Evaluation.} Two human evaluators (NLP Phd students), unaware of both the model's confidence scores and the ground truth labels, reviewed 90 samples. The evaluators' task was to identify logical patterns in the LLM reasoning-chain which reduce their confidence that the LLM has reached a correct answer; we call these patterns low-quality-indicators. Also, the evaluators were asked to briefly describe each identified pattern.
+
+\paragraph{Results.} Our evaluation demonstrated a significant correlation in confidence assessments: 67\% of the samples assessed as relative-low confidence by the model were also judged to contain low-quality indicators by human evaluators, while only 33\% of the samples assessed as relative-high confidence by the model contained the human identified low-quality-indicators. This strong correlation suggests that LLMs are adept at assessing their own reasoning processes and identifying patterns that humans consider indicative of low quality. 
+
+In addition, we categorized these low-quality indicators. Three primary categories emerged: (1) the LLM's final answer was not among the provided options; (2) the LLM deliberated between multiple options; and (3) the LLM omitted necessary calculations. Of these, only categories (1) and (3) showed a strong correlation with the LLM's low-confidence scores. Further details regarding these categories and their correlation statistics are available in the Appendix \ref{sec:appendix-qualitative}.
+\section{Related Work}
+
+\paragraph{Confidence signals for LLMs.} 
+There is a long line of work on deriving confidence measures from LLMs. Popular approaches use
+% Popular methods to derive calibrated confidence from LLMs include 
+the agreement across multiple samples \cite{kuhn2023semantic, manakul2023selfcheckgpt, tian2023fine,lyu2024calibrating,gekhman-etal-2024-fine}, the model's internal representations \cite{azaria2023internal, burns2022discovering,orgad2025iclr} or directly prompting the model to verbalize its confidence \cite{tian2023just, kadavath2022language}.
+All papers in this line of work focused on fact-seeking tasks, 
+so confidence is typically derived based on the final answer alone. To the best of our knowledge, our work is the first to apply these approaches to scoring the entire reasoning path.
+
+\paragraph{Reasoning verification.}
+While learned verifiers have been demonstrated to significantly improve performance on math word problems \cite{cobbe2021training, lightman2023let, li2022making}, the ability of LLMs to perform \emph{self}-verification and \emph{self}-correction is still heavily contested, with some works providing positive evidence for such capabilities \cite{weng2022large, gero2023self, madaan2024self, liu2024large, li2024confidence} and others arguing that the gains can mostly be attributed to clever prompt design, unfair baselines, data contamination and using overly simple tasks \cite{tyen2023llms, valmeekam2023can, hong2023closer, huang2023large, stechly2024self, zhang2024small}. This work contributes to this ongoing discussion by presenting multiple lines of evidence supporting LLM self-verification. In particular, we demonstrate clear benefits from a simple confidence-based self-verification approach. 
+
+
+\paragraph{Improving self-consistency's efficiency. }
+
+Numerous attempts \cite{chen-etal-2024-self-para} have been made to reduce SC computational overhead while maintaining quality. However, none have matched the widespread adoption of self-consistency. This can be largely attributed to several limitations: (1) a trade-off where throughput is reduced while \textit{latency increases}, for example by sampling chains sequentially (instead of in parallel) until reaching a certain condition \cite{aggarwal2023let, li2024escape, wang2024make} or running expensive LLM calls instead of the cheap majority voting \cite{yoran2023answering}, (2) the need for manual feature crafting and tuning tailored to each dataset \cite{wan2024dynamic}, (3) promising results on specialized setups \cite{wang2024soft} which did not generalize to standard benchmarks (Table \ref{table:max-ablation}), and (4) as highlighted by \citet{huang2023large}, many of the more sophisticated methods that appear promising actually don't outperform self-consistency when evaluated with a thorough analysis of inference costs. Our approach is different in that CISC adds minimal complexity to self-consistency, and still allows parallel sampling which enables to improve throughput \textit{without compromising latency}, a crucial requirement for many applications.
+
+\paragraph{Self-consistency with confidence.}
+Related approaches to CISC's confidence-weighted majority vote were previously explored in both the original self-consistency paper \citet{wang2022self}, that considered a weighted majority using Sequence Probability (\S\ref{sec:metrics}), and in \citet{miao2023selfcheck}, that concluded that verbally \nl{asking the LLM to check its own reasoning is largely ineffective} for improving self-consistency. In both cases, these failures are attributed to the confidence scores being too similar to one another. Our work shows that despite this, the scores contain a useful signal (reflected in the WQD scores; Table \ref{tab:confidence-methods}) that can be utilized by a normalization step prior to aggregation to significantly improve the efficiency of self-consistency. Furthermore, the P(True) method, which achieves the highest WQD scores, has not been previously used for attempting to improve self-consistency.
+
+
+
+\section{Discussion}
+
+In this work we introduced CISC, a lightweight extension of self-consistency. Across diverse models, datasets, and confidence extraction methods, CISC consistently outperformed self-consistency, reducing computation costs by over 40\% on average.
+
+The performance gains achieved by using model-derived confidence scores provide a practical evidence that LLMs can effectively judge the quality of their own outputs, contributing to the ongoing debate on this topic \cite{huang2023large, li2024confidence}. This is further strengthened by our qualitative evaluation, revealing significant agreement between model confidence and human assessments of response quality.
+% Specifically, responses identified by the models as low-confidence were also significantly more likely to be flagged by human evaluators as exhibiting signs of flawed reasoning.
+
+Complementing our investigation of LLM self-assessment, we address the crucial aspect of evaluating confidence methods.  Traditional calibration metrics, which assess confidence across different questions, fail to capture a model's ability to distinguish between high and low quality responses to the same question. To overcome this, we introduce the Within-Question Discrimination (WQD) metric and demonstrate its effectiveness.
+
+We encourage future research to explore the integration of model self-confidence into more sophisticated reasoning frameworks like Tree of Thoughts \cite{yao2024tree} or Graph of Thoughts \cite{besta2024graph}, believing that harnessing this inherent capability can further boost performance. Another promising avenue is training models to produce more accurate intrinsic or verbal confidence \cite{lin2022teaching, chaudhry2024finetuning}, which would directly improve CISC and related methods. For instance, recent evidence suggests that a better signal can be derived from the model's internal states, even outperforming P(True) \cite{gekhman2025inside}. Conversely, CISC and WQD can be used to assess the impact of advancements in confidence generation.
+
+\section{Limitations}
+
+\paragraph{Confidence Prompting. } Our confidence extraction prompting approach minimizes the computational overhead (\S\ref{sec:conf-methods}) by using short confidence prompts (less than 5\% of the input and reasoning chain length) that, unlike other works, are appended after the reasoning chain. This allows us to continue to use the auto-regressive cache that was used when the models generated the answer. While this approach is readily implementable within frameworks like HuggingFace \cite{hf}, it may not be universally supported. An alternative one-step prompting approach, which does not rely on prefix caching, is discussed in Appendix \ref{sec:appendix-prompting}.  We opted for the two-step approach in this study to ensure a clear and robust evaluation of CISC, fully mitigating the impact of confidence integration on the generated reasoning paths.
+
+\paragraph{Access to the model's probabilities. } The preferred CISC approach calculates P(True) (as described in \S\ref{sec:conf-methods}) by examining the model's assigned probability to the verbal confidence token.  This method is available in both popular open-weights frameworks (e.g., \citet{hf}) and closed-weights frameworks (e.g., \citet{openaiapi}).  However, this feature may not be universally available across all frameworks.
+
+\paragraph{Human Evaluation. }  The qualitative human evaluation presented in Section \ref{sec:qualitative} provides further support for our claims regarding LLMs' ability to self-assess the correctness of their responses. This evaluation was conducted on the MMLU dataset, which offers a diverse set of single-choice questions.  Extending this analysis to other datasets could offer additional insights.
+
+\paragraph{Additional ablations. } We examined the performance of CISC across several key aspects, focusing on the impact of the choice of confidence extraction method and the impact of the confidence normalization step. Additional ablations could include examining the effect of zero-shot vs few-shot prompting, different choices of normalization techniques, and using trainable confidence methods \cite{lin2022teaching, chaudhry2024finetuning} to improve the performance of CISC.
+
+\section{Ethics Statement}
+
+This work improves LLM reasoning efficiency by introducing a new decoding strategy (CISC). While CISC itself introduces no new ethical issues, LLMs can perpetuate biases and have societal impacts. Responsible LLM development and deployment, including bias mitigation, are crucial. 
+
+\clearpage
+\newpage
+
+
+% Bibliography entries for the entire Anthology, followed by custom entries
+%\bibliography{anthology,custom}
+% Custom bibliography entries only
+\clearpage
+\appendix
+
+\input{latex/sections/appendix-sections/quantitive-example}
+\input{latex/sections/appendix-sections/prompts}
+\input{latex/sections/appendix-sections/additional-results}
+\input{latex/sections/appendix-sections/temperature-scaling}
+\input{latex/sections/appendix-sections/qualitative}
+\input{latex/sections/appendix-sections/compute}
+
+\end{document}

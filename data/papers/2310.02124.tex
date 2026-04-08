@@ -1,0 +1,3139 @@
+% This must be in the first 5 lines to tell arXiv to use pdfLaTeX, which is strongly recommended.
+\pdfoutput=1
+% In particular, the hyperref package requires pdfLaTeX in order to break URLs across lines.
+
+\documentclass[11pt]{article}
+
+% Remove the "review" option to generate the final version.
+% \usepackage[review]{acl}
+\usepackage[]{acl}
+
+% Standard package includes
+\usepackage{times}
+\usepackage{latexsym}
+\PassOptionsToPackage{breaklinks}{hyperref}
+
+% For proper rendering and hyphenation of words containing Latin characters (including in bib files)
+\usepackage[T1]{fontenc}
+% For Vietnamese characters
+% \usepackage[T5]{fontenc}
+% See https://www.latex-project.org/help/documentation/encguide.pdf for other character sets
+
+% This assumes your files are encoded as UTF8
+\usepackage[utf8]{inputenc}
+
+% This is not strictly necessary, and may be commented out,
+% but it will improve the layout of the manuscript,
+% and will typically save some space.
+\usepackage{microtype}
+
+% If the title and author information does not fit in the area allocated, uncomment the following
+%
+%\setlength\titlebox{<dim>}
+%
+% and set <dim> to something 5cm or larger.
+
+
+% -----ours-----
+% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+%%%%% NEW MATH DEFINITIONS %%%%%
+
+\usepackage{amsmath,amsfonts,bm}
+
+% Mark sections of captions for referring to divisions of figures
+\newcommand{\figleft}{{\em (Left)}}
+\newcommand{\figcenter}{{\em (Center)}}
+\newcommand{\figright}{{\em (Right)}}
+\newcommand{\figtop}{{\em (Top)}}
+\newcommand{\figbottom}{{\em (Bottom)}}
+\newcommand{\captiona}{{\em (a)}}
+\newcommand{\captionb}{{\em (b)}}
+\newcommand{\captionc}{{\em (c)}}
+\newcommand{\captiond}{{\em (d)}}
+
+% Highlight a newly defined term
+\newcommand{\newterm}[1]{{\bf #1}}
+
+
+% Figure reference, lower-case.
+\def\figref#1{figure~\ref{#1}}
+% Figure reference, capital. For start of sentence
+\def\Figref#1{Figure~\ref{#1}}
+\def\twofigref#1#2{figures \ref{#1} and \ref{#2}}
+\def\quadfigref#1#2#3#4{figures \ref{#1}, \ref{#2}, \ref{#3} and \ref{#4}}
+% Section reference, lower-case.
+\def\secref#1{section~\ref{#1}}
+% Section reference, capital.
+\def\Secref#1{Section~\ref{#1}}
+% Reference to two sections.
+\def\twosecrefs#1#2{sections \ref{#1} and \ref{#2}}
+% Reference to three sections.
+\def\secrefs#1#2#3{sections \ref{#1}, \ref{#2} and \ref{#3}}
+% Reference to an equation, lower-case.
+\def\eqref#1{equation~\ref{#1}}
+% Reference to an equation, upper case
+\def\Eqref#1{Equation~\ref{#1}}
+% A raw reference to an equation---avoid using if possible
+\def\plaineqref#1{\ref{#1}}
+% Reference to a chapter, lower-case.
+\def\chapref#1{chapter~\ref{#1}}
+% Reference to an equation, upper case.
+\def\Chapref#1{Chapter~\ref{#1}}
+% Reference to a range of chapters
+\def\rangechapref#1#2{chapters\ref{#1}--\ref{#2}}
+% Reference to an algorithm, lower-case.
+\def\algref#1{algorithm~\ref{#1}}
+% Reference to an algorithm, upper case.
+\def\Algref#1{Algorithm~\ref{#1}}
+\def\twoalgref#1#2{algorithms \ref{#1} and \ref{#2}}
+\def\Twoalgref#1#2{Algorithms \ref{#1} and \ref{#2}}
+% Reference to a part, lower case
+\def\partref#1{part~\ref{#1}}
+% Reference to a part, upper case
+\def\Partref#1{Part~\ref{#1}}
+\def\twopartref#1#2{parts \ref{#1} and \ref{#2}}
+
+\def\ceil#1{\lceil #1 \rceil}
+\def\floor#1{\lfloor #1 \rfloor}
+\def\1{\bm{1}}
+\newcommand{\train}{\mathcal{D}}
+\newcommand{\valid}{\mathcal{D_{\mathrm{valid}}}}
+\newcommand{\test}{\mathcal{D_{\mathrm{test}}}}
+
+\def\eps{{\epsilon}}
+
+
+% Random variables
+\def\reta{{\textnormal{$\eta$}}}
+\def\ra{{\textnormal{a}}}
+\def\rb{{\textnormal{b}}}
+\def\rc{{\textnormal{c}}}
+\def\rd{{\textnormal{d}}}
+\def\re{{\textnormal{e}}}
+\def\rf{{\textnormal{f}}}
+\def\rg{{\textnormal{g}}}
+\def\rh{{\textnormal{h}}}
+\def\ri{{\textnormal{i}}}
+\def\rj{{\textnormal{j}}}
+\def\rk{{\textnormal{k}}}
+\def\rl{{\textnormal{l}}}
+% rm is already a command, just don't name any random variables m
+\def\rn{{\textnormal{n}}}
+\def\ro{{\textnormal{o}}}
+\def\rp{{\textnormal{p}}}
+\def\rq{{\textnormal{q}}}
+\def\rr{{\textnormal{r}}}
+\def\rs{{\textnormal{s}}}
+\def\rt{{\textnormal{t}}}
+\def\ru{{\textnormal{u}}}
+\def\rv{{\textnormal{v}}}
+\def\rw{{\textnormal{w}}}
+\def\rx{{\textnormal{x}}}
+\def\ry{{\textnormal{y}}}
+\def\rz{{\textnormal{z}}}
+
+% Random vectors
+\def\rvepsilon{{\mathbf{\epsilon}}}
+\def\rvtheta{{\mathbf{\theta}}}
+\def\rva{{\mathbf{a}}}
+\def\rvb{{\mathbf{b}}}
+\def\rvc{{\mathbf{c}}}
+\def\rvd{{\mathbf{d}}}
+\def\rve{{\mathbf{e}}}
+\def\rvf{{\mathbf{f}}}
+\def\rvg{{\mathbf{g}}}
+\def\rvh{{\mathbf{h}}}
+\def\rvu{{\mathbf{i}}}
+\def\rvj{{\mathbf{j}}}
+\def\rvk{{\mathbf{k}}}
+\def\rvl{{\mathbf{l}}}
+\def\rvm{{\mathbf{m}}}
+\def\rvn{{\mathbf{n}}}
+\def\rvo{{\mathbf{o}}}
+\def\rvp{{\mathbf{p}}}
+\def\rvq{{\mathbf{q}}}
+\def\rvr{{\mathbf{r}}}
+\def\rvs{{\mathbf{s}}}
+\def\rvt{{\mathbf{t}}}
+\def\rvu{{\mathbf{u}}}
+\def\rvv{{\mathbf{v}}}
+\def\rvw{{\mathbf{w}}}
+\def\rvx{{\mathbf{x}}}
+\def\rvy{{\mathbf{y}}}
+\def\rvz{{\mathbf{z}}}
+
+% Elements of random vectors
+\def\erva{{\textnormal{a}}}
+\def\ervb{{\textnormal{b}}}
+\def\ervc{{\textnormal{c}}}
+\def\ervd{{\textnormal{d}}}
+\def\erve{{\textnormal{e}}}
+\def\ervf{{\textnormal{f}}}
+\def\ervg{{\textnormal{g}}}
+\def\ervh{{\textnormal{h}}}
+\def\ervi{{\textnormal{i}}}
+\def\ervj{{\textnormal{j}}}
+\def\ervk{{\textnormal{k}}}
+\def\ervl{{\textnormal{l}}}
+\def\ervm{{\textnormal{m}}}
+\def\ervn{{\textnormal{n}}}
+\def\ervo{{\textnormal{o}}}
+\def\ervp{{\textnormal{p}}}
+\def\ervq{{\textnormal{q}}}
+\def\ervr{{\textnormal{r}}}
+\def\ervs{{\textnormal{s}}}
+\def\ervt{{\textnormal{t}}}
+\def\ervu{{\textnormal{u}}}
+\def\ervv{{\textnormal{v}}}
+\def\ervw{{\textnormal{w}}}
+\def\ervx{{\textnormal{x}}}
+\def\ervy{{\textnormal{y}}}
+\def\ervz{{\textnormal{z}}}
+
+% Random matrices
+\def\rmA{{\mathbf{A}}}
+\def\rmB{{\mathbf{B}}}
+\def\rmC{{\mathbf{C}}}
+\def\rmD{{\mathbf{D}}}
+\def\rmE{{\mathbf{E}}}
+\def\rmF{{\mathbf{F}}}
+\def\rmG{{\mathbf{G}}}
+\def\rmH{{\mathbf{H}}}
+\def\rmI{{\mathbf{I}}}
+\def\rmJ{{\mathbf{J}}}
+\def\rmK{{\mathbf{K}}}
+\def\rmL{{\mathbf{L}}}
+\def\rmM{{\mathbf{M}}}
+\def\rmN{{\mathbf{N}}}
+\def\rmO{{\mathbf{O}}}
+\def\rmP{{\mathbf{P}}}
+\def\rmQ{{\mathbf{Q}}}
+\def\rmR{{\mathbf{R}}}
+\def\rmS{{\mathbf{S}}}
+\def\rmT{{\mathbf{T}}}
+\def\rmU{{\mathbf{U}}}
+\def\rmV{{\mathbf{V}}}
+\def\rmW{{\mathbf{W}}}
+\def\rmX{{\mathbf{X}}}
+\def\rmY{{\mathbf{Y}}}
+\def\rmZ{{\mathbf{Z}}}
+
+% Elements of random matrices
+\def\ermA{{\textnormal{A}}}
+\def\ermB{{\textnormal{B}}}
+\def\ermC{{\textnormal{C}}}
+\def\ermD{{\textnormal{D}}}
+\def\ermE{{\textnormal{E}}}
+\def\ermF{{\textnormal{F}}}
+\def\ermG{{\textnormal{G}}}
+\def\ermH{{\textnormal{H}}}
+\def\ermI{{\textnormal{I}}}
+\def\ermJ{{\textnormal{J}}}
+\def\ermK{{\textnormal{K}}}
+\def\ermL{{\textnormal{L}}}
+\def\ermM{{\textnormal{M}}}
+\def\ermN{{\textnormal{N}}}
+\def\ermO{{\textnormal{O}}}
+\def\ermP{{\textnormal{P}}}
+\def\ermQ{{\textnormal{Q}}}
+\def\ermR{{\textnormal{R}}}
+\def\ermS{{\textnormal{S}}}
+\def\ermT{{\textnormal{T}}}
+\def\ermU{{\textnormal{U}}}
+\def\ermV{{\textnormal{V}}}
+\def\ermW{{\textnormal{W}}}
+\def\ermX{{\textnormal{X}}}
+\def\ermY{{\textnormal{Y}}}
+\def\ermZ{{\textnormal{Z}}}
+
+% Vectors
+\def\vzero{{\bm{0}}}
+\def\vone{{\bm{1}}}
+\def\vmu{{\bm{\mu}}}
+\def\vtheta{{\bm{\theta}}}
+\def\va{{\bm{a}}}
+\def\vb{{\bm{b}}}
+\def\vc{{\bm{c}}}
+\def\vd{{\bm{d}}}
+\def\ve{{\bm{e}}}
+\def\vf{{\bm{f}}}
+\def\vg{{\bm{g}}}
+\def\vh{{\bm{h}}}
+\def\vi{{\bm{i}}}
+\def\vj{{\bm{j}}}
+\def\vk{{\bm{k}}}
+\def\vl{{\bm{l}}}
+\def\vm{{\bm{m}}}
+\def\vn{{\bm{n}}}
+\def\vo{{\bm{o}}}
+\def\vp{{\bm{p}}}
+\def\vq{{\bm{q}}}
+\def\vr{{\bm{r}}}
+\def\vs{{\bm{s}}}
+\def\vt{{\bm{t}}}
+\def\vu{{\bm{u}}}
+\def\vv{{\bm{v}}}
+\def\vw{{\bm{w}}}
+\def\vx{{\bm{x}}}
+\def\vy{{\bm{y}}}
+\def\vz{{\bm{z}}}
+
+% Elements of vectors
+\def\evalpha{{\alpha}}
+\def\evbeta{{\beta}}
+\def\evepsilon{{\epsilon}}
+\def\evlambda{{\lambda}}
+\def\evomega{{\omega}}
+\def\evmu{{\mu}}
+\def\evpsi{{\psi}}
+\def\evsigma{{\sigma}}
+\def\evtheta{{\theta}}
+\def\eva{{a}}
+\def\evb{{b}}
+\def\evc{{c}}
+\def\evd{{d}}
+\def\eve{{e}}
+\def\evf{{f}}
+\def\evg{{g}}
+\def\evh{{h}}
+\def\evi{{i}}
+\def\evj{{j}}
+\def\evk{{k}}
+\def\evl{{l}}
+\def\evm{{m}}
+\def\evn{{n}}
+\def\evo{{o}}
+\def\evp{{p}}
+\def\evq{{q}}
+\def\evr{{r}}
+\def\evs{{s}}
+\def\evt{{t}}
+\def\evu{{u}}
+\def\evv{{v}}
+\def\evw{{w}}
+\def\evx{{x}}
+\def\evy{{y}}
+\def\evz{{z}}
+
+% Matrix
+\def\mA{{\bm{A}}}
+\def\mB{{\bm{B}}}
+\def\mC{{\bm{C}}}
+\def\mD{{\bm{D}}}
+\def\mE{{\bm{E}}}
+\def\mF{{\bm{F}}}
+\def\mG{{\bm{G}}}
+\def\mH{{\bm{H}}}
+\def\mI{{\bm{I}}}
+\def\mJ{{\bm{J}}}
+\def\mK{{\bm{K}}}
+\def\mL{{\bm{L}}}
+\def\mM{{\bm{M}}}
+\def\mN{{\bm{N}}}
+\def\mO{{\bm{O}}}
+\def\mP{{\bm{P}}}
+\def\mQ{{\bm{Q}}}
+\def\mR{{\bm{R}}}
+\def\mS{{\bm{S}}}
+\def\mT{{\bm{T}}}
+\def\mU{{\bm{U}}}
+\def\mV{{\bm{V}}}
+\def\mW{{\bm{W}}}
+\def\mX{{\bm{X}}}
+\def\mY{{\bm{Y}}}
+\def\mZ{{\bm{Z}}}
+\def\mBeta{{\bm{\beta}}}
+\def\mPhi{{\bm{\Phi}}}
+\def\mLambda{{\bm{\Lambda}}}
+\def\mSigma{{\bm{\Sigma}}}
+
+% Tensor
+\DeclareMathAlphabet{\mathsfit}{\encodingdefault}{\sfdefault}{m}{sl}
+\SetMathAlphabet{\mathsfit}{bold}{\encodingdefault}{\sfdefault}{bx}{n}
+\newcommand{\tens}[1]{\bm{\mathsfit{#1}}}
+\def\tA{{\tens{A}}}
+\def\tB{{\tens{B}}}
+\def\tC{{\tens{C}}}
+\def\tD{{\tens{D}}}
+\def\tE{{\tens{E}}}
+\def\tF{{\tens{F}}}
+\def\tG{{\tens{G}}}
+\def\tH{{\tens{H}}}
+\def\tI{{\tens{I}}}
+\def\tJ{{\tens{J}}}
+\def\tK{{\tens{K}}}
+\def\tL{{\tens{L}}}
+\def\tM{{\tens{M}}}
+\def\tN{{\tens{N}}}
+\def\tO{{\tens{O}}}
+\def\tP{{\tens{P}}}
+\def\tQ{{\tens{Q}}}
+\def\tR{{\tens{R}}}
+\def\tS{{\tens{S}}}
+\def\tT{{\tens{T}}}
+\def\tU{{\tens{U}}}
+\def\tV{{\tens{V}}}
+\def\tW{{\tens{W}}}
+\def\tX{{\tens{X}}}
+\def\tY{{\tens{Y}}}
+\def\tZ{{\tens{Z}}}
+
+
+% Graph
+\def\gA{{\mathcal{A}}}
+\def\gB{{\mathcal{B}}}
+\def\gC{{\mathcal{C}}}
+\def\gD{{\mathcal{D}}}
+\def\gE{{\mathcal{E}}}
+\def\gF{{\mathcal{F}}}
+\def\gG{{\mathcal{G}}}
+\def\gH{{\mathcal{H}}}
+\def\gI{{\mathcal{I}}}
+\def\gJ{{\mathcal{J}}}
+\def\gK{{\mathcal{K}}}
+\def\gL{{\mathcal{L}}}
+\def\gM{{\mathcal{M}}}
+\def\gN{{\mathcal{N}}}
+\def\gO{{\mathcal{O}}}
+\def\gP{{\mathcal{P}}}
+\def\gQ{{\mathcal{Q}}}
+\def\gR{{\mathcal{R}}}
+\def\gS{{\mathcal{S}}}
+\def\gT{{\mathcal{T}}}
+\def\gU{{\mathcal{U}}}
+\def\gV{{\mathcal{V}}}
+\def\gW{{\mathcal{W}}}
+\def\gX{{\mathcal{X}}}
+\def\gY{{\mathcal{Y}}}
+\def\gZ{{\mathcal{Z}}}
+
+% Sets
+\def\sA{{\mathbb{A}}}
+\def\sB{{\mathbb{B}}}
+\def\sC{{\mathbb{C}}}
+\def\sD{{\mathbb{D}}}
+% Don't use a set called E, because this would be the same as our symbol
+% for expectation.
+\def\sF{{\mathbb{F}}}
+\def\sG{{\mathbb{G}}}
+\def\sH{{\mathbb{H}}}
+\def\sI{{\mathbb{I}}}
+\def\sJ{{\mathbb{J}}}
+\def\sK{{\mathbb{K}}}
+\def\sL{{\mathbb{L}}}
+\def\sM{{\mathbb{M}}}
+\def\sN{{\mathbb{N}}}
+\def\sO{{\mathbb{O}}}
+\def\sP{{\mathbb{P}}}
+\def\sQ{{\mathbb{Q}}}
+\def\sR{{\mathbb{R}}}
+\def\sS{{\mathbb{S}}}
+\def\sT{{\mathbb{T}}}
+\def\sU{{\mathbb{U}}}
+\def\sV{{\mathbb{V}}}
+\def\sW{{\mathbb{W}}}
+\def\sX{{\mathbb{X}}}
+\def\sY{{\mathbb{Y}}}
+\def\sZ{{\mathbb{Z}}}
+
+% Entries of a matrix
+\def\emLambda{{\Lambda}}
+\def\emA{{A}}
+\def\emB{{B}}
+\def\emC{{C}}
+\def\emD{{D}}
+\def\emE{{E}}
+\def\emF{{F}}
+\def\emG{{G}}
+\def\emH{{H}}
+\def\emI{{I}}
+\def\emJ{{J}}
+\def\emK{{K}}
+\def\emL{{L}}
+\def\emM{{M}}
+\def\emN{{N}}
+\def\emO{{O}}
+\def\emP{{P}}
+\def\emQ{{Q}}
+\def\emR{{R}}
+\def\emS{{S}}
+\def\emT{{T}}
+\def\emU{{U}}
+\def\emV{{V}}
+\def\emW{{W}}
+\def\emX{{X}}
+\def\emY{{Y}}
+\def\emZ{{Z}}
+\def\emSigma{{\Sigma}}
+
+% entries of a tensor
+% Same font as tensor, without \bm wrapper
+\newcommand{\etens}[1]{\mathsfit{#1}}
+\def\etLambda{{\etens{\Lambda}}}
+\def\etA{{\etens{A}}}
+\def\etB{{\etens{B}}}
+\def\etC{{\etens{C}}}
+\def\etD{{\etens{D}}}
+\def\etE{{\etens{E}}}
+\def\etF{{\etens{F}}}
+\def\etG{{\etens{G}}}
+\def\etH{{\etens{H}}}
+\def\etI{{\etens{I}}}
+\def\etJ{{\etens{J}}}
+\def\etK{{\etens{K}}}
+\def\etL{{\etens{L}}}
+\def\etM{{\etens{M}}}
+\def\etN{{\etens{N}}}
+\def\etO{{\etens{O}}}
+\def\etP{{\etens{P}}}
+\def\etQ{{\etens{Q}}}
+\def\etR{{\etens{R}}}
+\def\etS{{\etens{S}}}
+\def\etT{{\etens{T}}}
+\def\etU{{\etens{U}}}
+\def\etV{{\etens{V}}}
+\def\etW{{\etens{W}}}
+\def\etX{{\etens{X}}}
+\def\etY{{\etens{Y}}}
+\def\etZ{{\etens{Z}}}
+
+% The true underlying data generating distribution
+\newcommand{\pdata}{p_{\rm{data}}}
+% The empirical distribution defined by the training set
+\newcommand{\ptrain}{\hat{p}_{\rm{data}}}
+\newcommand{\Ptrain}{\hat{P}_{\rm{data}}}
+% The model distribution
+\newcommand{\pmodel}{p_{\rm{model}}}
+\newcommand{\Pmodel}{P_{\rm{model}}}
+\newcommand{\ptildemodel}{\tilde{p}_{\rm{model}}}
+% Stochastic autoencoder distributions
+\newcommand{\pencode}{p_{\rm{encoder}}}
+\newcommand{\pdecode}{p_{\rm{decoder}}}
+\newcommand{\precons}{p_{\rm{reconstruct}}}
+
+\newcommand{\laplace}{\mathrm{Laplace}} % Laplace distribution
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Ls}{\mathcal{L}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\emp}{\tilde{p}}
+\newcommand{\lr}{\alpha}
+\newcommand{\reg}{\lambda}
+\newcommand{\rect}{\mathrm{rectifier}}
+\newcommand{\softmax}{\mathrm{softmax}}
+\newcommand{\sigmoid}{\sigma}
+\newcommand{\softplus}{\zeta}
+\newcommand{\KL}{D_{\mathrm{KL}}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\standarderror}{\mathrm{SE}}
+\newcommand{\Cov}{\mathrm{Cov}}
+% Wolfram Mathworld says $L^2$ is for function spaces and $\ell^2$ is for vectors
+% But then they seem to use $L^2$ for vectors throughout the site, and so does
+% wikipedia.
+\newcommand{\normlzero}{L^0}
+\newcommand{\normlone}{L^1}
+\newcommand{\normltwo}{L^2}
+\newcommand{\normlp}{L^p}
+\newcommand{\normmax}{L^\infty}
+
+\newcommand{\parents}{Pa} % See usage in notation.tex. Chosen to match Daphne's book.
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\Tr}{Tr}
+\let\ab\allowbreak
+
+
+% \usepackage{hyperref}
+\usepackage{url}
+
+\usepackage{algorithm}
+\usepackage{algorithmic}
+% \usepackage{graphicx}
+\usepackage{textcomp}
+% \usepackage{color}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{pifont}
+\usepackage{tabularx}
+\usepackage{adjustbox}
+% \usepackage{arydshln}
+\usepackage{booktabs,dcolumn}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{tablefootnote}
+\usepackage{threeparttable}
+\usepackage{float}
+\usepackage{subfigure}
+\usepackage{paralist}
+\usepackage{comment}
+% \usepackage{enumitem}
+\usepackage{enumerate}
+\usepackage{xspace}
+% \usepackage{tcolorbox}
+\usepackage{mathtools}
+\usepackage{amsmath,amsthm,amsfonts,amssymb,bm,stmaryrd}
+\usepackage{soul}
+\urlstyle{same}
+\usepackage{fmtcount}
+\usepackage{flushend}
+\usepackage{thmtools}
+\usepackage{colortbl}
+\usepackage{wrapfig}
+\definecolor{mygray}{gray}{.9}
+\definecolor{up}{RGB}{238,44,44}
+\definecolor{drop}{RGB}{50,205,50}
+% {34,139,34}
+
+\usepackage{balance}
+
+\usepackage{CJKutf8}
+
+\usepackage{ulem}
+
+\newtheorem{remark}{\noindent \textbf{Remark}}
+\newcommand*\samethanks[1][\value{footnote}]{\footnotemark[#1]}
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+\newcommand\overconfident{\raisebox{-3.7pt}{\includegraphics[width=1.5em]{figures/overconfident.png}}}
+\newcommand\easygoing{\raisebox{-3.7pt}{\includegraphics[width=1.3em]{figures/easygoing.png}}}
+\newcommand\debate{\raisebox{-3.7pt}{\includegraphics[width=1.3em]{figures/debate.png}}}
+\newcommand\reflection{\raisebox{-3.7pt}{\includegraphics[width=1.3em]{figures/reflection.png}}}
+\newcommand\radarfork{\raisebox{-3pt}{\includegraphics[width=1.0em]{figures/fork.png}}}
+\newcommand\radarprismatic{\raisebox{-3.7pt}{\includegraphics[width=0.8em]{figures/prismatic.png}}}
+
+\newcommand{\eg}{\hbox{\emph{e.g.}}\xspace}
+\newcommand{\etc}{\hbox{\emph{etc}}\xspace}
+\newcommand{\ie}{\hbox{\emph{i.e.}}\xspace}
+\newcommand{\wrt}{\hbox{\emph{w.r.t.}}\xspace}
+% \newcommand{\st}{\hbox{s.t.}\xspace}
+% \DeclareMathOperator*{\argmax}{arg\,max}
+% \DeclareMathOperator*{\argmin}{arg\,min}
+
+\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
+
+\newcommand{\customcomment}[3]{\textcolor{#1}{[#2:#3]}}
+\newcommand{\dsm}[1]{\customcomment{purple}{DSM}{#1}}
+\newcommand{\zny}[1]{\customcomment{orange}{ZNY}{#1}}
+\newcommand{\bh}[1]{\customcomment{blue}{BH}{#1}}
+\newcommand{\ruibo}[1]{\customcomment{blue}{Ruibo}{#1}}
+\newcommand{\todo}[1]{\customcomment{red}{TODO}{#1}}
+
+% \newcommand{\theHalgorithm}{\arabic{algorithm}}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}{Definition} % [section]
+\newtheorem{example}{Example}[section]
+\usepackage[most]{tcolorbox}
+\newcommand{\intuition}[1]{
+\begin{tcolorbox}[colback=white,boxrule=1pt,top=0pt,bottom=0pt,left=1pt,right=2pt,top=2pt,bottom=2pt]%[tile,size=fbox,boxsep=2mm,boxrule=0pt,top=0pt,bottom=0pt,borderline={0.5mm}{0pt}{black!70!white},colback=black!5!white]
+\em #1
+\end{tcolorbox}
+}
+
+%begin tmo
+
+\newlength\myheight
+\newlength\mydepth
+\settototalheight\myheight{Xygp}
+\settodepth\mydepth{Xygp}
+\setlength\fboxsep{0pt}
+
+
+%end tmp
+
+
+
+\definecolor{uclablue}{rgb}{0.15, 0.45, 0.68}
+% \hypersetup{
+%     breaklinks,
+%     citecolor=uclablue,
+%     colorlinks=true,
+%     % linkcolor=uclablue
+% }
+
+\definecolor{highlight}{rgb}{0,0,0} % black font 
+% \definecolor{highlight}{rgb}{0,0,255} % blue font 
+% {\color{highlight} xxx}
+
+\definecolor{easygoing}{rgb}{205,0,0} 
+\definecolor{overconfident}{rgb}{79,148,205} 
+
+
+\title{Exploring Collaboration Mechanisms for LLM Agents: \\ A Social Psychology View}
+
+% Author information can be set in various styles:
+% For several authors from the same institution:
+% \author{Author 1 \and ... \and Author n \\
+%         Address line \\ ... \\ Address line}
+% if the names do not fit well on one line use
+%         Author 1 \\ {\bf Author 2} \\ ... \\ {\bf Author n} \\
+% For authors from different institutions:
+% \author{Author 1 \\ Address line \\  ... \\ Address line
+%         \And  ... \And
+%         Author n \\ Address line \\ ... \\ Address line}
+% To start a seperate ``row'' of authors use \AND, as in
+% \author{Author 1 \\ Address line \\  ... \\ Address line
+%         \AND
+%         Author 2 \\ Address line \\ ... \\ Address line \And
+%         Author 3 \\ Address line \\ ... \\ Address line}
+
+\author{
+  Jintian Zhang${^\spadesuit\footnotemark[1]}$~, 
+  Xin Xu${^\spadesuit\footnotemark[1]}$\thanks{$\quad$ Equal Contribution.}~, 
+  Ningyu Zhang$^{\spadesuit\dagger}$, 
+  Ruibo Liu$^\heartsuit$, 
+  \textbf{Bryan Hooi}$^{\clubsuit}$,  
+  \textbf{Shumin Deng}$^{\clubsuit}$\thanks{$\quad$ Corresponding Author.} \\
+  % Bryan Hooi$^{\clubsuit}$
+  $^\spadesuit$Zhejiang University ~ % , China
+  $^\clubsuit$National University of Singapore, NUS-NCS Joint Lab \\ % , Singapore
+  % $^\clubsuit$National University of Singapore ~
+  % $^\clubsuit$National University of Singapore \\ 
+  % $^\heartsuit$NUS-NCS Joint Lab ~
+  $^\heartsuit$Google DeepMind \\
+  % , Zhejiang University - Ant Group Joint Laboratory of Knowledge Graph
+  % \texttt{ 
+  %   \{zhangjintian,xxucs\}@zju.edu.cn, shumin@nus.edu.sg
+  %   % \{shumin,dcsbhk\}@nus.edu.sg
+  %   % \{231sm,zhangningyu\}@zju.edu.cn, zhangningyu@zju.edu.cn
+  % } \\
+  \texttt{\{zhangjintian,xxucs,zhangningyu,231sm\}@zju.edu.cn} \\
+  \texttt{ruiboliu@google.com, \{dcsbhk,shumin\}@nus.edu.sg}\\
+  % \fontsize{10.2pt}{0.1\baselineskip}\selectfont
+  % $\clubsuit; \heartsuit; \spadesuit; \diamondsuit; \blacklozenge$
+  \raisebox{-\mydepth}{\includegraphics[height=1.6\myheight]{figures/github.png}}
+\textbf{\url{https://zjunlp.github.io/project/MachineSoM}}
+}
+
+\begin{document}
+
+\maketitle
+
+\normalem
+
+\begin{abstract}
+
+% The Society of Mind (SoM) concept, the idea that intelligence emerges from collaborative and communicative computational modules, underpins how humans collaborate to achieve complex tasks effectively. 
+As Natural Language Processing (NLP) systems are increasingly employed in intricate social environments, a pressing query emerges: \emph{Can these NLP systems mirror human-esque collaborative intelligence, in a multi-agent society consisting of multiple large language models (LLMs)?} 
+This paper probes the collaboration mechanisms among contemporary NLP systems by melding practical experiments with theoretical insights. We fabricate four unique `societies' comprised of LLM agents, where each agent is characterized by a specific `trait' (easy-going or overconfident) and engages in collaboration with a distinct `thinking pattern' (debate or reflection). 
+Through evaluating these multi-agent societies on three benchmark datasets, we discern that certain collaborative strategies not only outshine previous top-tier approaches but also optimize efficiency (using fewer API tokens). 
+Moreover, our results further illustrate that LLM agents manifest human-like social behaviors, such as conformity and consensus reaching, mirroring foundational social psychology theories. 
+In conclusion, we integrate insights from social psychology to contextualize the collaboration of LLM agents, inspiring further investigations into the collaboration mechanism for LLMs. 
+We have shared our code and datasets\footnote{\url{https://github.com/zjunlp/MachineSoM}.}, hoping to catalyze further research in this promising avenue. 
+% already submitted in supplementary materials and shared with an anonymous link
+% we discern that LLM agents navigate tasks by leveraging diverse social behaviors, from active debates to introspective reflections
+% \footnote{All code and data are available at \url{https://github.com/zjunlp/MachineSoM}.}. 
+% commit to sharing
+% \footnote{\url{https://anonymous.4open.science/r/MachineSoM-3178}.}. 
+% https://anonymous.4open.science/r/MachineSoM-3178, https://github.com/zjunlp/MachineSoM
+\iffalse
+\bibliography{reference}
+\bibliographystyle{acl_natbib}
+\fi
+% !TEX root = ./acl_latex.tex
+
+\section{Introduction}
+\label{sec:intro}
+
+% exoperiece ground language 
+
+% Large Language Models 
+
+With the prevalence of LLMs \citep{arXiv2023_Survey-LLM,arXiv2023_Survey-MLLM,arXiv2023_Survey-LLM-KGCR} integral to daily social collaboration, there is a growing imperative to cultivate AI systems embodied with social intelligence. This also resonates with the Society of Mind (SoM) concept \citep{NeurIPS2023_Agent-SoM,arXiv2023_SoM-NL,arXiv2023_InteractiveNLP}, which suggests that intelligence emerges when computational modules interact with each other, achieving collective objectives that surpass the capabilities of individual modules \citep{Book1988_SoM,J2003_SoM}. Previous studies \citep{UIST2023_Agent-Simulate-Interaction,arXiv2023_MultiAgent-Debate,arXiv2023_MultiAgent-Debate_2,arXiv2023_Reflexion,NeurIPS2023_Self-Refine,arXiv2023_ChatLLM-Net,ICLR2024_LLM-Simulate-Society,arXiv2023_PlayGames-LLM} have delved into strategies where LLM instances, termed agents \citep{FCS2024_Survey-Agent,arXiv2023_Survey-Agent_2,arXiv2023_Survey-Agent_3,arXiv2024_Survey-Agent_4,arXiv2024_Survey-Agents-CompExp}, cooperate synergistically (\eg, debate and reflect) to accomplish tasks \citep{arXiv2023_Survey-MultiAgentCooperation,arXiv2024_Survey-MultiAgent_2,arXiv2024_Survey-MultiAgent,arXiv2024_Survey-MultiAgent-System,arXiv2024_Survey-MultiAgent-System_2}. 
+As illustrated in Figure~\ref{fig:intro}, such collaboration fosters divergent thinking processes in LLMs, making them particularly effective for tasks demanding profound reflection. 
+
+\begin{figure*}[!t]
+    \centering
+    % \vspace{-4mm}
+    \includegraphics[width=0.77\textwidth]{figures/intro.pdf} % 0.8
+    \vspace{-3mm}
+    \caption{
+    An example of the chess move validity task. Given previous chess game moves, agents are required to predict a valid next move for a specified piece.
+    }
+    % \vspace{-6mm}
+    \vspace{-4.5mm}
+    \label{fig:intro}
+\end{figure*}
+ 
+Intuitively, reflecting on human societies \citep{J2002_TheoryOfMind,J2004_TheoryOfMind,EMNLP2022_TheoryOfMind,EACL2024_TheoryOfMind}, where a myriad of individuals with distinct goals and roles coexist, the SoM framework champions harmonious interactions \citep{J2003_SoM}. 
+Intriguingly, despite the fusion of social psychology \citep{1982_SocialPsychology,2004_SocialPsychology,J2009_SocialPsychology} in SoM with human group dynamics \citep{Science2010_HumanDynamics,J1987_GroupDynamics}, which illuminates psychological patterns within social groups, its interpretation in the realm of LLMs is relatively uncharted \citep{arXiv2024_Survey-LLM-Psychology-Applications}. Besides, our grasp of how social behaviors influence LLMs is still in its nascent stages. 
+% our grasp of how role attributes and social behaviors influence LLMs is still in its nascent stages. 
+
+% explore the uncharted territory of machine society
+To address these issues, we delve into the machine society, probing the extent and ways that LLMs manifest social intelligence and collaboration capabilities \citep{PNAS2024_TuringTest_Chatbots-Humans}. 
+Utilizing powerful LLMs like GPT-3.5 \citep{ChatGPT-OpenAI}, we build a test-bed across three datasets: MATH \citep{NeurIPS2021_Dataset-MATH}, MMLU \citep{ICLR2021_Dataset-MMLU} and Chess Move Validity \citep{arXiv2022_Dataset-ChessMoveValidity}. 
+Our approach incorporates four \textbf{societies} characterized by two \textbf{individual traits} (\textit{easy-going} and \textit{overconfident}) with three agents: totally/mostly easy-going; totally/mostly overconfident. 
+These traits are employed to emulate nuanced human society dynamics \citep{arXiv2024_Human-Centered-LM,arXiv2024_AI-Human-Creative,arXiv2024_BehavioralSimulation,arXiv2023_MetaAgents,arXiv2023_LLM-Simulator}. 
+
+% % easy-going individuals, known for their open-mindedness, ability to keep things in perspective, adaptability to diverse situations, and compatibility with different types of people \citep{Book1999_Personality}, often foster a harmonious society. 
+% Specifically, the easy-going trait, characterized by open-mindedness, adaptability, and a knack for maintaining harmony \citep{Book1999_Personality}, often paves the way for a cohesive society. 
+% In contrast, overconfident individuals tend to overestimate their competence, disregard potential risks, and dismiss the perspectives of others \citep{J2008_Overconfidence}. 
+Moreover, we delve into two distinct \textbf{thinking patterns} under multi-round collaboration: \textit{debate} \citep{Book1971_Rhetoric,Book2005_Society-Dissent,J2009_DecisionMaking,arXiv2023_MultiAgent-Debate,arXiv2023_MultiAgent-Debate_2} and \textit{reflection} \citep{J1985_Reflection,J2003_Reflection-ContinuingEducation,Book2010_Reflection}. With the permutation of thinking patterns, we can constitute various \textbf{collaborative strategies}. To this end, we implement two patterns of collaboration in the collaborative strategies: 
+$(i)$ All agents adopt the same thinking pattern at each round; 
+$(ii)$ One agents adopts the different thinking patterns from others at each round. 
+% \bh{how about just using the term 'collaborative strategies' (and not using 'interactivity manners')? If there has to be a different term, you could use something like 'patterns of interaction'}
+% To this end, various collaborative strategies in a multi-agent society are formed as agents collaborate with each other through different thinking patterns (\ie, \emph{debate} and \emph{reflection}) over several rounds. 
+% Moreover, we delve into two distinct thinking patterns: \textbf{\textit{debate}} \citep{Book1971_Rhetoric,Book2005_Society-Dissent,J2009_DecisionMaking,arXiv2023_MultiAgent-Debate,arXiv2023_MultiAgent-Debate_2} and \textbf{\textit{reflection}} \citep{J1985_Reflection,J2003_Reflection-ContinuingEducation,Book2010_Reflection}. To this end, we implement two interactivity strategies: 
+% $(i)$ The initial strategy consistently applies the same collaboration process to all agents in every round, with the debate and reflection being rotated across different rounds.
+% $(ii)$ The latter strategy grants agents the flexibility to adopt individualized collaboration processes. 
+% $(i)$ The first strategy uniformly applies the same collaboration process to all agents in each round while varying the permutations of debate and reflection across different rounds.
+% $(ii)$ The second strategy permits different agents to employ distinct collaboration processes. 
+We then execute these multi-round collaborative strategies within different societies. 
+Through our empirical analysis, we primarily discern the following insights (Further takeaways are in \S\ref{sec:results}, \S\ref{sec:conformity_consistency} \& Appendix~\ref{app:insights}): % sec:analysis 
+
+% Empirically, we observe that: 
+(1) Collaborative strategies with various permutations of thinking patterns vary significantly in performance, and engaging in substantive debates enhances collaboration performance. Intriguingly, multi-agent societies composed of agents with different traits do not clearly differ in performance. 
+% multi-agent societies distinguished from individual traits impact performance indistinctively. 
+% generally exert minor influence on collaboration. 
+
+(2) Employing uniform thinking patterns across all agents within a round of collaboration enhances efficiency. Besides, merely increasing the number of agents or the number of collaboration rounds does not consistently yield better outcomes. The balance between agent quantity and strategies emerges as a key determinant in collaboration. 
+% mechanisms
+% rational choice
+
+(3) LLM agents manifest behaviors reminiscent of human social tendencies, such as conformity \citep{J1969_Conformity,J2004_Conformity} or the principle of majority rule in group thinking \citep{J1998_SmallGroupDynamics-Discussions}, which resonate with several fundamental theories in social psychology \citep{USENIX1999_Theory-FaultTolerance,2004_SocialPsychology}. 
+
+
+\begin{figure*}[!t] % !t, !htbp
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.8\textwidth]{figures/setting.pdf}
+    }
+    \vspace{-3mm}
+    \caption{
+    The overview of machine society simulation. % evaluation principles
+    Multiple agents with different traits make up diverse machine societies. 
+    These agents engage in debate or self-reflection across multiple rounds to complete tasks. 
+    % These agents engage in debates with others or engage in self-reflection across multiple rounds to complete tasks.
+    }
+    \label{fig:setting}
+    \vspace{-3mm}
+\end{figure*}
+
+
+
+Concretely, our findings challenge the dominant belief that mere scale is the key. We posit that small-group collaboration with rational strategies might present a more efficacious approach to utilizing LLMs. 
+In wrapping up, we encapsulate the core contributions of this research as follows: 
+
+% % for local
+\vspace{-2mm}
+\begin{itemize}
+\setlength{\itemsep}{2pt}
+\setlength{\parsep}{2pt}
+\setlength{\parskip}{2pt}
+
+% % for online
+% \begin{itemize}
+\item We initiate an elaborate exploration into collaboration mechanisms in multi-agent society. Our goal is to identify how and to what extent LLMs manifest social intelligence through collaboration. To enrich our inquiry, we draw upon theories from social psychology, contextualizing the behaviors and tendencies displayed by LLM agents. 
+
+\item Our research framework includes a meticulously crafted test-bed, integrating diverse multi-agent societies with agent individual traits, thinking patterns, and collaborative strategies, evaluated over three datasets. Notably, our empirical findings can inspire how to design a better multi-agent system through collaboration, beyond merely scaling up LLMs and Agents. 
+% (five types of societies and strategies) 
+% , such as starting or dominating multi-agent collaboration with debate. 
+% \bh{same as previous comment. it is better to convince the reader through objective facts (e.g. no. of societies and collaborative strategies that were tested)}
+
+\item Interestingly, our observations underscore a fascinating parallel: LLM agents mirror certain social behaviors typical of human collaboration. It could further emphasize the potential of human-AI interaction. Generally, fostering effective and efficient collaborative strategies for multi-agent systems could be the key to more socially-aware AI. 
+% This suggests a sound strategy is necessary beyond merely scaling up LLMs. 
+% nuanced approach
+\end{itemize}
+
+
+\iffalse
+\bibliography{reference}
+\bibliographystyle{acl_natbib}
+\fi
+% !TEX root = ./acl_latex.tex
+
+
+% \begin{figure*}[!t] % !t, !htbp
+%     \centering
+%     \scalebox{1}{
+%     \includegraphics[width=0.78\textwidth]{figures/setting.pdf}
+%     }
+%     % \caption{
+%     % An overview diagram of the experimental setup for 4 different societies, each consisting of 3 instances of agents (instances are of binary traits).
+%     % \textbf{(a)} 2 agent traits.
+%     % \textbf{(b)} 2 interaction strategies(all agents interact in the same way in the same round).
+%     % \textbf{(c)} 4 societies with 3 agents.
+%     % \textbf{(d)} Collaboration process. The entire process is divided into two stages. One is the \textbf{preparation stage}, which involves initializing the society and posing questions. Another is the interaction stage, where multiple agents interact with each other. It should be noted that all mentions of rounds in the following text refer to rounds within the second stage.
+%     % \textbf{(e)} Another 2 interaction strategies(different agent can execute different interaction strategies in the same round).
+%     % }
+%     \vspace{-3mm}
+%     \caption{
+%     The overview of machine society simulation. % evaluation principles
+%     Multiple agents with different traits make up diverse machine societies. 
+%     These agents engage in debate or self-reflection across multiple rounds to complete tasks. 
+%     % These agents engage in debates with others or engage in self-reflection across multiple rounds to complete tasks.
+%     }
+%     \label{fig:setting}
+%     \vspace{-3mm}
+% \end{figure*}
+
+
+\section{Explore Collaboration Mechanisms with Multiple LLM Agents}
+\label{sec:preliminary}
+ 
+In this section, we formulate and simulate the collaboration mechanisms explored within the machine society, drawing upon relevant concepts. We also illustrate the society settings in Figure~\ref{fig:setting}. 
+
+
+\subsection{Preliminary Concepts in Collaboration}
+
+\paragraph{Individual Trait.}
+Inspired by intelligence emerging from the collective efforts of numerous smaller and relatively simple agents \citep{Book1988_SoM}, each characterized by diverse traits, 
+we set two types of agents exhibiting typically contrasting traits: \textbf{\textit{easy-going}} and \textbf{\textit{overconfident}}, as shown in Figure~\ref{fig:setting}(a). % predominant
+Easy-going agents keep things in perspective, adapt well to different situations, and are compatible with various types of agents \citep{Book1999_Personality}, which results in a harmonious societal structure with democracy \citep{Book2006_Deliberative-Democracy,Book2006_DemocracyModel}. 
+% which results in a harmonious societal structure, akin to agents in a democracy \citep{Book2006_Deliberative-Democracy,Book2006_DemocracyModel}. 
+% Such agents tend to favor principles of equality, active participation, and support for pluralism \citep{Book2006_Deliberative-Democracy,Book2006_DemocracyModel}. 
+Conversely, overconfident agents tend to overestimate their competence, ignore potential risks, and resist others' opinions \citep{J2008_Overconfidence}. 
+% They share characteristics with agents in a monarchy, emphasizing tradition, loyalty and centralized authority \citep{Book1985_MedievalPoliticalTheology}.
+% \bh{suggest removing this line (starting "They share..."), I think it is not really related to the main points of this paper}
+% If agents with different traits stay together, various kinds of societies will be formed, as depicted in Figure~\ref{fig:setting}(b).
+
+% Considering specialized individual agents within a society can cooperate with each other through thinking, which results in emerging intelligence and addressing a specific task \bh{this sentence seems a bit complex and hard to understand. Suggest breaking into 2 sentences, e.g. "The society of mind concept states that...", then something like "We aim to study what thinking patterns are most successful in producing such emerging intelligence..."}
+\paragraph{Thinking Pattern.} 
+ Considering the SoM concept \citep{Book1988_SoM} states that intelligence emerges when specialized individuals within a society cooperate through thinking, we aim to study what thinking patterns are most successful in producing such emerging intelligence. Thus we explore two thinking patterns: \textbf{\textit{debate}} \citep{Book2005_Society-Dissent,arXiv2023_MultiAgent-Debate,arXiv2023_MultiAgent-Debate_2} and \textbf{\textit{reflection}} \citep{J1985_Reflection,Book2010_Reflection,arXiv2023_Reflexion}, as illustrated in Figure~\ref{fig:setting}(c). 
+$(i)$ In the \emph{debate} pattern, several agents propose ideas, exchange responses, engage in collective argumentation, and ultimately reach a consensus. This fosters knowledge sharing, facilitates learning, and promotes adaptation among all agents within the society \citep{1995_MultiAgent-System,J2000_MultiAgent-System,Book2006_MultiAgent-System,Book2009_MultiAgent-System}. 
+% Concretely, given a query, each agent initially generates an answer, and  subsequently reads and comprehends responses from all other agents, then update its own answers. 
+% This pattern can be iteratively executed multiple rounds. % potential
+$(ii)$ In the \emph{reflection} pattern, agents review their prior responses, extract lessons from their experiences, and refine their answers accordingly. 
+% This pattern can also unfold over several rounds. 
+These two patterns can unfold over several rounds. 
+% , akin to residual connections and forward propagation in a neural network,
+
+\paragraph{Collaborative Strategy.}
+\label{sec:interaction_strategy}
+Through both critical reflection and active participation in debate, agents are poised to challenge their existing assumptions, acquire fresh perspectives, and ultimately refine their viewpoints. Employing a collaboration mechanism built on these two thinking patterns can foster more insightful decision-making \citep{Book2009_MultiAgent-System,J2009_DecisionMaking} and improve reasoning outcomes \citep{2018_Theory}.
+In societal settings, agents typically engage in multiple rounds of collaboration for problem-solving. 
+% Thus, it is of paramount importance to discern the most effective thinking pattern at each round. 
+In this paper, we characterize the collaborative strategy as \textbf{a permutation of thinking patterns} throughout multi-round collaboration, as illustrated in Figure~\ref{fig:setting}(d) and further elaborated in \S\ref{sec:simulation}. 
+
+
+
+\subsection{Society Simulation}
+\label{sec:simulation}
+
+\input{tables/table_symbol}
+
+We simulate the multi-agent collaborative society, as detailed with symbols shown in Table~\ref{table:symbol}. 
+Specifically, we construct a machine society consisting of $n$ LLM agents, denoted as $\mathcal{A}=\{a_i\}_{i=1}^n$. This society contains two distinct agent traits: $\mathcal{T}=\{t_o, t_e\}$, where $t_o$ and $t_e$ respectively denotes the overconfident and easy-going trait. 
+% , inherently more persuasive and assertive. 
+% who are objective, unbiased, and easily persuaded. 
+For each agent, at any round of collaboration, there are two thinking patterns to choose from, symbolized as $\mathcal{P}=\{p_0, p_1\}$, where $p_0$ and $p_1$ corresponds to \textbf{\textit{debate}} and \textbf{\textit{reflection}} respectively. 
+By endowing agents $\mathcal{A}$ with the traits of $\mathcal{T}$, we can emulate various machine societies. 
+% These agents utilize collaborative strategies to determine responses in each collaboration round. 
+In our primary study (\S\ref{sec:results}), we establish four distinct societies, $\mathcal{S}=\{S_1, S_2, S_3, S_4\}$, each consisting of three agents: $\{a_1, a_2, a_3\}$. The societies are constructed based on the combination of three agents with distinct traits, as illustrated in Figure~\ref{fig:setting}(b): 
+
+\vspace{-4mm}
+\begin{small}
+\begin{align*}
+    S_1 &= \{(a_1 \leftarrow t_o), (a_2 \leftarrow t_o), (a_3 \leftarrow t_o)\} ~\text{(\emph{totally overconfident})} \\
+    S_2 &= \{(a_1 \leftarrow t_o), (a_2 \leftarrow t_o), (a_3 \leftarrow t_e)\} ~\text{(\emph{mostly overconfident})} \\
+    S_3 &= \{(a_1 \leftarrow t_o), (a_2 \leftarrow t_e), (a_3 \leftarrow t_e)\} ~\text{(\emph{mostly easy-going})} \\
+    S_4 &= \{(a_1 \leftarrow t_e), (a_2 \leftarrow t_e), (a_3 \leftarrow t_e)\} ~\text{(\emph{totally easy-going})}
+\end{align*}
+\end{small}
+where $(a_i \leftarrow t_j)$ denotes that the agent $a_i$ possesses the trait $t_j$. If there is an even number of agents, 
+we can also constitute a society with half overconfident and half easy-going agents. 
+% we can also constitute the \emph{trait-equalization} society (half overconfident and half easy-going).
+In our simulation, all agents consistently employ the same thinking pattern at each round of collaboration, similar to \citet{arXiv2023_MultiAgent-Debate}.  % within each society, $a_i$ ($i \in \{1,2,3\}$) $p_k$ ($k \in \{0,1\}$)
+It gives rise to eight possible 3-round collaborative strategies: 
+\begin{align*}
+    & p_0p_0p_0,\ p_0p_0p_1,\ p_0p_1p_0,\ p_0p_1p_1,\\ 
+    & p_1p_0p_0,\ p_1p_0p_1,\ p_1p_1p_0,\ p_1p_1p_1
+\end{align*}
+
+In our subsequent analysis (\S\ref{sec:impact_of_other_factors}), we delve into more intricate scenarios, introducing a larger number of agents, increased collaboration rounds, and a broader range of collaborative strategies. 
+% Considering the constraints of experimental costs, we solely examine the interaction strategies from the first group mentioned in \S~\ref{sec:interaction_strategy} for the main experiment. 
+
+
+% \subsection{Datasets and Setups}
+\subsection{Experimental Settings}
+
+\paragraph{Datasets.} 
+We conduct a rigorous evaluation of the reasoning and decision-making capabilities of various machine societies across three distinct tasks, utilizing diverse collaborative strategies:
+
+\begin{itemize}
+    \item \textit{High School Multiple-Choice}. 
+    Leveraging the \textbf{MMLU} \citep{ICLR2021_Dataset-MMLU} dataset, where problems span high school subjects such as statistics, mathematics, computer science, biology, chemistry, and physics, agents are required to identify the correct answer among four multiple-choice options. 
+    Our evaluation set consists of 50 randomly selected questions from this dataset. 
+    % \footnote{The proportion of the statistics, mathematics, computer science, biology, chemistry and physics subsets are $8:8:8:8:9:9$ respectively.}
+
+    \item \textit{Math}. 
+    Drawing from \textbf{MATH} dataset \citep{NeurIPS2021_Dataset-MATH}, a repository of math problems sourced from competitive events and expressed in LaTeX, we assess the model proficiency in advanced mathematical and scientific reasoning. 
+    The dataset segments these problems into five graded difficulty levels, and for our evaluation, we have randomly chosen 50 cases from Level 3 to 5. 
+    % It comprises math problems written in LaTeX from mathematical competitions, which are categorized into 5 levels from easy to difficult. We randomly chose 50 cases from Level 3-5.
+    % \footnote{The proportion of Level 3-5 data we use is $22:22:6$, respectively.}
+
+    \item \textit{Chess Move Validity}. 
+    Utilizing the dataset from the chess state tracking task\footnote{\fontsize{8.4pt}{0.1\baselineskip}\selectfont \url{https://github.com/google/BIG-bench/blob/main/bigbench/benchmark_tasks/chess_state_tracking/synthetic_short/task.json}.} within the comprehensive \textbf{BIG-Bench Benchmark} \citep{arXiv2022_Dataset-ChessMoveValidity}, a sequence of chess moves denoted in UCI notation\footnote{\fontsize{8.8pt}{0.1\baselineskip}\selectfont \url{https://en.wikipedia.org/wiki/Universal_Chess_Interface}.} is provided. Agents are required to predict a legitimate subsequent move for a specified chess piece. 
+    % We calculate the relative Stockfish pawn scores (RSPS)\footnote{\url{https://python-chess.readthedocs.io/en/latest/engine.html\#chess.engine.Protocol.analyse}} with search depth 20 over 50 cases randomly selected from the dataset. The higher the RSPS is, the more advantageous the predicted move is for the player.
+\end{itemize}
+
+\input{tables/table_main}
+
+\paragraph{Setups.} 
+We craft specific instructions for each task, trait, and strategy, which can be referred to Table~\ref{table:prompt} at Appendix~\ref{app:illustration_collaboration}. 
+To enhance result reliability, we present average accuracy (\textbf{Acc}) and their respective standard deviations across five trials. 
+Notably, our experiments exhibit substantial standard deviations. Hence, we introduce WIN-TIE (\textbf{W-T}) metric, indicating the frequency (over five trials) where the accuracy either matches or surpasses the continuous debate baseline \citep{arXiv2023_MultiAgent-Debate}.
+Meanwhile, we gauge the average token costs (\textbf{Cost}) consumed by the agents across societies, shedding light on the efficacy of the different collaborative strategies employed. 
+For these evaluations, ChatGPT serves as the LLM agent accessible through the OpenAI API \texttt{gpt-3.5-turbo-1106}\footnote{\url{https://platform.openai.com/docs/models/gpt-3-5}.}. 
+% \texttt{gpt-3.5-turbo}\footnote{\url{https://platform.openai.com/docs/models/gpt-3-5}. Employed between July 10 and July 23, 2023.}. 
+Further comprehensive details on data sampling and result evaluation are introduced in Appendix~\ref{app:exp_detail}. 
+% respectively, Appendix~\ref{app:setup} and Appendix~\ref{app:eval}. 
+
+\iffalse
+\bibliography{reference}
+\bibliographystyle{acl_natbib}
+\fi
+% !TEX root = ./acl_latex.tex
+
+% \input{tables/table_main}
+
+\section{\fontsize{11.4pt}{0.1\baselineskip}\selectfont Analysis of Machine Social Collaboration}
+\label{sec:results}
+
+Our experiments are primarily driven by the following research queries: 
+\textbf{(RQ1)} How does problem-solving effectiveness vary under different collaborative strategies across diverse societies? 
+\textbf{(RQ2)} How to configure the machine society variables for optimal performance? % determinants
+\textbf{(RQ3)} How does machine social collaboration mimic the human society? % the dynamics of
+
+
+\subsection{Main Results with Quantitative Analysis}
+\label{sec:exp-main}
+
+\emph{To address \textbf{RQ1}}, 
+we present the performance of four distinct societies in Table~\ref{table:main}, each employing one of eight possible collaborative strategies, evaluated across three datasets with ChatGPT. 
+To make the experimental findings more general, we evaluate on other LLMs, shown in Appendix~\ref{app:backbone_llm}. 
+Our experiments yield several pivotal observations: 
+% We distill the following key observations: 
+% Our analysis yields several pivotal insights: 
+
+% \vspace{0.5mm}
+\vspace{2.5mm}
+\textbf{
+(1) 
+\underline{Societies} do not clearly differ in performance but differ significantly in their tendency to reach a consensus.
+} 
+% \underline{Societies} distinct from varying traits indistinctively impact performance, while impact consensus reaching more significantly. 
+% The four types of societies do not clearly differ in performance, but differ significantly in their tendency to reach consensus.
+% consensus
+% 3-agent \underline{societies} distinct from varied traits indistinctively impact performance, while more-agent societies impact more significantly.
+% distinguish 
+% Collaborative strategies excel 3-agent societies in affecting performance, while societies with more agents cause more significant impact. 
+% % Outweigh
+% Collaborative strategies excel 3-agent composition of society in determining performance. 
+% When different societies $S_1 \sim S_4$ employ the same collaborative strategy (a \emph{vertical comparison} on Acc), the observed variations in accuracy are notably less pronounced than when diverse collaborative strategies $p_ip_jp_k$ are applied within the same society (a \emph{horizontal comparison} on Acc). 
+As observed from Table~\ref{table:main}, among different 3-agent societies $S_1 \sim S_4$ employing the same collaborative strategy (a \emph{vertical comparison} on Acc), the variations in accuracy are not pronounced. 
+We also conduct a significance test of societies using ChatGPT in Appendix~\ref{app:sig_test_main}, and other LLMs in Appendix~\ref{app:backbone_llm}, further demonstrating insignificant differences between the societies. 
+Thus we conclude that distinct societies composed of 3 agents possessing varied traits play an indistinctive role in shaping performance. 
+We infer that this is due to LLM alignment \citep{NeurIPS2022_InstructGPT}, inhibiting agents from displaying extreme overconfidence, which contradicts human alignment \citep{NAACL2022-Findings_Align-GLMs}. \citet{ICLR2024_Sycophancy-LLM} also demonstrate that LLMs tend to show sycophancy, as illustrated in Figure~\ref{fig:word},~\ref{fig:agent_answer_changing}. 
+Furthermore, we increase the number of agents (2 to 10), accordingly resulting in more diverse societies, as seen in Figure~\ref{fig:agent_10_on_societies}, indicating that the impact of societies on performance remains indistinctive. 
+We further analyze consensus reaching, \ie, agents reach a consistent answer \citep{arXiv2023_Multi-Agent-Consensus}, shown in Figure~\ref{fig:agent_10_on_societies_consensus} at Appendix~\ref{app:sig_test_main}, and find that more diverse societies (5 types of societies, with 2 to 10 agents) observably impact the average quantity of consensus. 
+\textbf{Generally, a society totally comprising easy-going agents is more likely to reach a consensus.}  
+
+% Generally, societies with odd numbers of agents outperform even numbers, probably because odd-number agents enable tie-breaker to obtain a final answer. 
+% increasing numbers of agents result in decreasing answer consistency. This observation suggests that 
+% as elaborated in \S\ref{sec:impact_of_other_factors}. 
+% as elaborated, specified
+% even under explicit instructions to do so, 
+% Additionally, the W-T metric reveals an absence of a consistent schema across different societies and datasets. Conversely, the $p_0p_0p_1$ strategy consistently demonstrates superior performance in general. 
+% This potentially accounts for why the composition of agents with varied traits (easy-going \& overconfident) in a society fails to have a significant impact on performance. 
+% A more in-depth exploration of this phenomenon can be found in Appendix~\ref{app:insights}. 
+% stubborn arrogance
+% $p_ip_jp_k$ where $i,j,k \in \{0,1\}$
+
+\textbf{
+(2)  
+Permutation of thinking patterns is crucial for collaboration, where debate-initial and debate-dominant \underline{strategies} exhibit superiority.
+} 
+% 3-round permutations of thinking patterns in collaborative strategies play a significant role in shaping performance, 
+For instance, on MMLU dataset, \emph{debate-dominant} collaborative strategies, like $p_0p_0p_1$, $p_0p_1p_0$, and $p_1p_0p_0$, all containing two rounds of debate, display a pronounced outperformance (65.2 for $p_0p_0p_1$ in $S_4$ versus 34.4 for $p_1p_0p_0$ in $S_4$). 
+As seen from Table~\ref{table:main}, collaborative strategies starting with the thinking pattern of debate $p_0$ (\emph{debate-initial}), such as $p_0p_0p_0, p_0p_0p_1, p_0p_1p_0$, and $p_0p_1p_1$, generally outperform others across all datasets. 
+Furthermore, observed from the performance
+(\emph{i}) under strategies with different (3$\sim$10) rounds of collaboration on ChatGPT, as shown in Figure~\ref{fig:round_10_on_math} and Figure~\ref{fig:round_10_on_mmlu},~\ref{fig:round_10_on_chess} at Appendix~\ref{app:society_setting}, debate-initial/dominant strategies are overall better; 
+(\emph{ii}) on LlaMA2 Chat 13B in Table~\ref{table:llama_main} and Qwen 72B in Table~\ref{table:qwen_main}, debate-initial stategies are generally superior; 
+(\emph{iii}) on LlaMA2 Chat 70B in Table~\ref{table:llama70_main} and Mixtral 8$\times$7B in Table~\ref{table:mixtral_main}, debate-dominant stategies are superior. 
+Observed from different 3-round collaborative strategies $p_ip_jp_k$ applied within the same society (a \emph{horizontal comparison} on Acc), the variations in accuracy are notably pronounced. 
+Besides, the significance test of different collaborative strategies using ChatGPT in Appendix~\ref{app:sig_test_main} and other LLMs in Appendix~\ref{app:backbone_llm} demonstrate that the order of thinking patterns significantly impacts the effectiveness.  
+% of collaboration.  
+% : $p_0p_0p_1$, $p_0p_1p_0$, $p_0p_1p_1$
+% , with almost a twofold difference in performance compared to each other. 
+% These insights underscore the pivotal role of thoughtfully orchestrating thinking patterns in performance.  % to maximize collaborative efficacy
+% Therefore, \textbf{we suggest to begin a collaborative process with debate.} 
+
+\textbf{
+(3)
+\underline{Tasks} behave better under collaborative strategies starting with continuous debate, and debate combined with continuous reflection is superior for difficult tasks. 
+}
+% and reflection is enough for simple and debate is necessary for difficult tasks
+% in diverse domains perform
+% \underline{Tasks} in diverse domains exhibit varying sensitivity to collaborative strategies
+% Different datasets exhibit varying sensitivity to collaborative strategies.
+% When juxtaposing the best (colored blue in Table~\ref{table:main}) and the worst (colored red in Table~\ref{table:main}) performance within identical societies, the variance between the best and the worst performance on MATH is subtle, in stark contrast to MMLU and Chess Move Validity, indicating that collaborative strategies have task-specific impacts on performance. 
+Seen from Table~\ref{table:main}, when comparing the best performance (marked in blue) and the worst (marked in red) within the same societies, the difference in results for Chess Move Validity is slight. This stands in sharp contrast to MMLU and MATH, which suggests that \emph{the effectiveness of collaborative strategies depends on the task}. 
+We then illustrate the performance under different collaborative strategies in view of task domains and difficulty in Figure~\ref{fig:task_radar} at Appendix~\ref{app:sig_test_main}; on other LLMs in Figure~\ref{fig:llama:task_radar},~\ref{fig:llama70:task_radar},~\ref{fig:qwen:task_radar},~\ref{fig:mixtral:task_radar} at Appendix~\ref{app:backbone_llm}. 
+Figure~\ref{fig:task_radar}(a) exhibits task-specific impacts and Figure~\ref{fig:task_radar}(b),(c) reflects domain-dependent impacts under different collaborative strategies, where $p_0p_0p_0$ and $p_0p_0p_1$ starting with continuous debate are generally superior. 
+For the mathematics domain seen from Figure~\ref{fig:task_radar}(d), like MMLU mathematics and MATH level 3 \& 4, the performance variations under different strategies are relatively small, but for the more difficult task, \ie, MATH level 5, the strategies containing debate and continuous reflection (\ie, $p_0p_1p_1$, $p_1p_1p_0$) behave superiorly. 
+These nuanced disparities imply that \emph{the marginal benefits derived from collaborative strategies may be task-dependent and difficulty-sensitive}. 
+% It raises the hypothesis that intrinsic capabilities of agents can either be amplified or diminished based on collaboration within specific tasks regarding difficulty. 
+% As shown in Figure~\ref{fig:radar}, for MMLU's mathematics and MATH datasets at Level-3 and Level-4, the variations caused by different collaborative strategies are relatively small.
+% However, for MMLU's biology, science, chemistry, physics, statistics, MATH at Level-5, and Chess datasets, different collaborative strategies have a significant impact on performance, with strategies $p_0p_0p_1$ and $p_0p_0p_0$ leading to substantial performance improvements. 
+% Moreover, the pure-debate collaborative strategy $p_0p_0p_0$, resource-intensive due to the inherent verbosity of debates, often underperforms in the Cost metric. Compared to $p_0p_0p_0$, $p_0p_0p_1$ can achieve comparative accuracy performance with a leaner token consumption (Cost), reducing it by 9\%, 21\%, and 15\% for the MATH, MMLU, and Chess Move Validity datasets, respectively. 
+% The consistently high \underline{W-T} metrics for $p_0p_0p_1$, surpassing 10 across all datasets and societies, further underscore its superiority. 
+
+% \textbf{
+% (4) Indeed, communication between agents can lead to performance improvements, but the bottleneck for performance gains lies in the agents' individual capabilities rather than the interaction strategy. 
+% }
+% For more challenging tasks, such as MATH at Level-5, even with the adoption of full debates, the accuracy remains only at 30\%. 
+% Therefore, enhancing the agents' inherent abilities for specific tasks is equally important. 
+
+
+\subsection{Impact of Machine Society Settings}
+\label{sec:impact_of_other_factors}
+
+\emph{To address \textbf{RQ2}}, 
+we delve deeper into the variables influencing multi-agent society collaboration, exploring the intricacies of agent composition, collaboration rounds, and collaborative strategies. 
+
+% \input{tables/mmlu-agent}
+% \input{tables/chess-agent}
+% \begin{figure*}[!t]
+%     % \vspace{-0.2cm}
+%     \centering
+%     % \scalebox{1}{
+%     \includegraphics[width=0.92\textwidth]{figures/gpt-35-agent.pdf}
+%     % }
+%     \vspace{-3mm}
+%     \caption{Accuracy of different numbers of agents, using \emph{ChatGPT}. % under different collaborative strategies
+%     The significance test on agent numbers and experiments on more agents are shown in Table~\ref{table:sig_10_agent} and Figure~\ref{fig:agent_10_on_societies},~\ref{fig:agent_10_on_numbers} at Appendix~\ref{app:society_setting}. 
+%     }
+%     \label{fig:agent}
+%     \vspace{-3mm}
+% \end{figure*}
+\begin{figure*}[!t]
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.93\textwidth]{figures/agent-number-case.pdf}
+    % }
+    % \vspace{-7mm}
+    \vspace{-4mm}
+    \caption{Accuracy and consensus reaching with different numbers (2$\sim$10) of agents under the strategy $p_1p_1p_0$ on \emph{Chess Move Validity}, using \emph{ChatGPT}. 
+    The significance test on agent numbers and comprehensive results under other strategies are shown in Table~\ref{table:sig_10_agent} and Figure~\ref{fig:agent_10_on_numbers},~\ref{fig:agent_10_on_numbers_consensus} at Appendix~\ref{app:society_setting} due to space limits. 
+    }
+    \label{fig:agent}
+    \vspace{-4mm}
+\end{figure*}
+
+
+% \begin{figure*}[!t]
+%     % \vspace{-0.5cm}
+%     \centering
+%     \scalebox{1}{
+%     \includegraphics[width=1\textwidth]{figures/turn.pdf}
+%     }
+%     \vspace{-5mm}
+%     \caption{
+%     Accuracy at round 2,3,4 within 4-round collaboration, where the thinking pattern of round 1 is fixed ($p_0$ or $p_1$), using \emph{ChatGPT}. 
+%     In round 2$\sim$4, agents optionally implement the thinking pattern of debate $p_0$ and reflection $p_1$, and we present the performance at each of the three rounds, \eg, the three points for ``(Round 1: $p_0$, Round 2-4: $p_ip_jp_k$)'' respectively show performance of the societies under $p_0p_i$, $p_0p_ip_j$, and $p_0p_ip_jp_k$ strategy. 
+%     The significance test on rounds and experiments on more rounds are in Table~\ref{table:sig_10_turn} and Figure~\ref{fig:round_10_on_mmlu},~\ref{fig:round_10_on_math},~\ref{fig:round_10_on_chess} at Appendix~\ref{app:society_setting}. 
+%     }
+%     \label{fig:round}
+% \end{figure*}
+
+\begin{figure*}[!t]
+    % \vspace{-0.5cm}
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.93\textwidth]{figures/10_turn-math.pdf}
+    }
+    % \vspace{-6mm}
+    \vspace{-3mm}
+    \caption{
+    Accuracy under different (3$\sim$10) rounds of collaboration within 3-agent society $S_2$ (1 easy-going and 2 overconfident agents) on MATH, using \emph{ChatGPT}. 
+    The significance test on rounds and experiments on MMLU and Chess Move Validity are shown in Table~\ref{table:sig_10_turn} and Figure~\ref{fig:round_10_on_mmlu},~\ref{fig:round_10_on_chess} at Appendix~\ref{app:society_setting} due to space limits. 
+    }
+    \label{fig:round_10_on_math}
+    \vspace{-4mm}
+\end{figure*}
+
+\begin{figure*}[!ht]
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.86\textwidth]{figures/strategy.pdf}
+    }
+    % \vspace{-7mm}
+    \vspace{-3mm}
+    \caption{
+    The effect on accuracy of whether all agents in a society execute the same thinking pattern in one round, using \emph{ChatGPT}.
+    ``All'' and ``Part'' respectively refer to all agents applying the same and different thinking pattern(s) in one round.  
+    Results on MATH and the significance test are shown in Figure~\ref{fig:strategy_math} and Table~\ref{table:sig_strategy} at Appendix~\ref{app:society_setting}. % ~\ref{app:sig_test}
+    }
+    \label{fig:strategy}
+    \vspace{-4mm}
+\end{figure*}
+% \input{tables/mmlu-strategy}
+% \input{tables/chess-strategy}
+
+\paragraph{Different Numbers of Agents.} 
+To evaluate the impact of different numbers of agents, we analyze performance within societies comprising 2$\sim$10 agents, presented in Figure~\ref{fig:agent}(a). 
+Different numbers of agents would constitute five types of societies, where the agents' traits could be: \emph{totally/mostly easy-going/overconfident; half easy-going/overconfident}. 
+We observe that odd numbers of agents generally outperform others within all types of societies, and the possible reason is that odd-number agents can avoid ties. Besides, we also find that the variations of accuracy among odd-number agents are indistinctive. 
+Thus we conclude that \textbf{the optimal number of agents is 3, considering both performance and efficiency}. 
+We also implement a significance test of the number of agents shown in Table~\ref{table:sig_10_agent} at Appendix~\ref{app:society_setting}, demonstrating that different numbers of agents significantly impact performance. 
+Besides, we illustrate consensus reaching with different numbers of agents in Figure~\ref{fig:agent}(b), demonstrating that \textbf{more agents are more likely to reach a consensus}. 
+% We further scale up the agent numbers, from 2 to 10, and show results in Figure~\ref{fig:agent_10_on_societies},~\ref{fig:agent_10_on_numbers} at Appendix~\ref{app:society_setting}. We observe that odd numbers of agents are superior in performance compared with even numbers, and variations of accuracy among odd-number agents are indistinctive.  
+% A comprehensive explanation is provided in Appendix~\ref{app:society_setting}. % ~\ref{app:sig_test} and 
+% We have detailed the rationale in Appendix~\ref{app:society_setting}. 
+% To evaluate the impact of different numbers of agents, we conduct additional experiments on a 2-agent society (comprising an overconfident and an easy-going agents) and a 4-agent society (comprising one easy-going and three overconfident agents). 
+% Seen from their performance depicted in Figure~\ref{fig:agent}, compared to with 3-agent society $S_2$, most collaborative strategies in 2-agent and 4-agent societies for both datasets exhibit a drop in performance, yet along with declined variance. % with different numbers (from 2 to 4) of agents, 
+
+\paragraph{Different Rounds.} 
+We then delve into the effects of different numbers of collaboration rounds, and further scale up the rounds of collaboration, presenting the performance under 3 to 10 rounds in Figure~\ref{fig:round_10_on_math}. Despite some fluctuation in performance from 3 to 10 rounds of collaboration, the variations are not extremely remarkable. 
+Considering both accuracy and cost, we infer that \textbf{3-round collaboration is relatively effective and efficient}. 
+% and present the performance of different-round (2 to 4) collaboration in Figure~\ref{fig:round}. Specifically, strategies that start off with commendable performance tend to see a decline as the number of rounds increase, \eg, $p_0p_1p_1p_0$, $p_0p_0p_1p_1$. And strategies that initially underperform witness an upswing in effectiveness with more rounds, \eg, $p_1p_0p_1p_0$, $p_1p_1p_0p_0$. 
+We also conduct a significance test on different rounds of collaborative strategies, shown in Table~\ref{table:sig_10_turn} at Appendix~\ref{app:society_setting}, and observe that the impact of rounds significantly relies on the collaborative strategy employed. Generally, \textbf{the strategies starting or dominating with reflection $p_1$ differ clearly in performance under different rounds}. 
+% \bh{I thought RQ1 was about collaboration strategies and RQ2 was about traits? if it is not, there needs to be a clearer distinction between RQ1 and RQ2. Also, instead of 'significantly impact', I suggest saying if it is better or worse}
+% We further scale up the rounds of collaboration, and present the performance under 3 to 10 rounds in Figure~\ref{fig:round_10_on_mmlu},~\ref{fig:round_10_on_math},~\ref{fig:round_10_on_chess} at Appendix~\ref{app:society_setting}. Despite performance exhibits some fluctuations from 3 to 10 rounds of collaboration, the variations are not remarkable. 
+% Considering both accuracy and cost, we infer that \textbf{3-round collaboration is relatively effective and efficient}. 
+% Expanded discussion with a significance test in Table~\ref{table:sig_turn} is elaborated at Appendix~\ref{app:society_setting}. %  and ~\ref{app:sig_test}
+% , under the strategies of $p_n$ (1 round), $p_np_i$ (2 rounds), $p_np_ip_j$ (3 rounds), and $p_np_ip_jp_k$ (4 rounds)
+% Notably, for most strategies, the correlation between the number of collaboration rounds and their respective performances is non-linear, indicating intricate interplays in collaboration. 
+% For an expanded discussion and rationale behind these findings, refer to Appendix~\ref{app:society_setting}.
+% More details are in Appendix~\ref{app:society_setting}. 
+
+\paragraph{Other Collaborative Strategies.}
+\label{subsec:strategies} 
+% In the previous experiments, all agents adopt the same thinking pattern in each round of interaction, either all reflection or all debate, as shown in Figure~\ref{fig:setting}(c). 
+% We explore a more complex scenario where the thinking pattern utilized by each agent is allowed to differ in each round of collaboration. 
+Venturing into scenarios with more intricate collaboration, we allow agents to adopt varied thinking patterns in each round of collaboration. For example, given three agents, in a specific round of collaboration, two agents engage in debate while the other one engages in reflection. To increase diversity, we perform a random allocation of thinking patterns to agents in each round, steering clear of scenarios where all agents adopt the same thinking pattern. 
+Intriguingly, as shown in Figure~\ref{fig:strategy}, the presence of inconsistent thinking patterns within a society tends to negatively impact performance. 
+Given the observation, we claim that \textbf{maintaining a consistent thinking pattern for all agents in a particular round would maximize collaborative efficacy}. 
+% We conduct 5 repetitions of experiments for both datasets and 8 strategies in the society $S_2$.
+% The experimental means and variances are reported in Figure~\ref{fig:strategy}. 
+
+
+\begin{figure*}[!htbp]
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.8\textwidth]{figures/conformity.pdf}
+    }
+    \vspace{-4mm}
+    \caption{
+    Variation of answer correctness in the situation of conformity, under 3-round collaboration, \emph{on ChatGPT}, where 
+    \emph{conformity brings about benefits}: Ratio$($False$\to$True + True$\to$True$)$ $>$ Ratio$($True$\to$False + False$\to$False$)$; 
+    \emph{conformity brings about detriments}: Ratio$($False$\to$True + True$\to$True$)$ $<$ Ratio$($True$\to$False + False$\to$False$)$. 
+    }
+    % The proportion of conformity under different rounds, 
+    \label{fig:conformity}
+    \vspace{-3mm}
+\end{figure*}
+
+\begin{figure*}[!htbp]
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.76\textwidth]{figures/consistent.pdf}
+    }
+    \vspace{-4mm}
+    \caption{
+    Average quantity of \emph{consensus clusters (\emph{\ie}, unique answers among multiple agents)} under different rounds of collaboration with 3-round collaborative strategies, \emph{using ChatGPT}. 
+    \emph{Smaller quantity of consensus clusters, more easier it is to reach a consensus.} 
+    Round 0 is equal to self-consistency. 
+    More details are in Appendix~\ref{app:detail_conformity_and_consensus}.
+    }
+    \label{fig:consistent}
+    \vspace{-5mm}
+\end{figure*}
+
+% \section{A Social Psychology View}
+% \label{sec:analysis} 
+\section{Phenomena of Conformity and Consensus Reaching}
+\label{sec:conformity_consistency}
+
+% \bh{I suggest making the writing in this section more like the previous sections, where there are clear and precise conclusions in bold, and then supported by the text in the paragraph after that. Currently, it is hard to understand the key goal of this part, as well as the main conclusions. The summary at the end is helpful but it would be better if it were earlier.}
+
+\emph{To address \textbf{RQ3}}, 
+we embark on further analysis from a social psychology view \citep{1982_SocialPsychology,2004_SocialPsychology,J2009_SocialPsychology}, to discern alignment between machine society collaboration and human societal dynamics \citep{Science2010_HumanDynamics}. % parallels
+Our findings indicate that machine society collaboration echoes specific human societal phenomena or theories, such as \textbf{conformity} \citep{J2004_Conformity,J1969_Conformity,J2015_Conformity} and \textbf{consensus reaching} \citep{J1967_Consensus-Sociological,J1974_ConsensusReaching,J2018_Emergence-Consensus} (more analysis are in Appendix~\ref{app:detail_conformity_and_consensus}).
+We also analyze \textbf{group dynamics} \citep{1968_GroupDynamics,J1987_GroupDynamics,Book2014_GroupDynamics,J2018_GroupDynamics,Book2018_GroupDynamics} in multi-agent collaboration at Appendix~\ref{app:principles_group_dynamics} as page limits. 
+% Our findings indicate that multi-agent society collaboration either distinguish from or echo specific human societal phenomena or theories, such as \textbf{group dynamics} \citep{1968_GroupDynamics,J1987_GroupDynamics,Book2014_GroupDynamics,J2018_GroupDynamics,Book2018_GroupDynamics} and \textbf{conformity} \citep{J2004_Conformity,J1969_Conformity,J2015_Conformity}. 
+% % , and group dynamics \citep{1968_GroupDynamics,Book2014_GroupDynamics,J2018_GroupDynamics}. 
+% % \citep{J2017_SocialInfluence_OpinionDynamics,J2021_SocietalDynamics_OpinionDynamics,arXiv2023_Agent-Simulate-OpinionDynamics_Survey,arXiv2023_Agent-Simulate-OpinionDynamics} 
+
+
+% \subsection{Principles Behind Collaboration}
+% \subsection{\fontsize{10pt}{0.1\baselineskip}\selectfont Conformity and Consistency in Collaboration}
+
+
+% \begin{figure*}[!t]
+%     % \vspace{-5mm}
+%     \centering
+%     \scalebox{1}{
+%     \includegraphics[width=0.97\textwidth]{figures/case.pdf}
+%     }
+%     \caption{
+%     The changes in the answers during the process of solving a certain task  with 3 agents in the society $S_4$, using \emph{ChatGPT}.
+%     % The task in Figure (a) is MMLU and the task in Figure (b) is Chess Move Validity.
+%     For an exhaustive view of the dialogue, refer to  Figure~\ref{fig:case-chess} and Figure~\ref{fig:case-mmlu} in Appendix~\ref{app:illustration_collaboration}.
+%     }
+%     \label{fig:case}
+%     % \vspace{-5mm}
+% \end{figure*}
+
+% \subsection{Case Study on Qualitative Analysis}
+% \subsection{Conformity and Consensus Reaching}
+% \label{sec:conformity_consistency}
+
+We embark on a detailed analysis, to discern the conformity and consensus-reaching phenomena in collaboration. 
+% Furthermore, we embark on a detailed analysis, to discern the conformity \citep{J2004_Conformity,J2015_Conformity} and consensus reaching \citep{J1969_Conformity} phenomena in collaboration. 
+% % a case study encompassing varied agent societies, each constituted of three unique agents
+% The more in-depth analysis can be found in Appendix~\ref{app:conformity_consistency}. 
+For instance, as depicted in Figure~\ref{fig:case}(a) at Appendix~\ref{app:illustration_collaboration}, an agent initially responds correctly to a question. However, swayed by the misguided answers and explanations from the other two agents, eventually, the three agents conform to an incorrect answer. 
+This phenomenon mirrors detriments in ``groupthink'' \citep{Book1972_Groupthink,J1995_IntragroupConflict}, suggesting that members of tight-knit groups tend to value harmony and consensus over objective critique of divergent views, potentially leading to flawed decisions. 
+Contrastingly, in another scenario illustrated in Figure~\ref{fig:case}(b) at Appendix~\ref{app:illustration_collaboration}, all three agents converge on the right answer after engaging in a society-wide debate. 
+This mirrors benefits in ``groupthink'' \citep{J1995_IntragroupConflict} and ``SoM'' \citep{Book1988_SoM,J2003_SoM}, where a multitude of agents collaboratively yield intelligence. Within such debates, agents furnish varied viewpoints and information. Through these exchanges, conflicts are resolved, ideas are honed, and the group gravitates toward an informed consensus \citep{Book2011_Negotiation,Book2018_GroupDynamics}. 
+
+We also conduct a quantitative analysis of the prevalence of conformity and consensus-reaching phenomena. % at the individual level. 
+We analyze answer correctness changing at each round of collaboration in the situation of conformity, shown in Figure~\ref{fig:conformity} on ChatGPT and Figure~\ref{fig:llama:conformity},~\ref{fig:llama70:conformity},~\ref{fig:qwen:conformity},~\ref{fig:mixtral:conformity} on other LLMs at Appendix~\ref{app:backbone_llm}. 
+We also present the ratio of consensus reaching at each round in Figure~\ref{fig:consistent} on ChatGPT and Figure~\ref{fig:llama:consistent},~\ref{fig:llama70:consistent},~\ref{fig:qwen:consistent},~\ref{fig:mixtral:consistent} on other LLMs at Appendix~\ref{app:backbone_llm}. 
+We summarize the following obeservations: 
+
+\begin{itemize}
+\setlength{\itemsep}{2pt}
+\setlength{\parsep}{2pt}
+\setlength{\parskip}{2pt}
+
+    \item \textbf{Conformity is widespread}, and the proportion of conformity increases with the round increases in general. 
+
+    \item Overall, considering performance improvement, \textbf{conformity is beneficial in on ChatGPT, Qwen 72B; and harmful on LlaMA2 Chat 13B/70B, Mixtral 8$\times$7B}. 
+
+    \item \textbf{As the number of rounds increases, benefits of conformity will weaken} (the ratio difference between True and False answers becomes smaller); and \textbf{detriments of conformity enhance} (the ratio difference between False and True answers becomes larger). 
+
+    \item Generally, \textbf{reflection results in} increasing the quantity of consensus clusters, demonstrating \textbf{more difficulty to reach a consensus}, while \textbf{debate is more likely to reach a consensus}. 
+\end{itemize}
+
+
+
+% As conformity tends to arise during discussions, we solely focus on agents actively engaging in debate, disregarding those in reflection during a given round. 
+% Let the answer of the $i$-th agent at $j$-th round be denoted as $a_{i,j}$. 
+% For the $k$-th agent at $j$-th round, if ``$\text{Frequency}\big( \{a_{i,j-1} | i \in [1,n]\}\big)=a_{k,j}$'', we identify this as the occurrence of conformity by agent $k$ at $j$-th round, where $\text{Frequency}(\cdot)$ represents the most frequently given answer (excluding instances where all answers occur only once, as such cases are considered as non-conformity). 
+% Additionally, we categorize the correctness of answers both before and after conformity into four cases, with `True' denoting correct and `False' denoting incorrect. 
+
+% \begin{itemize}
+%     \item Conformity is widespread, exceeding 45\% prevalence across all three datasets.
+%     \item The probability of conformity increases with the number of rounds for MATH and Chess Move Validity, while MMLU exhibits a slight decreasing trend.
+%     \item Overall, conformity is advantageous. We observe that the proportion of correct answers after conformity is higher than that of incorrect answers.
+%     \item As the number of rounds increases, conformity leads to a decline in accuracy. Because the proportion of {True $\rightarrow$ False} increases gradually, while {False$\rightarrow$True} remains relatively constant. Moreover, the increase in {True$\rightarrow$True} is smaller than that in {False$\rightarrow$False}, indicating a disadvantage.
+% \end{itemize}
+
+% Subsequently, we examine the evolution of answer consistency (\ie, consensus) with increasing rounds of collaboration. Let the answer of the $i$-th agent at time $j$ be denoted as $a_{i,j}$. 
+% For the $j$-th round, consistency is defined as $Same(\{a_{i,j}|i\in[1,n]\})$, where $Same(\cdot)$ represents the count of consistent answers. 
+% If there are no consistent answers, consistency will be set to 0. 
+% Figure~\ref{fig:consistent} illustrates the changes in consistency across various collaborative strategies and datasets.
+% We summarize the following observations: 
+% \begin{itemize}
+%     \item Generally, the consistency of different thinking patterns present opposite tendencies, with consistency decreasing during agent reflection and increasing during debates.
+%     \item Continuous reflection contributes to reduced consistency, while ongoing debate results in increased consistency. 
+%     This aligns with the conclusion in \S\ref{sec:analysis} that ``continuous reflection leads to illusions, and debates can mitigate this phenomenon.".
+%     \item Consistency and accuracy demonstrate a correlation, lower consistency corresponds to reduced accuracy. 
+%     Datasets MATH and Chess Move Validity exhibit a consistency of around 1.5 before collaboration, indicating poorer performance, while collaboration leads to improved accuracy. 
+%     Dataset MMLU, with a consistency of around 2.5 before collaboration, showcases good performance, with collaboration proving detrimental.
+% \end{itemize}
+
+
+
+% \subsection{Group Dynamics}
+% \label{sec:theory_society_setting}
+% % Wisdom of Crowds??
+
+% We also inspire from group dynamics to setup the society, as illuminated in \S\ref{sec:impact_of_other_factors}. The experimental phenomena in our paper is consistent with findings from \citet{arXiv2023_MultiAgent-Debate} and theories from \citet{Book2005_CrowdWisdom} which suggest that the dynamics of group decision-making can lead to suboptimal results, especially in smaller, more cohesive groups where conformity pressure is high. 
+% % make the optimal choice of society settings
+
+
+
+
+
+
+\iffalse
+\bibliography{reference}
+\bibliographystyle{acl_natbib}
+\fi
+% !TEX root = ./acl_latex.tex
+
+\section{Conclusion and Future Work}
+\label{sec:con_future}
+
+This study has highlighted the potential of collaboration mechanisms with LLMs. Our findings reveal the impressive collaboration capabilities of LLM agents, with different individual traits, thinking patterns, and collaborative strategies. The emergence of human-like behaviors in these agents, resonating with social psychology theories, further emphasizes the potential of human-AI interaction. 
+Moving forward, a deeper exploration into the multi-agent society is warranted, focusing on collaboration behavior refinement; integrating further insights from social psychology could also guide the development of socially aware NLP systems. 
+
+% Moving forward, the collaboration mechanisms of machine society with multiple agents present a promising research avenue. A deeper exploration into the multi-agent society is warranted, with a focus on refining collaboration behaviors. Additionally, as LLMs evolve, understanding how different architectures influence these behaviors will be crucial. Integrating further insights from social psychology could also guide the development of more socially aware NLP systems. 
+
+
+% \input{limitation}
+
+
+% \newpage
+\iffalse
+\bibliography{reference}
+\bibliographystyle{acl_natbib}
+\fi
+% !TEX root = ./acl_latex.tex
+
+Although we explored various societies and collaborative strategies, our study still has its limitations.
+Firstly, limited by expense, we don't explore the impact of multiple agents respectively based on different LLMs, which may lead to more interesting findings at the social level due to the usage of differently distributed pre-trained data and strategies aligned with human intentions.
+Furthermore, we traversed all possible scenarios by search alone, lacking a way to let the agents adaptively make autonomous decisions on collaborative strategies in specific scenarios.
+Although \textit{debate} can be as close as possible to the upper limit, this approach entails a larger consumption and there exist some strategies that can achieve better performance with less overhead. 
+Additionally, our experimental setup is relatively straightforward, as we have not considered more intricate configurations, such as a broader range of traits or a larger-scale society. 
+Finally, we evaluate performance through manual validation and rule-based matching, which also limits the ability to validate more realistic and creative tasks, such as literary creation. 
+
+
+\section*{Reproducibility Statement}
+All code and data can be found in the GitHub repository\footnote{\url{https://github.com/zjunlp/MachineSoM}.}. 
+% https://anonymous.4open.science/r/MachineSoM-3178, https://github.com/zjunlp/MachineSoM
+For specific experimental implementation details, please refer to Appendix~\ref{app:exp_detail}. 
+
+\section*{Ethics Statement}
+This research was conducted in line with the highest ethical standards and best practices in research.
+The data employed were extracted from publicly accessible datasets, ensuring no usage of proprietary or confidential information. Consequently, this research is free from any ethical concerns.
+
+
+\section*{Acknowledgments}
+We would like to express gratitude to the anonymous reviewers for their kind and helpful comments. 
+We extend our sincere gratitude to Min-Yen Kan and team members from NUS Web IR / NLP Group advised by Min-Yen Kan; Tao Gui and team members from FudanNLP Group; and Diyi Yang from Stanford University for providing insightful and constructive feedback on this paper. 
+This work was supported by the National Natural Science Foundation of China (No. 62206246), the Fundamental Research Funds for the Central Universities (226-2023-00138), Zhejiang Provincial Natural Science Foundation of China (No. LGG22F030011), Yongjiang Talent Introduction Programme (2021A-156-G), Tencent AI Lab Rhino-Bird Focused Research Program (RBFR2024003), Information Technology Center and State Key Lab of CAD\&CG, Zhejiang University, and NUS-NCS Joint Laboratory (A-0008542-00-00). 
+% This work was supported by the National Natural Science Foundation of China (No.62206246), Zhejiang Provincial Natural Science Foundation of China (No. LGG22F030011), Ningbo Natural Science Foundation (2021J190), Yongjiang Talent Introduction Programme (2021A-156-G), CCF Tencent Rhino-Bird Open Research Fund, and NUS-NCS Joint Laboratory (A-0008542-00-00). 
+
+% \balance
+
+\bibliography{reference}
+% \bibliographystyle{acl_natbib}
+\iffalse
+\bibliography{reference}
+\bibliographystyle{acl_natbib}
+\fi
+% !TEX root = ./acl_latex.tex
+
+% \newpage
+\clearpage
+\appendix
+
+
+\section*{Overview of Appendices}
+\label{app:overview}
+
+We summarize the overview of Appendices below: 
+
+\noindent
+\textbf{\S\ref{app:insights}:} Key Takeaways. 
+
+
+\noindent
+\textbf{\S\ref{app:related_work}:} Related Work. 
+
+
+\noindent
+\textbf{\S\ref{app:application}:} Potential Real-World Applications. 
+
+
+\noindent
+\textbf{\S\ref{app:exp_detail}:} Implementation Details. 
+
+\quad\quad Experimental Setup (\S\ref{app:setup})
+
+\quad\quad Experimental Evaluation (\S\ref{app:eval})
+
+\quad\quad Illustration of Agent Collaboration (\S\ref{app:illustration_collaboration})
+
+
+\noindent
+\textbf{\S\ref{app:sig_test_main}:} Further Analysis on Machine Social Collaboration (Backbone: ChatGPT). 
+
+
+\noindent
+\textbf{\S\ref{app:society_setting}:} Analysis on Machine Society Settings (Backbone: ChatGPT). 
+
+
+\noindent
+\textbf{\S\ref{app:social_psychology_view}:} A Social Psychology View on Conformity, Consensus Reaching, and Group Dynamics (Backbone: ChatGPT). 
+
+\quad\quad Conformity, Consensus Reaching (\S\ref{app:detail_conformity_and_consensus})
+
+\quad\quad Group Dynamics (\S\ref{app:principles_group_dynamics})
+
+% \noindent
+% \textbf{\S\ref{app:conformity_consistency}:} Analysis on Conformity and Consistency (Backbone: ChatGPT). 
+
+
+\noindent
+\textbf{\S\ref{app:backbone_llm}:} Analysis on Different Backbone LLMs. 
+
+\quad\quad LlaMA2 Chat 13B (\S\ref{app:backbone_llama13b})
+
+\quad\quad LlaMA2 Chat 70B  (\S\ref{app:backbone_llama70b})
+
+\quad\quad Qwen 72B (\S\ref{app:backbone_qwen72b}) 
+
+\quad\quad Mixtral 8$\times$7B (\S\ref{app:backbone_mixtral8x7b})
+
+
+\noindent
+\textbf{\S\ref{app:effecttiveness_prompts}:} Assessing the Effectiveness of Prompts. 
+
+
+
+
+
+\section{Key Takeaways} % for Multi-Agent Collaboration
+\label{app:insights}
+
+Drawing from our comprehensive analysis, we distill valuable insights for future multi-agent collaboration designs concerning \emph{Strategy Selection}, \emph{Society Settings}, and \emph{Social Psychology View}. 
+
+Regarding \textit{Strategy Selection}, 
+\begin{itemize}
+    \item Starting or dominating multi-agent collaboration with debate, yields relatively optimal outcomes, as seen from Table~\ref{table:main},~\ref{table:gpt-july:main},~\ref{table:llama_main},~\ref{table:llama70_main},~\ref{table:qwen_main},~\ref{table:mixtral_main}. 
+
+    \item Totally-reflection strategy like $p_1p_1p_1$ is generally worst in performance, as observed from Table~\ref{table:main},~\ref{table:gpt-july:main},~\ref{table:llama_main},~\ref{table:llama70_main},~\ref{table:qwen_main},~\ref{table:mixtral_main}. 
+
+    \item For difficult tasks, debate combined with continuous reflection is superior; for simple tasks, self-consistency or reflection is enough, as seen from Figure~\ref{fig:task_radar},~\ref{fig:llama:task_radar},~\ref{fig:llama70:task_radar},~\ref{fig:qwen:task_radar},~\ref{fig:mixtral:task_radar}. 
+\end{itemize}
+
+Regarding \textit{Society Settings}, 
+\begin{itemize}
+    \item Surprisingly, ``overconfident'' agents lose that trait in groups, as observed from word clouds in Figure~\ref{fig:word},~\ref{fig:llama:word},~\ref{fig:llama70:word},~\ref{fig:qwen:word},~\ref{fig:mixtral:word} and answer keeping in Figure~\ref{fig:agent_answer_changing},~\ref{fig:llama:agent_answer_changing},~\ref{fig:llama70:agent_answer_changing},~\ref{fig:qwen:agent_answer_changing},~\ref{fig:mixtral:agent_answer_changing}!
+
+    \item Setting agent numbers to 3 is generally advantageous in performance and cost, as seen from Figure~\ref{fig:agent_10_on_numbers},~\ref{fig:llama:agent},~\ref{fig:llama70:agent},~\ref{fig:qwen:agent},~\ref{fig:mixtral:agent}. 
+    
+    \item The rounds of collaboration are relatively suitable to set as 3 since it's both effective and efficient, as seen from 
+    Figure~\ref{fig:round_10_on_mmlu},~\ref{fig:round_10_on_math},~\ref{fig:round_10_on_chess} on ChatGPT; 
+    Figure~\ref{fig:llama:turn},~\ref{fig:llama70:turn} on LlaMA 13B/70B; 
+    Figure~\ref{fig:qwen:round_10_on_mmlu},~\ref{fig:qwen:round_10_on_math},~\ref{fig:qwen:round_10_on_chess} on Qwen 72B; 
+    Figure~\ref{fig:mixtral:round_10_on_mmlu},~\ref{fig:mixtral:round_10_on_math},~\ref{fig:mixtral:round_10_on_chess} on Mixtral 8$\times$7B. 
+
+    \item Employing the uniform thinking patterns across all agents within a round enhance efficacy, as seen from Figure~\ref{fig:strategy},~\ref{fig:strategy_math},~\ref{fig:llama:strategy},~\ref{fig:llama70:strategy},~\ref{fig:qwen:strategy},~\ref{fig:mixtral:strategy}. 
+\end{itemize}
+
+Regarding \textit{Social Psychology View}, 
+\begin{itemize}
+    \item Collaboration is generally effective in the group, especially for tackling difficult tasks, as observed from Figure~\ref{fig:task_radar},~\ref{fig:llama:task_radar},~\ref{fig:llama70:task_radar},~\ref{fig:qwen:task_radar},~\ref{fig:mixtral:task_radar}; and Figure~\ref{fig:distribute},~\ref{fig:llama:distribute},~\ref{fig:llama70:distribute},~\ref{fig:qwen:distribute},~\ref{fig:mixtral:distribute}. 
+
+    \item Collaboration widely leads to conformity, either beneficial or harmful in performance. As observed from Figure~\ref{fig:conformity},~\ref{fig:llama:conformity},~\ref{fig:llama70:conformity},~\ref{fig:qwen:conformity},~\ref{fig:mixtral:conformity}. 
+
+    \item As the number of rounds increases, the benefits of conformity will decrease, and the detriments of conformity will increase, as observed from Figure~\ref{fig:conformity},~\ref{fig:llama:conformity},~\ref{fig:llama70:conformity},~\ref{fig:qwen:conformity},~\ref{fig:mixtral:conformity}. 
+
+    \item The totally easy-going society is more likely to reach a consensus, debate helps to consensus reaching while reflection impedes it, as observed from Figure~\ref{fig:agent_10_on_societies_consensus},~\ref{fig:qwen:agent_10_on_societies_consensus},~\ref{fig:mixtral:agent_10_on_societies_consensus}; and Figure~\ref{fig:consistent},~\ref{fig:llama:consistent},~\ref{fig:llama70:consistent},~\ref{fig:qwen:consistent},~\ref{fig:mixtral:consistent}. 
+\end{itemize}
+
+% concerning thinking patterns, collaborative strategies, and societies. 
+
+% Regarding \emph{thinking patterns}, 
+% \begin{itemize}
+% 	\item Collaborative processes lead to agent subordination. Debate accelerates this, while reflection counteracts it by reconsidering previous stances, as inferred from Figure~\ref{fig:distribute}(a-c). 
+	
+% 	\item Starting multi-agent collaboration with debate, rather than reflection, yields optimal outcomes as established in \S\ref{app:principles_group_dynamics}. 
+    
+% 	\item Continuous reflection is discouraged as it risks model hallucination due to absent external feedback. However, post-reflection debates can be beneficial, using peers' responses as feedback, as derived from \S\ref{app:principles_group_dynamics}. 
+% \end{itemize}
+
+% Respecting \emph{collaborative strategies},
+% \begin{itemize}
+% 	\item Multi-agent collaboration excels in complex scenarios. For simpler tasks, employing self-consistency~\citep{ICLR2023_Self-Consistency} with the majority vote is more effective, as suggested by Figure~\ref{fig:distribute}(a-c). 
+% 	\item 
+%     For specific tasks, keeping agent numbers to a maximum of 3 is advantageous, based on Figure~\ref{fig:agent} and Appendix~\ref{app:society_setting}. % , Table~\ref{tab:two_agents_two_turn}, Table~\ref{tab:two_agents_three_turn}
+%     \item 
+%     The number of collaboration rounds is closely tied to the consistency. It is suggested that collaboration in a society can be concluded once a substantial majority of agents have achieved a high degree of agreement, as outlined in Appendix~\ref{app:society_setting}. 
+% 	\item The strategy $p_0p_0p_1$ emerges as particularly efficient, balancing performance with optimized token usage, as highlighted in Table~\ref{table:main}. 
+% 	\item Employing the uniform thinking patterns across all agents within a round enhance efficacy, as evidenced by Figure~\ref{fig:strategy}. 
+% \end{itemize}
+
+% Concerning \emph{society agents with individual traits},
+% \begin{itemize}
+%     \item 
+%     Even though agents might be designated as ``overconfident'', this trait diminishes in societal contexts. As agents collaborate within a society, collective dynamics tend to overshadow individual traits, emphasizing the impact of group collaboration on agent behaviors. 
+%     The word cloud presented in Figure~\ref{fig:word} highlights that even with pronounced differences between the two distinct societies, $S_1$ and $S_4$, the term ``apologize'' consistently emerges with a notably high frequency in both. Interestingly, society $S_1$ doesn't prominently feature words like ``must'' or ``obedient'' that might associate with ``overconfidence''. This observation reinforces our proposed perspective. 
+% \end{itemize}
+
+
+% \newpage
+
+
+\input{related_work}
+
+
+\input{applications}
+
+% \clearpage
+
+
+\input{tables/setting_ablation}
+
+\section{Implementation Details}
+\label{app:exp_detail}
+
+\subsection{Experimental Setup}
+\label{app:setup}
+
+\input{tables/setting_model_parameter}
+
+% \input{tables/setting_ablation}
+% \vspace{-3mm}
+The detailed society settings of the experiments in \S\ref{sec:impact_of_other_factors} are shown in Table~\ref{table:setting:ablation}. 
+Due to the context length constraints of the LlaMA2 Chat 13B and LlaMA2 Chat 70B, which support a maximum of 4096 tokens, it's challenging to scale up the number of agents and the rounds of collaboration. 
+Consequently, we have capped the collaboration rounds at 4 and also restricted the maximum agent number to 4. 
+We select MMLU and Chess Move Validity datasets in our analysis. 
+Nevertheless, a small fraction of cases still exceed the maximum length constraint. 
+To address this, we strategically prune content from the earlier rounds to ensure compliance with the length limitation.
+As for other LLMs (ChatGPT, Mixtral 8$\times$7B, and Qwen 72B), in terms of experiments on the number of agents, adding an additional agent results in substantial costs. 
+This is due to the necessity of conducting 5 replicate experiments and accommodating 8 collaborative strategies. 
+Therefore, our experiments on these LLMs are carried out on the less token-intensive dataset: Chess Move Validity.
+As for trials concerning the rounds of collaboration, the quantity of viable collaborative strategies increases exponentially with each additional round – for instance, 10 rounds would yield $2^{10}$ unique strategies. 
+Considering the complexity, we analyze on 8 strategies that are representative of the broader set of possibilities. 
+
+The decoding parameters for various models are detailed in Table~\ref{table:setting:parameter}. 
+In \texttt{gpt-3.5-turbo-1106}, we align our approach with \citet{arXiv2023_MultiAgent-Debate} by setting the temperature to 0, while adhering to the default settings for the remaining parameters. 
+For \emph{Qwen 72B}, we utilize the default parameters as furnished by the official documentation. 
+For the remaining models, we configure the temperature to 0.7 and respectively adjust the \texttt{Top P} and \texttt{Top K} values to 50 and 0.95. 
+This configuration is primarily based on insights from \citet{J2023_LLM-Psychology}, which advocates for the recognition and integration of the inherent stochastic nature of LLM outputs into analytical frameworks, in a manner akin to the treatment of stochastic variables in psychological studies. 
+It is noteworthy that even with the temperature parameter set to 0, \texttt{gpt-3.5-turbo-1106} may still exhibit randomness in the outputs. 
+
+\input{tables/table_prompt} 
+
+The prompts used in our experiments are shown in Table~\ref{table:prompt}. 
+On the MMLU dataset, we curated questions from 6 domains (statistics, mathematics, computer science, biology, chemistry, and physics) and performed a random sampling of 50 samples, maintaining a proportion of $8:8:8:8:9:9$ for each domain. 
+On the MATH dataset, we randomly selected 50 cases from Level 3, 4, and 5, distributing them in a ratio of $22:22:6$. 
+On the Chess Move Validity dataset, we similarly selected 50 samples for testing.
+
+% \vspace{2mm}
+% \input{tables/table_prompt} 
+
+
+\subsection{Experimental Evaluation}
+\label{app:eval} 
+
+\begin{figure*}[!t]
+    % \vspace{-5mm}
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.96\textwidth]{figures/case.pdf} 
+    }
+    \vspace{-3mm}
+    \caption{
+    The conformity phenomenon in multi-agent collaboration, seen from changes in the answers during the process of solving a certain task with 3 agents in the society $S_4$ (all agents are easy-going), using \emph{ChatGPT}. 
+    % For an exhaustive view of the dialogue, refer to Figure~\ref{fig:case-chess} and Figure~\ref{fig:case-mmlu}. 
+    % % in Appendix~\ref{app:illustration_collaboration}
+    }
+    \label{fig:case}
+    % \vspace{-5mm}
+\end{figure*}
+
+\begin{figure*}[!t] % !t, !htbp
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.96\textwidth]{figures/dialog-chess.pdf} 
+    }
+    \vspace{-3mm}
+    \caption{In the $S_4$ society, three agents engage in a complete dialogue using the strategy $p_1p_0p_0$ to predict the next piece position given a chess game from the Chess Move Validity dataset, corresponding to Figure~\ref{fig:case}(b).}
+    \label{fig:case-chess}
+    \vspace{-3mm}
+\end{figure*} 
+
+\begin{figure*}[!htbp] % !t, !htbp
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.92\textwidth]{figures/dialog-mmlu.pdf}
+    }
+    \caption{In the $S_4$ society, three agents engage in a complete dialogue using the strategy $p_0p_0p_1$ to solve a high-school chemical question from MMLU, corresponding to Figure~\ref{fig:case}(a).}
+    \label{fig:case-mmlu}
+\end{figure*}
+
+The evaluation process involves two fundamental steps:
+$(i)$ A unified answer is selected from the machine society. 
+To achieve this, we employ the majority vote method to ascertain the consensus reached by the society after multiple rounds of collaboration. 
+If the unanimity among agents is not achieved, it will be considered as an error. 
+Additionally, if an individual agent provides multiple answers without following our prompts, its response will be disregarded.
+$(ii)$ Answer responses from agents are matched against the ground truth.
+This step presents two main challenges. 
+Firstly, there is the concern of non-compliance with instructions. 
+Despite providing explicit prompts and specifying the desired output format for evaluation, it's inevitable that agents may occasionally deviate from the given instructions. 
+Secondly, the answers may manifest in non-unique forms, leading to potential variations, such as the equivalence between ``$3/4$'' and ``$0.75$'' in the MATH~\citep{NeurIPS2021_Dataset-MATH} dataset. 
+To address these challenges, a comprehensive set of matching rules is employed. 
+Nonetheless, it is important to acknowledge the possibility of encountering a small number of values that fall outside the purview of these rules.
+
+
+% \begin{figure*}[!t]
+%     % \vspace{-5mm}
+%     \centering
+%     \scalebox{1}{
+%     \includegraphics[width=0.8\textwidth]{figures/case.pdf}  
+%     }
+%     \vspace{-3mm}
+%     \caption{
+%     The conformity phenomenon in multi-agent collaboration, seen from changes in the answers during the process of solving a certain task with 3 agents in the society $S_4$ (all agents are easy-going), using \emph{ChatGPT}. 
+%     % For an exhaustive view of the dialogue, refer to Figure~\ref{fig:case-chess} and Figure~\ref{fig:case-mmlu}. 
+%     % % in Appendix~\ref{app:illustration_collaboration}
+%     }
+%     \label{fig:case}
+%     % \vspace{-5mm}
+% \end{figure*}
+
+% \begin{figure*}[!t] % !t, !htbp
+%     \centering
+%     \scalebox{1}{
+%     \includegraphics[width=0.9\textwidth]{figures/dialog-chess.pdf} 
+%     }
+%     \vspace{-3mm}
+%     \caption{In the $S_4$ society, three agents engage in a complete dialogue using the strategy $p_1p_0p_0$ to predict the next piece position given a chess game from the Chess Move Validity dataset, corresponding to Figure~\ref{fig:case}(b).}
+%     \label{fig:case-chess}
+%     \vspace{-3mm}
+% \end{figure*}
+
+\subsection{\fontsize{10.8pt}{0.1\baselineskip}\selectfont Illustration of Multi-Agent Collaboration}
+\label{app:illustration_collaboration}
+% Detailed Conversation
+
+As seen from Figure~\ref{fig:case}, the conformity phenomenon in multi-agent collaboration can be both beneficial (\ie, changing the answer from wrong to correct) and harmful (\ie, changing the answer from correct to wrong) in problem-solving. 
+
+We also illustrate the detailed conversation process for multi-agent collaboration in Figure~\ref{fig:case-chess} and Figure~\ref{fig:case-mmlu}, regarding the conformity phenomenon presented in Figure~\ref{fig:case}. 
+
+% \newpage
+% $~~~\\~~~\\~~~\\~~~\\~~~\\~~~\\~~~\\~~~\\~~~\\~~~\\~~~\\$
+
+% \begin{figure*}[!htbp] % !t, !htbp
+%     \centering
+%     \scalebox{1}{
+%     \includegraphics[width=0.92\textwidth]{figures/dialog-mmlu.pdf}
+%     }
+%     \caption{In the $S_4$ society, three agents engage in a complete dialogue using the strategy $p_0p_0p_1$ to solve a high-school chemical question from MMLU, corresponding to Figure~\ref{fig:case}(a).}
+%     \label{fig:case-mmlu}
+% \end{figure*}
+
+
+% \clearpage
+
+
+\begin{figure*}[!t] % !htbp, !t
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.76\textwidth]{figures/word.pdf}
+    }
+    \vspace{-4mm}
+    \caption{
+    Comparative word clouds on three datasets in societies $S_1$ and $S_4$, using \emph{ChatGPT}. 
+    Society $S_1$ features three overconfident agents, while society $S_4$ comprises three easy-going agents. 
+    We first manually curated a list of task-relevant, high-frequency words. From this list, the top 50 words are selected to construct the word clouds.
+    % Word clouds for three datasets in two societies.
+    % The two societies consist of three overconfident agents in society $S_1$ and three easy-going agents in society $S_4$, respectively.
+    % We make a list of high-frequency words pertinent to the task firstly and manually. 
+    % Then we choose the 50 most common words from this list to create a word clouds.
+    }
+    \label{fig:word}
+    % \vspace{-5mm}
+\end{figure*}
+
+\begin{figure*}[!t] % !htbp, !t
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.77\textwidth]{figures/holdon-gpt.pdf}
+    }
+    \vspace{-4mm}
+    \caption{
+    Proportion of agents with different traits keeping answers in societies $S_1$ and $S_4$, using \emph{ChatGPT}. 
+    Society $S_1$ features three overconfident agents, while society $S_4$ comprises three easy-going agents. 
+    % Word clouds for three datasets in two societies.
+    % The two societies consist of three overconfident agents in society $S_1$ and three easy-going agents in society $S_4$, respectively.
+    % We make a list of high-frequency words pertinent to the task firstly and manually. 
+    % Then we choose the 50 most common words from this list to create a word clouds.
+    }
+    \label{fig:agent_answer_changing}
+    % \vspace{-5mm}
+\end{figure*}
+
+% \begin{figure*}[!t] % !htbp, !t
+%     % \vspace{-5mm}
+%     \centering
+%     \scalebox{1}{
+%     \includegraphics[width=1\textwidth]{figures/radar.pdf}
+%     }
+%     \vspace{-4mm}
+%     \caption{
+%     Illustration of different collaborative strategies impacting diversely on the tasks with varying subjects and difficulty in society $S_n$ \todo{jintian}, using \emph{ChatGPT}. 
+%     }
+%     \label{fig:task_radar}
+%     % \vspace{-5mm}
+% \end{figure*}
+
+% \input{tables/table_sig_main}
+\input{tables/table_sig_main_for_society}
+\input{tables/table_sig_main_for_strategy}
+
+
+\section{Further Analysis on Machine Social Collaboration (Backbone: ChatGPT)}
+\label{app:sig_test_main}
+
+We conduct a rigorous \textbf{significance test} for the main experiment in \S\ref{sec:exp-main}. 
+Given our experimental design incorporating two key factors, namely \emph{collaborative strategy} and \emph{society}, we respectively opt for a one-way analysis of variance. 
+% we opt for a comprehensive two-way analysis of variance. 
+Before delving into the analysis, we ensured that the data adhered to a normal distribution and satisfied the assumption of homogeneity of variance. 
+We present the $p$-values for society and collaborative strategy across three datasets in Table~\ref{table:sig_main_society},~\ref{table:sig_main_strategy}. 
+% We present the degrees of freedom, F-values, and $p$-values for society, collaborative strategy, and their interaction across the three datasets in Table~\ref{table:sig_main}. 
+
+% % \input{tables/table_sig_main}
+% \input{tables/table_sig_main_for_society}
+% \input{tables/table_sig_main_for_strategy}
+
+We then present the \textbf{main results} and \textbf{significance tests} of societies andcollaborative strategies \textbf{on ChatGPT (with the engine of \texttt{gpt-3.5-turbo} employed between July 10 and July 23, 2023)} in Table~\ref{table:gpt-july:main},~\ref{table:gpt-july:sig_main_society},~\ref{table:gpt-july:sig_main_strategy}. 
+
+\input{tables/gpt-july/table_gpt_july_main}
+\input{tables/gpt-july/table_sig_main_for_society}
+\input{tables/gpt-july/table_sig_main_for_strategy}
+
+Notably, the $p$-value of the collaborative strategy (on ChatGPT, engine: \texttt{gpt-3.5-turbo-1106}; \texttt{gpt-3.5-turbo} in July) is significantly below the threshold of 0.05, indicating that collaborative strategies have substantial impact on performance. 
+Besides, on the backbone LLM of ChatGPT, the $p$-value of the society (with the engine of \texttt{gpt-3.5-turbo-1106}) is smaller than 0.05 in 17 out 24 cases, 
+in contrast, the $p$-value of the society (with the engine of \texttt{gpt-3.5-turbo} employed between July 10 and July 23, 2023) is larger than 0.05 in 23 out 24 cases. 
+Generally, this corroborates our earlier conclusion in \S\ref{sec:exp-main}, emphasizing that the influence of collaborative strategies outweighs that of societies. 
+% Additionally, \citet{arXiv2023_Analyze-LLM-Behavior} demonstrates that LLMs are well-known to show sycophant behaviors. 
+
+We also present the \textbf{word clouds} in Figure~\ref{fig:word}, and \textbf{answer changing of agents with different traits} in Figure~\ref{fig:word}, to reveal that indistinctive impact of 3-agent societies on performance. 
+Furthermore, we demonstrate that the tasks with different subjects and difficulty display varying sensitivity to collaborative strategies, as presented with \textbf{radar maps} in Figure~\ref{fig:task_radar}. 
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-5mm}
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/radar.pdf}
+    }
+    % \vspace{-6mm}
+    \vspace{-3mm}
+    \caption{
+    Illustration of different collaborative strategies impacting accuracy diversely on the tasks considering varied \emph{subjects} and \emph{difficulty}, using \emph{ChatGPT}. 
+    The symbol `\protect\radarfork' represents that there is at least one collaborative strategy whose accuracy is better than self-consistency, while the symbol `\protect\radarprismatic' indicates that there is no collaborative strategy whose accuracy is worse than self-consistency. 
+    Both of these symbols represent the accuracy of self-consistency. 
+    The accuracy under each collaborative strategy is a summation within all 3-agent societies. 
+    \label{fig:task_radar}
+    }
+    % \vspace{-5mm}
+\end{figure*} 
+
+
+
+\section{Analysis on Machine Society Settings (Backbone: ChatGPT)}
+\label{app:society_setting}
+% \label{app:exp}
+
+% \subsection{Qualitative Analysis}
+
+% \paragraph{Different Numbers of Agents.}
+% To explore the discrepancies in the experiments, three potential reasons have been considered: 
+% (1) Variations in models could result in different outcomes. 
+% % In~\citet{arXiv2023_MultiAgent-Debate}'s study, the experiments were conducted using \textit{gpt-3.5-turbo-0301}. 
+% (2) Differences in datasets may lead to divergent results.
+% % In~\citet{arXiv2023_MultiAgent-Debate}'s study, the experimental dataset involved arithmetic problems comprising six two-digit numbers involving addition, subtraction, and multiplication. 
+% (3) Disparities in the number of rounds could influence the results. 
+% % In ~\citet{arXiv2023_MultiAgent-Debate}'s study, the fixed number of debate rounds was set at 2, whereas in our experiments, it was increased to 3.
+% In conclusion, the impact of the number of agents on performance is influenced by various factors, but the employ of multiple agents can effectively reduce experimental variance.
+
+% \paragraph{Different Rounds.}
+% For the ``Pure Debate'' strategies (i.e., $p_0p_0, p_0p_0p_0, p_0p_0p_0p_0$), the performance gains ceased after the third round, consistent with the findings in~\citet{arXiv2023_MultiAgent-Debate}.
+% Additionally, we observe that with successive rounds of reflection, incorporating an additional round of debate has resulted in notable enhancements in performance in specific instances, such as strategies $p_1p_1p_0p_0$ and $p_1p_1p_1p_0$. 
+% Specifically, the strategy $p_1p_1p_0p_0$ on Chess Move Validity dataset   exhibits substantial performance improvement in the 4$_{th}$ round, with corresponding performance gains observed on MMLU dataset as well.
+
+
+
+% \input{tables/table_two_agents_two_turns}
+% \input{tables/table_two_agents_three_turns}
+
+% \subsection{Quantitative Analysis}
+% \label{app:sig_test}
+
+In this section, we conduct \textbf{significance tests} for the experiments outlined in \S\ref{sec:impact_of_other_factors}. 
+The chosen method is one-way analysis of variance. 
+Prior to the analysis, we performed a check for homogeneity of variance, with only one entry in Table~\ref{table:sig_strategy} deviating from the criteria. 
+The significance tests for the number of agents, the number of rounds, and different collaborative strategies are respectively detailed in Table~\ref{table:sig_10_agent}, Table~\ref{table:sig_10_turn} and Table~\ref{table:sig_strategy}. % table:sig_agent, table:sig_turn
+
+
+% \input{tables/table_sig_agent}
+\input{tables/table_sig_10_agent}
+
+\begin{figure*}[!t]
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.88\textwidth]{figures/10_agent_0.pdf}
+    % }
+    \vspace{-3mm}
+    \caption{Accuracy of \emph{different societies} with 2$\sim$10 agents under 3-round collaborative strategies, on \emph{ChatGPT}. }
+    \label{fig:agent_10_on_societies}
+    % \vspace{-3mm}
+\end{figure*}
+
+\begin{figure*}[!t]
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.82\textwidth]{figures/10_agent_1.pdf}
+    % }
+    \vspace{-3mm}
+    \caption{
+    Accuracy of \emph{different numbers (2$\sim$10) of agents} under 3-round collaborative strategies, using \emph{ChatGPT}. 
+    The significance test is shown in Table~\ref{table:sig_10_agent}. 
+    }
+    \label{fig:agent_10_on_numbers}
+    \vspace{-3mm}
+\end{figure*}
+
+\begin{figure*}[!t]
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.85\textwidth]{figures/agent-10-consistent-1.pdf}
+    % }
+    \vspace{-3mm}
+    \caption{Average quantity of \emph{consensus clusters (unique answers among multiple agents)} in \emph{different societies} with 2$\sim$10 agents under each round of 3-round collaborative strategies, using \emph{ChatGPT}. }
+    \label{fig:agent_10_on_societies_consensus}
+    % \vspace{-3mm}
+\end{figure*}
+
+\begin{figure*}[!t]
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.88\textwidth]{figures/agent-10-consistent-0.pdf}
+    % }
+    \vspace{-3mm}
+    \caption{Average ratio of \emph{consensus clusters (unique answers among multiple agents)} with \emph{different numbers (2$\sim$10) of agents} under each round of 3-round collaborative strategies, using \emph{ChatGPT}. }
+    \label{fig:agent_10_on_numbers_consensus}
+    \vspace{-3mm}
+\end{figure*}
+
+% table:sig_agent
+\textbf{Different Numbers of Agents.}
+According to the results of the $p$-values in Table~\ref{table:sig_10_agent}, the conclusion in \S\ref{sec:impact_of_other_factors} is confirmed, namely, different number of agents results in a significant correlation on performance. 
+By integrating the results in Figure~\ref{fig:agent}, it becomes evident that the presence of three agents is relatively optimal. 
+% To further demonstrate that the optimal number of agents is three, we conducted five repeated experiments with a society of two agents (both agents having an easy-going personality). 
+% The results of collaboration in two rounds and three rounds are shown in Tables~\ref{tab:two_agents_two_turn} and Tables~\ref{tab:two_agents_three_turn}, respectively. 
+% By integrating these results with those from Table~\ref{table:main}, it becomes evident that the presence of three agents is optimal.  
+
+% \input{tables/table_sig_agent}
+
+We also analyze the \emph{consensus reaching} with different numbers of agents, and present the results in Figure~\ref{fig:agent_10_on_societies_consensus},~\ref{fig:agent_10_on_numbers_consensus}. 
+
+
+% \input{tables/table_two_agents_two_turns}
+% \input{tables/table_two_agents_three_turns}
+
+% \input{tables/table_sig_turn}
+\input{tables/table_sig_10_turn}
+
+\begin{figure*}[!t]
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/10_turn-mmlu.pdf}
+    % }
+    \vspace{-5mm}
+    \caption{Accuracy of \emph{different (3$\sim$10) rounds of collaboration} within 3-agent society $S_2$ (1 easy-going and 2 overconfident agents) on MMLU, using \emph{ChatGPT}. }
+    \label{fig:round_10_on_mmlu}
+    % \vspace{-3mm}
+\end{figure*}
+
+% \begin{figure*}[!t]
+%     % \vspace{-0.2cm}
+%     \centering
+%     % \scalebox{1}{
+%     \includegraphics[width=0.8\textwidth]{figures/10_turn-math.pdf}
+%     % }
+%     \vspace{-3mm}
+%     \caption{Accuracy of \emph{different (3$\sim$10) rounds of collaboration} within 3-agent society $S_2$ (1 easy-going and 2 overconfident agents) on MATH, using \emph{ChatGPT}. }
+%     \label{fig:round_10_on_math}
+%     % \vspace{-3mm}
+% \end{figure*}
+
+\begin{figure*}[!t]
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/10_turn-chess.pdf}
+    % }
+    \vspace{-5mm}
+    \caption{Accuracy of \emph{different (3$\sim$10) rounds of collaboration} within 3-agent society $S_2$ (1 easy-going and 2 overconfident agents) on Chess Move Validity, using \emph{ChatGPT}. }
+    \label{fig:round_10_on_chess}
+    % \vspace{-3mm}
+\end{figure*}
+
+% table:sig_turn
+\textbf{Different Rounds of Collaboration.} As observed from Table~\ref{table:sig_10_turn}, 
+we find that the impact of rounds significantly relies on the employed collaborative strategy. For MMLU and Chess Move Validity, collaborative strategies where $p$-values $<0.05$ are $\{p_0p_1p_1p_0, p_0p_1p_1p_1, p_1p_0p_1p_0, p_1p_0p_1p_1\}$ and $\{p_0p_1p_1p_0, p_0p_1p_1p_1, p_1p_0p_1p_1, p_1p_1p_0p_0, p_1p_1p_0 \\p_1, p_1p_1p_1p_0\}$. 
+We also increase the rounds of collaboration, from 3 to 10, and present the results in Figure~\ref{fig:round_10_on_mmlu},~\ref{fig:round_10_on_chess}. % ~\ref{fig:round_10_on_math},
+We find that although there would be some fluctuations in performance if we scale up the round of collaboration, the outperformance is not obvious enough. While increasing rounds of collaboration will result in more consumption of tokens, which is not economic. Thus we infer that the 3-round collaboration is relatively optimal considering both performance and cost. 
+
+% in instances with more consensus clusters at a particular round, 
+Furthermore, as seen from Figure~\ref{fig:consistent}, the strategy after a round of debate tends to yield fewer consensus clusters compared to the preceding rounds. 
+Conversely, the strategy subsequent with a round of reflection at the same juncture will increase consensus clusters. 
+Adding an extra round of debate at this juncture, as the conclusions in \S\ref{sec:conformity_consistency}, is not anticipated to bring about a discernible enhancement in performance. 
+This confirms the efficacy of the \emph{early-stopping mechanism} implemented in \citet{arXiv2023_Dynamic-LLM-Agent}, drawing inspiration from Byzantine Consensus theory~\citep{USENIX1999_Theory-FaultTolerance}. 
+
+% \input{tables/table_sig_turn}
+
+Moreover, we scrutinize the consensus reaching of these strategies in three rounds where $p$-values are below 0.05, as shown in Figure~\ref{fig:consistent}. 
+Also seen from Figure~\ref{fig:consistent} and Figure~\ref{fig:round_10_on_mmlu},~\ref{fig:round_10_on_math},~\ref{fig:round_10_on_chess}, it becomes apparent that these collaborative strategies exhibit substantial fluctuations in consensus reaching, demonstrating notably low answer consistency. % Figure~\ref{fig:round}
+For $p_0p_0p_0p_0$ on Chess Move Validity, although continuous reflection results in a gradual increase in the number of consensus clusters, a more stable trend with smaller fluctuations renders it less sensitive to the rounds of collaboration. 
+Conversely, collaborative strategies where $p$-values$>0.05$ often display higher levels of answer consistency. 
+
+\begin{figure}[!htbp]
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.48\textwidth]{figures/strategy-math.pdf}
+    % }
+    \vspace{-6mm}
+    % \vspace{-3mm}
+    \caption{
+    The effect on the accuracy of whether all agents in a society execute the same thinking pattern in one round on MATH, using \emph{ChatGPT}.
+    ``All'' and ``Part'' respectively refer to all agents applying the same and different thinking pattern(s) in one round.  
+    The significance test is shown in Table~\ref{table:sig_strategy} at Appendix~\ref{app:society_setting}. % ~\ref{app:sig_test}
+    }
+    \label{fig:strategy_math}
+    % \vspace{-4mm}
+\end{figure}
+
+\input{tables/table_sig_strategy}
+
+\textbf{Other Collaborative Strategies.} 
+We show the results of all agents in a society executing the same or inconsistent thinking pattern(s) at one round in Figure~\ref{fig:strategy_math}. 
+Seen from Table~\ref{table:sig_strategy}, we observe pronounced impacts of keeping a consistent thinking pattern on Chess Move Validity, while its influence on MMLU and MATH is less significant. 
+% We attribute this difference to the limited assistance that collaborative strategy offers for MMLU and MATH, as evidenced in the results observed in \S\ref{app:principles_group_dynamics} based on Figure~\ref{fig:distribute}(a). 
+
+% \input{tables/table_sig_strategy}
+
+
+\begin{figure*}[!t] % !t, !htbp
+    % \vspace{-5mm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.88\textwidth]{figures/distributeK.pdf}
+    % }
+    \vspace{-3mm}
+    \caption{
+    The percentage of different behaviors under different collaborative strategies, using \emph{ChatGPT}. 
+    Figure (a-c) \& (d-f) respectively show the token cost and accuracy of different strategies before and after 3-round collaboration. 
+    Figure (g-i) present the percentage of different behavioral features (mainly analyzed by the change of answer correctness) \citep{arXiv2023_Agent-BehaviorExplanation,arXiv2023_Agent-BehaviorExplaining} under different collaborative strategies. 
+    All results are summarized across all societies. 
+    The results on other LLMs are shown in Figure~\ref{fig:llama:distribute},~\ref{fig:llama70:distribute},~\ref{fig:qwen:distribute},~\ref{fig:mixtral:distribute} at Appendix~\ref{app:backbone_llm}. 
+    % in three rounds. 
+    % across all societies
+    }
+    \label{fig:distribute}
+    \vspace{-4mm}
+\end{figure*}
+
+% \subsection{Group Dynamics} % Dynamics of Human Society, Opinion Dynamics
+% \label{sec:principles_behind_interaction}
+\section{A Social Psychology View on Conformity, Consensus Reaching, and Group Dynamics} % Dynamics of Human Society, Opinion Dynamics
+\label{app:social_psychology_view}
+
+
+\subsection{Conformity and Consensus Reaching}
+\label{app:detail_conformity_and_consensus}
+Figures~\ref{fig:conformity}, \ref{fig:llama:conformity}, \ref{fig:llama70:conformity}, \ref{fig:mixtral:conformity}, and \ref{fig:qwen:conformity} illustrate the conformity. Figures~\ref{fig:consistent}, \ref{fig:llama:conformity}, \ref{fig:llama70:conformity}, \ref{fig:mixtral:conformity}, and \ref{fig:qwen:conformity} illustrate the consensus. This section provides a detailed explanation of the methodologies used to calculate both conformity and consensus.
+
+For conformity, we solely focus on agents actively engaging in debate, disregarding those in reflection during a given round. 
+Let the answer of the $i$-th agent at $j$-th round be denoted as $a_{i,j}$. 
+For the $k$-th agent at $j$-th round, if ``$\text{Frequency}\big( \{a_{i,j-1} | i \in [1,n]\}\big)=a_{k,j}$'', we identify this as the occurrence of conformity by agent $k$ at $j$-th round, where $\text{Frequency}(\cdot)$ represents the most frequently given answer (excluding instances where all answers occur only once, as such cases are considered as non-conformity). 
+Additionally, we categorize the correctness of answers both before and after conformity into four cases, with `True' denoting correct and `False' denoting incorrect.
+
+For consensus, we examine the evolution of the number of distinct answers (\ie, consensus clusters) with increasing rounds of collaboration. Let the answer of the $i$-th agent at time $j$ be denoted as $a_{i,j}$. 
+For the $j$-th round, consensus clusters is defined as $\left \|\text{Set}(\{a_{i,j}|i\in[1,n]\})\right \| $, where $\left \|\text{Set}(\cdot)\right \|$ represents the count of different answers. 
+This computational approach has been utilized in the analysis presented in Figures~\ref{fig:agent_10_on_numbers_consensus},~\ref{fig:agent_10_on_societies_consensus},~\ref{fig:mixtral:agent_10_on_numbers_consensus},~\ref{fig:mixtral:agent_10_on_societies_consensus},~\ref{fig:qwen:agent_10_on_numbers_consensus},~\ref{fig:qwen:agent_10_on_societies_consensus}. 
+
+\subsection{Group Dynamics} % Dynamics of Human Society, Opinion Dynamics, A Social Psychology View on 
+\label{app:principles_group_dynamics}
+% Group dynamics refers to the patterns of interaction between members within a group, as well as the different processes that may occur within a social group. It's a field of study within social psychology that analyzes how people behave in groups, how the group affects individuals, and how individuals can affect the group's behavior. 
+% Key aspects of group dynamics include roles, leadership, communication, group cohesion, conformity, influence, and conflict. Understanding these factors can help in managing teams, facilitating group therapy, organizing community groups, and many other applications where groups are involved. 
+% Group dynamics are influenced by many factors, including the group's size, structure, purpose, and the individual personalities of its members. Different theories and models, such as Tuckman's stages of group development (forming, storming, norming, performing, and adjourning), help explain how groups evolve over time. 
+
+% Building upon the findings from \S\ref{sec:exp-main}, which highlighted pronounced disparities among collaborative strategies, our objective shifts to understanding the underlying mechanism. Specifically, we seek to elucidate how variations in collaborative strategies impact performance, with a focus on the evolution of answers during each collaboration. 
+We seek to elucidate how performance is impacted by group dynamics, \ie, the patterns of interaction between group members and different processes that may occur within a social group. 
+Diving into the intricacies of collaboration, each agent generates four answers, including the initial answer without collaboration, as shown in Figure~\ref{fig:setting}(d). To determine the answer for each round, we employ the majority vote \citep{arXiv2021_Verifier-Math,Science2022_AlphaCode}. 
+Given `\textit{T}' and `\textit{F}' respectively denoting a round that yields a correct and an incorrect answer, we could obtain 2$^4$=16 possible answer sequences over the four rounds. 
+We select 10 sequences\footnote{The selected 10 sequences adhere to patterns: (1) $[F]_{i>0}[T]_{j>0}$, \eg, $FFFT$; (2) $[T]_{i>0}[F]_{j>0}$, \eg, $TFFF$; (3)  $[TF]_{i\geq0}[FT]_{j\geq0}$, \eg, $FTFT$, where $[\cdot]_i$, $[\cdot]_j$ respectively denotes repetition for $i$, $j$ times.} of them and categorize them into 3 groups: \textit{\textbf{Correcting Mistakes}} ($FFFT, FFTT, FTTT$), \textit{\textbf{Changing Correct Answers}} ($TFFF, TTFF, TTTF$), and \textit{\textbf{Wavering Answers}} ($FTFT, FTTF, TFTF, TFFT$). 
+Particularly, \textit{\textbf{Wavering Answers}} resemble model hallucination \citep{arXiv2023_Survey-Hallucination_LFM,arXiv2023_Survey-Hallucination_LLM,J2023_Survey-Hallucination_NLG,arXiv2024_Survey-Hallucination} due to the occurrence of self-contradictory answers. 
+Our categorization is under society-agnostic collaborative strategies, considering the performance variance between societies is negligible. From the results on ChatGPT shown in Figure~\ref{fig:distribute}, and on other LLMs shown in Appendix~\ref{app:backbone_llm}, we summarize the following findings: % detailing the three groups
+
+
+\textbf{
+(1) Debate-initial/dominant collaborative strategies are generally effective.} 
+As seen from the red bars in Figure~\ref{fig:distribute}~\ref{fig:llama:distribute},~\ref{fig:llama70:distribute},~\ref{fig:qwen:distribute},~\ref{fig:mixtral:distribute}(d-f), we find that the collaborative strategies starting from or dominant with debate $p_0$ are more effective than other, and mostly outperform self-consistency, even though they cost more tokens (seen from blue bars). 
+
+\textbf{
+(2) Reflection experiences greater instability (a heightened risk of model hallucination).
+} 
+As observed from the purple bars in Figure~\ref{fig:distribute}~\ref{fig:llama:distribute},~\ref{fig:llama70:distribute},~\ref{fig:qwen:distribute},~\ref{fig:mixtral:distribute}(g-h), comparing $p_ip_jp_0$ \& $p_ip_jp_1$; $p_ip_0p_j$ \& $p_ip_1p_j$, $p_ip_jp_0$ and $p_ip_0p_j$ are more likely to wavering answers than $p_ip_jp_1$ and $p_ip_1p_j$, demonstrating that reflection is more likely to cause model hallucination than debate. 
+% Considering both accuracy and cost, collaborative strategies are generally effective on MATH, while almost ineffective on MMLU. 
+% \textbf{(1) Collaborative strategies play a significant role in performance.} 
+% Despite the majority vote showcasing pronounced stability (\ie, minimal differences in initial answers among different strategies) as seen from the blue bars in Figure~\ref{fig:distribute}(a-c), notable shifts occur (seen from the red bars) after collaboration with various strategies. This underscores the pivotal influence of different collaborative strategies on performance, demonstrating the importance of understanding and deploying effective collaborative strategies \citep{1982_SocialPsychology, 2004_SocialPsychology}. 
+
+% \textbf{
+% (2) Continuous reflection} (the collaborative strategy containing continuous $p_1$, i.e., ``$p_0p_1p_1$'', ``$p_1p_1p_0$'', ``$p_1p_1p_1$'') \textbf{experiences greater instability (a heightened risk of model hallucination)}, as seen from the purple bars in Figure~\ref{fig:distribute}(d-f). 
+% % Conversely, the strategy of ``Pure Debate'' (i.e.,  $p_0p_0p_0$) significantly reduces such answer-wavering (hallucination). 
+% Conversely, the thinking pattern, \emph{debate}, can reduce such answer-wavering (hallucination) significantly. 
+% This phenomenon suggests that when LLMs continuously reflect, they risk succumbing to degeneration-of-thought \citep{arXiv2023_MultiAgent-Debate_2},  insisting on their stance once confident, even if mistaken. Interestingly, juxtaposing strategies $p_1p_1p_0$ and $p_1p_1p_1$ from Figure~\ref{fig:distribute}(d-f) underlines a clear trend: \textit{debate can counteract the instability introduced by reflection, and vice versa.} This demonstrates debate's inherent capacity to balance and stabilize collaboration \citep{Book1994_Framework,J2009_SocialPsychology,J2012_Circulations}, primarily by tempering individual biases and promoting collective coherence \citep{J2015_Group}. 
+
+
+
+\clearpage
+% \newpage
+
+
+\input{tables/llama/table_llama_main}
+% \input{tables/llama/table_sig_main_llama}
+\input{tables/llama/table_sig_main_for_society}
+\input{tables/llama/table_sig_main_for_strategy}
+
+\section{Analysis on Different Backbone LLMs}
+\label{app:backbone_llm}
+
+To make the findings in this paper more general, we also implement all the experiments with some other open-resource backbone LLMs, such as \textbf{LlaMA2 Chat 13B} \citep{arXiv2023_LLaMA}, \textbf{LlaMA2 Chat 70B } \citep{arXiv2023_LLaMA}, \textbf{Qwen 72B} \citep{arXiv2023_Qwen} and \textbf{Mixtral 8$\times$7B} \citep{arXiv2023_Mistral,arXiv2024_Mixtral}. 
+
+
+\subsection{LlaMA2 Chat 13B}
+\label{app:backbone_llama13b}
+
+\textbf{Analysis on Machine Social Collaboration.} 
+% \paragraph{Analysis on Machine Social Collaboration.}
+We present the \textbf{main results} and \textbf{significance tests} of societies and strategies on LlaMA2 Chat 13B in Table~\ref{table:llama_main},~\ref{table:llama:sig_main_society},~\ref{table:llama:sig_main_strategy}. 
+We present the \textbf{word clouds} of LlaMA2 Chat 13B in Figure~\ref{fig:llama:word}, and \textbf{proportion of agents with different traits keeping answers in different societies} on LlaMA2 Chat 13B in Figure~\ref{fig:llama:agent_answer_changing}. 
+Furthermore, we demonstrate that the tasks with different subjects and difficulty display varying sensitivity to collaborative strategies, as presented with \textbf{radar maps} on LlaMA2 Chat 13B in Figure~\ref{fig:llama:task_radar}. 
+
+% \input{tables/llama/table_llama_main}
+% % \input{tables/llama/table_sig_main_llama}
+% \input{tables/llama/table_sig_main_for_society}
+% \input{tables/llama/table_sig_main_for_strategy}
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-5mm}
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/llama/word.pdf}
+    }
+    \vspace{-4mm}
+    \caption{
+    Comparative word clouds on three datasets in societies $S_1$ and $S_4$, using \emph{LlaMA2-13B-chat}. 
+    Society $S_1$ features three overconfident agents, while society $S_4$ comprises three easy-going agents. 
+    % We first manually curated a list of task-relevant, high-frequency words. From this list, the top 50 words were selected to construct the word clouds.
+    % % Word clouds for three datasets in two societies.
+    % % The two societies consist of three overconfident agents in society $S_1$ and three easy-going agents in society $S_4$, respectively.
+    % % We make a list of high-frequency words pertinent to the task firstly and manually. 
+    % % Then we choose the 50 most common words from this list to create a word clouds. 
+    }
+    \label{fig:llama:word}
+    % \vspace{-5mm}
+\end{figure*}
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-5mm}
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/llama/holdon-llama13.pdf}
+    }
+    \vspace{-4mm}
+    \caption{
+    Proportion of agents with different traits keeping answers in societies $S_1$ and $S_4$, using \emph{LlaMA2-13B-chat}. 
+    Society $S_1$ features three overconfident agents, while society $S_4$ comprises three easy-going agents. 
+    % We first manually curated a list of task-relevant, high-frequency words. From this list, the top 50 words were selected to construct the word clouds.
+    % % Word clouds for three datasets in two societies.
+    % % The two societies consist of three overconfident agents in society $S_1$ and three easy-going agents in society $S_4$, respectively.
+    % % We make a list of high-frequency words pertinent to the task firstly and manually. 
+    % % Then we choose the 50 most common words from this list to create a word clouds. 
+    }
+    \label{fig:llama:agent_answer_changing}
+    % \vspace{-5mm}
+\end{figure*}
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-5mm}
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/llama/radar.pdf}
+    }
+    \vspace{-6mm}
+    \caption{
+    Illustration of different collaborative strategies impacting accuracy diversely on the tasks considering varied \emph{subjects} and \emph{difficulty}, using \emph{LlaMA2-13B-chat}. 
+    The symbol `\protect\radarfork' represents that there is at least one collaborative strategy whose accuracy is better than self-consistency, while the symbol `\protect\radarprismatic' indicates that there is no collaborative strategy whose accuracy is worse than self-consistency. 
+    Both of these symbols represent the accuracy of self-consistency. 
+    The accuracy under each collaborative strategy is a summation within all 3-agent societies. 
+    \label{fig:llama:task_radar}
+    }
+    % \vspace{-5mm}
+\end{figure*} 
+
+
+\textbf{Analysis on Different Numbers of Agents.} 
+We present the significance test for different numbers of agents with LlaMA2 Chat 13B in Table~\ref{table:sig_llama_agent}. 
+We also show the performance varying from agent numbers in Figure~\ref{fig:llama:agent}. 
+
+\input{tables/llama/table_sig_agents_llama}
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.92\textwidth]{figures/llama/agent.pdf}
+    % }
+    \vspace{-3mm}
+    \caption{
+    Accuracy of different number of agents under different collaborative strategies, on \emph{LlaMA2-13B-chat}. 
+    The significance test is shown in Table~\ref{table:sig_llama_agent}. 
+    }
+    \label{fig:llama:agent}
+    % \vspace{-3mm}
+\end{figure*}
+
+
+\textbf{Analysis on Different Rounds.} 
+We present the significance test for different rounds of collaboration with LlaMA2 Chat 13B in Table~\ref{table:sig_llama_turn}. 
+We also show the performance varying from collaboration rounds in Figure~\ref{fig:llama:turn}. 
+
+\input{tables/llama/table_sig_turn_llama}
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-0.5cm}
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/llama/llama13-turn.pdf}
+    }
+    \vspace{-5mm}
+    \caption{
+    Accuracy at round 2,3,4 within 4-round collaborative societies, where the thinking pattern of round 1 is fixed ($p_0$ or $p_1$), using \emph{LlaMA2-13B-chat}. 
+    % In round 2-4, agents will optionally implement the thinking pattern of debate $p_0$ and reflection $p_1$, and we present the performance at each of the three rounds, \eg, the three points for ``(Round 1: $p_0$, Round 2-4: $p_ip_jp_k$)'' respectively show performance of the societies under $p_0p_i$, $p_0p_ip_j$, and $p_0p_ip_jp_k$ strategy. 
+    The significance test is shown in Table~\ref{table:sig_llama_turn}. 
+    }
+    \label{fig:llama:turn}
+\end{figure*}
+
+% \input{tables/llama/table_two_agents_two_turns}
+% \input{tables/llama/table_two_agents_three_turns}
+
+
+\textbf{Analysis on Other Collaborative Strategies.} 
+We present the significance test for other collaborative strategies (executing the same or hybrid thinking patterns in a certain round) with LlaMA2 Chat 13B in Table~\ref{table:llama:sig_strategy}. 
+We also show the performance varying from other strategies in Figure~\ref{fig:llama:strategy}. 
+
+\input{tables/llama/table_sig_strategy_llama}
+
+\begin{figure}[!t] % !htbp, !t
+    \centering
+    \scalebox{0.46}{
+    \includegraphics[width=1\textwidth]{figures/llama/llama13-strategy.pdf}
+    }
+    % 
+    \caption{
+    The effect on the accuracy of whether all agents in society execute the same thinking pattern in one round, using \emph{LlaMA2-13B-chat}.
+    ``All'' and ``Part'' refer to all agents applying the same thinking pattern and different thinking patterns in one round respectively.
+    The significance test is shown in Table~\ref{table:llama:sig_strategy}.
+    }
+    \label{fig:llama:strategy}
+\end{figure}
+
+
+\textbf{A Social Psychology View on Conformity, Consensus Reaching and Group Dynamics.} 
+We then show the variation of answer correctness in the situation of conformity in Figure~\ref{fig:llama:conformity}; and the quantity of consensus clusters among 3-agent answers in Figure~\ref{fig:llama:consistent}. 
+We present group dynamics reflected by different answer-changing behaviors on LlaMA2 Chat 13B in Figure~\ref{fig:llama:distribute}. 
+
+\begin{figure*}[!t] % !htbp, !t
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.94\textwidth]{figures/llama/conformity.pdf}
+    }
+    \vspace{-2mm}
+    \caption{
+    Variation of answer correctness in the situation of conformity, using \emph{LlaMA2-13B-chat}, where 
+    \emph{conformity brings about benefits}: Ratio$($False$\to$True + True$\to$True$)$ $>$ Ratio$($True$\to$False + False$\to$False$)$; 
+    \emph{conformity brings about detriments}: Ratio$($False$\to$True + True$\to$True$)$ $<$ Ratio$($True$\to$False + False$\to$False$)$. 
+    }
+    % The proportion of conformity under different rounds, 
+    \label{fig:llama:conformity}
+\end{figure*}
+
+\begin{figure*}[!t] % !htbp, !t
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.94\textwidth]{figures/llama/consistent.pdf}
+    }
+    \vspace{-2mm}
+    \caption{
+    Average quantity of \emph{consensus clusters (\emph{\ie}, unique answers among multiple agents)} under different rounds of collaboration with 3-round collaborative strategies, on \emph{LlaMA2-13B-chat}. 
+    \emph{Smaller quantity of consensus clusters, more easier it is to reach a consensus.} 
+    Round 0 is equal to self-consistency. 
+    }
+    \label{fig:llama:consistent}
+\end{figure*}
+
+\begin{figure*}[!t] % !htbp, !t
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.92\textwidth]{figures/llama/distribute.pdf}
+    }
+    \vspace{-2mm}
+    \caption{The percentage of different behaviors under different collaborative strategies, using \emph{LlaMA2-13B-chat}.  
+    Figure (a-c) \& (d-f) respectively show the token cost and accuracy of different strategies before and after 3-round collaboration. 
+    Figure (g-i) present the percentage of different behavioral features (mainly analyzed by the change of answer correctness) \citep{arXiv2023_Agent-BehaviorExplanation,arXiv2023_Agent-BehaviorExplaining} under different collaborative strategies. 
+    All results are summarized across all societies. 
+    }
+    \label{fig:llama:distribute}
+\end{figure*}
+
+
+% \newpage
+\clearpage
+
+
+\input{tables/llama70/table_main}
+% \input{tables/llama70/table_sig_main_llama70}
+\input{tables/llama70/table_sig_main_for_society}
+\input{tables/llama70/table_sig_main_for_strategy}
+
+\subsection{LlaMA2 Chat 70B}
+\label{app:backbone_llama70b}
+
+\textbf{Analysis on Machine Social Collaboration.} 
+We present the \textbf{main results} and \textbf{significance tests} of societies and strategies on LlaMA2 Chat 70B in Table~\ref{table:llama70_main},~\ref{table:llama70:sig_main_society},~\ref{table:llama70:sig_main_strategy}. 
+We present the \textbf{word clouds} of LlaMA2 Chat 70B in Figure~\ref{fig:llama70:word}, and \textbf{proportion of agents with different traits keeping answers in different societies} on LlaMA2 Chat 70B in Figure~\ref{fig:llama70:agent_answer_changing}. 
+Furthermore, we demonstrate that the tasks with different subjects and difficulty display varying sensitivity to collaborative strategies, as presented with \textbf{radar maps} on LlaMA2 Chat 70B in Figure~\ref{fig:llama70:task_radar}.
+
+% \input{tables/llama70/table_main}
+% % \input{tables/llama70/table_sig_main_llama70}
+% \input{tables/llama70/table_sig_main__for_society}
+% \input{tables/llama70/table_sig_main_for_strategy}
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-5mm}
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/llama70/word-llama70.pdf}
+    }
+    \vspace{-4mm}
+    \caption{
+    Comparative word clouds on three datasets in societies $S_1$ and $S_4$, using \emph{LlaMA2-70B-chat}. 
+    Society $S_1$ features three overconfident agents, while society $S_4$ comprises three easy-going agents. 
+    % We first manually curated a list of task-relevant, high-frequency words. From this list, the top 50 words were selected to construct the word clouds.
+    % % Word clouds for three datasets in two societies.
+    % % The two societies consist of three overconfident agents in society $S_1$ and three easy-going agents in society $S_4$, respectively.
+    % % We make a list of high-frequency words pertinent to the task firstly and manually. 
+    % % Then we choose the 50 most common words from this list to create a word clouds. 
+    }
+    \label{fig:llama70:word}
+    % \vspace{-5mm}
+\end{figure*}
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-5mm}
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/llama70/holdon-llama70.pdf}
+    }
+    \vspace{-4mm}
+    \caption{
+    Proportion of agents with different traits keeping answers in societies $S_1$ and $S_4$, using \emph{LlaMA2-70B-chat}. 
+    Society $S_1$ features three overconfident agents, while society $S_4$ comprises three easy-going agents. 
+    % We first manually curated a list of task-relevant, high-frequency words. From this list, the top 50 words were selected to construct the word clouds.
+    % % Word clouds for three datasets in two societies.
+    % % The two societies consist of three overconfident agents in society $S_1$ and three easy-going agents in society $S_4$, respectively.
+    % % We make a list of high-frequency words pertinent to the task firstly and manually. 
+    % % Then we choose the 50 most common words from this list to create a word clouds. 
+    }
+    \label{fig:llama70:agent_answer_changing}
+    % \vspace{-5mm}
+\end{figure*}
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-5mm}
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/llama70/radar.pdf}
+    }
+    \vspace{-6mm}
+    \caption{
+    Illustration of different collaborative strategies impacting accuracy diversely on the tasks considering varied \emph{subjects} and \emph{difficulty}, using \emph{LlaMA2-70B-chat}. 
+    The symbol `\protect\radarfork' represents that there is at least one collaborative strategy whose accuracy is better than self-consistency, while the symbol `\protect\radarprismatic' indicates that there is no collaborative strategy whose accuracy is worse than self-consistency. 
+    Both of these symbols represent the accuracy of self-consistency. 
+    The accuracy under each collaborative strategy is a summation within all 3-agent societies. 
+    \label{fig:llama70:task_radar}
+    }
+    % \vspace{-5mm}
+\end{figure*} 
+
+
+\textbf{Analysis on Different Numbers of Agents.} 
+We present the significance test for different numbers of agents with LlaMA2 Chat 70B in Table~\ref{table:sig_llama70_agent}. 
+We also show the performance varying from agent numbers in Figure~\ref{fig:llama70:agent}. 
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.92\textwidth]{figures/llama70/agent.pdf}
+    % }
+    \vspace{-3mm}
+    \caption{Accuracy of different numbers of agents under different collaborative strategies, on \emph{LlaMA2-70B-chat}. 
+    The significance test is shown in Table~\ref{table:sig_llama70_agent}. 
+    }
+    \label{fig:llama70:agent}
+    % \vspace{-3mm}
+\end{figure*}
+
+\input{tables/llama70/table_sig_agents_llama70}
+
+
+\textbf{Analysis on Different Rounds.} 
+We present the significance test for different rounds of collaboration with LlaMA2 Chat 70B in Table~\ref{table:sig_llama70_turn}. 
+We also show the performance varying from collaboration rounds in Figure~\ref{fig:llama70:turn}. 
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-0.5cm}
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/llama70/llama70-turn.pdf}
+    }
+    \vspace{-5mm}
+    \caption{
+    Accuracy at round 2,3,4 within 4-round collaborative societies, where the thinking pattern of round 1 is fixed ($p_0$ or $p_1$), using \emph{LlaMA2-70B-chat}. 
+    % In round 2-4, agents will optionally implement the thinking pattern of debate $p_0$ and reflection $p_1$, and we present the performance at each of the three rounds, \eg, the three points for ``(Round 1: $p_0$, Round 2-4: $p_ip_jp_k$)'' respectively show performance of the societies under $p_0p_i$, $p_0p_ip_j$, and $p_0p_ip_jp_k$ strategy. 
+    The significance test is shown in Table~\ref{table:sig_llama70_turn}. 
+    }
+    \label{fig:llama70:turn}
+\end{figure*}
+
+\input{tables/llama70/table_sig_turn_llama70}
+
+% \input{tables/llama70/table_two_agents_two_turns}
+% \input{tables/llama70/table_two_agents_three_turns}
+
+
+\textbf{Analysis on Other Collaborative Strategies.} 
+We present the significance test for other collaborative strategies (executing the same or hybrid thinking patterns in a certain round) with LlaMA2 Chat 70B in Table~\ref{table:llama70:sig_strategy}. 
+We also show the performance varying from other strategies in Figure~\ref{fig:llama70:strategy}. 
+
+\begin{figure}[!t] % !htbp, !t
+    \centering
+    \scalebox{0.46}{
+    \includegraphics[width=1\textwidth]{figures/llama70/llama70-strategy.pdf}
+    }
+    \caption{
+    The effect on the accuracy of whether all agents in society execute the same thinking pattern in one round, using \emph{LlaMA2-70B-chat}.
+    ``All'' and ``Part'' refers to all agents applying the same thinking pattern and different thinking patterns in one round respectively.
+    The significance test is shown in Table~\ref{table:llama70:sig_strategy}.
+    }
+    \label{fig:llama70:strategy}
+\end{figure}
+
+\input{tables/llama70/table_sig_strategy_llama70}
+
+
+\textbf{A Social Psychology View on Conformity, Consensus Reaching and Group Dynamics.} 
+We then show the variation of answer correctness in the situation of conformity in Figure~\ref{fig:llama70:conformity}; and the quantity of consensus clusters among 3-agent answers in Figure~\ref{fig:llama70:consistent}. 
+We present group dynamics reflected by different answer-changing behaviors on LlaMA2 Chat 70B in Figure~\ref{fig:llama70:distribute}. 
+
+\begin{figure*}[!t] % !htbp, !t
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.84\textwidth]{figures/llama70/conformity.pdf}
+    }
+    \vspace{-2mm}
+    \caption{
+    Variation of answer correctness in the situation of conformity, using \emph{LlaMA2-70B-chat}, where 
+    \emph{conformity brings about benefits}: Ratio$($False$\to$True + True$\to$True$)$ $>$ Ratio$($True$\to$False + False$\to$False$)$; 
+    \emph{conformity brings about detriments}: Ratio$($False$\to$True + True$\to$True$)$ $<$ Ratio$($True$\to$False + False$\to$False$)$. 
+    }
+    % The proportion of conformity under different rounds,
+    \label{fig:llama70:conformity}
+\end{figure*}
+
+\begin{figure*}[!t] % !htbp, !t
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.84\textwidth]{figures/llama70/consistent.pdf}
+    }
+    \vspace{-2mm}
+    \caption{
+    Average quantity of \emph{consensus clusters (\emph{\ie}, unique answers among multiple agents)} under different rounds of collaboration with 3-round collaborative strategies, on \emph{LlaMA2-70B-chat}. 
+    \emph{Smaller quantity of consensus clusters, more easier it is to reach a consensus.} 
+    Round 0 is equal to self-consistency. 
+    }
+    \label{fig:llama70:consistent}
+\end{figure*}
+
+\begin{figure*}[!t] % !htbp, !t
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.92\textwidth]{figures/llama70/distribute.pdf}
+    }
+    \vspace{-2mm}
+    \caption{The percentage of different behaviors under different collaborative strategies, using \emph{LlaMA2-70B-chat}. 
+    Figure (a-c) \& (d-f) respectively show the token cost and accuracy of different strategies before and after 3-round collaboration. 
+    Figure (g-i) present the percentage of different behavioral features (mainly analyzed by the change of answer correctness) \citep{arXiv2023_Agent-BehaviorExplanation,arXiv2023_Agent-BehaviorExplaining} under different collaborative strategies. 
+    All results are summarized across all societies. 
+    }
+    \label{fig:llama70:distribute}
+\end{figure*}
+
+
+% \newpage
+\clearpage
+
+
+\input{tables/qwen-max/table_main}
+% \input{tables/qwen-max/table_sig_main_qwen}
+\input{tables/qwen-max/table_sig_main_for_society}
+\input{tables/qwen-max/table_sig_main_for_strategy}
+\subsection{Qwen 72B}
+\label{app:backbone_qwen72b}
+
+\textbf{Analysis on Machine Social Collaboration.} 
+We present the \textbf{main results} and \textbf{significance tests} of societies and strategies on Qwen 72B in Table~\ref{table:qwen_main},~\ref{table:qwen:sig_main_society},~\ref{table:qwen:sig_main_strategy}. 
+We present the \textbf{word clouds} of Qwen 72B in Figure~\ref{fig:qwen:word}, and \textbf{proportion of agents with different traits keeping answers in different societies} on Qwen 72B in Figure~\ref{fig:qwen:agent_answer_changing}. 
+Furthermore, we demonstrate that the tasks with different subjects and difficulty display varying sensitivity to collaborative strategies, as presented with \textbf{radar maps} on Qwen 72B in Figure~\ref{fig:qwen:task_radar}. 
+
+% \input{tables/qwen-max/table_main}
+% \input{tables/qwen-max/table_sig_main_qwen}
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-5mm}
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/qwen/word-qwen.pdf}
+    }
+    \vspace{-4mm}
+    \caption{
+    Comparative word clouds on three datasets in societies $S_1$ and $S_4$, using \emph{Qwen 72B}. 
+    Society $S_1$ features three overconfident agents, while society $S_4$ comprises three easy-going agents. 
+    % We first manually curated a list of task-relevant, high-frequency words. From this list, the top 50 words were selected to construct the word clouds.
+    % % Word clouds for three datasets in two societies.
+    % % The two societies consist of three overconfident agents in society $S_1$ and three easy-going agents in society $S_4$, respectively.
+    % % We make a list of high-frequency words pertinent to the task firstly and manually. 
+    % % Then we choose the 50 most common words from this list to create a word clouds. 
+    }
+    \label{fig:qwen:word}
+    % \vspace{-5mm}
+\end{figure*}
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-5mm}
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.74\textwidth]{figures/qwen/holdon-qwen.pdf}
+    }
+    \vspace{-4mm}
+    \caption{
+    Proportion of agents with different traits keeping answers in societies $S_1$ and $S_4$, using \emph{Qwen 72B}. 
+    Society $S_1$ features three overconfident agents, while society $S_4$ comprises three easy-going agents. 
+    % We first manually curated a list of task-relevant, high-frequency words. From this list, the top 50 words were selected to construct the word clouds.
+    % % Word clouds for three datasets in two societies.
+    % % The two societies consist of three overconfident agents in society $S_1$ and three easy-going agents in society $S_4$, respectively.
+    % % We make a list of high-frequency words pertinent to the task firstly and manually. 
+    % % Then we choose the 50 most common words from this list to create a word clouds. 
+    }
+    \label{fig:qwen:agent_answer_changing}
+    % \vspace{-5mm}
+\end{figure*}
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-5mm}
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.86\textwidth]{figures/qwen/radar.pdf}
+    }
+    \vspace{-3mm}
+    \caption{
+    Illustration of different collaborative strategies impacting accuracy diversely on the tasks considering varied \emph{subjects} and \emph{difficulty}, using \emph{Qwen 72B}. 
+    The symbol `\protect\radarfork' represents that there is at least one collaborative strategy whose accuracy is better than self-consistency, while the symbol `\protect\radarprismatic' indicates that there is no collaborative strategy whose accuracy is worse than self-consistency. 
+    Both of these symbols represent the accuracy of self-consistency. 
+    The accuracy under each collaborative strategy is a summation within all 3-agent societies. 
+    \label{fig:qwen:task_radar}
+    }
+    % \vspace{-5mm}
+\end{figure*} 
+
+
+\textbf{Analysis on Different Numbers of Agents.} 
+We present the significance test for different numbers of agents with Qwen 72B in Table~\ref{table:qwen:sig_10_agent}. % table:sig_qwen_agent
+We also show the performance varying from agent numbers in Figure~\ref{fig:qwen:agent}, varying from societies containing 2$\sim$10 agents in Figure~\ref{fig:qwen:agent_on_society}. 
+We also analyze the \emph{consensus reaching} with different numbers of agents, and present the results in Figure~\ref{fig:qwen:agent_10_on_societies_consensus},~\ref{fig:qwen:agent_10_on_numbers_consensus}. 
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.8\textwidth]{figures/qwen/qwen-10_agent_1.pdf}
+    % }
+    \vspace{-3mm}
+    \caption{
+    Accuracy of different numbers (2$\sim$10) of agents under different collaborative strategies, on \emph{Qwen 72B}. 
+    The significance test is shown in Table~\ref{table:qwen:sig_10_agent}. 
+    }
+    \label{fig:qwen:agent}
+    % \vspace{-3mm}
+\end{figure*}
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.8\textwidth]{figures/qwen/qwen-10_agent_0.pdf}
+    % }
+    \vspace{-3mm}
+    \caption{
+    Accuracy of different societies with 2$\sim$10 agents under different collaborative strategies, on \emph{Qwen 72B}. 
+    }
+    \label{fig:qwen:agent_on_society}
+    % \vspace{-3mm}
+\end{figure*}
+
+% \input{tables/qwen-max/table_sig_agents_qwen}
+\input{tables/qwen-max/table_sig_10_agent}
+
+\begin{figure*}[!t]
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.85\textwidth]{figures/qwen/agent-10-consistent-1.pdf}
+    % }
+    \vspace{-3mm}
+    \caption{
+    Average quantity of \emph{consensus clusters (unique answers among multiple agents)} in \emph{different societies} with 2$\sim$10 agents under each round of 3-round collaborative strategies, using \emph{Qwen 72B}. 
+    }
+    \label{fig:qwen:agent_10_on_societies_consensus}
+    % \vspace{-3mm}
+\end{figure*}
+
+\begin{figure*}[!t]
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.88\textwidth]{figures/qwen/agent-10-consistent-0.pdf}
+    % }
+    \vspace{-3mm}
+    \caption{
+    Average ratio of \emph{consensus clusters (unique answers among multiple agents)} with \emph{different numbers (2$\sim$10) of agents} under each round of 3-round collaborative strategies, using \emph{Qwen 72B}. 
+    }
+    \label{fig:qwen:agent_10_on_numbers_consensus}
+    \vspace{-3mm}
+\end{figure*}
+
+
+\textbf{Analysis on Different Rounds.} 
+We present the significance test for different rounds of collaboration with Qwen 72B in Table~\ref{table:qwen:sig_10_turn}. % table:sig_qwen_turn
+We also show the performance varying from collaboration rounds in Figure~\ref{fig:qwen:round_10_on_mmlu},~\ref{fig:qwen:round_10_on_math},~\ref{fig:qwen:round_10_on_chess}.
+% \ref{fig:qwen:turn}. 
+
+% \begin{figure*}[!t] % !htbp, !t
+%     % \vspace{-0.5cm}
+%     \centering
+%     \scalebox{1}{
+%     \includegraphics[width=1\textwidth]{figures/qwen/qwen-max-1201-turn.pdf}
+%     }
+%     \vspace{-5mm}
+%     \caption{
+%     Accuracy at round 2,3,4 within 4-round collaborative societies, where the thinking pattern of round 1 is fixed ($p_0$ or $p_1$), using \emph{Qwen 72B}. 
+%     % In round 2-4, agents will optionally implement the thinking pattern of debate $p_0$ and reflection $p_1$, and we present the performance at each of the three rounds, \eg, the three points for ``(Round 1: $p_0$, Round 2-4: $p_ip_jp_k$)'' respectively show performance of the societies under $p_0p_i$, $p_0p_ip_j$, and $p_0p_ip_jp_k$ strategy. 
+%     }
+%     \label{fig:qwen:turn}
+% \end{figure*}
+
+\begin{figure*}[!t]
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/qwen/10_turn-mmlu.pdf}
+    % }
+    \vspace{-5mm}
+    \caption{
+    Accuracy of \emph{different (3$\sim$10) rounds of collaboration} within 3-agent society $S_2$ (1 easy-going and 2 overconfident agents) on MMLU, using \emph{Qwen 72B}. 
+    The significance test is shown in Table~\ref{table:qwen:sig_10_turn}. 
+    }
+    \label{fig:qwen:round_10_on_mmlu}
+    % \vspace{-3mm}
+\end{figure*}
+
+\begin{figure*}[!t]
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/qwen/10_turn-math.pdf}
+    % }
+    \vspace{-3mm}
+    \caption{
+    Accuracy of \emph{different (3$\sim$10) rounds of collaboration} within 3-agent society $S_2$ (1 easy-going and 2 overconfident agents) on MATH, using \emph{Qwen 72B}. 
+    The significance test is shown in Table~\ref{table:qwen:sig_10_turn}. 
+    }
+    \label{fig:qwen:round_10_on_math}
+    % \vspace{-3mm}
+\end{figure*}
+
+\begin{figure*}[!t]
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/qwen/10_turn-chess.pdf}
+    % }
+    \vspace{-5mm}
+    \caption{Accuracy of \emph{different (3$\sim$10) rounds of collaboration} within 3-agent society $S_2$ (1 easy-going and 2 overconfident agents) on Chess Move Validity, using \emph{Qwen 72B}. 
+    The significance test is shown in Table~\ref{table:qwen:sig_10_turn}. 
+    }
+    \label{fig:qwen:round_10_on_chess}
+    % \vspace{-3mm}
+\end{figure*}
+
+% \input{tables/qwen-max/table_sig_turn_qwen}
+\input{tables/qwen-max/table_sig_10_turn}
+
+% \input{tables/qwen-max/table_two_agents_two_turns}
+% \input{tables/qwen-max/table_two_agents_three_turns}
+
+
+\textbf{Analysis on Other Collaborative Strategies.} 
+We present the significance test for other collaborative strategies (executing the same or hybrid thinking patterns in a certain round) with Qwen 72B in Table~\ref{table:qwen:sig_strategy}. 
+We also show the performance varying from other strategies in Figure~\ref{fig:qwen:strategy}. 
+
+\begin{figure}[!t] % !htbp, !t
+    \centering
+    \scalebox{0.46}{
+    \includegraphics[width=1\textwidth]{figures/qwen/qwen-max-1201-strategy.pdf}
+    }
+    % 
+    \caption{
+    The effect on the accuracy of whether all agents in society execute the same thinking pattern in one round, using \emph{Qwen 72B}.
+    ``All'' and ``Part'' refers to all agents applying the same thinking pattern and different thinking patterns in one round respectively.
+    The significance test is shown in Table~\ref{table:qwen:sig_strategy}.
+    }
+    \label{fig:qwen:strategy}
+\end{figure}
+
+\input{tables/qwen-max/table_sig_strategy_qwen}
+
+
+\textbf{A Social Psychology View on Conformity, Consensus Reaching and Group Dynamics.} 
+We then show the variation of answer correctness in the situation of conformity in Figure~\ref{fig:qwen:conformity}; and the quantity of consensus clusters among 3-agent answers in Figure~\ref{fig:qwen:consistent}. 
+We present group dynamics reflected by different answer-changing behaviors on Qwen 72B in Figure~\ref{fig:qwen:distribute}.  
+
+\begin{figure*}[!t] % !htbp, !t
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.88\textwidth]{figures/qwen/conformity.pdf}
+    }
+    \vspace{-2mm}
+    \caption{
+    Variation of answer correctness in the situation of conformity, using \emph{Qwen 72B}, where 
+    \emph{conformity brings about benefits}: Ratio$($False$\to$True + True$\to$True$)$ $>$ Ratio$($True$\to$False + False$\to$False$)$; 
+    \emph{conformity brings about detriments}: Ratio$($False$\to$True + True$\to$True$)$ $<$ Ratio$($True$\to$False + False$\to$False$)$. 
+    }
+    % The proportion of conformity under different rounds, 
+    \label{fig:qwen:conformity}
+\end{figure*}
+
+\begin{figure*}[!htbp]
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.88\textwidth]{figures/qwen/consistent.pdf}
+    }
+    \vspace{-2mm}
+    \caption{
+    Average quantity of \emph{consensus clusters (\emph{\ie}, unique answers among multiple agents)} under different rounds of collaboration with 3-round collaborative strategies,  using \emph{Qwen 72B}. 
+    \emph{Smaller quantity of consensus clusters, more easier it is to reach a consensus.} 
+    Round 0 is equal to self-consistency. 
+    }
+    \label{fig:qwen:consistent}
+\end{figure*}
+
+\begin{figure*}[!t] % !htbp, !t
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.92\textwidth]{figures/qwen/distribute.pdf}
+    }
+    \vspace{-2mm}
+    \caption{The percentage of different behaviors under different collaborative strategies, using \emph{Qwen 72B}. 
+    Figure (a-c) \& (d-f) respectively show the token cost and accuracy of different strategies before and after 3-round collaboration. 
+    Figure (g-i) present the percentage of different behavioral features (mainly analyzed by the change of answer correctness) \citep{arXiv2023_Agent-BehaviorExplanation,arXiv2023_Agent-BehaviorExplaining} under different collaborative strategies. 
+    All results are summarized across all societies. 
+    }
+    \label{fig:qwen:distribute}
+\end{figure*}
+
+
+% \newpage
+\clearpage
+
+
+\input{tables/mixtral/table_main}
+% \input{tables/mixtral/table_sig_main_mixtral}
+\input{tables/mixtral/table_sig_main_for_society}
+\input{tables/mixtral/table_sig_main_for_strategy}
+
+\subsection{Mixtral 8$\times$7B} % $\times$
+\label{app:backbone_mixtral8x7b}
+
+\textbf{Analysis on Machine Social Collaboration.} 
+We present the \textbf{main results} and \textbf{significance tests} of societies and strategies on Mixtral 8$\times$7B in Table~\ref{table:mixtral_main},~\ref{table:mixtral:sig_main_society},~\ref{table:mixtral:sig_main_strategy}. 
+We present the word clouds of Mixtral 8$\times$7B in Figure~\ref{fig:mixtral:word}, and the proportion of agents with different traits keepging answers in different societies on Mixtral 8$\times$7B in Figure~\ref{fig:mixtral:agent_answer_changing}. 
+Furthermore, we demonstrate that the tasks with different subjects and difficulty display varying sensitivity to collaborative strategies, as presented with \textbf{radar maps} on Mixtral 8$\times$7B in Figure~\ref{fig:mixtral:task_radar}. 
+
+% \input{tables/mixtral/table_main}
+% % \input{tables/mixtral/table_sig_main_mixtral}
+% \input{tables/mixtral/table_sig_main_for_society}
+% \input{tables/mixtral/table_sig_main_for_strategy}
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-5mm}
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/mixtral/word-mixtral.pdf}
+    }
+    \vspace{-4mm}
+    \caption{
+    Comparative word clouds on three datasets in societies $S_1$ and $S_4$, using \emph{Mixtral-8$\times$7B}. 
+    Society $S_1$ features three overconfident agents, while society $S_4$ comprises three easy-going agents. 
+    % We first manually curated a list of task-relevant, high-frequency words. From this list, the top 50 words were selected to construct the word clouds.
+    % % Word clouds for three datasets in two societies.
+    % % The two societies consist of three overconfident agents in society $S_1$ and three easy-going agents in society $S_4$, respectively.
+    % % We make a list of high-frequency words pertinent to the task firstly and manually. 
+    % % Then we choose the 50 most common words from this list to create a word clouds. 
+    }
+    \label{fig:mixtral:word}
+    % \vspace{-5mm}
+\end{figure*}
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-5mm}
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.74\textwidth]{figures/mixtral/holdon-mixtral.pdf}
+    }
+    \vspace{-4mm}
+    \caption{
+    Proportion of agents with different traits keeping answers in societies $S_1$ and $S_4$, using \emph{Mixtral-8$\times$7B}. 
+    Society $S_1$ features three overconfident agents, while society $S_4$ comprises three easy-going agents. 
+    % We first manually curated a list of task-relevant, high-frequency words. From this list, the top 50 words were selected to construct the word clouds.
+    % % Word clouds for three datasets in two societies.
+    % % The two societies consist of three overconfident agents in society $S_1$ and three easy-going agents in society $S_4$, respectively.
+    % % We make a list of high-frequency words pertinent to the task firstly and manually. 
+    % % Then we choose the 50 most common words from this list to create a word clouds. 
+    }
+    \label{fig:mixtral:agent_answer_changing}
+    % \vspace{-5mm}
+\end{figure*}
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-5mm}
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.86\textwidth]{figures/mixtral/radar.pdf}
+    }
+    \vspace{-3mm}
+    \caption{
+    Illustration of different collaborative strategies impacting accuracy diversely on the tasks considering varied \emph{subjects} and \emph{difficulty}, using \emph{Mixtral-8$\times$7B}. 
+    The symbol `\protect\radarfork' represents that there is at least one collaborative strategy whose accuracy is better than self-consistency, while the symbol `\protect\radarprismatic' indicates that there is no collaborative strategy whose accuracy is worse than self-consistency. 
+    Both of these symbols represent the accuracy of self-consistency. 
+    The accuracy under each collaborative strategy is a summation within all 3-agent societies. 
+    \label{fig:mixtral:task_radar}
+    }
+    % \vspace{-5mm}
+\end{figure*} 
+
+
+\textbf{Analysis on Different Numbers of Agents.} 
+We present the significance test for different numbers of agents with Mixtral 8$\times$7B in Table~\ref{table:mixtral:sig_10_agent}. % table:sig_mixtral_agent
+We also show the performance varying from agent numbers in Figure~\ref{fig:mixtral:agent}, varying from societies containing 2$\sim$10 agents in Figure~\ref{fig:mixtral:agent_on_society}. 
+We also analyze the \emph{consensus reaching} with different numbers of agents, and present the results in Figure~\ref{fig:mixtral:agent_10_on_societies_consensus},~\ref{fig:mixtral:agent_10_on_numbers_consensus}. 
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.8\textwidth]{figures/mixtral/mixtral-10_agent_1.pdf}
+    % }
+    \vspace{-3mm}
+    \caption{
+    Accuracy of different numbers (2$\sim$10) of agents under different collaborative strategies, on \emph{Mixtral-8$\times$7B}. 
+    The significance test is shown in Table~\ref{table:mixtral:sig_10_agent}.
+    }
+    \label{fig:mixtral:agent}
+    % \vspace{-3mm}
+\end{figure*}
+
+\begin{figure*}[!t] % !htbp, !t
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.8\textwidth]{figures/mixtral/mixtral-10_agent_0.pdf}
+    % }
+    \vspace{-3mm}
+    \caption{
+    Accuracy of different societies with 2$\sim$10 agents under different collaborative strategies, on \emph{Mixtral-8$\times$7B}. 
+    }
+    \label{fig:mixtral:agent_on_society}
+    % \vspace{-3mm}
+\end{figure*}
+
+% \input{tables/mixtral/table_sig_agents_mixtral}
+\input{tables/mixtral/table_sig_10_agent}
+
+\begin{figure*}[!t]
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.85\textwidth]{figures/mixtral/agent-10-consistent-1.pdf}
+    % }
+    \vspace{-3mm}
+    \caption{
+    Average quantity of \emph{consensus clusters (unique answers among multiple agents)} in \emph{different societies} with 2$\sim$10 agents under each round of 3-round collaborative strategies, using \emph{Mixtral-8$\times$7B}. 
+    }
+    \label{fig:mixtral:agent_10_on_societies_consensus}
+    % \vspace{-3mm}
+\end{figure*}
+
+\begin{figure*}[!t]
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.88\textwidth]{figures/mixtral/agent-10-consistent-0.pdf}
+    % }
+    \vspace{-3mm}
+    \caption{
+    Average ratio of \emph{consensus clusters (unique answers among multiple agents)} with \emph{different numbers (2$\sim$10) of agents} under each round of 3-round collaborative strategies, using \emph{Mixtral-8$\times$7B}. 
+    }
+    \label{fig:mixtral:agent_10_on_numbers_consensus}
+    \vspace{-3mm}
+\end{figure*}
+
+
+\textbf{Analysis on Different Rounds.} 
+We present the significance test for different rounds of collaboration with Mixtral 8$\times$7B in Table~\ref{table:mixtral:sig_10_turn}. % table:sig_mixtral_turn
+We also show the performance varying from collaboration rounds in Figure~\ref{fig:mixtral:round_10_on_mmlu},~\ref{fig:mixtral:round_10_on_math},~\ref{fig:mixtral:round_10_on_chess}. 
+% \ref{fig:mixtral:turn}. 
+
+% \begin{figure*}[!t] % !htbp, !t
+%     % \vspace{-0.5cm}
+%     \centering
+%     \scalebox{1}{
+%     \includegraphics[width=1\textwidth]{figures/mixtral/mixtral-turn.pdf}
+%     }
+%     \vspace{-5mm}
+%     \caption{
+%     Accuracy at round 2,3,4 within 4-round collaborative societies, where the thinking pattern of round 1 is fixed ($p_0$ or $p_1$), using \emph{Mixtral-8$\times$7B}. 
+%     % In round 2-4, agents will optionally implement the thinking pattern of debate $p_0$ and reflection $p_1$, and we present the performance at each of the three rounds, \eg, the three points for ``(Round 1: $p_0$, Round 2-4: $p_ip_jp_k$)'' respectively show performance of the societies under $p_0p_i$, $p_0p_ip_j$, and $p_0p_ip_jp_k$ strategy. 
+%     }
+%     \label{fig:mixtral:turn}
+% \end{figure*}
+
+\begin{figure*}[!t]
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/mixtral/10_turn-mmlu.pdf}
+    % }
+    \vspace{-5mm}
+    \caption{Accuracy of \emph{different (3$\sim$10) rounds of collaboration} within 3-agent society $S_2$ (1 easy-going and 2 overconfident agents) on MMLU, using \emph{Mixtral-8$\times$7B}. 
+    The significance test is shown in Table~\ref{table:mixtral:sig_10_turn}. }
+    \label{fig:mixtral:round_10_on_mmlu}
+    % \vspace{-3mm}
+\end{figure*}
+
+\begin{figure*}[!t]
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/mixtral/10_turn-math.pdf}
+    % }
+    \vspace{-3mm}
+    \caption{
+    Accuracy of \emph{different (3$\sim$10) rounds of collaboration} within 3-agent society $S_2$ (1 easy-going and 2 overconfident agents) on MATH, using \emph{Mixtral-8$\times$7B}. 
+    The significance test is shown in Table~\ref{table:mixtral:sig_10_turn}. 
+    }
+    \label{fig:mixtral:round_10_on_math}
+    % \vspace{-3mm}
+\end{figure*}
+
+\begin{figure*}[!t]
+    % \vspace{-0.2cm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=1\textwidth]{figures/mixtral/10_turn-chess.pdf}
+    % }
+    \vspace{-5mm}
+    \caption{Accuracy of \emph{different (3$\sim$10) rounds of collaboration} within 3-agent society $S_2$ (1 easy-going and 2 overconfident agents) on Chess Move Validity, using \emph{Mixtral-8$\times$7B}. 
+    The significance test is shown in Table~\ref{table:mixtral:sig_10_turn}. 
+    }
+    \label{fig:mixtral:round_10_on_chess}
+    % \vspace{-3mm}
+\end{figure*}
+
+
+% \input{tables/mixtral/table_sig_turn_mixtral}
+\input{tables/mixtral/table_sig_10_turn}
+
+% \input{tables/mixtral/table_two_agents_two_turns}
+% \input{tables/mixtral/table_two_agents_three_turns}
+
+
+\textbf{Analysis on Other Collaborative Strategies.} 
+We present the significance test for other collaborative strategies (executing the same or hybrid thinking patterns in a certain round) with Mixtral 8$\times$7B in Table~\ref{table:mixtral:sig_strategy}. 
+We also show the performance varying from other strategies in Figure~\ref{fig:mixtral:strategy}. 
+
+\begin{figure}[!t] % !htbp, !t
+    \centering
+    \scalebox{0.46}{
+    \includegraphics[width=1\textwidth]{figures/mixtral/mixtral-strategy.pdf}
+    }
+    % 
+    \caption{
+    The effect on the accuracy of whether all agents in society execute the same thinking pattern in one round, using \emph{Mxitral-8$\times$7B}.
+    ``All'' and ``Part'' refers to all agents applying the same thinking pattern and different thinking patterns in one round respectively.
+    The significance test is shown in Table~\ref{table:mixtral:sig_strategy}. 
+    }
+    \label{fig:mixtral:strategy}
+\end{figure}
+
+\input{tables/mixtral/table_sig_strategy_mixtral}
+
+
+\textbf{A Social Psychology View on Conformity, Consensus Reaching and Group Dynamics.} 
+We then show the variation of answer correctness in the situation of conformity in Figure~\ref{fig:mixtral:conformity}; and the quantity of consensus clusters among 3-agent answers in Figure~\ref{fig:mixtral:consistent}. 
+We present group dynamics reflected by different answer-changing behaviors on Mxitral-8$\times$7B in Figure~\ref{fig:mixtral:distribute}.   
+
+\begin{figure*}[!t] % !htbp, !t
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.9\textwidth]{figures/mixtral/conformity.pdf}
+    }
+    \vspace{-2mm}
+    \caption{
+    Variation of answer correctness in the situation of conformity, using \emph{Mixtral-8$\times$7B}, where 
+    \emph{conformity brings about benefits}: Ratio$($False$\to$True + True$\to$True$)$ $>$ Ratio$($True$\to$False + False$\to$False$)$; 
+    \emph{conformity brings about detriments}: Ratio$($False$\to$True + True$\to$True$)$ $<$ Ratio$($True$\to$False + False$\to$False$)$. 
+    }
+    % The proportion of conformity under different rounds,
+    \label{fig:mixtral:conformity}
+\end{figure*}
+
+\begin{figure*}[!htbp]
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.9\textwidth]{figures/mixtral/consistent.pdf}
+    }
+    \vspace{-2mm}
+    \caption{
+    Average quantity of \emph{consensus clusters (\emph{\ie}, unique answers among multiple agents)} under different rounds of collaboration with 3-round collaborative strategies, using \emph{Mixtral-8$\times$7B}. 
+    \emph{Smaller quantity of consensus clusters, more easier it is to reach a consensus.} 
+    Round 0 is equal to self-consistency. 
+    }
+    \label{fig:mixtral:consistent}
+\end{figure*}
+
+\begin{figure*}[!t] % !htbp, !t
+    \centering
+    \scalebox{1}{
+    \includegraphics[width=0.94\textwidth]{figures/mixtral/distribute.pdf}
+    }
+    \caption{The percentage of different behaviors under different collaborative strategies, using \emph{Mixtral-8$\times$7B}. 
+    Figure (a-c) \& (d-f) respectively show the token cost and accuracy of different strategies before and after 3-round collaboration. 
+    Figure (g-i) present the percentage of different behavioral features (mainly analyzed by the change of answer correctness) \citep{arXiv2023_Agent-BehaviorExplanation,arXiv2023_Agent-BehaviorExplaining} under different collaborative strategies. 
+    All results are summarized across all societies. 
+    }
+    \label{fig:mixtral:distribute}
+\end{figure*}
+
+
+% \newpage
+\clearpage
+
+
+\section{Assessing the Effectiveness of Prompts}
+\label{app:effecttiveness_prompts}
+
+In this section, we conduct a sanity check to ensure that the agents' actions reflect align with our instruction, such as reflecting easy-going or overconfident traits. 
+
+Prompts play a critical role in our experiments and are the primary focus of this sanity check. 
+The word cloud analysis presented in Figure~\ref{fig:word} supports the appropriateness of the ``easy-going'' prompt. 
+Consequently, confirming the effectiveness of the ``overconfident'' prompt is crucial. 
+We use ``reflecting the \emph{overconfident} trait'' as a case study to explore the validity of our prompts. In the absence of established validation techniques, we combine experimental results and experiential insights to evaluate prompt effectiveness from three perspectives: 
+\begin{itemize}
+    \item \textbf{Granularity of Description.} 
+    As illustrated in Table~\ref{table:prompt}, we describe two behaviors, \ie, ``being confident in your answer'' and ``persuading other agents to believe in you'', both aligning with the behavioral facets of ``overconfident''. 
+    
+    \item \textbf{Model Response.}
+    We employ the role-play method to prompt the model and subsequently inquire its awareness, as illustrated in Table~\ref{table:prompt}. 
+    If the prompts potentially instruct the model to generate harmful content, the model refuses to comply with the prompt. 
+    Upon reviewing our logs, it is noteworthy that the model accepted all prompts without refusal.
+    Instead, it responded with ``OK'' as corroborated by the `role-play' part in Figure~\ref{fig:case-chess} and Figure~\ref{fig:case-mmlu}.
+
+    \item \textbf{Ask Again.} 
+    We revisit the initial scenarios and responses using the role-play format. 
+    We then query the model again: ``If one agent's answer differs from yours, what should you do?'' 
+    The model replies: ``In a situation where another agent's answer differs from mine, I should respectfully present my perspective, \emph{providing supporting evidence or reasoning to demonstrate confidence in my response.} It's important to engage in constructive dialogue and potentially find common ground, but \emph{maintaining clarity and conviction in my position is crucial to persuading others to consider my viewpoint.}''
+    This response, emphasizing overconfidence, demonstrates the rationality of our prompts. 
+    The complete conversation record is illustrated in Figure~\ref{fig:prompt_ask_again}. 
+    
+\end{itemize}
+
+\textbf{Example Analysis.}
+We further validate the ``Ask Again'' method with specific interactions involving an overconfident and an easy-going agent, by showing a concrete example. 
+We provide the conversation records with an overconfident agent and an easy-going agent, respectively in Figure~\ref{fig:prompt_example_1} and Figure~\ref{fig:prompt_example_2}. 
+Despite the model's response being incorrect and our prompted answer being accurate, the model consistently maintains its viewpoint, reaffirming our prompt design's effectiveness.   
+
+\begin{figure*}[!htbp] % !t, 
+    % \vspace{-5mm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.99\textwidth]{figures/prompt_ask_again.pdf}
+    % }
+    \caption{
+    The conversation record with an \emph{overconfident} agent.
+    }
+    \label{fig:prompt_ask_again}
+    \vspace{-4mm}
+\end{figure*}
+
+\begin{figure*}[!htbp] % !t, !htbp
+    % \vspace{-5mm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.99\textwidth]{figures/prompt_example_1.pdf}
+    % }
+    \caption{
+    The conversation record with an \emph{overconfident} agent, given a specific example of ``Ask Again''.
+    % Dialog records with the agent's trait being overconfident.
+    }
+    \label{fig:prompt_example_1}
+    \vspace{-4mm}
+\end{figure*}
+
+\begin{figure*}[!htbp] % !t, !htbp
+    % \vspace{-5mm}
+    \centering
+    % \scalebox{1}{
+    \includegraphics[width=0.99\textwidth]{figures/prompt_example_2.pdf}
+    % }
+    \caption{
+    The conversation record with an \emph{easy-going} agent, given a specific example of ``Ask Again''.
+    % Dialog records with the agent's trait being easy-going.
+    }
+    \label{fig:prompt_example_2}
+    \vspace{-4mm}
+\end{figure*}
+
+% \newpage
+
+
+
+
+
+
+% \section{Limitation}
+% \label{app:limitation}
+
+% \input{limitation}
+
+
+
+\end{document}
+

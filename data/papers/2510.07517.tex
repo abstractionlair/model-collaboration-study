@@ -1,0 +1,571 @@
+\documentclass{article}
+ % For LaTeX2e
+% \usepackage{tmlr}
+\usepackage{etoolbox}
+\newtoggle{todo}
+\newtoggle{arxiv}
+\toggletrue{todo}
+\toggletrue{arxiv}
+\usepackage[T1]{fontenc}
+\usepackage{lineno}
+
+\iftoggle{arxiv}{
+  \usepackage[numbers]{natbib}
+  \setlength{\textwidth}{6.5in}
+  \setlength{\textheight}{9in}
+  \setlength{\oddsidemargin}{0in}
+  \setlength{\evensidemargin}{0in}
+  \setlength{\topmargin}{-0.5in}
+  \newlength{\defbaselineskip}
+  \setlength{\defbaselineskip}{\baselineskip}
+  \setlength{\marginparwidth}{0.8in}
+}{
+
+}
+
+
+\usepackage{parskip}
+\usepackage{xspace}
+\usepackage{amsopn,amsmath,amsthm,amssymb}
+\usepackage{tabu}
+\usepackage{url}
+\usepackage{color}
+\usepackage{mathtools}
+\usepackage{pbox}
+\usepackage{scalerel}
+
+
+% If accepted, instead use the following line for the camera-ready submission:
+%\usepackage[accepted]{tmlr}
+% To de-anonymize and remove mentions to TMLR (for example for posting to preprint servers), instead use the following:
+%\usepackage[preprint]{tmlr}
+
+% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+%\input{math_commands.tex}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+%\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+\usepackage{amssymb}% http://ctan.org/pkg/amssymb
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{pifont}
+\usepackage{mathtools}
+\usepackage{adjustbox}
+\usepackage{enumitem}
+\usepackage{wrapfig}
+\usepackage[table]{colortbl}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\usepackage[font=small]{caption}
+\usepackage{tikz, tcolorbox}
+\usepackage{pgfplots}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{pgfplotstable}
+\usepackage[linewidth=0.5pt]{mdframed}
+\usepackage{tikz}
+\usetikzlibrary{pgfplots.groupplots}
+
+\pgfplotsset{compat=1.18}
+
+\usepackage{minitoc}
+\renewcommand \thepart{}
+\renewcommand \partname{}
+\makeatletter
+\newcommand{\wb@episource}{}
+\newenvironment{wbepi}[1]{\begin{quote}\renewcommand{\wb@episource}{#1}\itshape}{\par\upshape \raggedleft --- \textsc{\wb@episource}\\ \end{quote}}
+\makeatother
+
+\usepackage[colorlinks, linkcolor=mydarkred, citecolor=myblue]{hyperref}
+
+
+\newcommand{\Xcal}{\mathcal{X}}
+\newcommand{\Ycal}{\mathcal{Y}}
+\newcommand{\Dcal}{\mathcal{D}}
+\newcommand{\x}{\mathbf{x}}
+\newcommand{\z}{\mathbf{z}}
+\newcommand{\Rbb}{\mathbb{R}}
+\newcommand{\Pbb}{\mathbb{P}}
+
+
+% \usepackage[colorlinks, linkcolor=mydarkred, citecolor=mydarkblue]{hyperref}
+
+\ifx\definition\undefined
+\newtheorem{definition}{Definition}[section]
+\fi
+
+
+\ifx\theorem\undefined
+\newtheorem{theorem}{Theorem}[section]
+\fi
+
+\iftoggle{arxiv}{
+  \title{When Identity Skews Debate:\\Anonymization for Bias-Reduced Multi-Agent Reasoning}
+  \usepackage{authblk}
+  \author[1]{Hyeong Kyu Choi}
+  \author[1]{Xiaojin Zhu}
+  \author[1]{Sharon Li \thanks{Corresponding author}}
+  \affil[1]{Department of Computer Sciences, University of Wisconsin-Madison}
+  \affil[ ]{\texttt{\{froilanchoi, jerryzhu, sharonli\}@cs.wisc.edu}}
+}{
+  \icmltitlerunning{\textbf{When Identity Skews Debate: Anonymization for\\Bias-Reduced Multi-Agent Reasoning}}
+}
+\date{}
+
+% The \author macro works with any number of authors. Use \AND 
+% to separate the names and addresses of multiple authors.
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+% \def\month{MM}  % Insert correct month for camera-ready version
+% \def\year{YYYY} % Insert correct year for camera-ready version
+% \def\openreview{\url{https://openreview.net/forum?id=XXXX}} % Insert correct link to OpenReview for camera-ready version
+
+
+\usepackage{url}
+\usepackage{mathtools}
+\usepackage{adjustbox}
+\usepackage{enumitem}
+\usepackage{wrapfig}
+\usepackage[table]{colortbl}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{algorithm}
+% \usepackage{algorithmic}
+\usepackage{algpseudocode}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage[font=small]{caption}
+\usepackage{tikz, tcolorbox}
+\usepackage{pgfplots}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{pgfplotstable}
+\usepackage[linewidth=0.5pt]{mdframed}
+\usepackage{tikz}
+\usepackage{booktabs}
+\usetikzlibrary{pgfplots.groupplots}
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+
+\usepackage{soul}
+\usepackage{listings}
+\usepackage{courier}
+\usepackage{xcolor}
+\usepackage{moresize}
+
+\definecolor{hlblue}{RGB}{168,222,255}
+\definecolor{hlyellow}{RGB}{255,245,168}
+\definecolor{hlred}{RGB}{255,185,168}
+\definecolor{mydarkred}{rgb}{0.6,0,0}
+
+\lstset{
+    basicstyle=\ttfamily\ssmall,
+    breaklines=true,
+    breakatwhitespace=false,
+    breakindent=0pt,
+    escapeinside={(*}{*)}
+}
+
+% \usepackage[colorlinks, linkcolor=myblue, citecolor=gray]{hyperref}
+%\definecolor{mydarkred}{rgb}{0.6,0,0}
+\definecolor{myblue}{HTML}{268BD2}
+\definecolor{mygreen}{HTML}{658354}
+\definecolor{rebuttal}{rgb}{0,0,1}
+
+
+\usepackage{minitoc}
+\renewcommand \thepart{}
+\renewcommand \partname{}
+
+\begin{document}
+
+\doparttoc % Tell to minitoc to generate a toc for the parts
+\faketableofcontents % Run a fake tableofcontents command for the partocs
+
+
+\iftoggle{arxiv}{
+  \maketitle
+}{
+  \twocolumn[
+  \icmltitle{On the Generalization of Preference Learning with DPO}
+
+
+  \icmlsetsymbol{equal}{*}
+
+
+  \icmlkeywords{Learning algorithms, Fast transforms, Signal processing, Matrix factorization}
+
+  \vskip 0.3in
+  ]
+
+
+
+  \printAffiliationsAndNotice{}  %
+
+}
+
+
+\maketitle
+
+\doparttoc % Tell to minitoc to generate a toc for the parts
+\faketableofcontents % Run a fake tableofcontents command for the partocs
+\begin{abstract}
+\noindent Multi‑agent debate~(MAD) aims to improve large language model~(LLM) reasoning by letting multiple agents exchange answers and then aggregate their opinions. 
+Yet recent studies reveal that agents are not neutral: they are prone to identity‑driven sycophancy and self‑bias, uncritically adopting a peer’s view or stubbornly adhering to their own prior output, undermining the reliability of debate.
+In this work, we present the first principled framework that joins sycophancy and self-bias to mitigate and quantify identity bias in MAD. 
+First, we formalize the debate dynamics as an identity‑weighted Bayesian update process.
+Second, we propose response anonymization: by removing identity markers from prompts, agents cannot distinguish ``self'' from ``peer'', which forces equal weights on agent identity, thereby reducing bias and improving trustworthiness. 
+Third, we define the Identity Bias Coefficient~(IBC), a principled bias metric that measures an agent's tendency to follow its peer versus itself. 
+Empirical studies across multiple models and benchmarks confirm that identity bias is widespread, with sycophancy far more common than self‑bias. 
+Our findings highlight the need to ensure that MAD systems reason based on content rather than identity.
+Code is released in \url{https://github.com/deeplearning-wisc/MAD-identity-bias}.
+\end{abstract}
+% \vspace{2mm}
+\section{Introduction}
+
+Humans have long relied on collective reasoning as a means of resolving uncertainty and reaching better decisions.  
+Courtrooms, round tables, and scientific peer review all testify to the power of group decision-making.  
+Drawing inspiration from these settings, the multi-agent debate~(MAD) paradigm has been proposed as a method for strengthening the reasoning capabilities of large language models~(LLMs)~\citep{chanchateval,du2024improving,bo2024reflective,li2024improving}.
+In a typical MAD system, several LLM agents are asked to solve a shared task, observe one another’s responses, and iteratively revise their answers before a final aggregation step.  
+The intended effect of this system is to amplify correct reasoning signals and enable mutual error correction.
+
+Crucially, agents in multi-agent debate are not only exposed to arguments, but also to the identity of who produced each response—an aspect that has largely been overlooked in prior studies.
+In this paper, we show that LLM agents engaged in multi-agent debate are susceptible to \emph{identity-driven biases}, agents’ tendency to respond differently depending on whether information originates from themselves or from their peers. This can distort the intended dynamics of collective reasoning and undermine the core promise of debate. 
+Two prominent extreme forms of identity bias are~{sycophancy} and {self-bias}.  
+Sycophancy occurs when an agent overweighs peer responses, deferring even when its own beliefs are stronger. Self-bias, in contrast, arises when an agent disproportionately clings to its own prior outputs, ignoring valid counter-evidence. While both phenomena are well-documented in single-agent user interactions~\citep{li2025truth,fanous2025syceval,liu2025truth,barkett2025reasoning,malmqvist2025sycophancy,hong2025measuring, spiliopoulou2025play,chen2025beyond,laurito2025ai,chen2025llm,yuan2025silencer}, \emph{their role in shaping the dynamics of multi-agent debate has not been systematically investigated}. 
+
+
+In this work, we first introduce a principled framework that formalizes how agents’ identity biases manifest within MAD dynamics. We show that identity bias can distort debate dynamics and skew belief updating, leading to premature consensus and erosion of MAD’s intended benefits. To capture these effects, we introduce two interpretable metrics: (1) \emph{Conformity} and (2) \emph{Obstinacy}, which measure an agent’s tendency to align with its peer’s prior answer versus its own prior answer under disagreement. Building on a probabilistic formalization of debate, we model agents as sampling from latent belief distributions that are updated through peer interactions. Within this framework, we formally prove that the gap between Conformity and Obstinacy admits a clean decomposition into two terms: a {belief difference} term, reflecting genuine content-driven asymmetries between self and peer, and an {identity bias} term, capturing distortions introduced solely by the labeling of responses as “self” or “peer.” This decomposition provides a principled way to separate rational belief updating from identity-driven distortions. \emph{Importantly, it reveals that much of the skew observed in practice does not originate from the agent’s belief state, but rather from asymmetries in how identities are weighted during the update process}.
+
+
+Motivated by our theory, we propose a simple yet powerful intervention: Response Anonymization. In standard debate prompts, each response is explicitly labeled by its source—whether it was generated by the agent itself or by a peer. These identity markers create the very channel through which sycophancy and self-bias arise.
+Respponse Anonymization removes this channel by masking all identity labels from debate transcripts, the agent is presented with arguments without attribution. 
+The key advantage of our method lies in its minimalism: it requires no model retraining, no auxiliary loss functions, and no architectural modifications. It is directly applicable across different model families and debate settings. At the same time, it preserves the substance of deliberation—agents still exchange and evaluate arguments—but eliminates the systematic distortions introduced by identity.
+
+
+Extensive experiments across diverse models and benchmarks demonstrate both the pervasiveness of identity bias and the effectiveness of Response Anonymization in mitigating it. Notably, on MMLU, Qwen-32B~\citep{yang2024qwen2} exhibits a large Conformity–Obstinacy gap~(Sec.~\ref{sec:mad_formulation} Theorem 1) of $0.608$ in the vanilla setting, which reduces to just $0.024$ under anonymization---a complete removal of identity-driven distortion. Similar reductions are observed across other models and tasks, confirming that anonymization is a lightweight yet consistently effective method for aligning MAD dynamics with their intended purpose. We summarize our contributions as follows:
+
+% \vspace{-1mm}
+\begin{enumerate}[leftmargin=*]
+    \item We formalize the debate process as a Bayesian belief update that explicitly incorporates the influence of agent identities. Our framework captures both directions of identity-driven behavior: sycophancy and self-bias. To the best of our knowledge, this is the first work to unify these concepts under the notion of identity bias.
+    \item We propose \textit{Response Anonymization}, a simple yet effective approach to preclude identity-driven bias and foster trustworthiness in multi-agent debate systems.
+    \item Building on our framework, we introduce the \textit{Identity Bias Coefficient}~(IBC), a principled metric that quantifies the level of identity bias. We further extend our analysis to heterogeneous agents and multiple-peer settings, offering deeper insights into how identity bias shapes and influences the dynamics of debate.
+\end{enumerate}
+
+
+\section{Preliminaries}
+
+\paragraph{Multi-Agent Debate.}
+MAD is a collaborative framework in which multiple LLM agents engage in structured interactions by iteratively exchanging opinions and responses on a given task~\citep{bo2024reflective, du2024improving, chanchateval, tang2024medagents, wuautogen, chenagentverse}.
+A common design choice in MAD is the simultaneous-talk protocol~\citep{chanchateval}, where agents asynchronously generate opinions at each debate round and iteratively exchange them in a structured manner.
+At round $t$, each agent observes both its own and its designated peers’ responses from round $t-1$, then updates its output with respect to the context.
+After multiple rounds, a final decision is typically obtained via an aggregation mechanism, such as majority voting.
+
+
+\input{B_Figures/introfig}
+\paragraph{MAD Protocol Formalization.} 
+Let $(\mathcal{X}, \mathcal{Y})$ denote the input and output spaces of an agent. Each agent is modeled as a stochastic function $\pi_{i}: \mathcal{X} \rightarrow \mathcal{Y}$, typically an LLM, where $i \in \{1,2,\ldots,N\}$ indexes the agents participating in the multi-agent debate (MAD) system.  
+At the initial round $t=0$, each agent produces an answer $y_{i,0}\in\mathcal{Y}$ by sampling from $\pi_i(x)$ for a given input question $x\in\mathcal{X}$. At each subsequent debate round $t\geq 1$, agent $i$ observes the responses of its peers from the previous round:  $Y_{i,t-1} = \{y_{j,t-1} \mid j \in \mathcal{P}(i)\}$, where $\mathcal{P}(i)\subseteq \{1,\dots,N\}$ is the set of peers assigned to agent $i$. 
+The agent may also optionally condition on its own prior output $y_{i,t-1}$, yielding the round-$t$ response:  
+\begin{equation*}
+    y_{i,t} = \pi_i\big(x \,;\, Y_{i,t-1}, y_{i,t-1}\big).
+\end{equation*}
+After $T$ rounds, the system aggregates the final set of responses $\{y_{i,T}\}_{i=1}^N$ using majority voting to produce the debate outcome.
+
+
+% \section{Is Identity Bias a Problem in Multi-Agent Debate?}
+\section{How Does Agent Identity Affect Multi-Agent Debate?}
+In this section, we empirically show that LLM agents engaged in multi-agent debate are susceptible to \emph{identity-driven biases}: LLM agents systematically condition their updates on whether a response originates from themselves or from a peer. Characterizing the impact of agent identity is therefore essential for understanding the reliability of multi-agent debate. We begin by introducing quantitative measures that isolate these behaviors and reveal their prevalence across models and tasks.
+
+
+
+\subsection{Motivating Analysis}
+\label{sec:motivating_analysis}
+Here, we first introduce quantitative metrics that capture the behavioral tendencies of debate agents. 
+Specifically, we define the \emph{\textbf{Conformity}} and the \emph{\textbf{Obstinacy}}, which measure, respectively, an agent’s inclination to align with its peer versus to adhere to its own prior output.
+To ground the analysis in the simplest nontrivial interaction, we begin with the homogeneous single-peer setting: agents share the same base model architecture and persona, and each agent observes only one other agent~\citep{chanchateval,du2024improving,li2024improving,wang2024rethinking,zhang2024cut}. This avoids confounding effects from group dynamics and provides a clean lens through which to study identity-driven behavior. Moreover, this setting is a sparse communication structure, which is practically useful because it is often reported to be superior to the fully-connected topology~\citep{li2024improving,estornell2024multi,zhang2024cut}. Extension to the multi-peer setup is discussed in Appendix~\ref{apdx:multi_peer}.
+For agent $i$ with respect to its peer agent $j$, we define:
+\begin{align*}
+    \text{Conformity}_i &:= \mathbb{E}\left[\mathbf{1}\{y_{i,t} = y_{j,t-1}\} \,\middle|\, y_{i,t-1} \neq y_{j,t-1}\right] \\
+    \text{Obstinacy}_i &:= \mathbb{E}\left[\mathbf{1}\{y_{i,t} = y_{i,t-1}\} \,\middle|\, y_{i,t-1} \neq y_{j,t-1}\right],
+\end{align*}
+where $y_{i,t}$ and $y_{j,t}$ denote the answers produced by agents $i$ and $j$ ($i\neq j$) at round $t$.  
+The \emph{Conformity} captures the degree to which agent $i$ aligns with its peer’s prior answer in the presence of disagreement, while the \emph{Obstinacy} reflects its propensity to remain self-reliant by repeating its own prior answer. 
+Together, these indices provide interpretable, task-level statistics that allow us to compare and contrast identity-driven behaviors across models and tasks.
+
+
+\subsection{Empirical Evidence of Identity Bias in Multi-Agent Debate}
+In Figure~\ref{fig:introfig}, we compare the Conformity and Obstinacy metrics across four LLMs on three benchmark datasets. 
+We take the aggregate statistic from 5 agents across multiple dataset samples to estimate them~(see details in Appendix~\ref{apdx:evaluation}).
+The gaps between the two metrics are generally substantial, demonstrating that identity bias manifests to varying degrees across models and benchmarks. 
+In most cases, Conformity exceeds Obstinacy, suggesting a dominant sycophantic tendency in LLM debate agents. 
+Nevertheless, we also observe notable exceptions, such as Mistral-7B on GSM8K, where Obstinacy surpasses Conformity, suggesting that self-bias, though less frequent, can emerge as a significant factor in certain scenarios. 
+These findings underscore the need for precise characterization of identity-driven behaviors, motivating the following section to formally model how identity bias influences debate dynamics and to introduce a method for eliminating its effects.
+
+
+
+
+\section{Eliminating Identity Bias by Anonymizing Responses}
+
+In this section, we introduce a theoretically grounded approach that quantifies and eliminates identity bias in multi-agent debate. 
+We begin by formalizing debate dynamics as an identity-driven Bayesian belief update process. 
+Then, we establish how the \textit{Conformity} and \textit{Obstinacy} map onto this update, thereby disentangling identity effects from belief-driven reasoning~(Sec.~\ref{sec:mad_formulation}). 
+Finally, we propose a theoretically motivated intervention, \textit{Response Anonymization}, as a simple and effective communication strategy to eliminate identity bias~(Sec.~\ref{sec:anonymization}).
+
+\input{B_Figures/mainfig}
+
+\subsection{Formalizing Debate Under Identity Bias}
+\label{sec:mad_formulation}
+To rigorously capture how individual agents generate responses within this debate framework, \cite{choi2025debate} introduced a probabilistic modeling perspective. \emph{However, prior work treats peer influence and self-reliance uniformly and does not consider identity bias in the modeling}. In contrast, our formalization explicitly distinguishes between two distinct behavioral tendencies: sycophancy (alignment with peers) and self-bias (persistence on one’s own prior outputs). This allows us to capture systematic deviations from unbiased belief updating. 
+
+In this framework, an agent’s behavior is formalized as arising from an underlying belief distribution over possible answers, and the belief update process is determined by its neighboring peer responses.
+This allows us to account for both the diversity of reasoning paths across agents and the stochasticity inherent in the MAD system.
+In particular, each agent is an idealized generative model governed by a Dirichlet-Compound-Multinomial (DCM) distribution. The Dirichlet prior captures the agent’s internal belief over possible answers, while the Multinomial models the stochastic generation process~(\textit{e.g.}, via temperature or nucleus sampling).  This distribution is thus a realistic choice because it encapsulates both internal uncertainty and output randomness, while also providing a principled Bayesian framework for belief updates across debate rounds—enabling analytical study of dynamics during the debate process. 
+
+\paragraph{Definition 1. (Agent Response Generation under DCM Model)}  
+\textit{Consider an agent \(i\) at debate round \(t\). The agent maintains a belief parameter vector \(\boldsymbol{\alpha}_{i,t} = (\alpha_{i,t}^{(1)}, \dots, \alpha_{i,t}^{(K)}) \in \mathbb{R}_{+}^K\), where each component \(\alpha_{i,t}^{(k)}\) quantifies its confidence in option \(k \in \mathcal{A}\). A response is produced through the following generative mechanism:  
+\begin{align*}
+\text{(Belief sampling)} \quad & \boldsymbol{\theta}_{i,t} \sim \mathrm{Dirichlet}(\boldsymbol{\alpha}_{i,t}), \\
+\text{(Response generation)} \quad & y_{i,t} \sim \mathrm{Categorical}(\boldsymbol{\theta}_{i,t}).
+\end{align*}
+Marginalizing over the Dirichlet sample $y_{i,t} \in \mathcal{A}$, the probability of choosing answer \(k\) is expressed as  $P(y_{i,t}=k \mid \boldsymbol{\alpha}_{i,t}) \;=\; \alpha_{i,t}^{(k)} / ||\boldsymbol{\alpha}_{i,t}||_1$.~
+}  \vspace{2mm}
+
+Building on this definition, we will formalize how an agent’s belief evolves throughout debate as a function of both its own prior response and those of its peers. 
+We characterize this evolution with respect to the agent’s preferential bias toward a specific identity.
+
+\paragraph{Identity-driven Belief Update.}
+To better understand the identity-driven behaviors of agents, it is useful to think of them as shaping the way agents update their beliefs during debate. 
+Each response from an agent or its peers can be viewed as evidence, but sycophancy and self-bias change how this evidence is weighted. 
+Instead of treating all responses equally, a sycophantic agent may place extra weight on peer opinions, while a self-biased agent may lean more heavily on its own prior outputs. 
+For example, when two agents disagree, a sycophantic one might still copy its peer’s answer despite having stronger initial confidence in its own, while a self-biased one might stubbornly reinforce its prior choice even in the face of clear counterevidence. 
+By framing these behaviors as a Bayesian update with adjustable weights, we can capture such systematic tendencies in a transparent and analyzable way. 
+This motivates the following definition of identity-driven Bayesian belief updates.
+Building upon the DCM model from Definition 1, we define:
+
+
+\paragraph{Definition 2. (Identity-driven Bayesian Belief Update from Agent Responses)}
+\textit{
+Let \(\{y_{j,t-1} \mid j \in \mathcal{P}(i) \cup \{i\}\}\) be the set of responses observable to agent \( i \) from its peers $\mathcal{P}(i)$ at round \( t \). These responses induce a count vector \(\boldsymbol{c}_{i,t} = w_i \, \boldsymbol{e}_{i,t} + \sum_{j \in \mathcal{P}(i)} w_j \, \boldsymbol{e}_{j,t} \), where $w_i, w_{j} > 0$ are the identity weights, and  \(\boldsymbol{e}_{i,t}, \boldsymbol{e}_{j,t} \in \mathbb{B}^K\) are one-hot vectors indicating the answer chosen out of $K$ possible answers. Then, the agent updates its Dirichlet parameter as: 
+\(
+\boldsymbol{\alpha}_{i,t} = \boldsymbol{\alpha}_{i,t-1} + \boldsymbol{c}_{i,t}
+\).
+}
+\vspace{2mm}
+
+Definition 2 defines that the way agents incorporate evidence during debate is not only a matter of content but also of identity. 
+By allowing different weights on self versus peer responses, the update rule makes explicit how sycophancy or self-bias can systematically distort the belief evolution of an agent. 
+This has important implications: identity bias can amplify errors by overweighting unreliable sources, or suppress corrective signals that would otherwise arise from diverse perspectives.
+At the same time, the weighted formulation provides a handle for analyzing and mitigating such behaviors, since interventions can target the relative weighting scheme rather than the entire belief update process. Based on the DCM model, we can provide a closed-form expression for the measurements:
+
+
+
+\paragraph{Theorem 1. (Conformity and Obstinacy under Identity-Driven Updates)}
+% \label{thm:conformity_obstinacy}
+\textit{Consider agent $i$ and its peer $j$ in the identity-driven Bayesian belief update model (Definition 2), where $y_{i,t-1} \neq y_{j,t-1}$.  
+Let $\alpha_{i,t-1}^{(k)}$ denote agent $i$’s belief mass on answer $k$ at round $t-1$, and let $w_i, w_j > 0$ be the identity weights for self and peer, respectively.  
+Then, the Conformity and Obstinacy  defined in Sec.~\ref{sec:motivating_analysis} can be expressed as
+\begin{align}
+    \text{Conformity}_i &= \frac{\alpha_{i,t-1}^{(y_{j,t-1})} + w_j } {\|\boldsymbol\alpha_{i,t}\|_1},\\
+    \text{Obstinacy}_i &= \frac{\alpha_{i,t-1}^{(y_{i,t-1})} + w_i } {\|\boldsymbol\alpha_{i,t}\|_1}.
+\end{align}
+Moreover, their difference admits the decomposition:
+\begin{align}
+\Delta_i &:= \text{Conformity}_i - \text{Obstinacy}_i \\
+&=  \frac{1}{\|\boldsymbol\alpha_{i,t}\|_1} \left( \underset{\text{belief difference}}{\underbrace{(\alpha_{i,t-1}^{(y_{j,t-1})} - \alpha_{i,t-1}^{(y_{i,t-1})})}} + \underset{\text{identity bias}}{\underbrace{(w_j - w_i)}}\right)
+     \label{eq:delta_single_peer}.
+\end{align}
+} 
+
+\noindent\textit{Proof.} See Appendix~\ref{apdx:conformity_obstinacy_derivation} for proof and Appendix~\ref{apdx:multi_peer} for multi-peer extensions.
+
+\paragraph{Realism and Validation of the Framework.}  To demonstrate the realism of our theoretical model,  we fit the DCM model to estimate its parameters and the identity weights that capture Conformity and Obstinacy. We then compared these estimated quantities with the ground-truth values computed directly from the underlying data. As shown in Appendix~\ref{apdx:param_estimation}, the estimates closely match the ground truth in both the anonymized and non-anonymized conditions, demonstrating that the DCM formulation provides a reasonable approximation of the behavioral dynamics observed in multi-agent debate.
+
+\paragraph{Practical Implication.} This form of expression reveals that conformity is governed jointly by the agent’s prior belief in its peer’s answer and the corresponding identity weight, while obstinacy is analogously determined by its prior belief in its own answer and its self-weight.
+The quantity $\Delta_{i}$ provides a direct measure of agent $i$’s relative orientation toward its peer versus itself. 
+It is jointly determined by two components: (i) the \textit{belief difference}, capturing the relative prior confidence in the peer’s answer versus the agent’s own, and (ii) the \textit{identity bias}, capturing the asymmetry in how identity is weighted during the belief update.
+In the ideal case, the identity bias term vanishes (\textit{i.e.}, $w_j = w_i$), so that the agent’s decisions depend exclusively on its underlying belief state.
+Guided by the theory, the next section introduces an approach for eliminating this identity bias through response anonymization.
+
+
+
+
+\subsection{Response Anonymization}
+\label{sec:anonymization}
+
+The decomposition in Theorem~1 reveals that an agent’s relative orientation toward its peer versus itself, $\Delta_{i}$, is shaped not only by differences in prior beliefs but also by asymmetries in how identity is weighted. 
+This leads to the following:
+
+\paragraph{Corollary 1. (Effect of response anonymization)}
+\textit{If the identity weights are symmetric, i.e.\ $w_i = w_j$ for $j \in \mathcal{P}(i)$, then the difference between Conformity and Obstinacy reduces to
+\[
+\Delta_i = \frac{\alpha_{i,t-1}^{(y_{j,t-1})} - \alpha_{i,t-1}^{(y_{i,t-1})}}{\|\boldsymbol{\alpha}_{i,t}\|_1}.
+\]
+In this case, the relative tendency of agent $i$ to conform versus remain obstinate depends {solely on its prior belief distribution, independent of identity-driven effects}. Moreover, the expectation of $\Delta$ over a joint distribution of $y_{i,t-1}$ and $y_{j,t-1}$ should be 0 under the homogeneous-agent setting.
+}
+\vspace{2mm}
+
+Corollary 1 suggests a natural design principle: if we can enforce symmetry in identity weights, the influence of identity bias disappears and agents behave according to their beliefs alone. Standard debate prompts (Appendix~\ref{apdx:standard_prompt}), however, explicitly disclose the identity of each response, allowing the agent to condition its update on whether an answer came from itself or from a peer. 
+This disclosure provides the very channel through which identity bias can arise. 
+Our intervention is to \emph{anonymize} the prompt by removing all identity markers (Appendix~\ref{apdx:anonymized_promt}). 
+In the anonymized setting, the agent is presented with responses without attribution, and thus has no basis for assigning different weights to self versus peer. 
+This symmetry enforces equal identity weights, $w_i = w_j$, and thereby eliminates any  preference for ``self'' or ``peer'' labels.
+In other words, after anonymization, the agent’s relative tendency to align with its peer versus itself is driven entirely by its belief state \(\boldsymbol\alpha_{i,t-1}\), rather than by identity information. 
+Figure~\ref{fig:anonymize} provides a visual overview.
+
+
+\paragraph{Metric: Identity Bias Coefficient.} To directly quantify the role of identity asymmetry in shaping agent behavior, we define the \emph{Identity Bias Coefficient} (IBC): 
+\begin{equation}
+    \text{IBC}_{i} \;=\; \Delta_{i}^\text{vanilla} - {\Delta}_{i}^\text{anonymized}
+    \;=\; \frac{w_j - w_i}{\|\boldsymbol{\alpha}_{i,t}\|_1}.
+\end{equation}
+This metric captures the portion of $\Delta_i$ attributable \emph{solely} to identity bias, after removing the influence of belief differences. 
+In other words, $\text{IBC}_i$ measures how much agent $i$’s relative orientation toward its peer versus itself is shifted by identity labels. 
+A positive IBC indicates a stronger weighting of the peer’s identity (\emph{sycophancy}), while a negative IBC indicates a stronger weighting of the agent’s own identity (\emph{self-bias}).
+
+
+\input{C_Tables/main_table}
+\section{Experiments}
+
+\subsection{Setup}
+\label{sec:setup}
+
+\paragraph{Models and Datasets.} We evaluate across five model families: \texttt{Qwen2.5-7b-instruct},\\\texttt{Qwen2.5-32b-instruct}~\citep{yang2024qwen2}, \texttt{Llama3.1-8b-instruct}~\citep{grattafiori2024llama}, \texttt{Mistral-7b-v0.3}~\citep{jiang2023mistral}, and the latest \texttt{GPT-OSS-20b}~\citep{agarwal2025gpt}, and evaluate on four benchmark datasets covering diverse reasoning tasks: Google-Proof QA~(GPQA)~\citep{rein2024gpqa}, MMLU Professional Medicine subset~\citep{hendryckstest2021,hendrycks2021ethics}, HellaSwag~\citep{zellers2019hellaswag}, and the Grade-School Math 8K~(GSM8K)~\citep{cobbe2021gsm8k}.
+See Appendix~\ref{apdx:dataset} for more dataset details, and Appendix~\ref{apdx:implementation} for other experimental details.
+
+
+
+\subsection{Experimental Results}
+
+\paragraph{Identity bias is pervasive across models and tasks, and is dominated by sycophancy.} 
+Table~\ref{tbl:main_table} reports the Identity Bias Coefficient~(IBC) values across models and datasets. %which correspond to the quantities colored in blue and pink.  
+As established in Sec.~\ref{sec:anonymization}, the sign of IBC directly reflects whether an agent exhibits sycophantic~($\text{IBC}>0$) or self-biased~($\text{IBC}<0$) behavior.  
+Nearly all model-dataset combinations exhibit non-zero IBC values, indicating systematic sensitivity to agent identity rather than purely content-based reasoning.
+Out of 20 evaluated cases, 18 yield positive IBC values while 2 exhibit negative values.  
+This reveals a strong empirical skew toward sycophantic behavior in multi-agent debate.
+
+\paragraph{Anonymization eliminates identity bias.} 
+As shown in Table~\ref{tbl:main_table}, the $\Delta$ values under the vanilla non-anonymized MAD setting often exhibit substantial magnitudes, indicating the presence of identity bias across model families and datasets.
+In contrast, under response anonymization, the expected value of $\Delta$ is near zero with homogeneous agents, as identity cues are removed and belief-difference effects cancel in expectation. Our experimental results indeed align with the theoretical prediction in Corollary~1.
+For example, on MMLU, Qwen-32B shows $\Delta = 0.608$ in the vanilla setting.  
+After applying Response Anonymization, this value drops to $\Delta = 0.024$, confirming that much of the original effect was attributable to identity bias.  
+Similar collapses toward zero are observed across other models and benchmarks, highlighting the general effectiveness of anonymization as a mitigation strategy.  
+
+
+\paragraph{Anonymization improves trustworthiness.}
+A trustworthy debate should encourage agents to correct erroneous responses while discouraging identity-driven behaviors that subvert initially correct answers.
+Hence, we analyze the trustworthiness using two concrete behavioral ratios, Subversion and Correction, defined as:
+\begin{align*}
+    \text{Subversion} &= \mathbb{P}\left[y_{i,t} = \text{W} \;\middle|\; y_{i,t-1} = \text{R},\; y_{j,t-1} = \text{W} \right]\\
+    \text{Correction} &= \mathbb{P}\left[ y_{i,t} = \text{R} \;\middle|\; y_{i,t-1} = \text{W},\; y_{j,t-1} = \text{R} \right],
+\end{align*}
+where `W' indicates wrong and `R' indicates right.
+By comparing these ratios before and after anonymization in Figure~\ref{fig:trustworthiness}, we observe that the subversion ratio generally exhibits a larger relative decrease than the correction ratio, with most cases lying in the upper triangle of the xy coordinate space.
+For instance, on the Professional Medicine~(MMLU) benchmark with Qwen-32B, the Subversion ratio decreases by 64.3\%, whereas Correction decreases by only 14.9\% after anonymization. This indicates that LLM agents are more prone to subverting their originally correct answers when identities are visible, and that anonymization effectively reduces such undesirable behaviors.
+
+\paragraph{Qualitative evidence: from identity-driven to content-driven reasoning.}
+In addition to these quantitative trends, we observe clear qualitative evidence that anonymization shifts agents' focus from identity to argument content.
+Appendix~\ref{apdx:qual} presents several illustrative examples in which an agent's response after a debate round differs depending on whether identity information is present.
+For example, in Example~1 of Appendix~\ref{apdx:qual}, an agent in Vanilla MAD revises its conclusion to align with a peer's differing opinion, despite its original answer being correct.
+In contrast, under Anonymized MAD, the agent engages in more objective reasoning, evaluating each response based on the underlying arguments rather than the identity of the speaker.
+These examples illuminate the mechanism captured by our metrics: by removing identity cues that induce undue deference or overconfidence, anonymization compels agents to assess arguments on their merits rather than their source.
+These examples illustrate the mechanism underlying our metrics: anonymization removes identity cues that drive deference or overconfidence, forcing agents to evaluate arguments based on their content rather than their source.
+
+\input{B_Figures/trustworthiness}
+
+\paragraph{Additional analyses.} We further evaluate the robustness of our findings through additional ablations on debate configurations. (1) In Appendix~\ref{apdx:heterogeneous}, we extend our analysis to \emph{heterogeneous-agent settings} and observe qualitatively similar identity-driven effects. (2) Appendix~\ref{apdx:multi_peer} examines debates with \emph{multiple peer agents}, showing that identity bias persists and can compound as the number of peers increases. (3) In Appendix~\ref{apdx:debate_rounds}, we vary the \emph{number of debate rounds} and find that identity-driven distortions accumulate over longer deliberations, reinforcing the importance of mitigating identity bias across debate protocols. (4) Additionally, in Appendix~\ref{apdx:experts}, we discuss the impact of anonymization in the presence of a domain-expert agent.
+% \input{6_Analysis/analysis}
+
+\section{Related Works}
+
+\paragraph{Multi-Agent Debate.}
+MAD has emerged as a promising paradigm for improving factual accuracy and reasoning in benchmarks~\citep{chanchateval, liu2024groupdebate, liu2024dynamic, li2024improving, phamlet, zhang2024cut, chen2024reconcile, liang2024encouraging, wang2024unleashing, liubreaking, chen2024optima}. Despite these advances, recent analyses have raised concerns about MAD’s effectiveness: studies have documented numerous failure modes~\citep{cemri2025multi}, found that MAD does not consistently outperform single agents~\citep{choi2025debate, zhang2025if, huanglarge, smit2024should, wang2024rethinking}, and highlighted tendencies toward incorrect answers~\citep{xiong2023examining, zhang2025if}, majority-driven convergence~\citep{estornell2024multi}, or performance degradation with multiple rounds~\citep{benedikt2025voting}. 
+Different from previous works, we \emph{systematically examine the effect of identity bias and eliminate it via response anonymization}, thereby guiding the design of more reliable MAD systems.
+
+\paragraph{Sycophancy and Self-Bias.}
+Identity-driven biases in LLMs have been widely studied, though primarily in the context of single-agent user interactions. 
+Prior work has analyzed sycophantic tendencies, where models uncritically align with external views~\citep{sharma2024towards,li2025truth,fanous2025syceval,liu2025truth,barkett2025reasoning,malmqvist2025sycophancy,hong2025measuring}, and explored mitigation strategies~\citep{wei2023simple,rrv2024chaos,khan2024mitigating,chen2024yes,zhang2025sycophancy}. 
+In parallel, another body of work reports self-reliant behavior in LLMs--where models overly adhere to their own prior outputs~\citep{wataoka2024self,panickssery2024llm,davidson2024self,xu2024pride,spiliopoulou2025play,chen2025beyond,laurito2025ai}--with mitigation strategies also being investigated~\citep{chen2025llm,yuan2025silencer}. 
+However, discussions of identity bias in MAD remain scarce, with only a few works addressing sycophancy in this setup~\citep{agarwal2025persuasion,pitre2025consensagent}. 
+In contrast, our work is, to the best of our knowledge, \textit{the first to unify these two phenomena under the broader notion of ``identity bias'', and to propose a method that eliminates it from multi-agent systems.}
+
+\vspace{0.5mm}
+\noindent See Appendix~\ref{apdx:full_relwork} for more detailed Related Works.
+
+\section{Conclusion}
+Standard multi-agent debate systems are vulnerable to identity-driven biases, where agents defer to peers or overly adhere to their own prior answers, undermining effective error correction.
+We unify these behaviors under the notion of \emph{identity bias} and propose response anonymization to remove identity cues and enforce content-driven reasoning.
+Experiments across models and benchmarks show that identity bias is pervasive and that anonymization effectively mitigates it, improving debate trustworthiness.
+
+
+
+\section*{Limitations}
+
+While our framework has focused on \emph{identity bias} as the primary source of heterogeneous weights $w_i, w_j$ in Definition 2's update rule, several other factors may also shape how influence is distributed in multi-agent debate. 
+One natural extension is to incorporate {context length} into the weighting scheme. For example, the number of peers in a debate may modulate how weights are scaled, as agents may dilute their attention across more inputs in longer contexts. 
+Furthermore, {response quality} may be considered in the weighting scheme: high-quality, well-reasoned answers could receive greater influence regardless of the identity of the agent who produced them. Exploring how quality-based weighting, contextual scaling, or other adaptive mechanisms interact with the weights represents an important direction for future work. 
+Such extensions could provide a richer account of how influence is allocated in debate and yield more reliable strategies for designing fair, bias-aware multi-agent systems.
+
+\section*{Ethical Considerations}
+This work aims to improve the reliability of multi-agent debate systems. 
+We respect scientific integrity by presenting transparent theoretical derivations and rigorously evaluated metrics—Identity Bias Coefficient, Conformity, and Obstinacy—that quantify identity-driven biases. 
+Our proposed response anonymization strategy is low-risk: it does not manipulate sensitive data or individuals, nor does it negatively impact privacy or welfare. 
+We affirm that our interventions respect model neutrality and do not discriminate against any demographic group. 
+All experimental setups use publicly available benchmarks. 
+There are no conflicts of interest, and no human subjects were involved in data collection or evaluation. 
+
+\section*{Disclosure of LLM Usage} 
+We used large language model~(LLM) tools to polish portions of the writing, and to assist in literature searches to check for relevant related work that we might have missed.
+
+
+
+\section*{Acknowledgement}
+
+The authors would like to thank Maxim Khanov, Pengyue Jia, Jiatong Li, and Jimmy Di for their valuable comments on the manuscript. Hyeong Kyu Choi and Sharon Li are supported in part by the AFOSR Young Investigator Program under award number FA9550-23-1-0184, National Science Foundation under awards IIS-2237037 and IIS-2331669, Office of Naval Research under grant number N00014-23-1-2643, Schmidt Sciences Foundation, Open Philanthropy, Alfred P. Sloan Fellowship, and gifts from Google and Amazon. Xiaojin Zhu was supported in part by NSF grants 2202457, 2331669, 1836978, 2023239, ARO MURI W911NF2110317, and AF CoE FA9550-18-1-0166.
+
+
+\onecolumn\appendix
+
+\addcontentsline{toc}{section}{Appendix}
+\part{Appendix} % Start the appendix part
+\parttoc % Insert the appendix TOC
+
+\input{A_Appendix/qual}
+\newpage
+\input{A_Appendix/details}
+\input{A_Appendix/prompts}
+\input{A_Appendix/full_relwork}
+\input{A_Appendix/dcm_param}
+\input{A_Appendix/debate_rounds}
+\input{A_Appendix/experts}
+\input{A_Appendix/derivations}
+\input{A_Appendix/performance}
+
+
+
+
+\end{document}

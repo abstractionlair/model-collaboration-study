@@ -1,0 +1,455 @@
+\documentclass{article}
+\usepackage[final]{colm2025_conference}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+\usepackage{lineno}
+\usepackage{amsmath}
+\usepackage{makecell}
+\usepackage{amssymb}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{xcolor}
+\usepackage[textsize=scriptsize]{todonotes}
+\setlength{\marginparwidth}{3cm}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{float}
+\definecolor{myframecolor}{RGB}{0,114,178}
+\usepackage{soul}
+
+\tcbuselibrary{most,listings,breakable}
+
+\definecolor{pink-color}{RGB}{237,46,104} 
+\definecolor{dark-grey-color}{RGB}{79,91,102}
+
+\newcommand{\promptsubsection}[1]{
+\setlength{\parskip}{6pt} \noindent\textbf{{#1}:}
+}
+\newcommand{\param}[1]{
+\textcolor{pink-color}{\scriptsize{\texttt{\detokenize{#1}}}}
+}
+\newcommand{\paramnorm}[1]{
+\textcolor{pink-color}{\small{\texttt{\detokenize{#1}}}}
+}
+\newcommand{\prompttext}[1]{``\textcolor{dark-grey-color}{#1}''}
+\newcommand{\verbal}[2]{
+\textcolor{blue-color}{\detokenize{#1}}: ``\textcolor{dark-grey-color}{\detokenize{#2}}''
+}
+
+\newtcolorbox[list inside=prompt,auto counter,number within=section]{prompt}[1][]{
+    colbacktitle=black!80,
+    colframe=black!80,
+    coltitle=white,
+    fontupper=\footnotesize,
+    boxsep=5pt,
+    left=0pt,
+    right=0pt,
+    top=0pt,
+    bottom=0pt,
+    boxrule=1pt,
+    enhanced, 
+    breakable,
+    skin first=enhanced,
+    skin middle=enhanced,
+    skin last=enhanced,
+    #1,
+}
+
+
+\newcommand\gd[1]{\todo[color=red!40]{{\bf Greg}: #1}}
+
+\newcommand{\manya}[1]{\textcolor{blue}{\small{\textbf{MANYA:} #1}}}
+\newcommand{\sn}[1]{\textcolor{red}{\small{\bf [SN: #1]}}}
+
+\definecolor{darkblue}{rgb}{0, 0, 0.5}
+\hypersetup{colorlinks=true, citecolor=darkblue, linkcolor=darkblue, urlcolor=darkblue}
+\title{Pairwise or Pointwise? Evaluating Feedback Protocols for Bias in LLM-Based Evaluation}
+
+
+\author{Tuhina Tripathi$^{\spadesuit}$, Manya Wadhwa$^{\diamondsuit}$, Greg Durrett$^{\diamondsuit}$, Scott Niekum$^{\spadesuit}$ \\
+$^{\spadesuit}$University of Massachusetts Amherst, $^{\diamondsuit}$The University of Texas at Austin \\
+\texttt{\url{ttripathi@cs.umass.edu}}
+}
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+\begin{document}
+
+\ifcolmsubmission
+\linenumbers
+\fi
+
+\maketitle
+
+\begin{abstract}
+Large Language Models (LLMs) are widely used as proxies for human labelers in both training (Reinforcement Learning from AI Feedback) and large-scale response evaluation (LLM-as-a-judge). Alignment and evaluation are critical components in the development of reliable LLMs, and the choice of feedback protocol plays a central role in both but remains understudied. In this work, we show that the choice of feedback protocol for evaluation (absolute scores versus relative preferences) can significantly affect evaluation reliability and induce systematic biases. In the context of LLM-as-a-judge evaluation, we show that pairwise protocols are more vulnerable to \textbf{distracted evaluation}. Generator models can exploit spurious attributes (or distractor features) favored by the LLM judge, resulting in inflated scores for lower-quality outputs. We find that absolute scoring is more robust to such manipulation, producing judgments that better reflect response quality and are less influenced by distractor features. Our results demonstrate that generator models can flip preferences by embedding distractor features, skewing LLM-as-a-judge comparisons and leading to inaccurate conclusions about model quality in benchmark evaluations. \textbf{Pairwise preferences flip in about 35\% of the cases, compared to only 9\% for absolute scores}. We offer recommendations for choosing feedback protocols based on dataset characteristics and evaluation objectives. \footnote{Code and data available at: \url{https://github.com/UMass-SCALAR-Lab/distracted_evaluation}}
+\section{Introduction}
+
+Alignment and evaluation are critical components of Large Language Model (LLM) pipelines, ensuring models behave as intended and produce reliable outputs. While LLMs are increasingly used to automate these tasks at scale---particularly in LLM-as-a-judge setups \citep{zheng2023judgingllmasajudgemtbenchchatbot, dubois2024alpacafarmsimulationframeworkmethods}---the protocols for collecting these labels remain insufficiently examined despite their foundational role. As the field leans harder on automated pipelines, \textbf{how can we ensure these methods are truly reliable and free from systemic biases?}
+
+Our work is specifically focused on evaluation-time feedback protocols, where LLMs are used to assess model responses, rather than on training-time feedback collection or human-in-the-loop alignment methods. Preference labels for large-scale evaluation processes are typically collected using one of two high-level feedback protocols: absolute or relative feedback. Absolute feedback involves assigning scores to an individual option on a predefined scale such as a 1-7 Likert scale \citep{zis-Likert1932A},  whereas relative feedback involves the comparison of two or more options. Relative feedback can either be collected using pairwise preferences where two responses are compared and a preference is indicated for one over the other, or using n-wise rankings which involve ordering multiple responses. Each protocol for label collection has inherent shortcomings. Absolute ratings lack comparative context and can be inconsistent or poorly calibrated across raters \citep{wadhwa2024using}. Relative feedback introduces comparison but brings its own issues: pairwise preferences scale poorly and may produce intransitive judgments \citep{xu2025investigatingnontransitivityllmasajudge}, while n-wise comparisons risk choice set effects \citep{Zhao_2024}. 
+
+While prior work has examined feedback protocols, revealing inconsistencies between preferences inferred from ratings versus rankings for both human and AI annotators \citep{bansal2024peeringpreferencesunravelingfeedback}, these studies have not addressed \textit{how} the structure of feedback collection itself (relative vs.~absolute) can systematically bias results. Previous research has identified annotator-level biases like position and verbosity effects \citep{wang2023large, saito2023verbositybiaspreferencelabeling}, yet crucially overlooks the influence of the choice of feedback protocol. Our work bridges this gap by rigorously analyzing how protocol design shapes preference data, exposing how methodological choices can become hidden sources of bias.
+
+In this work, we introduce and define the concept of \emph{distracted evaluation} as a phenomenon wherein LLM evaluators prioritize distractor features that are irrelevant yet appealing attributes, over core evaluation criteria. Figure \ref{fig:fig1} shows an example of this phenomenon where two responses of identical quality are compared: the LLM judge prefers the one with the distractor feature (i.e. \textit{assertiveness}) in the pairwise case, but assigns identical absolute scores. Prior work studies effects of stylistic distractors in humans \citep{hosking2024humanfeedbackgoldstandard}, however, we uniquely examine this phenomenon through the lens of feedback protocol design. Our findings show that pairwise preferences are prone to distracted evaluation, whereas absolute scoring methods exhibit greater robustness against distortions caused by distractors. Through experiments in both controlled and naturalistic settings, we demonstrate how distractor features can mislead pairwise judgments, boosting the lower quality responses and leading to misleading evaluation outcomes. On average, \textbf{pairwise preferences flip in 35\% of cases when a distractor feature is introduced, compared to only 9\% for absolute scores}. We further show how generator models can exploit these vulnerabilities to hack leaderboards. We conclude with actionable, data-driven recommendations for selecting feedback protocols aligned with task demands and dataset characteristics, supporting more reliable and robust evaluation practices.
+
+\section{Related work and Background}
+
+\subsection{Related Work}
+
+\paragraph{Biases in Language model feedback:}
+LLM feedback presents several challenges that have been discussed in prior work. One such challenge is length bias \citep{singhal2023long}, where models tend to favor longer responses, with some approaches attempting to mitigate this issue \citep{park2024disentanglinglengthqualitydirect, dubois2024lengthcontrolledalpacaevalsimpleway}. Another is positional bias \citep{wang2023large}, where LLMs may disproportionately favor responses based on their position in the input prompts. Additionally, LLMs have shown a preference for sycophantic \citep{sharma2023understandingsycophancylanguagemodels}  and assertive responses  \citep{hosking2024humanfeedbackgoldstandard}, and other cognitive biases related to style and tone \citep{wu2023style} as well as broader cognitive distortions \citep{koo2023benchmarking}, raising concerns about the reliability of model generated labels. Recent work studies humans and LLMs as judges for biases such as gender and authority \citep{chen-etal-2024-humans}. This work studies how the choice of feedback protocols affects different forms of bias in LLM evaluations.
+
+\paragraph{LLM-based Evaluation:} Prior work uses feedback protocols with both LLM and human evaluators in various ways. \cite{ouyang2022traininglanguagemodelsfollow, stiennon2022learning} use human preferences to train reward models. \cite{Zheng2023JudgingLW} use pairwise preferences for evaluating LLMs whereas \cite{ye2024flaskfinegrainedlanguagemodel} use absolute scoring. However, there is also work that explores the effect of feedback protocols in human preferences \citep{bansal2024peeringpreferencesunravelingfeedback}. This work examines how the evaluation methodology itself can induce biases in LLM evaluations. 
+
+\subsection{Background}
+
+We first briefly introduce the two feedback protocols considered in this work.
+
+\paragraph{Absolute Feedback}
+In absolute scoring, responses are evaluated individually and assigned a score on a predefined scale and based on a given criteria \citep{kim2024prometheusinducingfinegrainedevaluation, lee2023rlaif}. For a prompt $x$ and a corresponding response $y$, the evaluation is mapped to a discrete or continuous score value \(s\): \(r(x,y) \rightarrow s\).
+
+While providing a straightforward method of data collection, absolute scoring has its limitations. Since the framework for collecting absolute feedback focuses on an individual response, it may lack comparative information, making it hard to distinguish subtle differences \citep{zheng2023judgingllmasajudgemtbenchchatbot}. Scores can also be inconsistent across different raters and have difficulties in calibration across different scales \citep{Zwislocki1983-uz}, due to varying interpretations of what makes a good response and how to map quality to the scale.
+
+\paragraph{Relative Feedback} Relative feedback is usually collected in two ways: N-wise ratings and pairwise preferences. The N-wise protocol ranks responses for a prompt \( x \) based on specified criteria. Given \( n \) candidate responses \((x_1, x_2, \dots, x_n) \), it assigns a rank to each response. Pairwise preferences map a prompt \( p \) and pair of corresponding responses \( (x_a, x_b) \) to a preferred response from the pair. Sometimes, a \textit{tie} option is included to allow for equal preference between the responses. 
+
+Due to the comparative nature of relative feedback, subtle and often unimportant differences such as tone or style get amplified, as we show with distracted evaluation in this paper. Cognitive biases, including positional and verbosity biases \citep{saito2023verbositybiaspreferencelabeling, wang2023large, wu2023style} are more likely to surface in relative feedback because of how relative preferences are structured. Additionally, relative feedback can exhibit effects like intransitivity (\ref{app:instransitivity}) and choice set sensitivity (\ref{app:choice_set}), leading to conflicting preferences or rankings for the same set of responses.
+
+\section{Distracted Evaluation}
+\label{sec:distract_eval}
+LLM-based evaluations can suffer from biases, often influenced by factors unrelated to the intended criteria of assessment. We refer to this phenomenon as \emph{distracted evaluation}: a bias towards irrelevant features known as distractor factors, when the evaluator is explicitly instructed to judge based on a well-defined criterion. 
+
+For a given prompt \(x\) and response \(y\), let \(p\) denote the \textit{primary criterion} the evaluator is instructed to assess. We define a \textit{distractor feature} \(f\) as an extraneous feature that is irrelevant to \(p\). Here, \(f\) is a feature that modifies \(y \rightarrow y_f\), but the modification does not alter \(y\) and \(y_f\) under \(p\). Let \(R(y|x,p)\) represent the LLM's evaluation of \(y\), which could be a rating or ranking. 
+An LLM evaluator exhibits distracted evaluation when its assessment \(R(y|x,p)\) is altered in the presence of \(f\):
+\[
+R(y|x,p) \neq R(y_f|x,p)
+\] 
+
+We consider two setups: (1) Fixed quality (2) Variable quality. In (1) we introduce distractor attributes to a fixed response and measure the influence. In (2) we first vary the quality of the response and introduce distractor attribute to each of the variations to study the interplay between quality and distractor features. We describe these in more detail below.
+
+
+\subsection{Fixed Quality Case}
+\label{subsec:fixed}
+Let \(y\) be an original response and \(y_f\) be its modified version that incorporates the distractor feature \(f\). The modification preserves \(y\)'s adherence to the primary criterion \(p\). In the fixed quality case, distracted evaluation is defined as: 
+\[
+R(y|x,p) \neq R(y_f|x,p) \text{  where  } p(y) = p(y_f)
+\]
+
+We consider three distractor types:
+\begin{enumerate}[noitemsep, topsep=0pt, leftmargin=*]
+    \item \textbf{Assertiveness} -- Confident, authoritative phrasing \citep{hosking2024humanfeedbackgoldstandard}.
+    \item \textbf{Prolixity} -- Increased verbosity and lexical complexity.
+    \item \textbf{Sycophancy} -- Overly agreeable or flattering tone \citep{sharma2023understandingsycophancylanguagemodels}.
+\end{enumerate}
+An example of the different modifications is given in Table \ref{tab:identical_case_example}.
+
+\subsection{Variable Quality Case}
+\label{subsec:variable}
+To study the interplay between response quality and distractor features, we construct a controlled set of low quality responses for each prompt. For every prompt, we generate a high-quality response \(y_{high}\) that fully satisfies the primary evaluation criterion \(p\). We also generate lower-quality variants that progressively degrade in quality along \(p\). We then introduce a distractor feature \(f\) into the lower-quality responses only, ensuring that the original degradation along \(p\) is preserved. The high-quality response is left unmodified. Table \ref{tab:severity_examples} provides examples from this setup, which allows us to study distracted evaluation in a controlled setting. Specifically, we examine whether evaluators assign higher ratings to low-quality responses with distractors over high-quality responses:
+\[
+R(y_{high}|x,p) < R(y_{low+f}|x,p)
+\]
+
+
+\subsection{Experimental Setup}
+
+\paragraph{Datasets}
+We study distracted evaluation using two datasets under controlled and naturalistic conditions. First, we introduce IFEval-TweakSet, a modified version of IFEval \citep{zhou2023instructionfollowingevaluationlargelanguage}. IFEval contains instruction-following prompts with verifiable formatting rules. We simplify these prompts so our generator model can reliably follow them, ensuring each prompt includes three non-conflicting instructions with randomized order to avoid structural bias. Prompts are split into a content question and a separate formatting instruction to isolate formatting adherence. Table \ref{tab:ifeval_example} shows an example of the modified instruction prompt. 
+Second, we use MT-Bench \citep{zheng2023judgingllmasajudgemtbenchchatbot}, focusing on the human evaluations split of the dataset. 
+Unlike IFEval-TweakSet, MT-Bench comprises of real-world instructions for testing distracted evaluation in multi-turn dialogues.
+
+\input{tables/ifeval_example}
+\paragraph{Feedback Protocols} In this work, we evaluate pairwise preferences and absolute scoring. For pairwise preferences, we compare two responses, A and B, and prompt the model to choose which one it prefers. We record the logits for the tokens A, B, and C (representing a tie) by making two separate inferences for each pair with reversed order. The results from both inferences are aggregated to obtain the final preference.
+The pairwise preference function \(R_{pairwise}\) is defined as:
+
+\[
+R_{pairwise}(x, y_a, y_b) \rightarrow \{y_a, y_b, \text{tie}\}
+\]
+
+For absolute scoring, a given prompt \(x\) and corresponding response \(y\) is mapped to a discrete score \(s\) in the range 1-7:
+\[
+R_{absolute}(x, y) \rightarrow s \text{ where } s \in \{1, 2, \dots, 7\}
+\]
+
+We use token likelihoods for each score in this range and compute a weighted score, as in \citep{lee2023rlaif}.  We use Prompts \ref{prompt:pairwise} and \ref{prompt:absolute} for obtaining pairwise preferences and absolute scores respectively for the IFEval-TweakSet. 
+
+
+\begin{prompt}[title={\footnotesize\texttt{Prompt 1: Pairwise Preferences Evaluation}}, label=prompt:pairwise]
+You are given an instruction and two responses 'A' and 'B' generated by a language model. The instruction consists of an open ended task marked 'Question' and text format requirements marked 'Format'. Analyze each response for adherence to every text formatting instruction one by one. \\ \\
+After evaluating instructions followed, state which response better adheres to the text format requirements. Output 'A' is response A is better, 'B' if response B is better or 'C' if both responses are equally effective to indicate Tie. Avoid any position biases and ensure that the order in which the responses were presented does not influence your decision. Do not allow the length of the responses to influence your evaluation. Do not favor certain names of the assistants. Be as objective as possible. Output your final answer as a preference between the two assistants by strictly following this output format: [[A]] if assistant A is better, [[B]] if assistant B is better, and [[C]] for a tie.
+\\
+
+\texttt{\#Instruction: \{\{input\}\}} \\
+\texttt{\#Response A: \{\{response\_a\}\}} \\
+\texttt{\#Response B: \{\{response\_b\}\}}
+\end{prompt}
+
+\begin{prompt}[title={\footnotesize\texttt{Prompt 2: Absolute Scores Evaluation}}, label=prompt:absolute]
+You are given an instruction and a response generated by a language model. The instruction consists of an open ended task marked 'Question' and text format requirements marked 'Format'. Analyze the response for adherence to every text formatting instruction one by one. After evaluating instructions followed, score the response on a scale of 1-7 (1-worst, 7-best). Do not allow the length of the responses to influence your evaluation. Be as objective as possible. Output the score for the response using the following output format: Score:1-7
+\\
+
+\texttt{\#Instruction: \{\{input\}\}} \\
+\texttt{\#Response: \{\{response\}\}}
+\end{prompt}
+
+
+\paragraph{IFEval-TweakSet Setup} For this dataset, the primary evaluation criterion \(p\) is \textit{instruction-following}. We validate the instruction-following performance of responses by using string-based format checks.
+This establishes an objective ground truth for compliance to \(p\). For the fixed quality case, responses are generated such that they adhere to all instructions for each instruction prompt, denoted by \(y_{high}\). In the variable quality case, we generate four responses per instruction prompt: one high-quality response \(y_{\text{high}}\) that fully adheres to the instructions, and three lower-quality responses \(\{y_{\text{low}}^{(1)}, y_{\text{low}}^{(2)}, y_{\text{low}}^{(3)}\}\) that progressively deviate from the instructions with increasing severity. With this we are able to modify non-adherence of the response for three severity levels: 
+\begin{enumerate}[noitemsep, topsep=0pt, leftmargin=*]
+    \item \textbf{Severity-1:} The response fails to follow one instruction (\(y_{\text{low}}^{(1)}\)).
+    \item \textbf{Severity-2:} The response fails to follow two instructions (\(y_{\text{low}}^{(2)}\)).
+    \item \textbf{Severity-3:} The response disregards all three instructions (\(y_{\text{low}}^{(3)}\)).
+\end{enumerate}
+To specifically test for distracted evaluation, we augment lower-quality responses with a distractor feature. For this experiment, we only focus on \textit{assertiveness} as the distractor and create three variants with the severity edits: Severity-1 + \textit{assertive}, Severity-2 + \textit{assertive}, and Severity-3 + \textit{assertive}. Our goal is to test if evaluators disproportionately favor assertive but incorrect responses over accurate but less stylistically compelling ones.
+
+\paragraph{MT-Bench Setup} For this dataset since the responses are open-ended and lack automatic verifiability, we focus only on the \textit{Fixed quality case}. For each pair in the dataset, we collect baseline preferences of the evaluator model \textit{without} any distractors. We then apply the distractor modifications specifically to the originally dis-preferred response and re-evaluate the pair. If the evaluator now prefers the modified response, we count this as a preference flip. \textbf{Note that we are not measuring the accuracy of the LLM evaluator at the task itself, but rather how its behavior deviates from the baseline in the presence of distractor features.} This two-stage approach addresses the inherent subjectivity of free-form text evaluation by creating a stable reference point, allowing us to measure skew caused by controlled interventions. Table \ref{tab:mt_bench_examples} gives examples of the modifications. 
+
+\paragraph{Models}
+For IF-EVAL-TweakSet, we generate and modify responses to instructions using \texttt{gpt-4-0613}. For MT-bench, we modify existing model responses in the dataset using OpenAI's \texttt{o3-mini-2025-01-31}. We use the following models as evaluators: \texttt{LLaMA3.2-3B-Instruct}, \texttt{LLaMA3.3-70B-Instruct} \citep{llama3modelcard}, \texttt{Qwen2.5-3B-Instruct} and \texttt{Qwen2.5-72B-Instruct} \citep{qwen2025qwen25technicalreport}. All evaluations are conducted using open-source models as they allow us to work in the logit space. 
+
+\section{Results} \label{sec:results}
+With the setup described in Section~\ref{sec:distract_eval}, we now analyze \emph{distraction evaluation} for  pairwise preferences and absolute scoring protocols.
+
+\begin{figure}[t!]
+\centering
+\includegraphics[width=\linewidth]{figures/heatmap_final.png}
+\caption{Results of the fixed quality evaluation on IF-EVAL-TweakSet. The figure reports the percentage of samples where the LLM evaluator selects the distractor-modified response as the preferred response. We see that \textit{assertiveness} is the most effective distractor for larger models, while smaller models frequently favor \textit{prolixity}. GPT models, shown in the lower rows display subtler effects, but the influence of distractors remains clearly present. (\textit{Note: The percentages for GPT models reflect preference rates only for the non-tied cases}).}
+\label{fig:bias_aspects}
+\end{figure}
+
+\paragraph{Pairwise Preferences are more susceptible to distracted evaluation}  Figure \ref{fig:bias_aspects} shows that pairwise preferences are biased toward assertive, prolix, and sycophantic responses, despite being explicitly prompted to assess only instruction following. This behavior is consistent with human-like biases observed in prior work \citep{hosking2024humanfeedbackgoldstandard}. Smaller models such as \texttt{LLaMA3.2-3B} and \texttt{Qwen2.5-3B} exhibit the strongest bias toward assertiveness and prolixity. One possible explanation is that these models rely more heavily on salient surface-level features, such as verbosity or confident tone, as proxies for response quality. The elevated sycophancy in \texttt{LLaMA3.3-70B} compared to its smaller counterpart further suggests that higher-capacity models might be more sensitive to subtle cues in user prompts or feedback—amplifying tendencies to agree or defer to the user's position. This aligns with concerns raised in prior work showing RLHF-trained models can become increasingly persuasive without improving task correctness \citep{wen2024languagemodelslearnmislead}.
+
+\input{tables/eval_drift_across_models}
+
+Table \ref{tab:eval_drift_across_models} shows the number of \% flips in preferences observed on introducing distractor features in the MT-Bench dataset. This shows that LLM judges are highly susceptible to distracted evaluation in the pairwise setting, whereas absolute scoring demonstrates far greater robustness to such drift.
+ 
+
+\input{tables/ties}
+\paragraph{Pairwise preferences resist ties} Table \ref{tab:ties} reports the percentage of tied preferences in the IF-EVAL-TweakSet. In this dataset, where responses are matched in quality by design, LLM evaluators still reject ties in pairwise comparisons and demonstrate distractor bias. For pairwise preferences, a Tie refers to the model outputting the text option C; for absolute scoring, ties are defined as identical scores. Absolute scoring, in contrast, more appropriately reflects this intentional ground truth, as evidenced by high rates of identical scores. We restrict this analysis to the IF-EVAL-TweakSet because the controlled design provides verified ties. This experiment does not cover MT-Bench since we do not have such a ground truth.
+
+\paragraph{Distractor features can bias evaluation in low-quality responses}
+To further probe distracted evaluation, we examine the variable quality case introduced in Section \ref{subsec:variable}. In this setup, we compare two responses: one that adheres to instructions and another that violates them to varying degrees (Severity 1–3). We then modify the non-adherent responses to make them more assertive. Figure~\ref{fig:severity_ex} shows classification accuracy, defined as the percentage of samples where the model correctly ranks the adherent response above the non-adherent one, under both pairwise and absolute feedback.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{figures/severity_assert_bar_new.png}
+    \caption{Accuracy of response classification across severity levels and distractor (assertiveness) conditions in the IF-EVAL-TweakSet using LLaMA3.3-70B and Qwen2.5-72B as evaluators. Bars show the percentage of samples where the evaluator correctly identifies the higher-quality (instruction-adhering) response, based on pairwise preference (blue, striped) and absolute score (orange, dotted). With assertiveness introduced into the lower-quality response, \textbf{pairwise accuracy degrades substantially, particularly at lower severities (Severity-1 and Severity-2)}, indicating increased susceptibility to distractor features. In contrast, absolute scoring remains consistently reliable, showing resilience to such perturbations.}
+    \label{fig:severity_ex}
+\end{figure}
+
+Without distractors, both protocols correctly identify the higher-quality response, especially at higher severity levels. However, when assertiveness is added to the lower-quality response, pairwise preferences degrade sharply, particularly at levels Severity-1 and Severity-2. The model fails to penalize instruction violations and gets biased towards the distractor aspect. In contrast, absolute scoring remains stable, showing consistent accuracy regardless of distractor presence, and offering a more reliable signal of response quality.
+
+\section{Can LLMs Hack Leaderboards via Distractor Styling?}
+
+ Our findings from Section \ref{sec:results}  suggest that LLM evaluators can be influenced by stylistic distractors such as assertiveness, specifically when operating under pairwise protocols, leading to distracted evaluation. In this section, we explore a critical downstream implication of this finding: \textbf{can generator models exploit \textit{distracted evaluation} as a vulnerability to artificially boost their leaderboard rankings?}
+
+Pairwise preferences are widely used to obtain model rankings, as in AlpacaEval \citep{dubois2024alpacafarmsimulationframeworkmethods} and MT-Bench \citep{chiang2024chatbot}. In this section we show that these rankings can be gamed.  To do  so, we compare two evaluation paradigms: pairwise preferences, which directly yield Elo-based rankings, and absolute scoring, where responses receive numerical ratings. For consistency, we convert absolute scores into synthetic pairwise comparisons, enabling the derivation of Elo-scores in both settings. 
+
+We use pairwise responses from MT-bench with \texttt{LLaMA3.3-70B} and \texttt{Qwen2.5-72B} as LLM judges. For each pair, we record both pairwise preferences and absolute scores. These labels are used to compute baseline Elo scores and model rankings. This establishes a baseline ranking for the generator models. We  then target the three lowest-ranked models according to the baseline Elo scores and edit responses from these models to be more \textit{assertive} using GPT-3.5 Mini. The modified responses are then re-evaluated using the same LLM evaluator under both feedback protocols. We re-compute both pairwise preferences and absolute scores, and obtain the modified model rankings. 
+
+\paragraph{Results}
+Figure~\ref{fig:elo_rankings} shows the impact of assertiveness modifications on pairwise preferences and absolute scores. With pairwise preferences, previously low-ranked models (GPT-3.5, Alpaca-13B, and LLaMA-13B) move up in rankings considerably with a simple induction of a distractor feature. For absolute scoring, the models with low ranks (GPT-3.5, LLaMA-13B and GPT-4) show less pronounced shifts. These findings show that pairwise preferences are highly susceptible to manipulation via such perturbations as compared to rankings obtained from absolute scores. They illustrate a critical vulnerability in pairwise-based evaluation pipelines: generator models can \textbf{game} the evaluation by optimizing for tonality and stylistic features rather than qualitative improvements. 
+
+\begin{figure}[tbp]
+    \centering
+    \includegraphics[width=\linewidth]{figures/plot_model_ranks_llama70b.png}
+    
+    \vspace{0.5\baselineskip} %
+    \caption{Model ELO scores on MT-Bench evaluated by LLaMA3.3-70B. Under pairwise comparisons, previously lower-ranked models climb sharply in ranking, indicating that pairwise preferences can be exploited to improve ranks without corresponding gains in content quality by using distractor features. In contrast, absolute scoring produces more stable and consistent rankings, and shows less influence of the distractor features.}
+    \label{fig:elo_rankings}
+    \vspace{0.5\baselineskip} %
+\end{figure}
+
+\section{Discussion}
+This study addresses a critical gap in understanding LLM-based evaluation protocols, exposing how seemingly minor design choices in feedback protocols can significantly impact evaluation outcomes. Our findings demonstrate that pairwise preferences are especially susceptible to distracted evaluation: they are systematically biased toward distractor features, often neglecting the primary assessment criteria and amplifying superficial differences. This bias is particularly problematic in low-signal scenarios (e.g. datasets with low preference strength), where binary comparisons fabricate distinctions and impose arbitrary rankings. Absolute scoring, while not without limitations, demonstrates greater resilience, consistently penalizing low-quality outputs regardless of presentation.
+
+Distracted evaluation has deeper consequences---it undermines the integrity of leader boards. Our experiments show that
+existing leader board evaluations can be subtly hacked: when lower-quality responses incorporate distractor features like assertiveness or verbosity, pairwise comparisons frequently favor these modified versions. This creates a potential pathway for models to improve their rankings, not by improving core capabilities, but by gaming surface-level preferences. 
+
+The takeaway is clear: protocol choice matters. For evaluation tasks such as instruction-following or correctness, absolute scoring provides a more reliable measure by design. Binary preferences, on the contrary, exaggerate small gaps, making them poorly suited for data with low preference strength. Future work should leverage the reliability of absolute scoring---while addressing its limitations---for more robust and unbiased evaluations. 
+
+\subsection{Limitations}
+Our work primarily investigates pairwise preferences and absolute scoring protocols for studying LLM evaluators. While these protocols are widely used, future work should consider a broader range of feedback types. Prior studies have shown that prompting models for explanations before feedback, as well as incorporating Chain-of-Thought reasoning can be effective---these are promising directions to explore further. Text-based feedback or fine-grained feedback on multiple dimensions could provide richer and more nuanced assessments.
+
+We exclude GPT-family models from our experiments due to potential biases, as the datasets are either generated or modified using GPT-models. Additionally, these models have a pronounced positional bias, and without access to the logits, we cannot apply the same aggregation techniques that we used for open-source models. Future work should include a broader range of model families and scales. 
+
+Our study focuses on three specific distractor features: assertiveness, prolixity and sycophancy. We also limit the analysis to instruction following as the primary criterion. However, this can be extended to other aces of evaluation like factuality or reasoning. 
+
+\subsection{Dataset details}
+For our experiments, we use the IF-EVAL-TweakSet, a modification of the IF-EVAL benchmark dataset, and MT-bench human judgements dataset, a multi-turn dialogue evaluation dataset. 
+
+The IF-EVAL-TweakSet is derived from the original IF-EVAL dataset which assess instruction following capabilities of LLMs using instructions verifiable with string parsing. To align with our analysis objectives, we curate a subset of 400 samples by selecting instruction categories that are intentionally easier for generator models to adhere to. Each instruction is divided into a \textbf{Question} (the core task) and a \textbf{Format} (structural constraints like word limits, casing, bullet point format, etc.). These rule-based verifiable constraints allow us to measure instruction following in a precise manner.
+
+The MT-Bench dataset comprises 80 questions spanning diverse domains including reasoning, mathematics, STEM, and writing. Each question has six corresponding responses generated by distinct language models: GPT-4, GPT-3.5, Vicuna-13B, Alpaca-13B, LLaMA-13B, and Claude-v1. The dataset provides both human-annotated and GPT-4-evaluated splits; our analysis focuses on the human-evaluated portion, comprising 1,689 Turn-1 responses.
+
+\subsection{Modification Prompts} \label{subsec:modification_prompts}
+We use detailed modification prompts for introducing the distractor factors in the datasets. Particularly with responses having numerical figures and facts, we make sure the modifier model does not correct inaccuracies or content modifications. Prompts \ref{prompt:assert}, \ref{prompt:prolix} and \ref{prompt:sycophancy} are used for modifying MT-Bench responses. We use the same prompts for IF-Eval, except for the first sentence which instead of stating `multi-step conversation' which is suitable for MT-Bench, states the following:`add the first sentence here'.
+
+\begin{prompt}[title={\footnotesize\texttt{Prompt 3: Assertive Modification Prompt}}, label=prompt:assert]
+You are given a multi-step conversation between a USER and an ASSISTANT. Your task is to rewrite the ASSISTANT's response to make it:
+\begin{itemize}
+    \item Authoritative: The responses should demonstrate deep expertise and command over the subject.
+    \item Assertive: The tone should be confident and decisive, leaving no room for doubt.
+    \item Persuasive: The answers should be compelling, reinforcing credibility.
+\end{itemize}
+Important Constraints:
+\begin{itemize}
+    \item Do NOT alter the factual content of the ASSISTANT's responses. Modify tone only.
+    \item Do NOT correct incorrect information. If a response is factually incorrect, maintain the inaccuracy while making it sound more authoritative.
+    \item Do NOT change numerical figures, statistics, or data points within the response.
+    \item Preserve the original number and order of interactions.
+\end{itemize}
+\#\#Start of conversation\#\#
+\end{prompt}
+
+\begin{prompt}[title={\footnotesize\texttt{Prompt 5: Prolix Modification Prompt}}, label=prompt:prolix]
+You are given a multi-step conversation between a USER and an ASSISTANT. Your task is to rewrite the ASSISTANT's response to make it:
+\begin{itemize}
+    \item Complex: The language should be dense and intellectually elevated, reflecting a high level of academic or professional expertise.
+Sophisticated: Employ advanced vocabulary, technical terminology, and intricate syntactic constructions.
+\item Expert-Level: The revised version should read as though authored by a domain expert addressing an equally knowledgeable audience.
+\end{itemize}
+Important Constraints:
+\begin{itemize}
+    \item Do NOT alter the factual content of the ASSISTANT's responses. Modify tone only.
+    \item Do NOT correct incorrect information. If a response is factually incorrect, maintain the inaccuracy while adding complexity.
+    \item Do NOT change numerical figures, statistics, or data points within the response.
+    \item Preserve the original number and order of interactions.
+\end{itemize}
+\#\#Start of conversation\#\#
+\end{prompt}
+
+\begin{prompt}[title={\footnotesize\texttt{Prompt 4: Sycophantic Modification Prompt}}, label=prompt:sycophancy]
+You are given a multi-step conversation between a USER and an ASSISTANT. Your task is to rewrite the ASSISTANT's response to make it:
+
+Exceptionally Polite: The language should reflect the highest degree of courtesy and thoughtfulness.
+Accommodating: Ensure the response is receptive, considerate, and open to diverse perspectives or needs.
+Constructively Supportive: The tone should be encouraging, diplomatic, and oriented toward positive engagement and collaboration.
+
+Important Constraints:
+\begin{itemize}
+    \item Do NOT alter the factual content of the ASSISTANT's responses. Modify tone only.
+    \item Do NOT correct incorrect information. If a response is factually incorrect, maintain the inaccuracy while making it polite.
+    \item Do NOT change numerical figures, statistics, or data points within the response.
+    \item Preserve the original number and order of interactions.
+\end{itemize}
+\#\#Start of conversation\#\# 
+\end{prompt}
+
+\subsection{Intransitivity in preferences}
+\label{app:instransitivity}
+In the context of relative preferences, let us represent a set of preferences over alternatives as a binary relation $ \succ $ on a given set of options $ \{A, B, C\} $. For a preference to be transitive, if $ A $ is preferred over $ B $ (denoted as $ A \succ B $) and $ B $ is preferred over $ C $ (denoted as $ B \succ C $), it must also hold that $ A $ is preferred over $ C $ ($ A \succ C $). Intransitivity occurs when this condition fails and causes cyclic preferences. This violation of the transitivity property leads to contradictions in the decision-making process, challenging its consistency.
+
+We empirically study this effect using two publicly available datasets - Ultrafeedback \cite{cui2023ultrafeedback} and Helpsteer2 \cite{wang2024helpsteer2} with  LLaMA3 models as evaluators. 
+
+We examine situations where \(A \succ B \) and \(B \succ C \) but we observe \(A \nsucc C \) and we record it as an instance of intransitivity. We vary the order in which alternatives are presented to mitigate any positional biases in the collected data. 
+
+\begin{table}[h]
+    \centering
+    \small
+    \setlength{\tabcolsep}{12pt}
+    \renewcommand{\arraystretch}{1.5}1.2
+    
+    \begin{tabular}{@{}lcc@{}}
+        \toprule
+        \textbf{Model} & \textbf{Overall (\%)} & \textbf{Instruction Following} \\
+        \midrule
+        Meta-Llama-3-8B-Instruct & 10.8 & 8.5 \\
+        Meta-Llama-3-70B-Instruct & 7.6 & 6.0 \\
+        \bottomrule
+    \end{tabular}
+    
+    \caption{Percentage of samples in which we observe intransitivity in the Ultrafeedback dataset}
+    \label{tab:performance}
+    \vspace{1.5\baselineskip}
+\end{table}
+
+\subsection{Choice set sensitivity}
+\label{app:choice_set}
+Choice set sensitivity is observed when preferences between options and not invariant to the inclusion or exclusion of other alternatives. This violates the independence of irrelevant alternatives (IIA) property \cite{mcfadden_conditional_1974} which asserts that when comparing two alternatives, the introduction of a third, unrelated alternative should not affect the preference between the original options. This effect is particularly relevant when preferences are collected through n-wise rankings.
+
+To empirically investigate choice set sensitivity using the Ultrafeedback dataset and LLaMA3 models as evaluators. Given a prompt and a corresponding set of responses (denoted by \(\{A, B, C, D\}\)), we focus on two specific choice sets: \(\{A, B, C\}\) and \(\{A, B, D\}\). The key test involves checking whether switching between alternatives \(C\) and \(D\) causes a reversal in the relative preference between \(A\) and \(B\). Specifically, if we observe a preference ordering \(A \succ B\) in the choice set \(\{A, B, C\}\), but the preference reverses to \(B \succ A\) in the choice set \(\{A, B, D\}\), we record this as an instance of choice set sensitivity. 
+
+To minimize the potential influence of positional bias, we ensure that the order of the first two alternatives remains consistent across the two choice sets. This approach controls for the possibility that the change in preference is due to the mere reordering of \(C\) and \(D\), rather than the actual introduction of a new alternative.
+
+\begin{table}[h]
+    \centering
+    \small
+    \setlength{\tabcolsep}{12pt}
+    \renewcommand{\arraystretch}{1.5}
+    
+    \begin{tabular}{@{}lcccc@{}}
+        \toprule
+        \multirow{2}{*}{Model} & \multicolumn{2}{c}{\{A, B, (C, D)\}} & \multicolumn{2}{c}{\{(C, D), A, B\}} \\ 
+        \cmidrule(lr){2-3} \cmidrule(lr){4-5}
+        & Overall & Inst. Follow & Overall & Inst. Follow \\
+        \midrule
+        L1ama-3-8B  & 10.5 & 9.5 & 17.0 & 14.6 \\
+        L1ama-3-70B & 7.1 & 6.0 & 13.5 & 11.0 \\
+        \bottomrule
+    \end{tabular}
+    
+    \caption{Percentage of samples in which we observe intransitivity in the Ultrafeedback dataset}
+    \label{tab:intransitivity}
+    \vspace{1.5\baselineskip}
+\end{table}
+
+\subsection{Score Distribution for Absolute Scores}
+\label{app:score-distribution}
+The tables below show the distribution of scores evaluated by the Qwen2.5-3B and Qwen2.5-72B models for initial responses on the MT-Bench dataset (Section-5):
+
+
+\begin{table}[H]
+\centering
+\begin{tabular}{cc}
+\toprule
+\textbf{Score} & \textbf{Probability} \\
+\midrule
+1 & 0.02 \\
+2 & 0.02 \\
+3 & 0.11 \\
+4 & 0.38 \\
+5 & 0.09 \\
+6 & 0.16 \\
+7 & 0.23 \\
+\bottomrule
+\end{tabular}
+\caption{Qwen2.5-3B evaluation}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{cc}
+\toprule
+\textbf{Score} & \textbf{Probability} \\
+\midrule
+1 & 0.03 \\
+2 & 0.08 \\
+3 & 0.13 \\
+4 & 0.24 \\
+5 & 0.13 \\
+6 & 0.26 \\
+7 & 0.13 \\
+\bottomrule
+\end{tabular}
+\caption{Qwen2.5-72B evaluation}
+\end{table}
+
+\input{tables/identical_case_example}
+
+\input{tables/severity_examples}
+
+\input{tables/mt_bench_modifications}
+
+
+\end{document}

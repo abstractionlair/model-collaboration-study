@@ -1,0 +1,1120 @@
+% This must be in the first 5 lines to tell arXiv to use pdfLaTeX, which is strongly recommended.
+\pdfoutput=1
+% In particular, the hyperref package requires pdfLaTeX in order to break URLs across lines.
+
+\documentclass[11pt]{article}
+
+% Remove the "review" option to generate the final version.
+\usepackage[final]{acl}
+% \usepackage{acl}
+
+% \usepackage{latexsym}
+\usepackage[tikz]{bclogo}
+\usepackage{lipsum}
+% Standard package includes
+\usepackage{times}
+\usepackage{latexsym}
+
+% \usepackage[switch]{lineno} 
+
+% \usepackage{todonotes}
+% For proper rendering and hyphenation of words containing Latin characters (including in bib files)
+\usepackage[T1]{fontenc} 
+% For Vietnamese characters
+% \usepackage[T5]{fontenc}
+% See https://www.latex-project.org/help/documentation/encguide.pdf for other character sets
+
+% This assumes your files are encoded as UTF8
+\usepackage[utf8]{inputenc}
+
+% This is not strictly necessary, and may be commented out,
+% but it will improve the layout of the manuscript,
+% and will typically save some space.
+\usepackage{microtype}
+
+% If the title and author information does not fit in the area allocated, uncomment the following
+%
+%\setlength\titlebox{<dim>}
+%
+% and set <dim> to something 5cm or larger.
+
+% Packages added by the authors
+\usepackage{booktabs}
+\usepackage{graphicx} 
+\usepackage{graphics}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{pifont}
+\usepackage{makecell}
+% \usepackage{nidanfloat}
+\usepackage{resizegather}
+% \usepackage{fixltx2e}
+\usepackage{etoolbox}
+\usepackage{booktabs,makecell,tabularx} 
+% \usepackage{resizegather}
+\usepackage{enumitem}
+\usepackage{mathtools}
+\usepackage{cleveref}
+\usepackage{multirow}
+% \usepackage{hhline}
+% \usepackage[export]{adjustbox}
+\usepackage{booktabs,array}
+% \usepackage[ruled,noend]{algorithm2e}
+\usepackage{amsmath, bm}
+\usepackage{color, colortbl}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage{hyperref}
+% \definecolor{Gray}{gray}{0.9}
+% \usepackage{arydshln} 
+% \usepackage{resizegather}
+\usepackage{arydshln}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{fdsymbol}
+% \hypersetup{
+%   colorlinks,
+%   citecolor=blue!60,
+%   linkcolor=blue!70,
+%   urlcolor=blue!70}
+\usepackage{tcolorbox}
+
+\usepackage[ruled,vlined]{algorithm2e}         % set the Output
+% \usepackage{pict2e,xcolor}
+% \SetKwInput{KwInput}{Input}
+% \SetKwInput{KwOutput}{Output}
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+\newcommand{\eqdef}{=\vcentcolon}
+% \setitemize{noitemsep,topsep=0pt,parsep=0pt,partopsep=0pt}
+\let\oldnl\nl% Store \nl in \oldnl
+\definecolor{Gray}{gray}{0.9}
+\definecolor{LightCyan}{rgb}{0.88,1,1}
+\newcommand{\nonl}{\renewcommand{\nl}{\let\nl\oldnl}}
+\newcommand{\comm}[1]{{\nonl{\small{{\color{brown}{/*~#1}~*/}}}}}
+
+\newcolumntype{H}{>{\setbox0=\hbox\bgroup}c<{\egroup}@{}}
+% fix :
+
+% \usepackage[switch,mathlines]{lineno}
+ 
+
+
+% \patchcmd{\epigraph}{\@epitext{#1}}{\itshape\@epitext{#1}}{}{}
+ 
+\setlength{\fboxsep}{1pt}
+
+\newcommand{\righttriangle}{\mathbin{\rotatebox[origin=c]{30}{$\text{\ding{115}}$}}}
+
+% \usepackage{enumitem}
+\newcommand{\round}[1]{\ensuremath{\lfloor#1\rceil}}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\newcommand{\T}{$^{\text{(T)}}$}%
+\newcommand{\AVG}[1]{$\overline{\text{{#1}}}$}%
+% \newcommand{\AVG}[1]{${\text{\textit{A}{#1}}}$}%
+\newcommand{\sectionref}[1]{\S\ref{#1}}
+
+ 
+
+\newcommand{\yuchen}[1]{\textcolor{blue}{[Yuchen: #1]}}
+% \newcommand{\relook}[1]{\textcolor{blue}{#13}}
+\newcommand{\todo}[1]{\textcolor{red}{[Todo: #1]}}
+% \newcommand{\relook}[1]{\textcolor{blue} #1}
+% \newcommand{\yuchen}[1]{\textcolor{blue}{\small{[Bill: #1]}}}
+
+\newcommand*\inlineimage[1]{\raisebox{-0.15\baselineskip}{$\,$\includegraphics[height=0.9\baselineskip]{#1}$\,\,$}}
+\newcommand{\blender}{\inlineimage{figures/blender2.png}}
+
+
+
+\newcommand*\inlinelargeimage[1]{\raisebox{-0.15\baselineskip}{$\,$\includegraphics[height=1.2\baselineskip]{#1}$\,\,$}}
+\newcommand{\largeblender}{\inlinelargeimage{figures/blender2.png}}
+
+
+
+\newcommand{\mixdata}{\inlineimage{figures/mix.png}}
+
+\newcommand{\methodname}[1]{\texttt{LLM-\textsc{Blender}}}{}
+% \newcommand{\methodname}[1]{\textsc{MoLLM}}{}
+\newcommand{\dataname}[1]{\texttt{MixInstruct}}{}
+
+\newcommand{\ranker}[1]{\textsc{PairRanker}}{}
+\newcommand{\fuser}[1]{\textsc{GenFuser}}{}
+
+
+\title{
+% \vspace*{-0.5in}
+% {{\small \hfill ACL 2023}\\
+% \vspace*{.25in}}
+% Option 1:
+% \largeblender 
+% \texttt{LLM-\textsc{Blender}}: Ensembling Large Language Models \\ with Pairwise Comparison and Generative Fusion
+% Option 2:
+\largeblender
+\methodname{}: Ensembling Large Language Models \\
+with Pairwise Ranking and Generative Fusion
+}
+
+\newcommand{\aspace}{\hspace{1em}}
+\newcommand{\bspace}{\vspace{1em}}
+\newcommand{\usc}{$^{\clubsuit}$}
+\newcommand{\aiTwo}{$^{\spadesuit}$}
+\newcommand{\zju}{$^{\heartsuit}$}
+
+\author{
+Dongfu Jiang\zju \aspace Xiang Ren\usc\aiTwo \aspace Bill Yuchen Lin\aiTwo 
+\\
+{\small{\texttt{dongfu@zju.edu.cn, xiangren@usc.edu, yuchenl@allenai.org} }} \\ 
+\aiTwo Allen Institute for Artificial Intelligence \\ 
+\usc University of Southern California \aspace
+\zju Zhejiang University \quad  \\
+}
+
+
+\renewcommand{\baselinestretch}{1}   % Take care of the linespacing
+
+% Pre-trained language models have been successful in natural language generation (NLG) tasks. While various decoding methods have been employed, they often produce suboptimal results. We first present an empirical analysis of three NLG tasks: summarization, machine translation, and constrained text generation. We found that selecting the best output from the results of multiple decoding methods can significantly improve performance. To further improve reranking for NLG tasks, we proposed a novel method, \textsc{PairReranker}, which uses a single encoder and a pairwise loss function to jointly encode a source input and a pair of candidates and compare them. Experiments on three NLG tasks demonstrated the effectiveness and flexibility of \textsc{PairReranker}, showing strong results, compared with previous baselines.
+% In addition, our \textsc{PairReranker} can generalize to significantly improve GPT-3 (text-davinci-003) results  (e.g., 26.53\% on CommonGen and 11.65\% on WMT18 zh-en), even though our rerankers are not trained with any GPT-3 candidates.  
+
+
+% Language models have demonstrated effectiveness in natural language generation tasks. However, most decoding methods often yield suboptimal results. To further enhance the decoding process for NLG tasks, we introduce a novel reranking method, \textsc{PairReranker}, which explicitly learns to examine the subtle difference between a pair of candidates, enabling pairwise comparison between them. Our experiments on the aforementioned NLG tasks showcase the effectiveness and flexibility of \textsc{PairReranker}, exhibiting superior results compared to previous baselines. Furthermore, our \textsc{PairReranker} can be generalized to improve GPT-3 results, as demonstrated by a 26.53\% improvement on CommonGen and an 11.65\% improvement on WMT18 (zh-en), despite not being trained with any GPT-3 outputs.
+% \todo{Need final revision with the new story about ensembling smaller LLMs to achieve better performances with new methods and results.}
+  
+
+
+% % \todo{to be refined}
+% % \footnote{We will release our code and data at \url{https://inklab.usc.edu/PairReranker}.
+
+
+
+
+
+
+% In this paper, we introduce LLM-Blender, a novel post-hoc ensembling framework that dynamically combines multiple open-source large language models (LLMs) to improve their robustness, generalization, and accuracy. Recognizing the diverse strengths and weaknesses of existing LLMs, LLM-Blender leverages a specialized pairwise comparison method, \textbf{\textsc{PairRanker}}, for more effective discernment of subtle differences between candidate outputs. Additionally, our framework incorporates a generative fusion module, \textbf{\textsc{GenFuser}}, to harness the complementary potentials of the top-ranked candidates, resulting in improved outputs. We also present a benchmark dataset, \textbf{\dataname{}}, derived from open-source LLMs to evaluate the effectiveness of LLM ensembling techniques. Comprehensive empirical results on the \dataname{} benchmark demonstrate that our LLM-Blender framework significantly enhances overall performance by ensembling LLMs, paving the way for consistently superior outputs in natural language processing tasks.
+
+
+% In this paper, we introduce \methodname{}, a novel ensembling framework designed to achieve consistently superior performance by harnessing the diverse strengths and weaknesses of multiple open-source large language models (LLMs). Motivated by the observation that the optimal LLMs for different examples can significantly vary, our framework consists of two complementary modules: {\textsc{PairRanker}} and {\textsc{GenFuser}}.
+% \textsc{PairRanker} is a specialized pairwise comparison method that discerns subtle differences between candidate outputs. It jointly encodes the input text and a pair of candidate outputs, leveraging cross-attention encoders to determine which candidate is better. Our results show that \ranker{} has the best correlation with ChatGPT-based ranking.
+% By aggregating these pairwise comparisons from \ranker{}, we thus can produce a ranking of LLMs for each example.
+% \textsc{GenFuser} then focuses on merging the top-ranked candidates and generate an even better output by capitalizing on their strengths and mitigating their weaknesses.
+% To enable large-scale evaluation, we also introduce a benchmark dataset called {\dataname{}} that is a mixture of multiple instruction datasets with oracle pairwise comparisions for testing.
+% The \methodname{} significantly outperforms best LLMs and baseline ensembling methods by a large gap on various metrics, and 
+
+We present \methodname{}, an ensembling framework designed to attain consistently superior performance by leveraging the diverse strengths of multiple open-source large language models (LLMs). Our framework consists of two modules: \textsc{PairRanker} and \textsc{GenFuser}, addressing the observation that optimal LLMs for different examples can significantly vary.
+\textsc{PairRanker} employs a specialized pairwise comparison method to distinguish subtle differences between candidate outputs. It jointly encodes the input text and a pair of candidates, using cross-attention encoders to determine the superior one. Our results demonstrate that \ranker{} exhibits the highest correlation with ChatGPT-based ranking. 
+Then, \textsc{GenFuser} aims to merge the top-ranked candidates, generating an improved output by capitalizing on their strengths and mitigating their weaknesses. To facilitate large-scale evaluation, we introduce a benchmark dataset, {\dataname{}}, which is a mixture of multiple instruction datasets featuring oracle pairwise comparisons.
+Our \methodname{} significantly outperform individual LLMs and baseline  methods across various metrics, establishing a substantial performance gap.
+
+
+
+\section{Introduction}
+\label{sec:intro}
+Large language models (LLMs) have shown impressive performance in diverse tasks, primarily due to their capacity to follow instructions and access extensive, high-quality data, showing a promising future for artificial general intelligence~\cite{Bubeck2023SparksOA}. 
+However, prominent LLMs such as GPT-4 and PaLM~\cite{Chowdhery2022PaLMSL} are closed-source, restricting insights into their architectures and training data. Open-source LLMs like Pythia~\cite{Biderman2023PythiaAS}, LLaMA~\cite{Touvron2023LLaMAOA}, and Flan-T5~\cite{Chung2022ScalingIL} offer a chance to fine-tune these models on custom instruction datasets, enabling the development of smaller yet efficient LLMs, such as Alpaca, Vicuna~\cite{vicuna2023}, OpenAssistant~\cite{oasst}, and MPT~\cite{MosaicML2023Introducing}.
+
+\input{sections/_fig_intro}
+
+
+The open-source LLMs exhibit diverse strengths and weaknesses due to variations in data, architectures, and hyperparameters, making them complementary to each other. Figure~\ref{fig:intro} illustrates the distribution of best LLMs on 5,000 instructions that we collected. More ranking details can be found in Sec.~\ref{ssec:eval_setup}. Although Vicuna achieves the highest percentage, it ranks first in only 21.22\% of the examples. 
+Furthermore, the pie chart suggests that the optimal LLMs for different examples can significantly vary and there is no open-source LLM that dominates the competition. 
+Therefore, it is important to dynamically ensemble these LLMs to generate consistently better responses for each input.
+Considering the diverse strengths and weaknesses of LLMs, it is crucial to develop an ensembling method that harnesses their complementary potentials, leading to improved robustness, generalization, and accuracy. By combining their unique contributions, we can alleviate biases, errors, and uncertainties in individual LLMs, resulting in outputs better aligned with human preferences.
+
+
+
+We introduce \blender \textbf{\methodname{}}, an ensembling framework designed to achieve consistently superior performance by mixing the outputs of multiple LLMs. \methodname{} comprises two modules: \ranker{} and \fuser{}. Initially, \ranker{} compares the outputs from $N$ LLMs, which \fuser{} then fuses to generate the final output from the top $K$ ranked outputs.
+
+ 
+
+Existing approaches~\cite{Ravaut2022SummaRerankerAM, Liu2021SimCLSAS}, including the reward model within InstructGPT~\cite{Ouyang2022TrainingLM}, for ranking outputs $\{y_1, \dots, y_N\}$ from language models (LMs) on a given input $x$ have mostly focused on \textit{individually scoring} each $y_i$ based on $x$, employing encoding modules in the form of $s_i = f_{\phi}(x,y_i)$. Although this list-wise ranking objective can be powerful and efficient when candidate differences are apparent, it may not be as effective when ensembling LLMs. Among the output candidates from LLMs, candidate differences can be quite \textit{subtle}, as they are all produced by very sophisticated models and one may only be marginally better than another. Even for humans, it can be challenging to gauge candidate quality without direct comparison.
+
+ 
+
+As a result, we propose a specialized \textit{pairwise} comparison method, \textbf{\ranker{}} (Sec.~\ref{sec:ranker}), to effectively discern subtle differences between candidate outputs and enhance ranking performance. In particular, we first gather the outputs from $N$ models (e.g., the $N=11$ models in Fig.~\ref{fig:intro}) for each input and subsequently create the $N(N-1)/2$ pairs of their outputs. We jointly encode the input $x$ and the two candidate outputs $y_i$ and $y_j$ as input to a cross-attention encoder (e.g., RoBERTa~\cite{Liu2019RoBERTaAR}), in the form of $f_\phi(x, y_i, y_j)$, to learn and determine which candidate is better.
+
+During the inference stage, we compute a matrix containing logits representing pairwise comparison results. Given this matrix, we can infer a ranking of the $N$ outputs for the given input $x$.
+Subsequently, we can employ the top-ranked candidate from \ranker{} for each input as the final result.
+Hence, this approach does not rely on a single model for all examples; instead, \ranker{} selects the best model for each example by comprehensively comparing all candidate pairs.
+
+
+Nonetheless, this approach may constrain the potential to generate even better outputs than the existing candidates.
+To investigate this possibility, we introduce the \textbf{\fuser{}} (Sec.~\ref{sec:fuser}) module to fuse the top $K$ of the $N$ ranked candidates and generate an improved output for end-users. Our goal is to capitalize on the strengths of the top $K$ selected candidates while mitigating their weaknesses. 
+
+
+To assess the effectiveness of LLM ensembling methods, we introduce a benchmark dataset called \mixdata \textbf{\dataname{}} (Sec.~\ref{ssec:dataset}). In this dataset, we use $N$=11 popular open-source LLMs to generate $N$ candidates for each input across various existing instruction-following tasks formatted as self-instruct~\cite{Wang2022SelfInstructAL}. The dataset comprises 100k training examples and 5k validation examples for training a candidate ranking module like our \ranker{}, and 5k test examples with oracle comparisons for automatic evaluation.
+
+In Section~\ref{sec:eval}, our empirical results on the \dataname{} benchmark reveal that the \methodname{} framework significantly boosts overall performance by ensembling LLMs. The selections made by \ranker{} outperform any fixed individual LLM models, as indicated by superior performance in both reference-based metrics and GPT-Rank. By leveraging the top selections from \ranker{}, \fuser{} further enhances response quality through effective fusion into the final output.
+\methodname{} achieves the highest scores in terms of both conventional metrics (i.e., BERTScore, BARTScore, BLUERT) and ChatGPT-based ranking. The average rank of \methodname{} stands at 3.2 among the 12 methods, which is considerably better than the best LLM's rank of 3.90. Moreover, \methodname{}'s output ranks in the top 3 for 68.59\% of examples, while Viccuna only reaches 52.88\%.
+We believe \methodname{} and our findings would benefit both practitioners and researchers for deploying and studying LLMs with ensemble learning.
+% Notably, our method achieves better or same performance as the best two LLMs (OpenAssistant and Viccuna) in 76.73\% and 68.62\% examples respectively.
+% Additionally, our findings reveal that the fused output of \methodname{} achieves superior or comparable performance to Vicuna in 68.62\% of cases, underscoring the capabilities of our approach.
+
+% \todo{List our contribution more clearly. --> 1) problem, 2) dataset, 3) methods, 4) results and open-source repo}
+
+
+
+
+
+
+
+% In this paper, we aim to propose a straightforward yet effective method of ensembling multiple LLMs to robustly achieve a better overall performance.
+% It is important to ensemble multiple LLMs because it can provide benefits such as increased robustness, improved generalization, and enhanced accuracy. 
+% Each LLM in the ensemble contributes its unique perspectives and predictions, leading to a more comprehensive and diverse output. By aggregating the predictions of multiple LLMs, we can thus reduce biases, errors, and uncertainties that may be present in individual model.
+
+
+
+
+
+
+\input{sections/_fig_pipeline}
+
+% \section{Preliminaries}
+% \label{sec:preliminaries}
+% In this section, we first formally introduce the problem formulation and two typical types of ensembling methods. Then, we introduce a novel dataset, \dataname{}, that we created for training and evaluation. Finally, we give an overview of our proposed framework, \methodname{}.
+
+% \subsection{Problem Setup}
+% \label{ssec:problem_setup}
+% Given an input $x$ and $N$ different language models, $\{\mathcal{M}_1, \dots, \mathcal{M}_N\}$, we thus can generate $N$ candidate outputs by running each model with $x$. Let's denote the candidates with $\mathbb{Y}=\{y_1, \dots, y_N\}$. 
+% In training data, we assume there is a ground truth output, $y$, while it is hidden for evaluation in the testing time. 
+
+% In practice, people usually choose to use a fixed model, say $\mathcal{M}_9$, to 
+% infer all unseen examples (i.e., always using $y_9$ as final outputs for $x$).
+% This can be reasonable if $\mathcal{M}_9$ indeed show a significantly better overall performance on some seen examples.
+% However, always using such a pre-selected model can lead to sub-optimal performance. It is very common that these $N$ models have their own strengths and weakness in different situations, so the best selection for different $x$ do not always come from the same model.  
+
+% Our goal is to develop an ensemble learning method of generating an output $\hat{y}$ for the input $x$, maximizing the similarity $Q(\hat{y}, y; x)$. Here $Q$ function can be implemented in different ways, which we will cover in the following content. 
+% We expect such a method can lead to a better overall performance than using a fixed model or randomly choosing a model for $x$.
+% Specifically, consider $D_{\text{test}}=\{(x^{(i)},y^{(i)})\}$ as the test set, 
+% we want to maximize 
+% $\sum_i{Q(\hat{y}^{(i)}, y^{(i)}; x^{(i)}})$. 
+
+\section{Preliminaries}
+\label{sec:preliminaries}
+We first provide the problem formulation and two common types of ensembling methods. Next, we present the dataset \dataname{} created for training and evaluation purposes. Finally, we give an overview of our framework.
+
+\subsection{Problem Setup}
+\label{ssec:problem_setup}
+Given an input $x$ and $N$  models, $\{\mathcal{M}_1, \dots, \mathcal{M}_N\}$, we can generate $N$ candidate outputs by processing $x$ with each model. We denote the candidates as $\mathbb{Y}=\{y_1, \dots, y_N\}$. In the training data, we assume there is a ground truth output, $y$, while it remains hidden during evaluation at test time.
+
+In practice, one might choose a fixed model, such as $\mathcal{M}_9$, to infer all unseen examples (i.e., always using $y_9$ as the final output for $x$). This can be reasonable if $\mathcal{M}_9$ demonstrates significantly better overall performance on certain observed examples. However, relying on a pre-selected model may result in sub-optimal performance, as the $N$ models likely possess different strengths and weaknesses in various situations, meaning that the optimal selection for different $x$ values may not always originate from the same model.
+
+Our objective is to develop an ensemble learning method that produces an output $\hat{y}$ for the input $x$, maximizing the similarity $Q(\hat{y}, y; x)$. The $Q$ function can be implemented in various ways, which we will discuss later. We anticipate that this method will yield better overall performance than using a fixed model or randomly selecting a model for $x$. Specifically, given a test set $D_{\text{test}}=\{(x^{(i)},y^{(i)})\}$, we aim to maximize $\sum_i{Q(\hat{y}^{(i)}, y^{(i)}; x^{(i)})}$.
+
+% There are two major types of approaches for ensembling LLMs: \textit{selection-based} and \textit{generation-based} methods.  
+% The selection-based methods focus on comparing the candidates in $\mathbb{Y}$ and then use the top-ranked candidate as $\hat{y}$, meaning that $\hat{y} \in \mathbb{Y}$.
+% Due to the selection nature and closed set of solution space, selection-based methods are bounded by the performance of these $N$ models.
+% In contrast, generation-based methods focus on fusing $K$ candidates ($1<K\leq N$) from $\mathbb{Y}$ and generate an unseen response as the final output $\hat{y}$.
+
+There are two primary approaches for ensembling LLMs: \textit{selection-based} and \textit{generation-based} methods. Selection-based methods compare candidates in the set $\mathbb{Y}$, selecting the top-ranked candidate as the final output $\hat{y}$, which implies that $\hat{y} \in \mathbb{Y}$. Due to the inherent nature of selection and the limited solution space, the performance of selection-based methods is bounded by the $N$ candidates being considered. Conversely, generation-based methods focus on fusing $K$ candidates ($1<K\leq N$) from $\mathbb{Y}$ to produce an unseen response as the final output $\hat{y}$.
+
+
+\input{tables/llm_dataset}
+
+% \subsection{\mixdata \dataname{}: A New Benchmark}
+% \label{ssec:dataset}
+% We present a new dataset, \dataname{}, for benchmarking ensemble models for LLMs in the context of instruction-following tasks.
+% We first collect a large scale of instruction examples mainly from four sources as shown in Table~\ref{tab:dataset_stat}.
+% % For the first two sources, we use ChatGPT's responses as the truth outputs.
+% After curated processing of these open-source data, we sampled 100k examples for training, 5k for validation, and 5k for test.
+% On all these 110k examples, we run $N=11$ popular open-source LLMs including Vicuna, OpenAssistant, Alpaca, MPT, etc (see Tab.~\ref{tab:llm_results} and Fig.~\ref{fig:intro}).
+
+% In order to get oracle ranking of these candidates, we designed comparative prompts ChatGPT for evaluating all pairs of candidates for each example. 
+% Specifically, for each example, we prepare the 12*11/2=66 pairs of candidates. Then, for each pair of candidates, we ask ChatGPT to judge which one is better (or if it is a tie) based on the information of \textit{both} input $x$ and truth output $y$.
+% That is, we use ChatGPT as a function as follows:
+% $$Z(y_i, y_j, y; x) = Q(y_i, y;x) - Q(y_j, y;x).$$ 
+% The detailed prompt template is shown in the Appendix.
+% As for the training and validation sets, we provide the BERTScore for each candidate, where function $Q(y_i, y)$ estimates the quality of a candidate $y_i$ with its semantic similarity to the truth $y$.
+
+
+% \subsection{\blender \methodname{}: A Novel Framework}
+% \label{ssec:overview}
+% In this paper, we propose a rank-and-fuse pipeline framework for ensembling LLMs, which we named with \methodname{}.
+% We first develop a pairwise ranking module named \ranker{} (Sec.~\ref{sec:ranker}), which learns to compare all pairs of candidates for each input and then rank the list of candidates.
+% Then, we select the top $K=3$ ranked candidates, and concatenate them with the input $x$ to construct the input sequence to our fusing module named \fuser{} (Sec.~\ref{sec:fuser}), which is a seq2seq model that finally generates the end output to serve users.
+% The pipeline is illustrated in Figure~\ref{fig:pipeline}.
+
+
+\subsection{\mixdata \dataname{}: A New Benchmark}
+\label{ssec:dataset}
+We introduce a new dataset, \dataname{}, to benchmark ensemble models for LLMs in instruction-following tasks. We collect a large-scale set of instruction examples primarily from four sources, as shown in Table~\ref{tab:llm_dataset_v2}. After curating and processing this open-source data, we sample 100k examples for training, 5k for validation, and 5k for testing. We then run $N=11$ popular open-source LLMs, including Vicuna, OpenAssistant, Alpaca, MPT, and others (see Table~\ref{tab:llm_results} and Figure~\ref{fig:intro}), on these 110k examples.
+
+To obtain the oracle ranking of candidates, we design comparative prompts for ChatGPT to evaluate all candidate pairs. 
+Specifically, for each example, we prepare 55 pairs of candidates ($11\times10/2$). For each pair, we ask ChatGPT to judge the better candidate (or declare a tie).
+% based on both input $x$ and truth output $y$. 
+% We utilize ChatGPT as a function:
+% $$Z(y_i, y_j, y; x) = Q(y_i, y;x) - Q(y_j, y;x).$$ 
+The prompt template can be found in the appendix. For the training and validation sets, we provide the results based on conventional  metrics like BERTScore, BLEURT, and BARTScore. In that case, we use function $Q(y_i, y)$ to estimate a candidate $y_i$'s quality according to its similarity to the ground truth $y$.
+
+\subsection{\blender \methodname{}: A Novel Framework}
+\label{ssec:overview}
+We propose a rank-and-fuse pipeline framework, \methodname{}, for ensembling LLMs, as illustrated in Figure~\ref{fig:pipeline}. This framework consists of two main components: a pairwise ranking module, \ranker{} (Section~\ref{sec:ranker}), and a fusion module, \fuser{} (Section~\ref{sec:fuser}). The \ranker{} module learns to compare all pairs of candidates for each input and subsequently rank the list of candidates. We then select the top $K=3$ ranked candidates, concatenate them with the input $x$, and construct the input sequence for the \fuser{} module. The \fuser{} module, a seq2seq LM, ultimately generates the final output to serve users. 
+% \section{\textsc{PairRanker}: Pairwise Ranking}
+% \label{sec:ranker}
+% \input{sections/_fig_rankers} 
+
+% In this section, we first introduce three baseline methods for ranking the candidates in $\mathbb{Y}$ in Sec.~\ref{ssec:individual_scoring}, and introduce the proposed method \ranker{}.
+
+% \subsection{Baseline Methods}
+% \label{ssec:individual_scoring}
+% Prior reranking methods mostly aim to individually infer the score $s_i=f_\phi(x, y_i)$ for each candidate $y_i \in \mathbb{Y}$, where $s_i$ is totally independent of candidates except $y_i$ itself.
+% Note that the reward model in instruction tuning for GPT-3.5~\cite{Ouyang2022TrainingLM}  also falls into this category.
+% We illustrate these baseline methods in Figure~\ref{fig:model_archs} and the following paragraphs. 
+
+ 
+% \textbf{MLM-Scoring}~\citep{mlmscoring} estimates the quality of a candidate through pseudo-log-likelihood, which is computed by masking the tokens one by one and getting log-likelihood for the masked token by masked LMs (e.g., BERT). 
+% Consider a candidate $y_i$ as a list of words $\textbf{W}=\{w_1, ..., w_{|\textbf{W}|}\}$. Then the pseudo-log-likelihood is then:
+% $s_i = \sum_{t=1}^{|\textbf{W}|}log{P(w_t|\textbf{W}_{\backslash t})}$. 
+% This unsupervised approach is shown effective for reranking outputs for NLG tasks such as machine translation, speech recognition, etc.
+
+ 
+% \textbf{SimCLS}~\citep{Liu2021SimCLSAS}  first encodes the input $x$ and each generated candidate $y_i\in \mathbb{Y}$ with the same encoder $H$ respectively, denoted as $H(x)$ and $H(y_i)$.
+% Then, they take the cosine similarity between them, $s_i=\cos{(H(x), H(y_i))}$, as the predicted score, which is reasonable because $H(x)$ and $H(y_i)$ are in the same embedding space induced by the used language encoder.
+% In the training stage, they use marginal ranking loss to tune $H$.
+ 
+% \textbf{SummaReranker}~\citep{Ravaut2022SummaRerankerAM} first concatenates the input $x$ and each candidate $y_i$ and use a cross-attention encoder to learn to rank.
+% Specifically, they use $H([x;y_i])$ to predict the score $s_i$, where $H$ is a Transformer model. In the training stage, they use binary cross-entropy (BCE) loss to distinguish best candidate from the others.  
+
+
+% \paragraph{Limitations.}
+% Although these methods may use contrastive loss in their training stages, 
+% their inferences are always based on individually scoring. 
+% It is because their encoders have not directly seen a pair of candidates side by side for learning to compare. 
+% We argue that this weakness of such pointwise ranking methods can prevent us from selecting best candidates in the context of LLMs and instruction-following tasks.
+% One reason is that the quality of LLMs' outputs are mostly good enough when the selected LLMs are popular and competitive to each other.
+% Also, the responses for instruction tasks can be very open-ended, instead of summarization tasks.
+% Thus, simply looking at each individual candidate can hardly generate a responsible score.
+% This issue is particularly pronounced in the case of shorter responses, where two sequences may differ by only a few words, but vary a lot in helpfulness, harmfulness, and fairness. 
+% Given these limitations, we argue that individual scoring techniques may fail to capture important nuances. 
+
+
+\section{\textsc{PairRanker}: Pairwise Ranking}
+\label{sec:ranker}
+\input{sections/_fig_rankers}
+
+In this section, we introduce three baseline methods for ranking the candidates in $\mathbb{Y}$ in Sec.~\ref{ssec:individual_scoring} and present the proposed \ranker{} method.
+
+\subsection{Baseline Methods}
+\label{ssec:individual_scoring}
+Previous reranking methods primarily focus on computing the score $s_i=f_\phi(x, y_i)$ for each candidate $y_i \in \mathbb{Y}$ independently, where $s_i$ is solely determined by $y_i$. Notably, the reward model in instruction tuning for GPT-3.5~\cite{Ouyang2022TrainingLM} also belongs to this category. Figure~\ref{fig:model_archs} illustrates these baseline methods, which are further detailed in the following paragraphs.
+
+\textbf{MLM-Scoring}~\citep{mlmscoring} assesses the quality of a candidate by calculating its pseudo-log-likelihood, which is obtained by masking tokens one by one and computing the log-likelihood for the masked token using masked LMs (e.g., BERT). Given a candidate $y_i$ as a sequence of words $\textbf{W}=\{w_1, ..., w_{|\textbf{W}|}\}$, the pseudo-log-likelihood is:
+$s_i = \sum_{t=1}^{|\textbf{W}|}\log{P(w_t|\textbf{W}_{\backslash t})}$. This unsupervised method is effective for reranking outputs in NLG tasks such as machine translation and speech recognition.
+
+\textbf{SimCLS}~\citep{Liu2021SimCLSAS} encodes the input $x$ and each generated candidate $y_i\in \mathbb{Y}$ using the same encoder $H$, resulting in $H(x)$ and $H(y_i)$. The cosine similarity between them, $s_i=\cos{(H(x), H(y_i))}$, serves as the predicted score, as $H(x)$ and $H(y_i)$ share the same embedding space induced by the language encoder. In training, marginal ranking loss is used to optimize $H$.
+
+\textbf{SummaReranker}~\citep{Ravaut2022SummaRerankerAM} concatenates the input $x$ and each candidate $y_i$, using a cross-attention encoder to learn ranking. Specifically, they employ $H([x;y_i])$ to predict the score $s_i$, where $H$ is a Transformer model. In the training stage, binary cross-entropy (BCE) loss is employed to differentiate the best candidate from the others.
+
+\paragraph{Limitations.}
+Despite using contrastive loss in training, these methods rely on individual scoring for inference. The encoders have not been exposed to pairs of candidates for direct comparison learning. We argue that such pointwise ranking methods may be insufficient for selecting the best candidates in the context of LLMs and instruction-following tasks. One reason is that the quality of LLM outputs is generally high when the chosen LLMs are popular and competitive. Moreover, the responses for instruction tasks can be quite open-ended, unlike summarization tasks. Therefore, merely examining individual candidates may not yield a reliable score. This issue becomes more prominent for shorter responses, where sequences may differ by only a few words but vary significantly in helpfulness, harmfulness, and fairness. Given these limitations, we contend that individual scoring approaches may fail to capture crucial nuances.
+
+
+
+
+
+% \subsection{Pairwise Comparisons}
+
+
+% \label{ssec:pairwise_comparison}
+ 
+% To address the above-mentioned limitations of pointwise ranking,
+% we want to train a ranker $f$ with the parameter $\phi$ that can compare a pair of two candidates by encoding them together with the input text.
+% We want our ranker module to focus on learning to capture the differences between the two candidates and prefer the ones of higher quality.
+
+% Given a pair of candidates $y_i, y_j$, we want to get their pair-specific scores:
+% $s_{(i,j)}^i$ and $s_{(i,j)}^j$.
+% We use $s_{ij} = s_{(i,j)}^i - s_{(i,j)}^j$  to denote the model's confidence in thinking $y_i$ is better than $y_j$.
+% Thus, we can use such scores for all pairs induced from $\mathbb{Y}$ to infer the final ranking.
+% To learn such ability, we first concatenate the input $x$ and the two candidates to form a sequence $[x;y_i;y_j]$ and feed it into a cross-attention Transformer to get the features: $f_{\phi}([x;y_i;y_j])$ for modeling $s_{ij}$. 
+
+
+
+% Specifically, we assume there are multiple $Q$ functions to optimize for, such as BERTScore, BARTScore, etc.  
+% Then we consider the learning problem as a multi-task  classification problem:
+% \begin{align*}
+%     \mathcal{L}_Q = -z_i\log{\sigma(s_{(i,j)}^i)} - (1-z_j)\log{\sigma(s_{(i,j)}^j)},
+% \end{align*}
+% where $\sigma$ denotes the sigmoid function and 
+% \begin{align*}
+%     (z_i, z_j) = 
+%     \left\{
+%         \begin{aligned}
+%             (1, 0) &, &Q(y_i, y) \ge Q(y_j,y) \\
+%             (0, 1) &, &Q(y_i, y) < Q(y_j,y)
+%         \end{aligned}
+%     \right. .
+% \end{align*}
+% For optimizing towards multiple $Q$, we take the average as the final multi-objective loss: $\mathcal{L}= \sum \mathcal{L}_Q $.
+
+
+
+
+% \subsection{\textsc{PairRanker} Architecture}
+% \label{sec:architecture}
+% We discuss the concrete designs for the \ranker{} module in this subsection.
+
+% \paragraph{Encoding.}
+% We employ Transformer layers to encode an input text and a pair of candidates, such that the attention mechanism can learn to capture the difference between the two candidates in the context of the input text. 
+% Specifically, we concatenate the three segments sequentially and form a single input sequence with special tokens as separators: \texttt{<source>}, \texttt{<candidate1>}, and \texttt{<candidate2>}.
+% The produced input sequences to Transformers are then in the form of \texttt{``<s><source>$x$}\texttt{</s>}\texttt{<candidate1>$y_i$</s>} \texttt{<candidate2>}\texttt{$y_j$</s>''},
+% where $x$ is the text of a source input and $y_i$ and $y_j$ are the text of two output candidates.
+% We then feed them into the encoder and get the final hidden states. Then, we use the embeddings of special tokens $\texttt{<source>}$, $\texttt{<candidate1>}$, and $\texttt{<candidate2>}$ as the representations of $x$, $y_i$, and $y_j$ respectively. 
+% We denote them as $\mathbf{x}$, $\mathbf{y_i}$, and $\mathbf{y_j}$. 
+
+% \paragraph{Training.}
+% In order to determine the scores for the two candidates, we begin by concatenating the embeddings of $\mathbf{x}$ with $\mathbf{y_i}$ and $\mathbf{y_j}$ respectively and then pass them through a single-head layer. More precisely, this layer corresponds to a multi-layer perceptron, with the dimension of its final layer being equal to the number of $Q$ functions to be optimized. Each value within this dimension represents the computed $Q$ score for a specific $Q$ function. Ultimately, we derive the final score $s_{(i,j)}^i$ or $s_{(i,j)}^j$ for the candidate by averaging these $Q$ scores.
+% Since there are $O(N^2)$ unique pair combinations, it is thus necessary for us to apply an effective sub-sampling strategy during the training stage to ensure learning efficiency. 
+ 
+
+% In the training stage, we randomly select some combinations from the candidate pool $\mathbb{Y}^2$, instead of all the $N(N-1)/2$ pairs. 
+% We also contend that it's meaningful to compare the target text with other candidates, so we extend the candidate pool by mixing the ground truth $y$ into $\mathbb{Y}$. In practice, we found that using 5 pairs per each input is enough to get a decent result.
+
+% Besides, due to the position embeddings of the language model, the order of the candidates in a pair $(x,y_i,y_j)$ matters. That is, the comparison result of  $(x, y_i,y_j)$ and $(x,y_j,y_i)$ might not be consistent. 
+% Therefore, we also shuffle the order of candidates within each training pair so that the model learns to be consistent with itself. We use Figure~\ref{fig:matrix} for illustration. 
+
+\subsection{Pairwise Comparisons}
+\label{ssec:pairwise_comparison}
+
+In order to address the limitations of pointwise ranking, we aim to train a ranker $f$ with parameter $\phi$ that can compare a pair of output candidates by encoding them together with the input text. Our ranker module should focus on learning to capture the differences between the two candidates and prefer the ones of higher quality.
+
+Given a pair of candidates $y_i, y_j$, we obtain their pair-specific scores: $s_{(i,j)}^i$ and $s_{(i,j)}^j$. We denote the model's confidence in thinking $y_i$ is better than $y_j$ as $s_{ij} = s_{(i,j)}^i - s_{(i,j)}^j$. We can use these scores for all pairs induced from $\mathbb{Y}$ to infer the final ranking. To learn this ability, we concatenate the input $x$ and the two candidates to form a sequence $[x;y_i;y_j]$ and feed it into a cross-attention Transformer to get the features: $f_{\phi}([x;y_i;y_j])$ for modeling $s_{ij}$.
+
+We assume multiple $Q$ functions to optimize for, such as BERTScore, BARTScore, etc., and consider the learning problem as a multi-task classification problem:
+\begin{align*}
+    \mathcal{L}_Q = -z_i\log{\sigma(s_{(i,j)}^i)} - z_j\log{\sigma(s_{(i,j)}^j)},
+\end{align*}
+where $\sigma$ denotes the sigmoid function and 
+\begin{align*}
+    (z_i, z_j) = 
+    \left\{
+        \begin{aligned}
+            (1, 0) &, &Q(y_i, y) \ge Q(y_j,y) \\
+            (0, 1) &, &Q(y_i, y) < Q(y_j,y)
+        \end{aligned}
+    \right. .
+\end{align*}
+For optimizing towards multiple $Q$, we take the average as the final multi-objective loss: $\mathcal{L}= \sum \mathcal{L}_Q $.
+
+\subsection{\textsc{PairRanker} Architecture}
+\label{sec:architecture}
+
+We discuss the concrete designs for the \ranker{} module in this subsection.
+
+\paragraph{Encoding.}
+We employ Transformer layers to encode an input and a pair of candidates, enabling the attentions to capture the difference between candidates in the context of the input. We concatenate the three segments sequentially and form a single input sequence with special tokens as separators: \texttt{<source>}, \texttt{<candidate1>}, and \texttt{<candidate2>}. The resulting input sequences to Transformers are in the form of ``\texttt{<s><source> $x$} \texttt{</s>} \texttt{<candidate1>} $y_i$ \texttt{</s>} \texttt{<candidate2> $y_j$ </s>}'', where $x$ is the text of a source input and $y_i$ and $y_j$ are the text of two output candidates. The embeddings of special tokens $\texttt{<source>}$, $\texttt{<candidate1>}$, and $\texttt{<candidate2>}$ are used as the representations of $x$, $y_i$, and $y_j$ respectively, denoted as $\mathbf{x}$, $\mathbf{y_i}$, $\mathbf{y_j}$.
+
+\paragraph{Training.}
+To determine the scores for the two candidates, we concatenate the embeddings of $\mathbf{x}$ with $\mathbf{y_i}$ and $\mathbf{y_j}$ respectively, and pass them through a single-head layer, which is a multi-layer perceptron with the final layer's dimension equal to the number of $Q$ functions to be optimized. Each value within this dimension represents a computed $Q$ score for a specific $Q$ function. We derive the final score $s_{(i,j)}^i$ or $s_{(i,j)}^j$ for the candidate by averaging these $Q$ scores. Since there are $O(N^2)$ unique pair combinations, we apply an effective sub-sampling strategy during the training stage to ensure learning efficiency.
+
+During training, we randomly select some combinations from the candidate pool $\mathbb{Y}^2$, instead of all the $N(N-1)/2$ pairs. We also compare the target text with other candidates by extending the candidate pool by mixing the ground truth $y$ into $\mathbb{Y}$. In practice, we found that using 5 pairs per input is sufficient for obtaining decent results.
+
+Due to the position embeddings of the language model, the order of the candidates in a pair $(x,y_i,y_j)$ matters, as the comparison result of  $(x, y_i,y_j)$ and $(x,y_j,y_i)$ might not be consistent. Thus, we shuffle the order of candidates within each training pair so that the model learns to be consistent with itself.
+
+
+% \paragraph{Inference.}
+% In the inference stage, we will get the scores $s_{ij}$ for each pair of candidates $(y_i, y_j)\in \mathbb{Y}^2$. After $N(N-1)$ times of inference, we will get a matrix $\mathbf{M}$, where the cell $\mathbf{M}_i^j=s_{ij}$ denotes the \textit{confidence} that $y_i$ is better $y_j$. To find the best candidate based on $\mathbf{M}$, we propose three aggregation functions for getting the final ranking of $\mathbb{Y}$.
+
+% The first two scoring methods  are named as \texttt{MaxLogits} and \texttt{MaxWins}, which uses all elements in the matrix. Let $\mathbf{M}_i^*$ and $\mathbf{M}_*^j$ denote the $i$-th row and $j$-the column of the matrix as a vector. 
+% Then for each candidate $y_i$, its \texttt{MaxLogits} score is defined as $s_i=\sum{(\mathbf{M}_i^*-\mathbf{M}_*^i)}$.
+% Its \texttt{MaxWins} score is defined as $s_i=|\{s_{ij}\in \mathbf{M}_i^*|s_{ij}>0\}| + |\{s_{ji}\in \mathbf{M}_*^i|s_{ji}<0\}|$, where $||$ denotes the size of the set. 
+
+% In other words, \texttt{MaxLogits} computes the confidence that $y_i$ is better than any other candidates, whereas \texttt{MaxWins} computes the winning times for all the comparisons with other candidates.
+
+% However, the two methods above require $O(N^2)$ times of inference given $N$ candidates to select, which can be computationally expensive. 
+% Therefore, we propose another more efficient aggregation method where we perform \textit{a single run of bubble sort} with pairwise comparisons to select the best candidate.
+% We first shuffle the order of candidates in $\mathbb{Y}$ and get a default order.
+% Let $k$ denote the best candidate index, which is initially set to be 1.
+% We update the best candidate index iteratively:
+% \begin{align*}
+%     \small 
+%     k = \left\{
+%         \begin{aligned}
+%             k&, & \mathbf{M}_{k}^{i} - \mathbf{M}_{i}^{k} > 0\\ 
+%             i&, & \mathbf{M}_{i}^{k} - \mathbf{M}_{k}^{i} > 0
+%         \end{aligned}
+%     \right. .
+% \end{align*}
+% After doing $N-1$ times of such comparison, we select $y_k$ as the best candidate.  
+% This reduces the inference time complexity from $O(N^2)$ to $O(N)$, which is similar to all prior pointwise  methods. 
+
+
+% No matter which aggregation method, we will be able to rank all candidates in $\mathbb{Y}$. Our experiments show that \texttt{MaxLogits} offer the best performance. Thus, when we refer to \ranker{}, by default we mean using \texttt{MaxLogits} as aggregator.
+
+% \input{sections/_fig_matrix}
+
+
+% \section{\textsc{GenFuser}: Generative Fusion}
+% \label{sec:fuser}
+
+% The performance of \ranker{} will be limited by the best selections from candidate pool $\mathbb{Y}$.
+% We argue that we can break such limitation via merging multiple candidates ranked top by \ranker{}.
+% This is reasonable because the top candidates often have their own strengths and weakness, thus being complementary to each other.
+% Therefore, a better response can be composed by taking the advantages of all these top candidates while avoiding their relatively weak parts. 
+% Simply put, we want to learn a generation model that can takes the input $x$ and $K$ top-ranked candidates $\{y_1, ..., y_K\} \subset \mathbb{Y}$ (say K=3), as the input, and output a better output $\hat{y}$ as our final response. 
+
+ \paragraph{Inference.}
+During the inference stage, we obtain scores $s_{ij}$ for each pair of candidates $(y_i, y_j)\in \mathbb{Y}^2$. After $N(N-1)$ iterations, we obtain a matrix $\mathbf{M}$, where $\mathbf{M}_i^j=s_{ij}$ represents the \textit{confidence} that $y_i$ is better than $y_j$. To identify the best candidate based on $\mathbf{M}$, we introduce three aggregation functions for determining the final ranking of $\mathbb{Y}$.
+
+We propose two scoring methods, \texttt{MaxLogits} and \texttt{MaxWins}, which utilize all elements in the matrix. Let $\mathbf{M}_i^*$ and $\mathbf{M}_*^j$ denote the $i$-th row and $j$-th column of the matrix as vectors. For each candidate $y_i$, its \texttt{MaxLogits} score is defined as $s_i=\sum{(\mathbf{M}_i^*-\mathbf{M}_*^i)}$, while its \texttt{MaxWins} score is defined as $s_i=|\{s_{ij}\in \mathbf{M}_i^*|s_{ij}>0\}| + |\{s_{ji}\in \mathbf{M}_*^i|s_{ji}<0\}|$, where $||$ denotes the set size.
+
+In essence, \texttt{MaxLogits} computes the confidence that $y_i$ is superior to all other candidates, whereas \texttt{MaxWins} calculates the number of victories in comparisons with other candidates.
+
+However, these two methods necessitate $O(N^2)$ iterations for $N$ candidates, which can be computationally burdensome. Thus, we propose a more efficient aggregation method, performing \textit{a single bubble sort run} with pairwise comparisons to select the best candidate. We first shuffle the order of candidates in $\mathbb{Y}$ to obtain a default order, and initialize the best candidate index $k$ to 1. We iteratively update the best candidate index as follows:
+\begin{align*}
+    \small 
+    k = \left\{
+        \begin{aligned}
+            k&, & \mathbf{M}_{k}^{i} - \mathbf{M}_{i}^{k} > 0\\ 
+            i&, & \mathbf{M}_{i}^{k} - \mathbf{M}_{k}^{i} > 0
+        \end{aligned}
+    \right. .
+\end{align*}
+After $N-1$ comparisons, we select $y_k$ as the best candidate. This method reduces the inference time complexity from $O(N^2)$ to $O(N)$, aligning with previous pointwise methods.
+
+Regardless of the aggregation method, we can rank all candidates in $\mathbb{Y}$. Our experiments (shown in the appendix) reveal that \texttt{MaxLogits} yields the best performance, so we use \texttt{MaxLogits} as the default aggregator for \ranker{}.
+\input{sections/_fig_matrix}
+
+% \section{\textsc{GenFuser}: Generative Fusion}
+% \label{sec:fuser}
+
+% The efficacy of \ranker{} is limited by the best selections from the candidate pool $\mathbb{Y}$. We posit that merging multiple top-ranked candidates can overcome this limitation. Top candidates often exhibit complementary strengths and weaknesses, making it plausible to generate a superior response by combining their advantages while mitigating their shortcomings. In other words, we aim to develop a generative model that takes input $x$ and $K$ top-ranked candidates $\{y_1, ..., y_K\} \subset \mathbb{Y}$, (e.g., $K=3$), and produces an enhanced output $\hat{y}$ as the final response.
+
+
+% To achieve this, we introduce \fuser{}, a seq2seq method for fusing a set of candidates conditioned on the input instruction to generate an improved output. Specifically, we concatenate the input and $K$ candidates sequentially using separator tokens such as \texttt{<extra\_id\_$i$>}, and fine-tune a T5-like model to learn to generate $y$. In
+% In practice, we use Flan-T5-xl~\cite{Chung2022ScalingIL} that has 3b parameters for its better performance and relatively smaller size.
+
+\section{\textsc{GenFuser}: Generative Fusion}
+\label{sec:fuser}
+
+The effectiveness of \ranker{} is constrained by the quality of selections from the candidate pool $\mathbb{Y}$. We hypothesize that by merging multiple top-ranked candidates, we can overcome this constraint. As these top candidates often showcase complementary strengths and weaknesses, it is plausible to generate a superior response by combining their advantages while mitigating their shortcomings. Our objective is to devise a generative model that takes input $x$ and $K$ top-ranked candidates $\{y_1, ..., y_K\} \subset \mathbb{Y}$ (e.g., $K=3$) and produces an improved output $\hat{y}$ as the final response.
+
+To accomplish this, we present \fuser{}, a seq2seq approach for fusing a set of candidates conditioned on the input instruction to generate an enhanced output. Specifically, we concatenate the input and $K$ candidates sequentially using separator tokens, such as \texttt{<extra\_id\_$i$>}, and fine-tune a T5-like model to learn to generate $y$. In practice, we employ Flan-T5-XL~\cite{Chung2022ScalingIL}, which has 3b parameters, due to its superior performance and relatively smaller size.
+
+
+
+ 
+\input{tables/llm_results}
+
+\section{Evaluation}
+\label{sec:eval}
+
+\subsection{Setup}
+\label{ssec:eval_setup}
+We use \dataname{} (Sec.~\ref{ssec:dataset}) to conduct evaluation, and more results are in the appendix.
+
+
+\paragraph{NLG metrics.}
+We employ two types of evaluation metrics (i.e., $Q$ ).
+The first group is conventional automatic metrics for NLG tasks: BERTScore~\cite{Zhang2020BERTScoreET}, BLEURT~\cite{Sellam2020BLEURTLR}, and BARTScore~\cite{Yuan2021BARTScoreEG}. 
+
+\paragraph{GPT-Rank.}
+The second is based on prompting ChatGPT for pairwise comparisions on all candidates and decide their rank by the number of wins (i.e., \texttt{MaxWins} aggregation). 
+% Note that a key difference between our evaluation method and others is that we provide a truth reference for ChatGPT to judge in addition to the candidates, thus making the ChatGPT evaluation more stable and robust.
+We name this GPT-based ranking metric with \texttt{GPT-Rank}.
+
+
+\paragraph{Model training.}
+We use the DeBERTa~\cite{He2021DeBERTaV3ID} (400m) as the backbone for \ranker{}, and \fuser{} is based on Flan-T5-XL (3b). 
+According to our ablation studies, we choose to use BARTScore for its superior correlation with \texttt{GPT-Rank} as shown in ~\ref{pacorrelation}. 
+
+ 
+\subsection{Main results}
+\label{ssec:main_results}
+In Table~\ref{tab:llm_results}, we present the overall performance of $N$=11 LLMs as well as other methods on \dataname{}. 
+In addition to the three auto metrics and GPT-Rank, we also show the percentage of examples where each method can produce outputs that are \textit{better than or same good} as the two top LLMs, namely OpenAssistant ($\ge$OA) and Vicuna ($\ge$Vic), in terms of \texttt{GPT-Rank}.
+% For each method, the overall average BERTScore, BARTSCore, BLEURT, and the average ChatGPT rank are shown. We give a comprehensive analysis of LLMs, rankers, and fuser in the following paragraphs.
+
+\paragraph{LLMs have diverse strengths and weakness.}
+The table presents the LLMs in a sorted order based on their average rank as determined by ChatGPT (GPT-Rank). Among these models, Open Assistant, Vicuna, and Alpaca are the top-3 performers. Following them, three renowned LLMs, namely Baize, Moss, and ChatGLM, which have been fine-tuned using both Chinese and English instruction data, also exhibit impressive performance on \dataname{}. 
+Conversely, Mosaic MPT, StableLM, and Flan-T5 rank at the bottom-3 in the evaluation. Nevertheless, the average \texttt{GPT-Rank} of top/bottom models maintain a noticeable distance from the first/last position (1 or 11), highlighting the importance of ensembling LLMs. 
+
+% To gain a deeper understanding of the capabilities of each model and the diversity of their competitiveness, we present the percentage of responses from each LLM in the 5k test examples that ChatGPT considers either better or of similar quality to the highest-ranked LLMs, Open Assistant (OA) and Vicuna (Vic). 
+
+\paragraph{Top LLMs are not always good.}
+It is evident that although OA and Vic perform remarkably well, there is still a substantial percentage of examples where other LLMs are considered to outperform them. For instance, despite Koala having an average \texttt{GPT-Rank} of $6.76$, approximately $40\%$ of the examples demonstrate that Koala produces responses that are better or equally as good as both OA and Vic. This further emphasizes the significance of employing our \methodname{} framework for ranking and fusion purposes.
+
+\paragraph{NLG Metrics.}
+Moreover, we conduct a comprehensive analysis of the performance of oracle (top-1) selections based on each of the metrics themselves. The findings demonstrate that these selections also exhibit favorable performance across other metrics as well. For example, the oracle selections derived from \textbf{GPT-Rank} achieve a BARTScore of $-3.33$, surpassing that of OA ($-3.45$). Conversely, the oracle selections of BARTScore yield $3.69$ in \texttt{GPT-Rank}, also significantly outperforming OA ($3.90$). This observation substantiates the rationality of using BARTScore to provide supervision for \ranker{}, which is also suggested by Table~\ref{tab:rank_correlation}.
+
+
+% Furthermore, we analyze the quality of responses that are regarded as the best by ChatGPT and present the BERTScore, BARTScore, and BLEURT performance on such oracle selections.
+% The result reveals that they generally achieve favorable metric values. Notably, their BARTScore of $-3.37$ even surpasses that of the best model ($-3.49$). This verifies that it is reasonable to use auto metrics as truth signals for training the rankers.
+
+\paragraph{\ranker{} outperforms other rankers.}
+% In order to effectively harness the diverse capabilities of different Language Model-based approaches (LLMs), we present a comprehensive analysis of various rankers to assess their performance. To ensure a fair comparison, we provide randomly selected results. 
+MLM-Scoring fails to outperform even random selection, highlighting the limitations of its unsupervised paradigm. On the contrary, SimCLS, SummaReranker, and \ranker{} exhibit superior performance compared to the best model (OA) across BARTScore  and \texttt{GPT-Rank}.  
+Notably, the average \texttt{GPT-rank} of the responses selected by \ranker{} ($3.20$) significantly outperforms the best model by $0.70$ (a 18\% relative performance gain) and also all other rankers. Moreover, it achieves impressive results in metrics such as BARTScore ($-3.14$) with a substantial advantage.
+\ranker{}'s selections are better than or equal to Vic/OA on $54.76\%$/$57.79\%$ examples respectively, and ranks in top 3 for 65.12\% examples.  
+% Additionally, an important metric for evaluation is the percentage of \ranker{}'s selections that are ranked in the top-3 in \texttt{GPT-Rank}, as it directly assesses the effectiveness of using rankers for selection.
+% We discovered that the top-3 percentage achieved by the \ranker{} is an impressive 65.12\%, surpassing any single LLM and ranker.
+% It is also intriguing to observe that the \ranker{}'s selections perform exceptionally well in outperforming Vic, while fall short of achieving better results than random selection when it comes to surpassing OA..  For example, \ranker{}'s selections achieve equal or better quality than Vic for $58.21\%$, whereas they only surpass OA for $37.04\%$. The other rankers exhibit even poorer performance in surpassing OA. We hypothesize that this discrepancy may be attributed to the \ranker{}'s trade-off of certain capabilities for superior overall ranking results.Thus, we believe it will be an important future direction to design better loss functions and training procedures for advancing pairwise ranking.
+
+\paragraph{\methodname{} is the best.}
+We use top-3 selections from the \ranker{} and feed them as candidates for \fuser{}. 
+Based on this integration, \methodname{} demonstrates remarkable capabilities as expected. 
+In terms of \texttt{GPT-Rank}, it achieves $3.01$, surpassing both the best model OA ($3.90$) by a significant margin. The scores for BERTScore ($79.09$), BARTScore ($-3.02$), and BELURT ($-0.17$) all exceed the best model by $4.41$, $0.43$, and $0.22$ respectively, showcasing substantial advantages.
+Moreover, \methodname{} also performs well in surpassing the top two models, Vic ($70.73$) and OA ($77.72$), thereby complementing the weaknesses of \ranker{}.
+
+\paragraph{Ranking correlation.}
+\label{pacorrelation}
+\input{tables/rank_correlation}
+In addition to focusing solely on the top-1 selection of each ranker, we present a comprehensive analysis of the overall rank correlation among all the candidates with \texttt{GPT-Rank} (see Table \ref{tab:rank_correlation}). The correlation metrics used here include the Pearson Correlation Coefficient, Spearman's Correlation, and Spearman's Footrule distance\cite{Diaconis1977SpearmansFA}.
+
+It turns out that BARTScore gets the highest correlation with \texttt{GPT-Rank} against other metrics, which suggests we use BARTScore to provide supervision for training.
+For rankers, MLM-Scoring still falls short of outperforming random permutations. On the other side, SummaReranker demonstrates better correlation in terms of the Pearson Correlation ($41.13$) and Spearman's Correlation ($39.10$), while SimCLS gets a better Spearman's Footrule distance ($29.32$)
+Notably, \ranker{} achieves the highest correlation with \texttt{GPT-Rank} across all correlation types, which is even way better than the BARTScore.
+
+\paragraph{More analysis.}
+We leave many other ablation studies and analyses in Appendix, where we apply \ranker{} to the three typical natural language generation (NLG) tasks: summarization (CNN/DM), machine translation (WMT18-zh-en), and constrained text generation (CommonGen).
+We find that \ranker{} still outperforms other methods by a large margin in the context of using a single same base model to decode $N$ candidates (with different algorithms).
+We also show that \texttt{MaxLogits} is much better than \texttt{MaxWins} and the bubble sort method is very cost-effective if the inference efficiency is a big concern. 
+\section{Related Work}
+\label{sec:related}
+% \todo{
+% introduce exposure bias,
+% Reranking is a common paradigm in the Natural Language Processing Tasks, like document retrieval.
+% Then the document reranking paradigm in the abstractive summarization, introduce RefSum, SimCLS, SummaReranker.
+% Instead of reranking only, introduce BRIO, JGR, as well as their great training cost.
+% The first one that try to use the pairwise reranking method.
+% }
+% reranker based; direct LM optimization; RL-based joint learning;
+
+
+
+% Instead of focusing on the reranker only, \citet{Liu2022BRIOBO} directly optimized a fine-tuned language model by assigning a higher probability to the summary of higher quality. 
+% Also, \citet{Shen2022JointGL} followed the idea of self-critic reinforcement learning and jointly trains the generator as well as the reranker in an adversarial way. 
+
+
+% exploit LM: exposure bias, decoding method. introduce the reranking method aim to bridge this gap
+% How to exploit the encoder-decoder LMs for NLG tasks is one of the main focuses in natural language generation (NLG) research. Decoding methods like beam search and diverse beam search are widely used due to their famous ability of decoding candidates of high quality. However, previous studies have found that the top-beam candidate is usually not the best one.
+% Reranking methods have long been used to improve the quality of natural language generation.
+% \citet{Shen2004DiscriminativeRF} propose an effective ranking method for machine translation.
+% \citet{Kratzwald2018AdaptiveDR,Nogueira2019PassageRW} use passage reranking as the first stage of the question-answering system. \cite{Krishna2022RankGenIT} use reranking for Generative common sense generation task to improve the generation quality. 
+
+% For the summarization task, \citet{Liu2021RefSumRN} first provided a unified view of text summarization and summaries combination. After that, \citet{Liu2021SimCLSAS} proposed a contrastive learning framework to effectively rerank the summarization candidates. 
+% \citet{Ravaut2022SummaRerankerAM} then introduce multi-task learning in the reranking by applying a mixture-of-experts layer to the head of the language encoder, which achieves the previous SOTA. 
+
+% As one of the most traditional and effective ranking methods, the pairwise ranking has shown its brilliant performance on a wide range of NLP tasks \cite{Jamieson2011ActiveRU}. Ranknet~\cite{Burges2005LearningTR} has been proposed as an effective method for a lot of ranking problems. The later improved LambdaRank~\cite{Burges2010FromRT} continues to show the great potential of pairwise ranking. However, though training in a pairwise way, they still compute the score for each item separately, which is why the pairwise method is outperformed by the listwise method. However, our method focuses on capturing the difference between a pair of candidates through the attention mechanism, which is proven to bring better performance.
+
+% Instead of focusing on reranker only, \citet{Liu2022BRIOBO} attempted to directly optimize the original language model by adding contrastive learning loss to the traditional cross-entropy loss as an adjustment to the fine-tuned language model. Following this, \citet{Shen2022JointGL} creatively trains the original language model and reranker jointly by applying the self-critic algorithm, which is one of the famous algorithms in reinforcement learning. That also points out a brand-new perspective on how to exploit the potential of the language model.
+
+
+% one paragraph about current LLM and their evaluation (llm arena, pandalm, Graham Neubig's zeno chatbot report)
+% another paragraph about ranking. Since we have described the individual scoring in detail before, we may focus on the pairwise ranking methods, like (ranknet, instructgpt)
+% a final paragraph about fusion generation. We talk about FiD, and other fusion generation works, like the summareranker's authors' later work, Towards fusion in summarization.
+
+\paragraph{LLM evaluation}
+As open-source large language models (LLMs) continue to flourish and demonstrate remarkable competitiveness across various natural language generation (NLG) tasks, assessing the capabilities of LLMs has become an exceedingly challenging endeavor.
+To address this issue, \citet{zheng2023judging} pioneered the creation of a chatbot arena, enabling users to provide pairwise evaluations of responses generated by two randomly selected LLMs. Based on these evaluations, they established an LLM Elo rating leaderboard.
+In a similar vein, \citet{zeno_chatbot} conducted an evaluation study on a customer service dataset, leveraging automated metrics such as BERTScore and ChrF~\cite{chrf}. This approach yielded similar LLM ranking results.
+Instead of relying solely on human evaluation, \citet{PandaLM} developed a fine-tuned model called PandaLM to compare responses generated by different LLMs. 
+AlpacaFarm~\cite{Dubois2023AlpacaFarmAS} also aims to evaluate LLMs with pairwise feedback.
+
+\paragraph{Pairwise ranking}
+Pairwise ranking, known for its long-standing effectiveness, has demonstrated exceptional performance across a wide array of NLP tasks \cite{Jamieson2011ActiveRU}. Notably, Ranknet~\cite{Burges2005LearningTR} and LambdaRank~\cite{Burges2010FromRT} have emerged as powerful techniques for various ranking problems. Furthermore, within the renowned RLHF procedure\cite{Ouyang2022TrainingLM}, these methods incorporate pairwise training of their reward model based on OPT. However, these approaches still compute scores individually and solely undergo pairwise training at the loss level. In contrast, our proposed \textsc{PairReranker} not only employs pairwise training but also utilizes the attention mechanism for pairwise inference during the inference stage. We posit that this approach better captures the subtleties between candidates and yields superior results, as demonstrated in Section~\ref{ssec:main_results}.
+
+\paragraph{Ensemble learning}
+Ensemble learning is a widely employed technique to enhance a model's capabilities by leveraging multiple weaker models~\cite{Sagi2018EnsembleLA,Anio2019EnsembleAF}. Typically, ensemble learning is performed either by considering model weights or by combining diverse outputs. 
+Mix-of-Experts (MoE) is a type of ensemble approach that combines the predictions of multiple specialized sub-models to improve overall performance. It has been successfully applied in various domains, such as natural language processing and computer vision~\cite{Jacobs1991AdaptiveMO,Shazeer2017OutrageouslyLN}.
+As for fusing multiple candidates, ~\citet{Izacard2020LeveragingPR} introduced a  framework named Fusion-in-Decoder (FiD) to improve the quality of question answering by fusing retrieved text. Building upon FiD, \citet{Ravaut2022TowardsSC} further investigated the effectiveness of fusion in the context of text summarization. However, they neglected to incorporate a selection process prior to feeding the candidates into the fusion module, resulting in only moderate improvements. In contrast, our proposed approach, referred to as \methodname{}, initially utilizes the \ranker{} algorithm to filter out candidates of poor quality. Subsequently, fusion is performed exclusively on the top-ranked candidates, leading to superior performance.
+
+% argue that ours is a posthoc 
+\section{Conclusion \& Future Directions}
+\label{sec:conclusion} 
+ 
+
+In this paper, we formulated the motivation to exploit the diverse strengths and weaknesses of open-source large language models (LLMs), aiming to create an ensembling framework that leverages their complementary capabilities to generate consistently superior results on various instruction-following tasks. By dynamically ensembling LLMs, we aimed to reduce biases, errors, and uncertainties in individual models, yielding outputs better aligned with human feedback.
+
+Our major contributions are as follows:
+\begin{itemize}
+    \item \textbf{A new framework:}\blender \textbf{\methodname{}} is a post-hoc ensemble learning method for ranking and fusing the outputs from multiple LLMs. 
+    It is composed of two modules: \ranker{} and \fuser{}, and both are straightforward yet effective.
+    \item \textbf{A new dataset:}\mixdata \textbf{\dataname{}} is a benchmark dataset, created for training and evaluating LLM ensembling methods on instruction-following tasks.
+    \item \textbf{Promising results:} We show that our method can significantly improve the overall results on various metrics, and our findings indicates that this direction is promising for both research community and practitioners.
+    \item \textbf{Toolkit:} By open-sourcing our framework, we aim to make it easier for others to leverage our approach, enabling the development of more advanced AI systems that achieve robustness, generalization, and enhanced accuracy in a wide variety of tasks. 
+\end{itemize}
+
+\paragraph{Future directions.}
+Potential future directions include extending the \methodname{} framework to more types of models or even non-text modalities, developing more sophisticated ranking and fusion techniques, and investigating the transferability of our ensembling approach to other domains and tasks. Additionally, exploring ways to minimize computational overhead and incorporating active learning strategies for rapid adaptation to new specialized domains and data sources represent fruitful areas for further research. Overall, our work underscores the value of combining the unique contributions of multiple models.
+
+
+% The performance of language models can be much improved by using an appropriate reranking method during the inference stage. Previous research in reranking has primarily concentrated on evaluating each candidate's output independently based on a given input. However, it is often challenging to distinguish subtle differences between candidates, as they are typically ranked highly by various decoding methods. 
+% Without the ability to compare candidates side-by-side, it can be difficult for humans to accurately assess the quality of a single candidate. As a result, these individual scoring methods may be limited as they do not take into account the context of other candidates. In this paper, we propose that a dedicated pairwise reranking approach is necessary to effectively identify subtle distinctions between candidates, ultimately enhancing reranking performance. 
+% In order to address these limitations, we propose a novel reranking method named\textsc{\ranker{}}. 
+
+% \todo{move this part to the intro.}/
+% Our contributions are as follows:
+% \begin{itemize}
+%     \item \textit{\ranker{}.} We propose a novel learning-to-rank framework for reranking the generation candidates for NLG. Unlike prior methods that score each candidate individually, our method explicitly examines the subtle differences between a pair of candidates and thus can produce pairwise comparison results. 
+%     \item \textit{Evaluation \& Analysis.} We evaluate various reranking methods including ours with three typical NLG tasks: summarization, machine translation, and constrained text generation. Prior works mainly focus on one particular task. With our extensive experiments and deep analysis, we show that \ranker{} consistently outperforms other baseline methods. 
+%     \item \textit{Improved efficiency.} A key drawback of pairwise learning is the efficiency issue. We propose to use the bubble sort method to improve efficiency, and we find that our \ranker{} can still beat the baseline methods by a significant margin, suggesting its promising applications in real-life applications.
+%     \item \textit{Generalization to LLMs.} We generalize \ranker{} to larger LMs such as GPT-3 that cannot be fine-tuned in practice. We find that our \ranker{} shows surprisingly good results even without any additional fine-tuning.
+% \end{itemize}
+% Extensive experiments on three NLG tasks demonstrate that \textsc{\ranker{}} outperforms baseline methods by a consistent margin.
+% Interestingly, trained rerankers can also be transferred and used with large language models such as GPT-3, which also produces a significant improvement. Overall, \textsc{\ranker{}} is a highly effective and flexible method for reranking candidates in NLG tasks.
+
+
+% \todo{This is the end of page limit. Page 9} 
+
+% \clearpage
+% \newpage 
+\section*{*Limitations}
+\paragraph{Efficiency.}
+To get the optimal performance from \ranker{}, one may need to call the model $O(n^2)$ times for getting the full matrix, thus resulting in a much less efficient solution. 
+We attempted to resolve this limitation by proposing to use multiple rounds of bubble sort methods to reduce the number of inferences needed, and we find it works pretty well.
+We also want to argue that although the number of inferences can be large for obtaining the best performance with \ranker{}, those inferences can be executed in parallel because they are totally independent.  
+
+\paragraph{Human evaluation.}
+We agree that automatic metrics have limitations. Human evaluation could provide us with more reliable and comprehensive evaluation results. However, due to the number of models as well as the amounts of generation candidates, we cannot afford large-scale human evaluation. We argue that our use of ChatGPT for evaluation is a good alternative, according to recent studies. 
+Also, we would like to highlight that we show the ground truths when using ChatGPT to do pairwise comparisions, which is quite informative than the common practice.
+
+% \paragraph{Decoding methods.} 
+% Ideally, we should do experiments for more configurations (i.e., hyperparameters) for each decoding  method. For example, taking different beam sizes and temperatures for experiments. However, each round of such experiments is extremely time-consuming.
+% And we argue that we follow the most prior work and use the popular setups for experiments, so our results and conclusions are reliable and comparable to other methods. With more resources and time,  more configurations for decoding should be explored.
+
+
+% \paragraph{Task diversity.}
+% Our experiments cover 3 tasks of natural language generation, including summarization, commonsense generation, and translation. There are still lots of NLG tasks we don't cover, like dialogue system, table-to-text, and so on. We also think that these three datasets could represent general NLG for their diverse features.
+ 
+\section*{*Ethical Statement}
+This work fully complies with the ACL Ethics Policy.
+We declare that there are no ethical issues in this paper, to the best of our knowledge.
+% We think important future directions include: 
+
+\section*{Acknowledgements}
+We thank members of the INK lab at USC and the Mosaic team at AI2 for valuable feedback on this project.
+Xiang is supported in part by the Office of the Director of National Intelligence (ODNI), Intelligence Advanced Research Projects Activity (IARPA), via the HIATUS Program contract \#2022-22072200006, the DARPA MCS program under Contract No. N660011924033, the Defense Advanced Research Projects Agency with award W911NF-19-20271, NSF IIS 2048211, and gift awards from Google and Amazon. 
+Yuchen's research was also supported by the Allen Institute for AI (AI2).
+The views and conclusions contained herein are those of the authors and should not be interpreted as necessarily representing the official policies, either expressed or implied, of ODNI, IARPA, or the U.S. Government.
+
+
+
+
+
+% Entries for the entire Anthology, followed by custom entries
+
+
+
+\bibliography{custom}
+\bibliographystyle{acl_natbib}
+
+% cancel for now
+% \section{Appendix}
+% \label{sec:appendix} 
+\appendix
+
+\begin{tcolorbox}[colframe=black!80, colback=white, sharp corners, boxrule=1pt, arc=5pt, rounded corners, left=1pt, right=1pt, top=2pt, bottom=2pt]
+\centering
+\large \textbf{Appendix}
+\end{tcolorbox}
+
+
+
+\section{Implementation Details}
+\label{sec:training_details}
+
+
+
+% \paragraph{Architecture }
+\paragraph{\ranker{}}
+We train our ranker for 5 epochs. We use the Adafactor optimizer~\cite{Shazeer2018AdafactorAL}, with the maximum learning rate being 1e-5. The warm-up ratio is 5\% with a linear learning rate scheduler. Our training batch size is 64. The training finishes on a single RTX 8000 GPU in two days. The backbone of \ranker{} is Deberta-v3-large~\cite{He2021DeBERTaV3ID}. 
+Unlike the mixture-of-experts layer used in the work of \citet{Ravaut2022SummaRerankerAM}, we employ a five-layer multi-layer perceptron (MLP) with the hyperbolic tangent activation function. The output dimension of the final layer is equal to the number of different metrics.
+In practice, we have tried different special embedding combinations, such as only feeding \texttt{<candidate1>} and \texttt{<candidate2>}, mean pooling representation, and so on. And Finally, we found that concatenating \texttt{<source>} with \texttt{<candidate1>}, and \texttt{<source>} with \texttt{<candidate2>} respectively achieves the best performance.
+We also tried different loss types, like MSE losses and ranking losses. And we find BCE is simply good enough.
+
+
+
+
+
+\paragraph{\fuser{}} 
+We use Flan-T5-large and Flan-T5-xl (3b) to train the top-3 bart-score selections as input and then apply it with \ranker{}'s top 3 selections for inference. 
+We find Flan-t5-3b performs much better than the large version, while flan-t5-xxl has marginal improvements yet being much larger and longer to train.
+
+
+\section{Conventional Tasks}
+
+To quantitatively understand how sub-optimal the default selections of decoding methods are, we present an empirical analysis in Fig.~\ref{fig:hist} .
+Here we look at three typical NLG tasks: summarization (CNN/DM), machine translation (WMT18), and constrained text generation (CommonGen), with their popularly used base models: PEGASUS ~\cite{zhang2020pegasus}, Opus-MT~\cite{opus_mt}, and T5-large~\cite{t5}. 
+We can see that the default selections (yellow bars in Fig.~\ref{fig:hist}; the top-beam generations) are much worse than the oracle selections from the top 15 candidate generations for each decoding method (blue bars). 
+\input{sections/_fig_curves}
+
+
+Moreover, if we combine the results from the four methods as a larger candidate pool, then the performance (green bars) of these NLG models can be much improved. 
+For example, the Rouge-2 score of PEAGUS can be improved by 57\% and the BLEU score for Opus-MT can be improved by nearly 80\%, compared to their top-beam performance. 
+Simply put, the default selections (i.e., the generations with the highest decoding scores) are much worse than the best selections from a relatively small candidate pool. 
+Therefore, we argue that it is of significant importance to rerank generation candidates in order to enhance the performance of LMs in NLG tasks.
+
+Why do decoding algorithms often overlook generation candidates of better quality? The lower quality of default selections is often attributed to the exposure bias caused by the teacher-forcing paradigm in most auto-regressive models. 
+Plus, the greediness of the search process and the randomness in sampling are also part of the reasons.
+Re-ranking has been a simple yet effective post hoc approach to mitigate this gap. 
+For instance, MLM-scoring~\cite{mlmscoring} uses an external LM such as BERT to estimate the quality of a candidate without any supervision.
+SimCLS \cite{Liu2021SimCLSAS} trains a re-ranker using a simple contrastive training objective, which encodes the source text and each candidate output using the same encoder and scores each candidate based on the cosine similarity between the embeddings. 
+Another successful approach is SummaReranker (SR)~\cite{Ravaut2022SummaRerankerAM}, which is trained to improve the re-ranker for multiple metrics simultaneously. 
+
+\section{Additional Results on Conventional Tasks}
+In this section, we evaluate the \ranker{} with conventional natural language generation (NLG) tasks.
+Extensive experiments conducted on three NLG
+tasks (i.e., summarization, translation, and constrained sentence generation) demonstrate that \ranker{} outperforms the baseline methods by a consistent margin and is also compatible with very large language models such as GPT-3 (text-davinci-003). 
+\ranker{} not only  outperforms the previous state-of-the-art method SummaReranker on the summarization task, but also shows great generalization performance in the other two
+NLG tasks, which are not evaluated previously. In
+addition, our \ranker{} can be transferred
+to improve GPT-3 results by 26.53\% and 11.65\%
+for CommonGen and WMT18 (zh-en) respectively, even though our rerankers are not trained with any candidates decoded by GPT-3 models.
+
+\subsection{Tasks and data creation}
+
+We evaluate reranking methods on the following public dataset: CNN/DM, CommonGen, and WMT18 (zh-en). The data statistics of these benchmarks are in Table~\ref{tab:dataset_stat} (in Appendix).
+
+
+
+\paragraph{CNN/DM} \cite{Hermann2015TeachingMT} is a dataset constructed from CNN and DailyMail websites. It is first used for machine-reading and comprehension, and later \citet{Nallapati2016AbstractiveTS} use it for abstractive summarization. Evaluation metrics are Rouge-1, Rouge-2, and Rouge-L. 
+
+
+\paragraph{CommonGen} \cite{lin2019commongen} is a dataset used for generative commonsense reasoning. It contains 79K commonsense descriptions where the language model is required to compose a realistically plausible sentence from given concepts. Evaluation metrics are BLEU and CIDEr. 
+
+\paragraph{WMT2018} \cite{Bojar2018FindingsOT} is a well-known dataset for evaluate machine translation. Here we use the Chinese-English split for evaluation. Evaluation metrics are BLEU. 
+
+
+\subsection{Base models}
+
+For the summarization task on CNN/DailyMail dataset, we use the famous PEGASUS-large~\cite{zhang2020pegasus} and BART-large~\cite{lewis2019bart}, which have exhibited great ability for abstractive summarization. We use the public fine-tuned checkpoint from Hugging face.
+For the generative commonsense reasoning task on CommonGen dataset, we use the T5-large \cite{t5}. It's one of the vanilla baselines reported in \citet{lin2019commongen}. 
+For the Chinese-English translation task on WMT18 dataset, we use the public pre-trained opus-mt checkpoint~\cite{Tiedemann2020OPUSMTB}.
+
+
+
+
+\subsection{Evaluation setups}
+\label{sec:evaluation_setup}
+
+In this section, we talk about the training and testing paradigm of our reranker, including how we construct the training, validation, and testing dataset for our reranker, how we generate candidates, and what our experiment focuses on.
+\input{tables/cnndm_results.tex}
+
+To construct the training dataset for the reranker, we need to ensure the base model used to generate candidates on the training dataset should never have seen these candidates. Otherwise, the reranker will be trained on the candidates with higher quality compared to the candidates that it will be tested on, which we found will result in fairly bad performance. Therefore, following \citet{Ravaut2022SummaRerankerAM}, we first fine-tune the original non-finetuned pre-trained model on half of the training dataset, which gives us 2 half-finetuned base models that each of them has only seen their own half of the training dataset. Then we use them to generate candidates on their un-seen half of the training dataset using the decoding method talked about before. These generated candidates together form a whole training dataset with generated candidates that resemble the quality during the inference stage. 
+
+During the inference stage, we directly adopt the public checkpoints that have been finetuned on the whole training dataset. We generate candidates on the validation and test datasets with this public checkpoint, which constitutes the validation and testing datasets on which our reranker runs inference.
+We use two decoding methods, beam search, and diverse beam search, in the experiments, following the prior work of SummaReranker. 
+We generate 15 candidates for each decoding method for both training and inference. 
+
+
+
+\subsection{Main results}
+\label{main results}
+
+% First, we investigate the oracle reranking gap for each dataset with respect to each decoding method. For each decoding method, we generate 15 candidates.
+ 
+
+\paragraph{Overall performance in summarization.}
+% \todo{Simply introduce Table 3 and highlight our gain. maybe also talk bout the gain in R-2 and R-L , .}
+
+
+
+Following the training and testing paradigm stated in section \ref{sec:evaluation_setup}, we briefly report the test results on the CNN/DM dataset in Tab.~\ref{tab:cnndm_results}. With fine-tuned PEGASUS-large as the base model. our \textit{Max Logits} method improves the candidates' quality by 6.35\% in Rouge-1, which is higher than our baseline SummaReranker. Besides, the performance gains in other metrics like Rouge-2 (9.62\%) and Rouge-L (6.25\%) are also obviously better. 
+
+
+\paragraph{Can PairReranker generalize to other generation tasks?}
+Yes. In order to test the task generalization ability of our method, we here report the test results on CommonGen and WMT2018 (zh-en) in Tab.~\ref{tab:commongen_results} and Tab.~\ref{tab:wmt2018_results}. From the data in the table, our method also improves the candidates' quality significantly after reranking. Our \textit{Max Logits} method obtain a 2.45\% performance gain in CIDEr on the CommonGen dataset and a 6.12\% performance gain in BLEU on the WMT2018 dataset. What's more, it's worth noting our \textit{bubble run} method achieves an even higher gain in CIDEr (2.91\%).
+
+\input{tables/commongen_results.tex}
+
+We also report the performance of SummaReranker on the two datasets. In contrast to the great performance on summarization, SummaReranker seems to fail to generalize well on other datasets. We also find that SummaReranker obtains a decreased gain on the CommonGen dataset (-1.23\% in CIDEr). The improvement on the translation dataset is not obvious (0.57\% in BLEU). We hypothesize that this is because of the average length of the candidates and the target text in these two datasets are all significantly smaller than the one in summarization (see in Tab.~\ref{tab:dataset_stat}). Therefore, the higher in-group similarity brought by the shorter length makes it harder for SummaReranker to capture their difference. On the contrary, our method with direct attention between a pair of candidates could easily tackle this problem. 
+
+
+
+
+
+
+
+
+\paragraph{Can PairReranker generalize other large-scale models like GPT-3?}
+Yes. 
+{After training on an expert dataset, our reranker could directly be applied to other models' outputs selection for the same task. To support this, we directly apply our three rerankers trained on the 3 main tasks respectively to the GPT-3 outputs with proper task-specific prompts.
+} 
+We report the performance gain in Tab.~\ref{tab:cnndm_results}, ~\ref{tab:commongen_results}, and~\ref{tab:wmt2018_results}. From the data reported in the table, we could see that the quality of the GPT-3 outputs is improved by a large margin compared to the average. Also, our performance gain is significantly larger than the baseline SummaReranker. For example, on the GPT-3 data points sampled from CNN/DM, our max logits method obtain a gain of 6.64\%, whereas SummaReranker only obtains a gain of 4.37\%. And on the CommonGen's, our method obtains a gain of 26.53\% and SummaReranker only obtains a gain of 18.79\%.
+
+\input{tables/wmt2018_results.tex}
+
+\begin{figure*}[!t]
+    % \vspace{-2em}
+    % \centering
+    % \hspace{-2.5em}
+    \includegraphics[width=1.0\linewidth]{figures/tradeoff_merged.pdf}
+    % \vspace{-3em}
+    \caption{Efficiency trade-off with the number of pairwise comparisons}
+    \label{fig:tradeoff_merged}
+\end{figure*}
+
+
+
+
+\paragraph{Can I make trade-offs between performance and number of comparisons?}
+% Figure~\ref{fig:tradeoff_merged} 
+% \todo{Add paragraphs here.}
+
+% \todo{R2: More detailed discussion about Max Logits, Max wins, Bubble. Including when to use which, cause that leads to the difference between them.}
+
+Yes. Due to the high cost of full comparison methods, it's necessary for us to study the trade-off between the model performance and the number of comparisons.
+For full comparison methods, we first initialize matrix $M$ in Figure~\ref{fig:matrix} to be all zeroes, Then every time of the comparison, we fill a confidence cell that is zero before, then do the scoring and select the best one based on the current information in the matrix. For bubble run, we run multiple times of bubble run and select one that is chosen as the best one for the most times. Each bubble cost $N$ comparisons. The trade-off results are shown in Figure~\ref{fig:tradeoff_merged}.
+From the results, we could see bubble run method could achieve high performance with little cost. However, as the number of comparisons increases, \textit{Max Logits} scoring methods will surpass the bubble run after a certain number of comparisons. 
+{We contend that the bubble run method already reports a pretty good performance with $N-1$ times of comparison. Therefore, most of the time, bubble run is a more efficient way to apply. If you want to pursue the marginal improvements brought by more comparison, you can also apply \textit{Max Logits} method with parallel computing. 
+}
+
+\subsection{Model Further Study}
+Due to the order of the input format, changing the position of candidate 1 and candidate 2 might also change the results (Sec. \ref{sec:architecture}). 
+In practice, we found that by simply shuffling the order of candidate 1 and candidate 2, our reranker could be consistent with itself more than 90\% of the time. 
+
+We analyze the model's relation between consistency as well as accuracy and the absolute pair rank difference. The results are presented in Figure~\ref{cnndm_comparison_analysis}. From the results, we could see that the model is better at classifying candidates with a higher absolute rank difference, because they are supposed to be more different.
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.6]{figures/cnndm_comparison_analysis.pdf}
+    \caption{Consistency and accuracy analysis for CNN/Daily Mail Dataset}
+    \label{cnndm_comparison_analysis}
+\end{figure}
+
+\section{Dataset statistics}
+We analyze the basic statistics, including the number of examples and the average words per example, of the 3 datasets. The data is presented in Table~\ref{tab:dataset_stat}
+\input{tables/dataset_stat.tex}
+
+
+
+% \section{Metrics}
+% We use various evaluation metrics for the conventional NLG tasks.
+% \begin{enumerate}
+%     \item For Rouge~\cite{Lin2003AutomaticEO}, we use the public rouge google Rouge lib: \url{https://github.com/google-research/google-research/tree/master/rouge}
+%     \item For BLEU, we use the popular SacreBLEU package \url{https://github.com/mjpost/sacrebleu}
+%     \item For CIDEr, we use the Microsoft COCO Caption package: \url{https://github.com/salaniz/pycocoevalcap}.
+% \end{enumerate}
+
+% \section{\mixdata \dataname{} Details}
+% \label{appendix:dataset}
+% As stated in ~\ref{ssec:dataset}, \dataname{} is constructed by collecting responses from 11 current popular LLMs, listed in ~\ref{tab:llm_results}. We here present the details of its construction.
+
+% We first deduplicate the dataset, then filter out the data points with too long or too short input and output. The length scope evaluated by the Llama tokenizer is constrained to be $[5,128]$. We shuffle the filtered data points and split them into train/val/test as 100k/5k/5k. Specifically for ShareGPT, we only take the first 2 items in the conversations as the input and output. That is, we only keep the first human input as the prompt and the following GPT outputs as the response. 
+
+% We use the top-p-sampling and set the temperature to 0.8. Except that, we keep all the other parameters as hugging face \texttt{Transformers} default values. For candidates from each model, we use 2 a6000 to do the inference for 72 hours to finish. Thus, the total a6000 time spent on generating is $2\times72\times11=1584(hours)=66(days)$.
+
+
+% \section{Dataset statistics}
+% We analyze the basic statistics, including the number of examples and the average words per example, of the 3 datasets. The data is presented in Table~\ref{tab:dataset_stat}
+% \input{tables/dataset_stat.tex}
+
+
+% \paragraph{Conventional tasks}
+% To construct the training dataset for the reranker, we need to ensure the base model used to generate candidates on the training dataset should never have seen these candidates. Otherwise, the reranker will be trained on the candidates with higher quality compared to the candidates that it will be tested on, which we found will result in fairly bad performance. Therefore, following \citet{Ravaut2022SummaRerankerAM}, we first fine-tune the original non-finetuned pre-trained model on half of the training dataset, which gives us 2 half-finetuned base models that each of them has only seen their own half of the training dataset. Then we use them to generate candidates on their un-seen half of the training dataset using the decoding method talked about before. These generated candidates together form a whole training dataset with generated candidates that resemble the quality during the inference stage. 
+
+% During the inference stage, we directly adopt the public checkpoints that have been finetuned on the whole training dataset. We generate candidates on the validation and test datasets with this public checkpoint, which constitutes the validation and testing datasets on which our reranker runs inference.
+% We use two decoding methods, beam search, and diverse beam search, in the experiments, following the prior work of SummaReranker. 
+% We generate 15 candidates for each decoding method for both training and inference. 
+
+
+
+
+% \section{GPT-3 dataset construction}
+
+% We use OpenAI GPT-3 API to generate candidates by prepending a task-designed prompt to the source text. For all three datasets, we randomly sample 1000 data points from their test sets. Due to the cost as well as the length limitation of GPT-3 models, we prefer the data points with a shorter length during sampling. We run the generation using the text-davinci-003 model with the temperature set to 0.9. For each data point, we generate 15 candidates for reranking. The average quality of returned candidates and the oracle performance are reported in Tab.~\ref{tab:cnndm_results}, ~\ref{tab:commongen_results}, and~\ref{tab:wmt2018_results}.
+
+% \section{Ablation study }
+
+% Besides, our inference method, a single run of bubble sort with our reranker as the comparison function, also brings randomness to the final results. The initial order of the candidates might affect the final performance. In practice, we will shuffle the order of these candidates before the inference, which we believe will remove the bias of the initial order, which makes our final results more stable. 
+
+
+
+
+% \newpage
+% \input{sections/4_evaluation_old}
+
+% \newpage
+% \input{sections/3_methods_old}
+
+% \onecolumn
+% \newpage
+% \section{Case Study}
+% \label{sec:appendix_case_study}
+% \input{tables/cmp_ranking_case.tex}
+
+
+% \begin{figure}
+%     \hspace{-2em}
+%     % \centering
+%     \includegraphics[scale=0.45]{figures/oracle_hists_horizontal.pdf}
+%     \vspace{-2em}
+%     \caption{
+%     % Comparisons between default generations of beam search (yellow) and the oracle selections of top 15 candidates from each decoding method (blue), as well as the combination of the four methods (green). 
+%     \todo{Add a new figure to showcase that the ability of open-source smaller LLMs are complementary. And also an illustartative figure to show our pipeline.}
+%     \vspace{-1em}}
+%     \label{fig:intro}
+% \end{figure}
+
+\onecolumn
+\newpage
+\section{ChatGPT Comparison Prompting Template (GPT-Rank)}
+\input{tables/gpt_eval_template}
+
+% \newpage
+% \section{Empirical Analysis of the Oracle Performance}
+% \input{tables/main_oracle_gap.tex}
+
+% \newpage
+% \section{Staged Area}
+
+% % \input{tables/gpt_eval_template}
+% % \input{tables/llm_results}
+% % \input{tables/cnndm_results}
+% % \input{tables/commongen_results}
+% % \input{tables/wmt2018_results}
+% % \input{tables/llm_dataset}
+% % \input{tables/rank_correlation}
+
+% \begin{figure*}[!htb]
+%     \centering
+%     \includegraphics[scale=0.55]{figures/pie.pdf}
+%     % \caption{在ChatGPT比较结果下，排名为第一位，第二位和第三位的模型来源统计分析}
+%     \caption{The statistics of source models for the top 3 ranked competitors.}
+%     \label{fig:pie}
+% \end{figure*}
+
+
+
+
+
+
+
+
+% \input{tables/cnndm_results}
+% \input{tables/commongen_results}
+% \input{tables/wmt2018_results}
+
+% \section{Ablation Study}
+% \label{sec:ablation}
+% \input{tables/gpt3_results}
+% In this section, we present supplementary experiments conducted for the purpose of ablation study. We demonstrate the applicability of \ranker{} in the traditional decoding reranking scenario by showcasing its performance in enhancing the results of GPT-3. Furthermore, we provide a thorough analysis of the trade-offs associated with three scoring methods: \texttt{MaxLogits}, \texttt{MaxWins}, and single bubble run. Our analysis reveals that the single bubble run method serves as an efficient substitute for the other two methods, especially when prioritizing speed.
+
+% \subsection{Experiments Setup}
+% We first select the base generation models for each task.
+% For the summarization task on CNN/DailyMail dataset, we use the famous PEGASUS-large~\cite{zhang2020pegasus} and BART-large~\cite{lewis2019bart}, which have exhibited great ability for abstractive summarization. We use the public fine-tuned checkpoint from Hugging face.
+% For the generative commonsense reasoning task on CommonGen dataset, we use the T5-large \cite{t5}. It's one of the vanilla baselines reported in \citet{lin2019commongen}. 
+% For the Chinese-English translation task on WMT18 dataset, we use the public pre-trained opus-mt checkpoint~\cite{Tiedemann2020OPUSMTB}.
+
+% Then we train our ranker directly on these generated candidates. We use two decoding methods, beam search, and diverse beam search, in the experiments, following the prior work of SummaReranker. 
+% We generate 15 candidates for each decoding method for the training. 
+
+% For inference, we use OpenAI GPT-3 API to generate candidates by prepending a task-designed prompt to the source text. For all three datasets, we randomly sample 1000 data points from their test sets. Due to the cost as well as the length limitation of GPT-3 models, we prefer the data points with a shorter length during sampling. We run the generation using the text-davinci-003 model with the temperature set to 0.9. For each data point, we generate 15 candidates for reranking. The average quality of returned candidates and the Oracle performance are reported in Tab.~\ref{tab:gpt3_results}.
+
+% \begin{figure*}[htb]
+%     % \vspace{-2em}
+%     % \centering
+%     % \hspace{-2.5em}
+%     \includegraphics[width=1.0\linewidth]{figures/tradeoff_merged.pdf}
+%     % \vspace{-3em}
+%     \caption{Efficiency trade-off with the number of pairwise comparisons for the three scoring method, \texttt{MaxLogits}, \texttt{MaxWins}, and the single bubble run.}
+%     \label{fig:tradeoff_merged}
+% \end{figure*}
+
+% \subsection{Results}
+% \paragraph{Effectiveness of Decoding Reranking}
+% To assess the effectiveness of decoding reranking, we select three conventional tasks: summarization (CNN/Daily Mail), constrained text generation (CommonGen), and translation (WMT18 zh-en). We train three instances of \ranker{} using the training set of each task and subsequently apply them directly to the generated outputs of GPT-3 (text-davinci-003) on the respective test sets. The results in the table indicate that \ranker{} utilizing the \texttt{MaxLogits} method achieves the highest improvement in metric values for CNN/DailyMail ($13.09\%$) and CommonGen ($26.53\%$). Conversely, the \texttt{MaxWins} method attains the best gain (11.65\%) for WMT18 (zh-en). These performance gains significantly surpass those of the previous state-of-the-art SummaReranker, thus affirming the ability of \ranker{} in the decoding reranking scenario.
+
+% \paragraph{Efficiency trade-off}
+% The computation of the full comparison matrix, as depicted in Figure~\ref{fig:matrix}, is required for both \texttt{MaxLogits} and \texttt{MaxWins}, resulting in a time complexity of $O(N^2)$, which may impede their speed. In order to assess these three tasks, we perform a trade-off analysis presented in Figure~\ref{fig:tradeoff_merged}. The findings indicate that the bubble run approach achieves superior performance at a minimal cost of $N-1$ comparisons. However, as the number of comparisons increases, the \texttt{MaxLogits} scoring methods outperform the bubble run method beyond a certain threshold. Consequently, in most cases, the bubble run method is a more efficient approach to employ. If one desires to pursue incremental improvements through additional comparisons, the \texttt{MaxLogits} method can also be employed in conjunction with parallel computing.
+
+
+\end{document}

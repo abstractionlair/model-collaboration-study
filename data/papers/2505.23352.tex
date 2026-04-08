@@ -1,0 +1,1470 @@
+% This must be in the first 5 lines to tell arXiv to use pdfLaTeX, which is strongly recommended.
+\pdfoutput=1
+% In particular, the hyperref package requires pdfLaTeX in order to break URLs across lines.
+
+\documentclass[11pt]{article}
+
+% Change "review" to "final" to generate the final (sometimes called camera-ready) version.
+% Change to "preprint" to generate a non-anonymous version with page numbers.
+\usepackage[preprint]{acl}
+\usepackage{multirow}
+% Standard package includes
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{booktabs}   % 优化表格线条
+\usepackage{amssymb}    % 支持 \checkmark
+\newtheorem{assumption}{Assumption}[section]
+\newtheorem{definition}{Definition}[section] 
+% For proper rendering and hyphenation of words containing Latin characters (including in bib files)
+\usepackage[T1]{fontenc}
+% For Vietnamese characters
+% \usepackage[T5]{fontenc}
+% See https://www.latex-project.org/help/documentation/encguide.pdf for other character sets
+
+% This assumes your files are encoded as UTF8
+\usepackage[utf8]{inputenc}
+
+% This is not strictly necessary, and may be commented out,
+% but it will improve the layout of the manuscript,
+% and will typically save some space.
+\usepackage{microtype}
+\usepackage{amsmath}
+% This is also not strictly necessary, and may be commented out.
+% However, it will improve the aesthetics of text in
+% the typewriter font.
+\usepackage{inconsolata}
+\usepackage{subfig}
+\usepackage{subfig}
+%Including images in your LaTeX document requires adding
+%additional package(s)
+\usepackage{graphicx}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins} % 提供更多皮肤选项
+\usepackage{lipsum} % 仅用于生成示例文本，实际使用时可以删除
+\usepackage{xspace}
+\usepackage{enumitem}
+\newcommand{\ourmethod}{\textsc{{EIB-Learner}}\xspace}
+
+\definecolor{deepblue}{RGB}{0, 0, 139}
+\definecolor{deepgreen}{RGB}{0, 100, 0}   % 深绿色（dark green）
+\definecolor{deepred}{RGB}{139, 0, 0}     % 深红色（dark red）
+\definecolor{deeppurple}{RGB}{75, 0, 130}  % 这是 Indigo（靛紫）色，常用于深紫效果
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+% table
+
+\usepackage{booktabs} 
+
+% 数学公式支持
+\usepackage{amsmath,amssymb,amsfonts}
+
+% algorithm2e 配置：
+%   ruled: 顶部和底部画横线
+%   vlined: 对控制结构自动画竖线
+%   noend: 不画 end 关键字
+\usepackage[ruled,vlined,noend]{algorithm2e}
+
+% 取消自动行号
+\SetAlgoNoLine
+
+% 定义蓝色注释字体命令
+\newcommand{\CommentFont}{\color{blue}\ttfamily}
+
+% 将注释样式设置为 \CommentFont
+\SetCommentSty{CommentFont}
+
+% 定义 C 风格注释 /* ... */
+\SetKwComment{Comment}{/* }{ */}
+
+
+
+% If the title and author information does not fit in the area allocated, uncomment the following
+%
+%\setlength\titlebox{<dim>}
+%
+% and set <dim> to something 5cm or larger.
+
+% \title{Understanding the Impact of Communication Topologies in Multi-Agent LLM Systems}
+
+\title{Understanding the Information Propagation Effects of Communication Topologies in LLM-based Multi-Agent Systems}
+
+% Author information can be set in various styles:
+% For several authors from the same institution:
+% \author{Author 1 \and ... \and Author n \\
+%         Address line \\ ... \\ Address line}
+% if the names do not fit well on one line use
+%         Author 1 \\ {\bf Author 2} \\ ... \\ {\bf Author n} \\
+% For authors from different institutions:
+% \author{Author 1 \\ Address line \\  ... \\ Address line
+%         \And  ... \And
+%         Author n \\ Address line \\ ... \\ Address line}
+% To start a separate ``row'' of authors use \AND, as in
+% \author{Author 1 \\ Address line \\  ... \\ Address line
+%         \AND
+%         Author 2 \\ Address line \\ ... \\ Address line \And
+%         Author 3 \\ Address line \\ ... \\ Address line}
+
+% \author{Xu Shen \\
+%   Affiliation / Address line 1 \\
+%   Affiliation / Address line 2 \\
+%   Affiliation / Address line 3 \\
+%   \texttt{email@domain} \\\And
+%   Second Author \\
+%   Affiliation / Address line 1 \\
+%   Affiliation / Address line 2 \\
+%   Affiliation / Address line 3 \\
+%   \texttt{email@domain} \\}
+
+\author{
+\textbf{Xu Shen\textsuperscript{1}\footnotemark[1]},
+ \textbf{Yixin Liu\textsuperscript{2}\footnotemark[1]},
+ \textbf{Yiwei Dai\textsuperscript{1}},
+ \textbf{Yili Wang\textsuperscript{1}},
+ \textbf{Rui Miao\textsuperscript{1}},
+ \textbf{Yue Tan\textsuperscript{3}},
+ \textbf{Shirui Pan\textsuperscript{2}},
+ \textbf{Xin Wang\textsuperscript{1}\footnotemark[2]},
+ \\
+ \textsuperscript{1}School of Artificial Intelligence, Jilin University, Changchun, China,
+ \\
+ \textsuperscript{2}School of Information and Communication Technology, Griffith University, Goldcoast, Australia,
+ \\
+ \textsuperscript{3}School of Computer Science and Engineering, University of New South Wales, Sydney, Australia
+ \\
+ \{\texttt{shenxu23}, \texttt{daiyw23}, \texttt{wangyl21}, \texttt{ruimiao20}\}@mails.jlu.edu.cn, 
+ \{\texttt{yixin.liu}, \texttt{s.pan}\}@griffith.edu.au, \\
+ \{\texttt{yue.tan}\}@unsw.edu.au, 
+ \{\texttt{xinwang}\}@jlu.edu.cn
+}
+
+\begin{document}
+\maketitle
+\footnotetext[1]{Equal Contribution}
+\footnotetext[2]{Corresponding Author}
+\begin{abstract}
+The communication topology in large language model-based multi-agent systems fundamentally governs inter-agent collaboration patterns, critically shaping both the efficiency and effectiveness of collective decision-making. While recent studies for communication topology automated design tend to construct sparse structures for efficiency, they often overlook why and when sparse and dense topologies help or hinder collaboration. 
+In this paper, we present a causal framework to analyze how agent outputs, whether correct or erroneous, propagate under topologies with varying sparsity. Our empirical studies reveal that moderately sparse topologies, which effectively suppress error propagation while preserving beneficial information diffusion, typically achieve optimal task performance. 
+Guided by this insight, we propose a novel topology design approach, \ourmethod, that balances error suppression and beneficial information propagation by fusing connectivity patterns from both dense and sparse graphs. Extensive experiments show the superior effectiveness, communication cost, and robustness of \ourmethod. The code is in: \href{https://github.com/se7esx/EIB/}{https://github.com/se7esx/EIB/}.
+% The communication topology in multi-agent systems (MAS) powered by large language models (LLMs) fundamentally shapes their collaborative reasoning. While recent works favor sparse structures for efficiency, they often overlook why and when different topologies help or hinder collaboration. In this paper, we present a causal framework to analyze how agent outputs, whether correct or erroneous, propagate under varying structures. Through two counterfactual interventions, error injection and answer injection, we reveal that moderately sparse topologies suppress errors whereas moderately dense ones preserve useful signals, as quantified by our proposed Total Counterfactual Topology Effect (TCTE) metric. Guided by this insight, we propose a GNN-based topology learning approach that balances robustness and efficiency by fusing connectivity patterns from both dense and sparse graphs. Experiments across multiple benchmarks show consistent improvements in both accuracy and communication cost.
+Agents powered by large language models (LLMs) ~\cite{li2023camel,wang2024survey,xi2025rise} have demonstrated strong performance across tasks like reasoning~\cite{yao2023react}, code generation~\cite{zhang2024codeagent}, and complex decision-making~\cite{guo2024embodied}. A key advancement in this area is the development of collaborative \textbf{multi-agent systems (MAS)}, where multiple LLM agents interact to outperform single agent when tackling complex tasks~\cite{talebirad2023multi,liang2024encouraging,guo2024large}. While agent role specialization contributes to this improvement~\cite{bo2024reflective}, the communication topology, which regulates how agents \textit{propagate}, \textit{exchange}, and \textit{process} information, plays a more fundamental role in enabling effective multi-agent collaboration~\cite{qian2024scaling,zhang2024exploring}. From simple chain~\cite{zhang2024chain} and tree~\cite{zhou2024language}, to fully connected graphs~\cite{hu2024learning} and LLM-generated designs~\cite{zhuge2024gptswarm}, prior works have proposed various topologies to shape this interaction. These studies converge on a central insight: \textbf{\textit{the topology of communication is critical to the effectiveness and efficiency of MAS}}.
+\begin{figure}[t!]   
+\vspace{-5mm}
+\centering    
+% 前面说过，图片放置在中间
+	\includegraphics[width=\columnwidth]{fig/intro.pdf}
+			\vspace{-6mm}
+					\caption{Illustration of (a) insight suppression caused by sparse chain and (b) error propagation induced by dense fully connected topologies.}
+      % 整个图片的说明，注释写在{}内
+					\label{fig:intro}  
+\vspace{-5mm}
+\end{figure}
+
+% Building on this, recent works have shifted from manually designed topologies to learning-based approaches that aim to induce sparse communication structures, motivated by the belief that fewer but more informative interactions can improve efficiency.
+Given its critical role in MAS performance, recent studies have increasingly focused on the automated design of communication topology using graph learning techniques~\cite{li2024improving,liu2025advances,zhou2025multi}, advancing beyond using pre-defined topologies. Central to these approaches is the principle of \textbf{\textit{sparsifying}} communication graphs, motivated by the insight that fewer but higher-quality interactions enhance system efficiency. 
+For example, AgentPrune~\cite{zhang2024cut} and AgentDrop~\cite{wang2025agentdropout} learn a task-specific sparse graph to eliminate suboptimal connections and/or agents, while G-Designer~\cite{zhang2024g} introduces a graph sparsification learning objective for the communication design model. Despite their advanced performance and efficiency, these methods often treat sparsification as an end goal, without considering a deeper question: \textit{{why} and {when} do \textbf{sparse} topologies help MAS collaboration?} Conversely, despite enabling maximal inter-agent interaction, \textit{why and when do \textbf{dense} topologies underperform}?
+
+%While these methods do lead to performance gains and reduced token costs, these methods often treat sparsifying as an end goal, without addressing a deeper question: \textbf{why} and \textbf{when} does sparsity help or hurt collaboration? This lack of explanation motivates a more fundamental investigation: Instead of simply learning sparser topologies,  \textbf{\textit{how different communication structures, whether sparse or dense, causally affect the reasoning and decision-making capacity of multi-agent systems}}.
+
+To answer the above questions, from a causal perspective, we conduct comprehensive analyses to investigate how the communication topologies with varying sparsity affect the information propagation among agents and thereby impact decision-making performance. 
+Through empirical analysis, we find that sparser topologies exhibit greater robustness against the propagation of error information generated by an individual agent, but may also suppress beneficial insights that contribute to accurate collective decision-making (see Figure~\ref{fig:intro}a). Conversely, denser topologies enable thorough insight dissemination, but also aggressively propagate individual errors (see Figure~\ref{fig:intro}b). With task-oriented analysis, we derive a novel insight: \textbf{\textit{an ideal communication topology should have a moderate sparsity, effectively suppressing error propagation while maintaining beneficial insight propagation.}}
+
+% In this paper, We propose a causal analysis framework to examine how individual agent outputs, whether accurate or erroneous, propagate under different communication structures. 
+% We design two counterfactual interventions, error injection and answer injection, to analyze how the topology affects the propagation of misinformation and the retention of insightful content. These two processes are illustrated in Figure~\ref{fig:intro}. We further introduce a metric, Total Counterfactual Topology Effect (TCTE), specifically designed to measure how different communication topologies respond to the two counterfactual interventions. 
+% Our experiments reveal that moderately sparse topologies better suppress error propagation, while moderately dense ones more effectively retain and transmit insightful information.
+% This leads to a novel insight: \textbf{\textit{the optimal communication topology is not the sparsest or the densest, but one that suppressing error propagation while preserving efficient insight sharing.}}
+
+Based on the insight above, we propose \textbf{E}rror-\textbf{I}nsight \textbf{B}alanced \textbf{Learner} (\ourmethod for short) for automated communication topology design of LLM-based MAS. Given a specific query, \ourmethod can dynamically customize an optimal topology by balancing error suppression and insight propagation. 
+Specifically, \ourmethod utilizes dual-view graph neural networks (GNNs) to simultaneously simulate error suppression on sparse graphs and insight propagation on dense graphs, creating complementary topological representations that inform optimal connectivity. Then, \ourmethod integrates the connectivity coefficients learned by both views with query-aware adaptive fusion, blending the error robustness of sparse topologies with the insight propagation capacity of dense topologies. Extensive experiments on 6 benchmark datasets demonstrate the effectiveness, communication efficiency, and robustness of \ourmethod.
+% \textbf{D}ual-view \textbf{C}ommunication \textbf{T}opology \textbf{L}earning (\ourmethod for short), a topology generation framework tailored for multi-agent systems powered by LLMs. 
+% \ourmethod models agent communication as a message-passing process over a graph, using a Graph Neural Network (GNN) to simulate information flow. To explicitly capture the dual objectives revealed by our causal analysis, \ourmethod learn two soft connectivity masks: one from a dense view to promote the spread of correct information, and another from a sparse view to limit error propagation. A query-aware fusion module then adaptively integrates the two views to generate a task-specific topology. This enables the MAS to remain robust in the presence of error while effectively leveraging informative insight, supporting more accurate and stable group decision-making.
+ To sum up, the main contributions of this paper are as follows:
+ \begin{itemize}[leftmargin=10pt]
+    \item \textbf{Causal Analysis.} We conduct causal counterfactual analyses to assess the impact of an agent on collective decision making in communication topologies with varying sparsity, revealing how error and insight propagation affect the inter-agent collaboration.
+    % \item \textbf{Topology Learning Guided by Causal Insights:} We develop a GNN-based framework that learns task-specific communication topologies by integrating two soft connectivity masks designed to suppress errors and preserve insightful signals, guided by causal analysis.
+    \item \textbf{Novel Method.} We propose \ourmethod, a GNN-based communication topology design approach that simulates error and insight propagation in MAS and learn reliable and efficient topologies by balancing error-insight trade-off.
+    \item \textbf{Comprehensive Experiments.} Experiments on 6 MAS decision-making benchmarks demonstrate that \ourmethod achieves superior accuracy with reduced communication cost and better robustness compared to existing baselines.
+\end{itemize}
+% % Agents based on large language models (LLM), integrating advanced generative language capacities with task-oriented reasoning frameworks, exhibit superior performance across diverse domains such as mathematical problem solving, code generation, and adaptive decision-making in dynamic scenarios. Recent studies suggest that assembling such agents into collaborative systems, inspired by the principles of human collective intelligence, can yield substantial performance gains compared to using isolated agent. This enhanced capability stems not merely from the role specialization of individual agents, but more critically from their capacity to engage in dynamic interactions, enabling information exchange, collective interpretation, and deliberative reasoning through systematic collaboration. To this end, an emerging line of work has begun to investigate how the communication topology among agents affects collective decision-making. From simple chain and tree structures to random graphs, fully connected networks, and even LLM-informed communication topologies, different structural designs have been shown to influence the flow of information, the efficiency of knowledge integration, and the accuracy of final decision making. These studies underscore a central insight: \textit{the topology of communication among agents plays a crucial role in shaping the overall performance of multi-agent LLM systems}. Therefore, designing effective communication topologies among agents is key to enabling human-like decision-making in LLM based multi-agent systems.
+
+% Agents powered by large language models (LLMs) ~\cite{li2023camel,wang2024survey,xi2025rise} have demonstrated strong performance across tasks like reasoning~\cite{yao2023react}, code generation~\cite{zhang2024codeagent}, and complex decision-making~\cite{guo2024embodied}. A key advancement in this area is the development of collaborative \textbf{multi-agent systems (MAS)}, where multiple LLM agents interact to outperform single-agent when tackling complex tasks~\cite{talebirad2023multi,liang2024encouraging,guo2024large,li2023theory}. While role specialization contributes to this improvement~\cite{bo2024reflective}, the communication topology, which defines how agents exchange information, plays a more fundamental role in enabling effective collaboration~\cite{qian2024scaling,zhang2024exploring}. From simple chain~\cite{zhang2024chain} and tree~\cite{zhou2024language}, to fully connected graphs~\cite{hu2024learning} and LLM-generated designs~\cite{zhuge2024gptswarm}, prior works have proposed various topologies to guide this interaction. These studies converge on a central insight: \textbf{\textit{the topology of communication is critical to the accuracy, efficiency, and final performance of multi-agent systems}}.
+% \begin{figure}[t!]   
+
+% \centering    
+% % 前面说过，图片放置在中间
+% 	\includegraphics[scale=0.3]{fig/intro.pdf}
+			
+% 					\caption{Illustration of insight suppression caused by chain (top) and error propagation induced by fully connected topologies (bottom).}
+%       % 整个图片的说明，注释写在{}内
+% 					\label{fig:intro}  
+% \vskip -1 em
+% \end{figure}
+
+% Building on this, recent works have shifted from manually designed topologies to learning-based approaches that aim to induce sparse communication structures, motivated by the belief that fewer but more informative interactions can improve efficiency~\cite{li2024improving,liu2025advances,zhou2025multi}. For example,~\cite{zhang2024cut} learns a task-specific sparse mask to eliminate suboptimal connections, while~\cite{wang2025agentdropout} introduces stochastic  pruning on both nodes and edges to encourage sparsity robustness. ~\cite{zhang2024g} goes further by generating a query-dependent sparse graph to improve adaptability. While these methods do lead to performance gains and reduced token costs, they often treat sparsity as an end goal, without addressing a deeper question: \textbf{why} and \textbf{when} does sparsity help or hurt collaboration? This lack of explanation motivates a more fundamental investigation: Instead of simply learning sparser topologies,  \textbf{\textit{how different communication structures, whether sparse or dense, causally affect the reasoning and decision-making capacity of multi-agent systems}}.
+
+% %Compared to manually crafted communication topology, recent state-of-the-art methods have begun to explore learning-based approaches that automatically derive task-specific topologies. These methods primarily aim to improve communication efficiency by removing redundancy, often under the assumption that \textbf{fewer interactions can yield similar or even better performance.} For instance, Cut the Crap proposes learning a sparse but fixed mask tailored to each task, which selectively disables certain inter-agent connections during inference to avoid reliance on suboptimal communication. AgentDropout extends this idea by introducing stochastic dropout on both nodes and edges, further encouraging sparse and robust interaction patterns. In contrast to learn a single fixed structure per task, G-Designer employs a graph generator to produce a unique sparse topology for each individual query, thereby enhancing adaptability across varying input scenarios. While these approaches offer practical benefits in terms of computational and economic cost, they share a common focus: they treat sparsity as an end goal, \textbf{without explaining why or when sparse structures actually help or hurt multi-agent collaboration.}
+% %This lack of explanation motivates a deeper investigation: instead of simply learning sparser topologies, \textbf{\textit{how to understand the causal relationship between a communication structure, whether sparse or dense, and the collective decision-making performance of the multi-agent system.}}
+
+% % In this paper, we propose a causal analysis framework that investigates how the correctness of an individual agent's output—whether accurate or erroneous—propagates through different communication topologies and ultimately influences the collective decision of the multi-agent system. Specifically, we design two counterfactual intervention strategies: error injection and answer injection. These interventions enable us to quantitatively evaluate the impact of both correct and incorrect agent-level outputs under varying topological structures. By systematically comparing sparse and dense communication structures, we reveal that sparser topologies are more effective at suppressing the influence of erroneous information, thereby enhancing robustness, while denser topologies facilitate the rapid dissemination of correct answers, promoting consensus and accuracy. These observations lead to a central insight: \textbf{\textit{the optimal communication structure is not the sparsest or the densest, but one that suppressing error propagation while preserving efficient information sharing.}}
+% In this paper, We propose a causal analysis framework to examine how individual agent outputs, whether accurate or erroneous, propagate under different communication structures. We design two counterfactual interventions, error injection and answer injection, to analyze how the topology affects the propagation of misinformation and the retention of insightful content. These two processes are illustrated in Figure~\ref{fig:intro}. We further introduce a metric, Total Counterfactual Topology Effect (TCTE), specifically designed to measure how different communication topologies respond to the two counterfactual interventions. Our experiments reveal that moderately sparse topologies better suppress error propagation, while moderately dense ones more effectively retain and transmit insightful information.
+% This leads to a novel insight: \textbf{\textit{the optimal communication topology is not the sparsest or the densest, but one that suppressing error propagation while preserving efficient insight sharing.}}
+
+% % Building upon this insight, we propose a graph neural network (GNN)-based architecture to emulate the message-passing process among agents. We begin with a fully connected graph as a message-passing template and identify a subgraph composed of nodes and links that are critical for the rapid dissemination of correct information. In parallel, we use a chain graph as another structural template to extract the subgraph most effective at suppressing the propagation of erroneous information. By fusing these two subgraphs, we obtain a task-specific communication topology that enables rapid convergence to a correct consensus and robustness to erroneous occurs, enabling reliable and efficient collective decision making. To sum up,the main contributions of this paper are as follows:
+% % Building on this insight, we propose a novel topology learning framework that explicitly incorporates the dual structural objectives revealed by our causal analysis: suppressing error propagation and preserving informative signals. We model multi-agent communication as a message-passing process over a graph and use a Graph Neural Network (GNN) as a simulator to learn how information flows under different topologies. To capture different propagation dynamics, we construct two soft connectivity masks: one from a fully connected graph to support efficient information diffusion, and one from a chain structure to enforce cautious propagation. A query-aware fusion module then adaptively combines these two views based on task semantics, yielding a task-specific communication topology. 
+% Based on our causal findings, we introduce \textbf{D}ual-view \textbf{C}ommunication \textbf{T}opology \textbf{L}earning (\ourmethod for short), a topology generation framework tailored for multi-agent systems powered by LLMs. \ourmethod models agent communication as a message-passing process over a graph, using a Graph Neural Network (GNN) to simulate information flow. To explicitly capture the dual objectives revealed by our causal analysis, \ourmethod learn two soft connectivity masks: one from a dense view to promote the spread of correct information, and another from a sparse view to limit error propagation. A query-aware fusion module then adaptively integrates the two views to generate a task-specific topology. This enables the MAS to remain robust in the presence of error while effectively leveraging informative insight, supporting more accurate and stable group decision-making.
+% % Building on this insight, we propose a topology learning framework that explicitly reflects the dual objectives identified by our causal analysis. We model multi-agent communication as a message-passing process over a graph, using a Graph Neural Network (GNN) to simulate information flow under different topologies. To capture distinct propagation dynamics, we construct two soft connectivity masks: one from a fully connected graph to facilitate insightful information propagation, and another from a chain structure to restrict the spread of errors. A query-aware fusion module then adaptively combines these views based on task semantics, generating a task-specific topology that balances efficiency and robustness. This design enables the MAS to converge quickly when agent inputs are reliable while remaining resilient to misleading information, ultimately supporting more accurate and stable collective decision making.
+
+%  To sum up,the main contributions of this paper are as follows:
+%  \begin{itemize}
+%     \item \textbf{Causal Analysis of Communication topologies:} We propose a causal counterfactual analysis framework to assess the impact of an agent on collective decision making across various communication topologies, revealing how communication sparsity and density influence the collaboration between agents.
+%     % \item \textbf{Topology Learning Guided by Causal Insights:} We develop a GNN-based framework that learns task-specific communication topologies by integrating two soft connectivity masks designed to suppress errors and preserve insightful signals, guided by causal analysis.
+%     \item \textbf{Topology Learning Guided by Causal Insights:} We propose \ourmethod, a GNN-based framework that simulates multi-agent communication and learns dual-view soft connectivity masks guided by our causal analysis, and adaptively fuses them into task-specific topologies.
+%     \item \textbf{Comprehensive Empirical Validation:} Extensive experiments on six multi-agent decision-making benchmarks demonstrate that our method achieves superior accuracy with reduced communication cost compared to existing baselines.
+% \end{itemize}
+
+% % \begin{itemize}
+% %     \item \textbf{Causal Analysis of Communication Topologies:} We introduce a counterfactual framework that analyzes the causal impact of an individual agent’s correct or incorrect output on the final group decision under different communication structures. Through error injection and answer injection interventions, we provide a principled explanation of when and why sparse or dense topologies help or hinder multi-agent collaboration.
+% %     \item \textbf{GNN-Based Topology Optimization:} We propose a novel graph neural network architecture that learns task-specific communication topologies by combining the strengths of both fully connected and chain structures. This design promotes both rapid propagation of correct information and suppression of erroneous signals, striking an effective balance between accuracy and robustness.
+% %     \item \textbf{Comprehensive Empirical Validation:} We conduct extensive experiments on six multi-agent decision-making benchmarks, demonstrating that our method consistently outperforms existing baselines while significantly reducing communication cost, thereby achieving both superior performance and communication efficiency.
+% % \end{itemize}
+% %Taking this idea further, G-Designer leverages a graph structure generator to create query-specific sparse masks for improved adaptability. While these approaches improve efficiency by reducing communication overhead, they largely treat sparsity as the ultimate goal, without offering a clear explanation of why certain sparse or dense structures are more beneficial for multi-agent collaboration. This motivates our work, which aims to uncover the causal relationship between communication topology and the collective reasoning performance of multi-agent systems.
+\section{Problem Definition}
+% \subsection{Communication Topology}
+\paragraph{{Communication Topology}}
+We formulate the communication topology of a multi-agent system (MAS) as a directed acyclic graph (DAG), defined as $\mathcal{G} = (\mathcal{V},\mathcal{E})$. Here $\mathcal{V} = \{v_{1},\cdots,{v}_{N}\}$ denotes the set of nodes, where each node $v_i$ indicates a LLM-based agent. The edge set $\mathcal{E}$ specifies directed communication links, where each edge $ e_{ij} = (v_{i}, v_{j}) \in \mathcal{E}$ indicates that agent $v_{i}$ can receive messages from agent $v_{j}$. The connectivity of $\mathcal{g}$ can be represented by an adjacency matrix $\mathbf{A} \in \{0,1\}^{N \times N}$, where $\mathbf{A}_{i,j} = 1$ if and only if $ (v_{i}, v_{j}) \in \mathcal{E}$ and $\mathbf{A}_{i,j} = 0$ otherwise.
+
+In this setup, each node $v_{i} \in V$ corresponds to a LLM-based agent and can be formalized as
+$v_{i} = \{\texttt{Role}_{i},\texttt{State}_{i}\}$, where $\texttt{Role}_{i}$ denotes the pre-defined role of agent $v_{i}$ for a specific task, and $\texttt{State}_{i}$ stores the history response of the agent $v_{i}$ and its interaction history with other agents.  Each LLM-based agent receives a prompt $\mathcal{P}$ and generates the response $\mathcal{R}_{i}$ by:
+\begin{equation}
+    \mathcal{R}_{i} = v_{i}(\mathcal{P}) = v_{i}(\mathcal{P}_{\text{sys}},\mathcal{P}_{\text{usr}}),
+\end{equation}
+where $\mathcal{P}_{\text{sys}}$ is the system prompt that combine the $\texttt{Role}_{i}$ and $\texttt{State}_{i}$ of the current agent, and $\mathcal{P}_{\text{usr}}$ denotes the user prompt, including current query, task instructions, and other necessary information.
+
+
+% \subsection{Communication Protocol}
+\paragraph{{Communication Protocol}}
+Given a user query $\mathcal{Q}$, a MAS performs $K$ rounds of interaction based on the communication graph $\mathcal{G}$. At each round $t$, the execution order of agents is determined by a topological sort $\sigma = [v_{\sigma_1}, \dots, v_{\sigma_N}]$, ensuring that an agent is only activated after all its in-neighbors have produced their outputs. Each agent $v_{i}$ generates its own response $\mathcal{R}_{i}^{(t)}$ according to the user query and the outputs of its neighbors:
+% \begin{align}
+%  \resizebox{.89\hsize}{!}{$R_{i}^{(t)} = v_{i}(P_{sys},P_{usr}^{(t)}), P_{usr}^{(t)}=\{Q\} \cup \{R_j^{(t)} | v_j\in N(v_{i})\},$}
+% \end{align}
+\begin{align} \label{mp_in_multi-agent}
+    \mathcal{R}_{i}^{(t)} &= v_{i}(\mathcal{P}_{\text{sys}},\mathcal{P}^{(t)}_{\text{usr}}), \\
+    \mathcal{P}^{(t)}_{\text{usr}}&=\{\mathcal{Q}\} \cup \{\mathcal{R}_{j}^{(t)} | v_j\in \mathcal{N}(v_{i})\}, \nonumber
+\end{align}
+where $\mathcal{N}(v_{i})=\{v_j|(v_j,v_i)\in \mathcal{E})\}$ denotes the neighbor set of the agent $v_{i}$. After $K$ rounds, the final output $\mathcal{O}$ is obtained by aggregating all agent outputs:
+\begin{equation}
+    \mathcal{O} = \operatorname{Aggregate}(\mathcal{R}_{i}^{(K)} \dots \mathcal{R}_{n}^{(K)}),
+\end{equation}
+\noindent where the aggregation strategy $\operatorname{Aggregate}(\cdot)$ varies across implementations, including majority voting among agents, delegating the final decision to a specific agent, or selecting the output from the last agent in the execution order. The communication rounds $K$ can be either predefined or adaptively determined via early-stopping mechanisms.
+% each agent viv_ivi​ receives a task-specific input query qqq, along with the outputs from its in-neighbors Zi={oj∣(vj,vi)∈E}\mathcal{Z}_i = \{o_j \mid (v_j, v_i) \in E\}Zi​={oj​∣(vj​,vi​)∈E}, and produces its own output oi=ϕi(q,Zi)o_i = \phi_i(q, \mathcal{Z}_i)oi​=ϕi​(q,Zi​). The outputs are propagated through the graph according to the topological order, culminating in a final prediction from a designated decision agent.
+% While prior graph-based multi-agent system (MAS) designing approaches primarily focus on producing sparse communication topologies to reduce redundancy, it is not clear how these topologies shape the actual information flows between agents and influence the results of collective decisions. This motivates us to delve into the topology factors that govern communication effectiveness. To this end, we try to answer two interrelated sub-questions (SQs) that together capture the dual role of topologies in modulating information flows in MAS. \textbf{\textit{SQ1}: How does the communication topology mediate the spread of errors?} Concretely, when an individual agent accidentally produces incorrect information, does the topology amplify this error and lead the group to a wrong decision? \textbf{\textit{SQ2}: How does the communication topology shape the propagation of accurate information?} Conversely, when an agent generates accurate and helpful insight, does the topology enable its influence to be retained and integrated into the final output, or is it suppressed along the way? These considerations lead us to our central research focus: \textbf{\textit{In a MAS, how different topologies affect its vulnerability to error propagation and its ability to preserve beneficial information.}}
+
+In this section, we conduct extensive empirical analysis to investigate how communication topologies of varying sparsity shape the actual information propagation among agents and influence collective decision-making outcomes in a multi-agent system (MAS). \textit{First}, we discuss two causal effects of communication topologies with different sparsity: \textbf{\textit{error propagation}} and \textbf{\textit{insight propagation}}. Specifically, we analyze how the erroneous information generated by an individual agent spreads, as well as how beneficial insights diffuse across the topology. \textit{Next}, we evaluate how sparsity influences the effectiveness through task-oriented performance analysis, and expose the ideal information propagation characteristics of communication topologies. \textit{Finally}, we assess the information diffusion capabilities of existing communication paradigms, including both pre-defined and automatically learned topologies, with respect to their error and insight propagation properties.
+
+\subsection{Causal Metric of Agent Impact}
+
+% In order to quantify the impact of each agent on the whole MAS, which allows us to systematically analyze how agent-level errors or accurate information propagate through the network and ultimately affect collective outcomes. 
+
+In order to analyze the information propagation effects of different communication topologies, we first define a new causal metric, denoted as Counterfactual Agent Propagation Effect (\textbf{CAPE}), that quantifies the causal influence of the output of a single agent on the final answer of MAS under a given communication graph. 
+Specifically, we perform a counterfactual intervention by forcing agent $v_{i}$ to produce a deliberately manipulated output, and then measure whether this change alters the final prediction made by the MAS under a fixed topology $\mathcal{G}$. The formal definition is as follows:
+\begin{definition}
+   Given a MAS under communication graph $\mathcal{G}$, for a query $\mathcal{Q}$, let $y_{Q}^\text{orig} \in \{0,1\}$ denote whether the final system answer is correct under the original communication process. The Counterfactual Agent Propagation Effect {\text{(CAPE)}} of agent $v_i$ under $\mathcal{G}$ and query $\mathcal{Q}$ as:
+   \begin{equation}
+       \resizebox{.8\hsize}{!}{$\text{CAPE}_{i}(\mathcal{G},\mathcal{Q}) = \mathbb{I}[y_q^{\text{cf}}(\mathcal{G}, \text{do}(\mathcal{O}_i := \hat{\mathcal{{O}}}_i)) \ne y_q^{\text{orig}}(\mathcal{G})]$},
+   \end{equation}
+   where $ \operatorname{do}(\mathcal{O}_i := \hat{\mathcal{{O}}}_i))$ denotes a targeted intervention that forces only agent $v_{i}$ output to a counterfactual value $\hat{\mathcal{{O}}}_i$, $y_{\mathcal{Q}}^{\text{cf}} \in \{0,1\}$ is the correctness of the final system prediction after the intervention, and $\mathbb{I} \left[ \cdot
+\right]$ is the indicator function for whether the final answer of MAS is flipped.
+\end{definition}
+
+A higher {CAPE} value suggests that changes in the output of an individual agent, once propagated through the communication structure, have a stronger influence on the final decision of MAS. Building on the ability of CAPE to quantify agent-level influence, we further define the Total Counterfactual Topology Effect (\textbf{TCTE}) to expend the casual metric to the topology level, providing a comprehensive measure of the general sensitivity of the topology to localized interventions.
+\begin{definition}
+Given a communication topology $\mathcal{G}$, its Total Counterfactual Topology Effect ({TCTE}) given a query $\mathcal{Q}$ is defined as:
+\begin{equation}
+\text{TCTE}(\mathcal{G},\mathcal{Q}) = \frac{1}{N}\sum_{v_i\in \mathcal{V}} \frac{1}{\sqrt{d_i}} \cdot \text{CAPE}_{i}(\mathcal{G},\mathcal{Q}),
+\end{equation}
+where $d_i$ is the degree of agent $v_i$ in graph $\mathcal{G}$. 
+\end{definition}
+
+In TCTE, the coefficient $1/\sqrt{d_i}$ downweights the agents with high degree, reflecting the intuition that highly connected agents are more likely to spread influence, and we wish to normalize their impact accordingly. A higher TCTE indicates that the topology is more responsive to specific changes in agent-level output, implying a greater potential to either propagate erroneous information or effectively transmit correct insights.
+
+\subsection{Empirical Analysis}
+In this subsection, we aim to empirically assess how different communication topologies affect the sensitivity of MAS to agent-level perturbations. We quantify the sensitivity by computing TCTE of communication graphs, and also evaluate the effectiveness of different topologies using task-oriented measurement, i.e., question-answering accuracy.
+
+\begin{figure}[t]
+  \centering
+  % 第一行：两张并排
+  \subfloat[Error propagation]{%
+    \label{subfig:error}%
+    \includegraphics[
+      width=0.5\columnwidth,
+    ]{fig/CAPE_error.pdf}%
+  }\hfill
+  \subfloat[Insight propagation]{%
+    \label{subfig:insight}%
+    \includegraphics[
+      width=0.5\columnwidth,
+    ]{fig/CAPE_answer.pdf}%
+  }
+
+  \vspace{-1em} % 两行之间垂直间距
+
+  % 第二行：一张拉伸到底栏宽
+  \subfloat[Analysis of pre-defined and learned topologies]{%
+    \label{subfig:baselinetp}%
+    \includegraphics[
+      width=\columnwidth
+    ]{fig/CAPE_baseline.pdf}%
+  }
+
+  \caption{Empirical results of error propagation effect and insight propagation effects.}%Experimental validation of how different communication topologies affect error propagation and the transmission of useful insight, as quantified by TCTE under two types of counterfactual interventions.}
+  \label{fig:three_plots}
+  \vskip -1 em
+\end{figure}
+
+% \subsubsection{Experimental Settings}
+\paragraph{Experimental Settings} 
+We conduct our experiments on the MMLU dataset~\cite{hendrycks2020measuring}, a benchmark for evaluating knowledge and reasoning across diverse domains. In our MAS setup, each of the six agents is an independent instance of GPT-3.5 with a distinct role and prompt template, and all communicate according to a pre-specified topology. For each topology, we construct two evaluation sets: one containing 500 questions that the MAS originally answers correctly, and another with 500 questions that the system answers incorrectly. These sets serve as the basis for simulating both detrimental and beneficial agent-level interventions under varying graph structures.
+
+% \noindent \textbf{} \ \ \  
+\subsubsection{Analysis of Error Propagation Effect}
+
+\paragraph{Setup} 
+To investigate \textbf{\textit{how different communication topologies spread the erroneous information generated by a single agent}}, we focus on the 500 originally correct questions and assess the vulnerability of MAS to local errors. Specifically, we start from a fully connected communication graph (\texttt{Full}) and progressively remove edges randomly to generate topologies with different sparsity levels, until it degrades into a chain graph (\texttt{Chain}). For each graph, we apply a counterfactual intervention by modifying the system prompt of an agent to produce an incorrect output, i.e., $\hat{\mathcal{{O}}}_i = \mathcal{O}_{\text{error}}$, and compute the corresponding $\text{TCTE}$ to quantify how often the final prediction flips from correct to incorrect under each topology. 
+
+% \noindent \textbf{Discussion of Results} \ \ \
+\paragraph{Discussion of Results} 
+As shown in Figure \ref{subfig:error}, dense topologies exhibit greater susceptibility to error propagation, wherein erroneous outputs from individual agents are more likely to compromise the final prediction. When the sparsity is zero (i.e., \texttt{Full}), $\text{TCTE}$ reaches its peak. In contrast, sparser structures can effectively mitigate this issue. For example, in the extreme case \texttt{Chain}, $\text{TCTE}$ is reduced by up to $19\%$, indicating improved robustness to localized errors. %Moreover, moderate sparsity also coxntributes to better task performance: as sparsity increases from 0 to 0.4, the system’s accuracy improves by up to $3.2\%$. Based on the above experimental results, we arrive at the following conclusion.
+\begin{tcolorbox}[
+    enhanced, % 启用增强样式
+    colback=white, % 背景色（白色）
+    colframe=deepgreen, % 边框颜色（黑色）
+    boxrule=1pt, % 边框线宽
+    arc=5pt, % 直角边框（无圆角）
+    left=5pt, right=5pt, % 左右内边距
+    top=5pt, bottom=5pt, % 上下内边距
+    width=\linewidth % 宽度与文本等宽
+]
+\textbf{\textcolor{deepgreen}{Finding 1}}: Denser communication topologies are more susceptible to error spreading, while sparser topologies demonstrate stronger resistance to the error propagation effect. %Moderately sparse topologies mitigate the risk of error propagation within the system.
+\end{tcolorbox}
+
+\subsubsection{Analysis of Insight Propagation Effect}
+
+% \noindent \textbf{Setup} \ \ \ 
+\paragraph{Setup} 
+In this experiment, we examine \textit{\textbf{how different topologies support the propagation of beneficial insight generated by each agent}}. We focus on the 500 originally incorrect questions and start from a sparse \texttt{Chain} topology, gradually adding edges to increase connectivity until reaching \texttt{Full}. In each case, we perform a counterfactual intervention by injecting the correct answer into a selected agent’s prompt, i.e., $\hat{\mathcal{{O}}}_i = \mathcal{{O}}_{\text{correct}}$, and compute the corresponding $\text{TCTE}$ to measure how often the final prediction flips from incorrect to correct.
+
+% \noindent \textbf{Discussion of Results} \ \ \
+\paragraph{Discussion of Results} 
+As shown in Figure \ref{subfig:insight}, sparse topologies tend to impede the propagation of accurate and informative signals, preventing them from influencing the final output. When connectivity is minimal (i.e., \texttt{Chain}), $\text{TCTE}$ reaches its lowest value, indicating poor transmission of correct insights. With increasing density, the insight propagation effect is strengthened. In \texttt{Full} structure, $\text{TCTE}$ increases by $10.5\%$, suggesting that the system becomes more capable of integrating accurate agent-level inputs into the final decision. 
+
+%In contrast, this limitation is alleviated as the network becomes more connected. For example, in the extreme case of a fully connected topology, $\text{TCTE}$ increases by $10.5\%$, suggesting that the system becomes more capable of integrating accurate agent-level inputs into the final decision. %Moreover, we observe that moderate density also contributes to improved task performance: as connectivity increases from 0 to 0.4, the system’s accuracy improves by up to $1.01\%$.  Based on the above experimental results, we arrive at the following conclusion.
+\begin{tcolorbox}[
+    enhanced, % 启用增强样式
+    colback=white, % 背景色（白色）
+    colframe=deepgreen, % 边框颜色（黑色）
+    boxrule=1pt, % 边框线宽
+    arc=5pt, % 直角边框（无圆角）
+    left=5pt, right=5pt, % 左右内边距
+    top=5pt, bottom=5pt, % 上下内边距
+    width=\linewidth % 宽度与文本等宽
+]
+\textbf{\textcolor{deepgreen}{Finding 2}}: Increased connectivity enhances beneficial insight propagation in MAS, while sparse topologies constrain the integration of informative signals from individual agents.
+\end{tcolorbox}
+
+
+
+%通过对现有的预定义结构的分析以及可学习的两个方法的分析，我们发现他们都无法在答案传播和错误阻碍这两部分取得平衡。多智能体的协作的核心在于求同存异，即当大多数agent趋向于正确答案时能够快速得到统一答案，当少数agent出现错误时能被抑制。需要一个恰好平衡的结构，为产生正确答案的智能体构建稠密的链接从而将正确答案快速传播，为产生错误答案的智能体构建瓶颈，从而抑制他的传播。
+
+\subsubsection{Effectiveness Analysis}
+
+\paragraph{Setup} 
+While communication topologies of different sparsity levels produce distinct error propagation and insight propagation effects, a follow-up question raises: \textbf{\textit{How do the topological sparsity ultimately affect real-world task performance?}} To answer this question, we examine the task-oriented performance of different topologies, in term of accuracy for MMLU dataset.
+
+\paragraph{Discussion of Results} 
+The task-oriented accuracies are demonstrated by the red dashed line in Figures~\ref{subfig:error} and \ref{subfig:insight}. From both cases, we can observe that a moderate sparsity contributes to better task performance, while overly sparse or dense structures lead to suboptimal outcomes. Recalling \textbf{\textcolor{deepgreen}{Finding 1}} and \textbf{\textcolor{deepgreen}{Finding 2}}, this phenomenon arises because topology with intermediate sparsity strikes a balance: it sufficiently suppresses erroneous information while effectively propagating beneficial insights, thereby maximizing the decision-making accuracy of MAS. At the agent level, an ideal topology should balance this trade-off through moderate sparsity: establishing dense connections around high-accuracy agents to amplify beneficial insights, while maintaining sparse connectivity for error-prone agents to limit misinformation propagation.
+
+\begin{tcolorbox}[
+    enhanced, % 启用增强样式
+    colback=white, % 背景色（白色）
+    colframe=deepblue, % 边框颜色（黑色）
+    boxrule=1pt, % 边框线宽
+    arc=5pt, % 直角边框（无圆角）
+    left=5pt, right=5pt, % 左右内边距
+    top=5pt, bottom=5pt, % 上下内边距
+    width=\linewidth % 宽度与文本等宽
+]
+\textbf{\textcolor{deepblue}{Insight}}: Topologies with moderate sparsity optimize MAS performance by balancing error suppression and insight propagation, achieved through dense connections around accurate agents and sparse links for error-prone agents.
+\end{tcolorbox}
+
+\subsubsection{Analysis of Existing Topologies}
+\paragraph{Setup} 
+With the \textbf{\textcolor{deepblue}{Insight}} given above, we are curious about: \textbf{\textit{How do existing communication topologies, both pre-defined and learnable, perform in balancing error propagation and insight diffusion?}} 
+We evaluate a range of representative topologies, including pre-defined ones such as \texttt{Full}, \texttt{Layered}, \texttt{Random}, \texttt{Star}, and \texttt{Chain}, as well as topologies learned through state-of-the-art methods such as \texttt{AgentDropout}~\cite{wang2025agentdropout} and \texttt{AgentPrune}~\cite{zhang2024cut}. 
+\vspace{-6pt}
+\paragraph{Discussion of Results} 
+As shown in Figure \ref{subfig:baselinetp}, the results reveal a consistent trend: sparse topologies are more robust to error propagation, while denser structures better support the amplification of helpful insight, which echoes our earlier analysis. However, we found that the topologies generated by \texttt{AgentDrop} and \texttt{AgentPrune} do not show superior performance compared to random graphs with moderate sparsity, indicating that topology optimization methods that explicitly balance error and insight propagation. 
+
+%However, no single topology achieves strong performance on both objectives simultaneously. %Notably, the best-performing structures in terms of overall task accuracy are neither the sparsest nor the densest, suggesting that effective multi-agent communication requires a balanced topology that can simultaneously suppress error propagation and preserve the transmission of informative insight. These observations lead us to the following insights:
+\begin{tcolorbox}[
+    enhanced, % 启用增强样式
+    colback=white, % 背景色（白色）
+    colframe=purple, % 边框颜色（黑色）
+    boxrule=1pt, % 边框线宽
+    arc=5pt, % 直角边框（无圆角）
+    left=5pt, right=5pt, % 左右内边距
+    top=5pt, bottom=5pt, % 上下内边距
+    width=\linewidth % 宽度与文本等宽
+]
+\textcolor{purple}{\textbf{Limitation}}: Current methods show limited effectiveness in simultaneously managing error suppression and insight propagation. %An effective topology should build dense connections around agents likely to produce correct answers to amplify their influence, while creating structural bottlenecks around potentially erroneous agents to limit the spread of misinformation.
+\end{tcolorbox}
+% While prior graph-based multi-agent system (MAS) designing approaches primarily focus on producing sparse communication topologies to reduce redundancy, it is not clear how these topologies shape the actual information flows between agents and influence the results of collective decisions. This motivates us to delve into the topology factors that govern communication effectiveness. To this end, we try to answer two interrelated sub-questions (SQs) that together capture the dual role of topologies in modulating information flows in MAS. \textbf{\textit{SQ1}: How does the communication topology mediate the spread of errors?} Concretely, when an individual agent accidentally produces incorrect information, does the topology amplify this error and lead the group to a wrong decision? \textbf{\textit{SQ2}: How does the communication topology shape the propagation of accurate information?} Conversely, when an agent generates accurate and helpful insight, does the topology enable its influence to be retained and integrated into the final output, or is it suppressed along the way? These considerations lead us to our central research focus: \textbf{\textit{In a MAS, how different topologies affect its vulnerability to error propagation and its ability to preserve beneficial information.}}
+
+% \subsection{Causal Metric}
+
+% In order to answer the above questions, it is crucial to quantify the impact of each agent on the whole MAS, which allows us to systematically analyze how agent-level errors or accurate information propagate through the network and ultimately affect collective outcomes. 
+% To this end, we first introduce a new metric from the causal perspective, denoted as Counterfactual Agent Propagation Effect (\textbf{CAPE} for short), which quantifies the causal influence of a single agent’s output on the system’s final answer under a given communication graph. Specifically, we perform a counterfactual intervention by forcing agent $v_{i}$ to produce a deliberately manipulated output, and then measure whether this change alters the final prediction made by the MAS under a fixed topology $\mathcal{G}$. The formal definition is as follows:
+% \begin{definition}
+%    Given a MAS under communication graph $\mathcal{G}$, for a query $\mathcal{Q}$, let $y_{Q}^\text{orig} \in \{0,1\}$ denote whether the final system answer is correct under the original communication process. The Counterfactual Agent Propagation Effect {\text{(CAPE)}} of agent $v_i$ under $\mathcal{G}$ and query $\mathcal{Q}$ as:
+%    \begin{align}
+%        \resizebox{.8\hsize}{!}{$\textbf{CAPE}_{i}(\mathcal{G},\mathcal{Q}) = \mathbb{I}[y_q^{\text{cf}}(\mathcal{G}, \text{do}(\mathcal{O}_i := \hat{\mathcal{{O}}}_i)) \ne y_q^{\text{orig}}(G)]$},
+%    \end{align}
+%    where $ \operatorname{do}(\mathcal{O}_i := \hat{\mathcal{{O}}}_i))$ denotes a targeted intervention that forces only agent $v_{i}$ output to a counterfactual value $\hat{\mathcal{{O}}}_i$, $y_{\mathcal{Q}}^{\text{cf}} \in \{0,1\}$ is the correctness of the final system prediction after the intervention, and $\mathbb{I} \left[ \cdot
+% \right]$ is the indicator function for whether the final answer of MAS is flipped.
+% \end{definition}
+% % CAPE captures how the communication structure mediates the spread of local agent interventions to global system behavior, allowing us to diagnose whether a topology amplifies or dampens the effects of agent-level errors or insights. 
+% A higher {CAPE} value suggests that changes in an individual agent’s output, once propagated through the communication structure, have a stronger influence on the final decision of MAS. Building on the ability of CAPE to quantify agent-level influence, we further define the Total Counterfactual Topology Effect (TCTE) to aggregate these effects at the topology level, providing a comprehensive measure of the general sensitivity of the topology to localized interventions.
+% \begin{definition}
+% Given a communication topology $\mathcal{G}$, the Total Counterfactual Topology Effect (\textbf{TCTE}) for query $\mathcal{Q}$ is defined as:
+% \begin{align}
+% \text{TCTE}(\mathcal{G},\mathcal{Q}) = \frac{1}{N}\sum_{v_i\in V} \frac{1}{\sqrt{d_i}} \cdot \text{CAPE}_{i}(\mathcal{G},\mathcal{Q}),
+% \end{align}
+% where $d_i$ is the degree of agent $v_i$ in graph $\mathcal{G}$. 
+% \end{definition}
+
+% In TCTE, the $1/\sqrt{d_i}$ factor downweights the agents with high degree, reflecting the intuition that highly connected agents are more likely to spread influence, and we wish to normalize their impact accordingly. A higher TCTE indicates that the topology is more responsive to specific changes in agent-level output, implying a greater potential to either propagate erroneous information or effectively transmit correct insights.
+% % Intuitively, a higher \textbf{TCTE} indicates that the system is more sensitive to localized changes—errors or corrections—suggesting a topology that more strongly amplifies agent-level perturbations. Conversely, a lower TCTE suggests that the structure acts as a dampening medium, making the system more robust to individual deviations. By comparing TCTE values across topologies, we can quantitatively analyze how structural properties—such as sparsity or connectivity—affect the collective decision-making dynamics of the system.
+% % This helps us analyze how different topologies modulate the influence of both beneficial and harmful agent-level information on the final system output.
+% \subsection{Validation Experiments and Analysis}
+% In this subsection, we aim to empirically assess how different communication topologies affect the sensitivity of MAS to agent-level perturbations. We quantify the sensitivity by computing TCTE across a range of graph structures, thereby answering our sub-questions, i.e. \textbf{\textit{SQ1}} and \textbf{\textit{SQ2}}.
+
+% \begin{figure}[t]
+%   \centering
+%   % 第一行：两张并排
+%   \subfloat[Error propagation]{%
+%     \label{subfig:error}%
+%     \includegraphics[
+%       width=0.5\columnwidth,
+%     ]{fig/CAPE_error.pdf}%
+%   }\hfill
+%   \subfloat[Insight suppression]{%
+%     \label{subfig:insight}%
+%     \includegraphics[
+%       width=0.5\columnwidth,
+%     ]{fig/CAPE_answer.pdf}%
+%   }
+
+%   \vspace{-1em} % 两行之间垂直间距
+
+%   % 第二行：一张拉伸到底栏宽
+%   \subfloat[Impact of all baseline topology]{%
+%     \label{subfig:baselinetp}%
+%     \includegraphics[
+%       width=\columnwidth
+%     ]{fig/CAPE_baseline.pdf}%
+%   }
+
+%   \caption{Experimental validation of how different communication topologies affect error propagation and the transmission of useful insight, as quantified by TCTE under two types of counterfactual interventions.}
+%   \label{fig:three_plots}
+%   \vskip -1 em
+% \end{figure}
+
+% \subsubsection{Experimental Settings}
+% % \noindent \textbf{Experimental Settings} \ \ \ 
+% % We conduct experiments on the MMLU dataset. For each topology, we select 500 questions that are originally answered correctly and 500 that are answered incorrectly by the multi-agent system. To create structures with varying sparsity, we start from a fully connected graph with six agents and randomly remove edges to construct topologies with different levels of sparsity. To evaluate error propagation, we perform a counterfactual intervention by forcibly modifying an agent’s prompt to produce an incorrect and misleading output, i.e., $\hat{o}_{i} = \text{error}$. This intervention is applied to the 500 originally correct questions, and $\text{CAPE}^{\text{error}}$ is computed to measure how often these injected errors flip the final system prediction.
+% % We conduct experiments on the MMLU dataset to evaluate how different communication topologies affect the system’s response to both harmful and beneficial agent-level perturbations. For each topology, we select 500 questions that are originally answered correctly and 500 that are answered incorrectly by the multi-agent system. To construct structures with varying connectivity, we manipulate the topology in two ways: starting from a fully connected graph with six agents, we progressively remove edges to simulate increasing sparsity; conversely, starting from a sparse chain graph, we gradually add edges to enhance connectivity. To evaluate error propagation, we apply a counterfactual intervention by modifying an agent’s prompt to produce incorrect output, i.e., $\hat{o}{i} = \text{error}$, and compute $\text{CAPE}^{\text{error}}$ on the 500 originally correct questions to measure how often the system’s prediction flips to incorrect. To assess the amplification of correct information, we inject the correct answer into the prompt of a selected agent, i.e., $\hat{o}{i} = \text{answer}$, on the 500 originally incorrect questions and compute $\text{CAPE}^{\text{answer}}$ to evaluate how often the system recovers the correct prediction.
+% We conduct our experiments on the MMLU dataset, a benchmark for evaluating knowledge and reasoning across diverse domains. In our multi-agent setup, each of the six agents is an independent instance of GPT-3.5 with a distinct role and prompt template, and all communicate according to a pre-specified topology graph. For each topology, we construct two evaluation sets: one containing 500 questions that the multi-agent system originally answers correctly, and another with 500 questions that the system answers incorrectly. These sets serve as the basis for simulating both detrimental and beneficial agent-level interventions under varying graph structures.
+
+% % \noindent \textbf{} \ \ \  
+% \subsubsection{Analysis of Error Propagation}
+
+% \noindent \textbf{Setup.} \ \ \
+% To address \textbf{\textit{SQ1}}, we focus on the 500 originally correct questions and assess the vulnerability of MAS to local errors under varying topologies. We start from a fully connected communication graph and progressively remove edges randomly to generate topologies with different sparsity levels. We then apply a counterfactual intervention by modifying the system prompt of the agent to produce an incorrect output, i.e., $\hat{\mathcal{{O}}}_i = \text{error}$, and compute the corresponding $\text{TCTE}$ to quantify how often the final prediction flips from correct to incorrect under each topology. 
+
+% \noindent \textbf{Discussion of Results.} \ \ \
+% As shown in Figure \ref{subfig:error}, dense topologies are significantly more vulnerable to what we refer to as error propagation, where an incorrect output from a single agent is more likely to influence the system's overall decision. When the sparsity is zero (i.e., a fully connected graph), $\text{TCTE}$ reaches its peak. In contrast, sparser structures can effectively mitigate this issue. For example, in the extreme case of a chain topology, $\text{TCTE}$ is reduced by up to $19\%$, indicating improved robustness to localized errors. Moreover, moderate sparsity also contributes to better task performance: as sparsity increases from 0 to 0.4, the system’s accuracy improves by up to $3.2\%$. Based on the above experimental results, we arrive at the following conclusion.
+% \begin{tcolorbox}[
+%     enhanced, % 启用增强样式
+%     colback=white, % 背景色（白色）
+%     colframe=black, % 边框颜色（黑色）
+%     boxrule=1pt, % 边框线宽
+%     arc=5pt, % 直角边框（无圆角）
+%     left=5pt, right=5pt, % 左右内边距
+%     top=5pt, bottom=5pt, % 上下内边距
+%     width=\linewidth % 宽度与文本等宽
+% ]
+% \textbf{Conclusion 1:} Moderately sparse topologies mitigate the risk of error propagation within the system.
+% \end{tcolorbox}
+% %To address subquestion 1, we simulate the injection of erroneous information by performing a counterfactual intervention: we forcibly modify an agent’s prompt to produce an incorrect and misleading output. This intervention is applied to the 500 questions originally answered correctly. CAPE is then computed to quantify how often such injected errors change the system’s final decision from correct to incorrect. As shown in Figure 3, denser communication structures are more susceptible to what we term error propagation, where incorrect outputs from individual agents are more likely to influence the overall decision. %而稀疏的结构能避免
+
+% % To address subquestion 2, we again use prompt-based counterfactual intervention—this time injecting the correct answer into a selected agent. This intervention is applied to the 500 questions that were originally answered incorrectly. CAPE is computed to capture how often this injected correct information flips the system’s decision from incorrect to correct. As illustrated in Figure 3, we observe that sparser structures are more prone to what we call answer suppression, where structural constraints limit the dissemination of correct information, preventing it from improving the system’s output. %而稠密的系统可以快速传播答案
+% % \subsection{Analysis of insight suppression}
+% % \noindent \textbf{Experimental Settings} \ \ \ We conduct experiments on the MMLU dataset. For each topology, we select 500 questions that are originally answered correctly and 500 that are answered incorrectly by the multi-agent system. To evaluate the effect of information amplification, we start from a sparse chain graph and progressively increase connectivity by randomly adding edges, thus creating topologies with different levels of connectedness. For the 500 originally incorrect questions, we perform a counterfactual intervention by injecting the correct answer into the prompt of a selected agent, i.e., $\hat{o}_{i} = \text{answer}$. We then compute $\text{CAPE}^{\text{answer}}$ to measure how often this injected correct information changes the system’s final prediction from incorrect to correct.
+% \subsubsection{Analysis of Insight Suppression}
+
+% \noindent \textbf{Setup.} \ \ \ To address \textbf{\textit{SQ2}}, we examine how different topologies support the propagation of beneficial insight. We focus on the 500 originally incorrect questions and start from a sparse chain topology, gradually adding edges to increase connectivity. In each case, we perform a counterfactual intervention by injecting the correct answer into a selected agent’s prompt, i.e., $\hat{\mathcal{{O}}}_i = \text{answer}$, and compute the corresponding $\text{TCTE}$ to measure how often the system’s prediction flips from incorrect to correct.
+
+% \noindent \textbf{Discussion of Results.} \ \ \
+% As shown in Figure \ref{subfig:insight}, sparse topologies are more susceptible to what we term insight suppression, where too sparse topologies impede the propagation of accurate and informative signals, preventing them from influencing the final output. When connectivity is minimal (i.e., a chain), $\text{TCTE}$ reaches its lowest value, indicating poor transmission of correct insights. In contrast, this limitation is alleviated as the network becomes more connected. For example, in the extreme case of a fully connected topology, $\text{TCTE}$ increases by $10.5\%$, suggesting that the system becomes more capable of integrating accurate agent-level inputs into the final decision. Moreover, we observe that moderate density also contributes to improved task performance: as connectivity increases from 0 to 0.4, the system’s accuracy improves by up to $1.01\%$.  Based on the above experimental results, we arrive at the following conclusion.
+% \begin{tcolorbox}[
+%     enhanced, % 启用增强样式
+%     colback=white, % 背景色（白色）
+%     colframe=black, % 边框颜色（黑色）
+%     boxrule=1pt, % 边框线宽
+%     arc=5pt, % 直角边框（无圆角）
+%     left=5pt, right=5pt, % 左右内边距
+%     top=5pt, bottom=5pt, % 上下内边距
+%     width=\linewidth % 宽度与文本等宽
+% ]
+% \textbf{Conclusion 2:} Moderately dense topologies enhance the system’s ability to rapidly propagate correct insights.
+% \end{tcolorbox}
+% %通过对现有的预定义结构的分析以及可学习的两个方法的分析，我们发现他们都无法在答案传播和错误阻碍这两部分取得平衡。多智能体的协作的核心在于求同存异，即当大多数agent趋向于正确答案时能够快速得到统一答案，当少数agent出现错误时能被抑制。需要一个恰好平衡的结构，为产生正确答案的智能体构建稠密的链接从而将正确答案快速传播，为产生错误答案的智能体构建瓶颈，从而抑制他的传播。
+% \subsubsection{Analysis of Existing topologies}
+% We evaluate a range of representative communication topologies, including pre-defined topologies such as \texttt{Full}, \texttt{Layered}, \texttt{Random}, \texttt{Star}, and \texttt{Chain}, as well as topologies learned through recent methods such as \texttt{AgentDrop} and \texttt{AgentPrune}. Following the experimental setup described above, we perform agent-level interventions based on both erroneous and correct outputs for each topology and compute the corresponding \text{TCTE}. As shown in Figure \ref{subfig:baselinetp}, the results reveal a consistent trend: sparse topologies are more robust to error propagation, while denser structures better support the amplification of helpful insight, which echoes our earlier analysis. However, no single topology achieves strong performance on both objectives simultaneously. Notably, the best-performing structures in terms of overall task accuracy are neither the sparsest nor the densest, suggesting that effective multi-agent communication requires a balanced topology that can simultaneously suppress error propagation and preserve the transmission of informative insight. These observations lead us to the following insights:
+% \begin{tcolorbox}[
+%     enhanced, % 启用增强样式
+%     colback=white, % 背景色（白色）
+%     colframe=black, % 边框颜色（黑色）
+%     boxrule=1pt, % 边框线宽
+%     arc=5pt, % 直角边框（无圆角）
+%     left=5pt, right=5pt, % 左右内边距
+%     top=5pt, bottom=5pt, % 上下内边距
+%     width=\linewidth % 宽度与文本等宽
+% ]
+% \textbf{Final Conclusion:} An effective topology should build dense connections around agents likely to produce correct answers to amplify their influence, while creating structural bottlenecks around potentially erroneous agents to limit the spread of misinformation.
+% \end{tcolorbox}
+
+
+
+ \begin{figure*}[ht!]    % 常规操作\begin{figure}开头说明插入图片
+					% 后面跟着的[htbp]是图片在文档中放置的位置，也称为浮动体的位置，关于这个我们后面的文章会聊聊，现在不管，照写就是了
+					\centering    
+% 前面说过，图片放置在中间
+	\label{fig:subfig5}\includegraphics[width=1.8\columnwidth]{fig/framework.pdf}
+			\vspace{-4mm}
+					\caption{The overall framework of \ourmethod. \ourmethod simulates MAS communication via GNNs, generating two connectivity coefficient matrices to suppress error spreading (sparse view) and enhance insight propagation (dense view), which are then combined by a query-aware fusion module into an optimal topology.}
+                    
+      % 整个图片的说明，注释写在{}内
+					\label{fig:framework}            % 整个图片的标签编号，注意这里跟子图是一样的道理，标签不能重复 
+To address the above \textcolor{purple}{\textbf{Limitation}}, in this section, we propose a novel
+\textbf{E}rror-\textbf{I}nsight \textbf{B}alanced \textbf{Learner} (\ourmethod for short) for communication topology optimization in multi-agent system (MAS). Motivated by our \textcolor{deepblue}{\textbf{Insight}}, \ourmethod balances the error-insight trade-off by co-training two complementary graph neural network (GNN) simulators to simulate the error suppression and insight propagation given a specific query (Section~\ref{GNN}), and then adaptively blending their learned inter-agent coefficients to construct robust topologies (Section~\ref{dual_graph}). The overall pipeline of \ourmethod is shown in Figure~\ref{fig:framework}.
+
+% \textbf{D}ual-view \textbf{C}ommunication \textbf{T}opology \textbf{L}earning (\ourmethod). This approach is motivated by the insight that effective communication topologies in multi-agent systems should both amplify beneficial insight and suppress the spread of errors. While our evaluation metric TCTE captures this trade-off, it is a post-hoc diagnostic tool that requires ground-truth answers and is therefore impractical during system deployment. To overcome this limitation, \ourmethod introduces a topology generation framework that employs graph neural networks (GNNs) to simulate multi-agent communication (Section~\ref{GNN}), generate two topology masks from dense and sparse views to suppress errors and enhance correct insights respectively, and adaptively fuse them via a query-aware mechanism (Section~\ref{dual_graph}).
+
+\subsection{GNN-based Propagation Simulators}\label{GNN}
+
+To balance error suppression and insight propagation in communication topologies, a critical prerequisite is identifying beneficial agents (those likely to contribute accurate insights) and error-prone agents (those susceptible to generating misinformation) within the MAS for a given query $\mathcal{Q}$, and then model the information flow among these agents. Nevertheless, without prior knowledge of agent reliability in answering $\mathcal{Q}$, it is challenging to distinguish the agents and simulate their responses. To address this challenge, we utilize GNNs to simulate the responding process of MAS given a query, and hence model error and insight propagation.
+
+\paragraph{MAS as an Attributed Graph}
+While the inter-agent communication can be represented as a graph structure, we further embed the agent role information and query text into the feature input of GNNs. Specifically, the feature of each agent node $v_i$ can be acquired by:
+\begin{equation}
+	\mathbf{x}_i \leftarrow \text{NodeEncoder}(\mathcal{T}(\texttt{Role}_{i}), \mathcal{Q}),
+\end{equation}
+where $\mathcal{T}(\cdot)$ extracts the textual description of the agent role and its corresponding prompt, and $\text{NodeEncoder}(\cdot)$ can be implemented using lightweight pre-trained text embedding models. The integration of agent role and query allows the GNN model to capture the contribution (beneficial or error-prone) of each agent given a specific query. 
+
+
+% To model how information propagates within a multi-agent system under a given communication topology, we use a Graph Neural Network (GNN) to simulate the message passing process. The Execution paradigm of GNNs inherently corresponds to multi-agent communication, with agents represented as nodes and edges denoting communication links.
+\vspace{-7pt}
+\paragraph{GNNs for Propagation Simulation}
+With the MAS attributed graph as input, we leverage GNNs to simulate the information propagation in MAS. 
+Formally, at the $l$-th GNN layer, the message representation for node $v_i$ is updated by aggregating features from its neighbors:
+\vspace{-5pt}
+\begin{equation}\label{message-passing}
+\resizebox{.85\hsize}{!}{$\mathbf{m}_{i}^{(l)} = \operatorname{MP}\left (\mathbf{m}_{i}^{(l-1)},\{ \mathbf{m}_{j}^{(L-1)} \mid v_j \in \mathcal{N}(v_i) \} \right),$}
+\vspace{-7pt}
+\end{equation}
+where $\mathbf{m}^{(0)}_i = \mathbf{X}_i$ is the raw input feature of node $v_i$, $\mathcal{N}(v_i)$ denotes the set of neighbors, and $\operatorname{MP}(\cdot)$ is the message passing function that aggregates and transforms neighboring information. The message passing scheme of GNNs can effectively mimic the information flow in MAS: the message aggregation of neighbors reflects the communication between agents, while the feature transformation can simulate the agent responding given a query. 
+
+In \ourmethod, we design a dual-view framework, with two GNNs to simulate the error suppression and insight propagation, respectively. Inspired by \textbf{\textcolor{deepgreen}{Finding 1}}, we employ the most sparse \texttt{chain} topology to simulate error suppression in MAS; In the other hand, \textbf{\textcolor{deepgreen}{Finding 2}} motivates us to use the densest \texttt{full} topology to simulate insight propagation effect. These two different topologies determine different neighbor definitions in Eq.~\eqref{message-passing}.
+
+% To initialize node features, we first encode each agent’s input representation by combining the textual description of its assigned role with the current task query:
+% \begin{align}
+% 	\mathbf{x}_i \leftarrow \text{NodeEncoder}(\mathcal{T}(\text{Role}_i), \text{Query}),
+% \end{align}
+% where $\mathcal{T}(\cdot)$ extracts the textual description of the current agent’s role and its corresponding prompt. The \texttt{NodeEncoder} can be implemented using lightweight text embedding models. This design aligns with the input format used in the multi-agent system as shown in Eq. \ref{mp_in_multi-agent}, where each agent receives a prompt composed of both its designated role and the current query.
+
+% Through this simulation process, the GNN learns which connections and node features contribute most to accurate final predictions, enabling us to infer structural patterns that facilitate effective information propagation.
+
+\subsection{Error-Insight Balanced Topology Learner}\label{dual_graph}
+% To be completed
+% \subsection{Topology Generator via Dual-Graph Encoding}
+% To construct a topology that effectively balances error suppression and answer propagation, we propose a structure generator based on dual-graph encoding. Motivated by our previous analysis as shown in \textbf{Conclusion 1} and \textbf{2}, we leverage these complementary characteristics to guide the learning of favorable nodes and links that support correct information flow and suppress harmful signals.
+
+% To identify an effective communication topology that balances suppression of error (\textbf{Conclusion 1}) and insight propagation (\textbf{Conclusion 2}), we adopt a GNN-based autoencoder framework to generate a soft adjacency mask $\mathbf{M}$ over the agent interaction graph. Given an input adjacency matrix $\mathbf{A}$ and corresponding agent features $\mathbf{X}$, 
+
+\paragraph{Inter-Agent Coefficient Modeling}
+Building upon the GNN simulators, we use an inner-product decoder to estimate pairwise connectivity to model the inter-agent connectivity in the optimal communication topology, which can be written as:
+% the generator applies a message-passing encoder to produce latent node representations, followed by an inner-product decoder to estimate pairwise connectivity:
+\begin{equation}
+\resizebox{.85\hsize}{!}{$
+    \mathbf{Z}_{\text{view}} = \operatorname{GNN}(\mathbf{A}_{\text{view}},\mathbf{X}), \mathbf{M}_{\text{view}} =  \sigma(\mathbf{Z}_{\text{view}}^{T}\mathbf{Z}_{\text{view}}),$}
+\end{equation}
+where subscript ``view'' can be ``sparse'' or ``dense'', corresponding to the views that simulate error suppression and insight propagation, respectively, $\mathbf{M}_{\text{view}}$ is the coefficient matrix to model inter-agent connectivity, and $\sigma(\cdot)$ denotes the sigmoid function to ensure outputs are in $[0, 1]$. The inner product operation leverages propagated information to estimate agent compatibility, determining the optimal likelihood of connection between any two agents in the communication topology. %The motivation for using inner production is leveraging the propagated information to model the xxxx
+
+
+% To capture different topological biases, we instantiate this module twice using two predefined templates: a fully-connected graph $\mathbf{A}_{\text{dense}}$ that encourages answer diffusion, and a chain-structured graph $\mathbf{A}_{\text{sparse}}$ that emphasizes cautious, localized propagation. These yield two connectivity masks, $\mathbf{M}_{\text{dense}}$ and $\mathbf{M}_{\text{sparse}}$, which serve as the basis for fusion and final graph construction.
+
+\paragraph{Adaptive Dual-View Fusion}
+Based on our \textcolor{deepblue}{\textbf{Insight}}, the optimal communication topology should balance the factors of error suppression and insight propagation, which are modeled by the sparse and dense views, respectively. To this end, we introduce a simple yet effective fusion function to fuse $\mathbf{M}_{\text{sparse}}$ and $\mathbf{M}_{\text{dense}}$ into a comprehensive coefficient matrix $\mathbf{M}_{\text{final}}$.
+% Since these two views emphasize different communication priors, combining them enables the resulting topology to achieve a desirable balance between insight propagation and error suppression. To generate a final adaptive topology that integrates the strengths of both dense and sparse perspectives, we introduce a simple yet effective fusion function:
+% \begin{equation}
+% \mathbf{M}_{\text{final}} = \operatorname{Fuse}(\mathbf{M}_{\text{dense}}, \mathbf{M}_{\text{sparse}}).
+% \end{equation}
+
+Concretely, we implement the fusion with a query-aware gating mechanism. Firstly, a lightweight feedforward network (i.e. $\operatorname{MLP}$) takes the task query embedding $\mathbf{Q}$ (acquired by pre-trained text encoder) as input and outputs the fusion weight $\mathbf{\alpha} = [\alpha_{\text{dense}}, \alpha_{\text{sparse}}]$ via a softmax function, dynamically adjusting the contribution of each view.  This allows the final topology to adapt to the semantic demands of different tasks, favoring dense propagation when the context is reliable, and leaning toward sparse filtering under uncertainty. Then, we can acquire $\mathbf{M}_{\text{final}}$ by:
+\begin{equation}
+\resizebox{.85\hsize}{!}{$
+\mathbf{M}_{\text{final}} = \alpha_{\text{dense}} \cdot \mathbf{M}_{\text{dense}} + \alpha_{\text{sparse}} \cdot \mathbf{M}_{\text{sparse}}.$}
+\end{equation}
+% The fusion function is designed to softly weight the two structural masks in a query-aware manner. Specifically, we employ a gating-based mechanism that takes the task query embedding $\mathcal{Q}$ as input and dynamically computes the combination of the two views. This mechanism captures high-level semantic dependencies between the query and structural preferences, allowing the system to favor either rapid propagation (dense) or cautious suppression (sparse) depending on task context.
+
+% Formally, we instantiate the fusion weights $\mathbf{\alpha} = [\alpha_{\text{dense}}, \alpha_{\text{sparse}}]$ using a lightweight feedforward gating network:
+% \begin{equation}
+% \alpha = \text{softmax}(\mathbf{W}_2 \cdot \text{ReLU}(\mathbf{W}_2 \mathcal{Q}+ \mathbf{b}_1) + \mathbf{b}_2),
+% \end{equation}
+% where $\mathbf{W}_1$, $\mathbf{W}_2$, $\mathbf{b}_1$, and $\mathbf{b}_2$ are learnable parameters. The final mask is then computed as:
+% \begin{equation}
+% \mathbf{M}_{\text{final}} = \alpha_{\text{dense}} \cdot \mathbf{M}_{\text{dense}} + \alpha_{\text{sparse}} \cdot \mathbf{M}_{\text{sparse}}.
+% \end{equation}
+% The resulting $M_{\text{final}}$ is then directly adopted as the multi-agent communication topology, guiding the message-passing structure among agents during downstream reasoning. 
+%Intuitively, it balances the advantages of dense propagation for answer transmission and sparse masking for error suppression, forming an adaptive and task-aware communication graph $\mathcal{G}_{\text{com}}$.
+The coefficient $\mathbf{M}_{\text{final}}$ is used to sample a discrete communication topology $\mathcal{G}$ that determines how messages flow between agents during inference, following the Bernoulli edge sampling strategy proposed in~\citet{zhang2024cut}.
+
+\paragraph{Model Optimization}
+To optimize this structure generation process, we aim to maximize the utility of the resulting communication topology, which measures the correctness of the final output $\mathcal{O} = \mathcal{G}(\mathcal{Q}) $ under the learned communication topology. However, the utility function $\phi(\cdot)$ is typically non-differentiable under our task setting since it depends on downstream black-box reasoning (e.g., querying LLMs). Hence, we adopt a standard policy gradient method to estimate gradients and update model parameters:
+% \begin{align}
+% \nabla_{\Theta}\mathbf{E}_{\Theta\sim\Omega}\Big[\phi\big(\mathcal{G}(\mathcal{Q})\big)\Big]\approx \frac{1}{M}\sum_{m=1}^{M}\phi(\mathcal{O}_{m})\nabla_{\Theta}\log(P(\mathcal{G}_{m})),
+% \end{align}
+\begin{equation}
+       \resizebox{.85\hsize}{!}{$\nabla_{\Theta}\mathbf{E}_{\Theta\sim\Omega}\Big[\phi\big(\mathcal{G}(\mathcal{Q})\big)\Big]\approx \frac{1}{M}\sum_{m=1}^{M}\phi(\mathcal{O}_{m})\nabla_{\Theta}\log(P(\mathcal{G}_{m}))$},
+   \end{equation}
+where the $\Theta\sim\Omega$ are learnable parameters in \ourmethod, $P(\mathcal{G}_{m})$ calculates the probability of $\mathcal{G}_{m}$ being sampled. $\phi(\mathcal{O}_{m})$ can be treated as the task-specific reward of the final answer produced under current topology. The pseudo-code algorithm of \ourmethod is provided in Appendix~\ref{appe:method_detail}. 
+
+
+% In this section, we present our proposed method, \textbf{D}ual-view \textbf{C}ommunication \textbf{T}opology \textbf{L}earning (\ourmethod). This approach is motivated by the insight that effective communication topologies in multi-agent systems should both amplify beneficial insight and suppress the spread of errors. While our evaluation metric TCTE captures this trade-off, it is a post-hoc diagnostic tool that requires ground-truth answers and is therefore impractical during system deployment. To overcome this limitation, \ourmethod introduces a topology generation framework that employs Graph Neural Networks (GNNs) to simulate multi-agent communication (Section \ref{GNN}), generate two topology masks from dense and sparse views to suppress errors and enhance correct insights respectively, and adaptively fuse them via a query-aware mechanism (Section\ref{dual_graph}).
+
+% \subsection{GNN as Simulator}\label{GNN}
+
+% To model how information propagates within a multi-agent system under a given communication topology, we use a Graph Neural Network (GNN) to simulate the message passing process. The Execution paradigm of GNNs inherently corresponds to multi-agent communication, with agents represented as nodes and edges denoting communication links.
+
+% Formally, at each GNN layer $L$, the message representation for node $v$ is updated by aggregating features from its neighbors:
+% \begin{equation}\label{message-passing}
+% \resizebox{.85\hsize}{!}{$\mathbf{m}_{v}^{(L)} = \operatorname{MP}\left (\mathbf{m}_{v}^{(L-1)},\{ \mathbf{m}_{u}^{(L-1)} \mid u \in \mathcal{N}(v) \} \right),$}
+% \end{equation}
+% where $\mathbf{m}^{(0)}_v = \mathbf{X}_v$ is the raw input feature of node $v$, $\mathcal{N}(v)$ denotes the set of neighbors, and $\operatorname{MP}$ is the message passing function that aggregates and integrates neighborhood information.
+
+% To initialize node features, we first encode each agent’s input representation by combining the textual description of its assigned role with the current task query:
+% \begin{align}
+% 	\mathbf{x}_i \leftarrow \text{NodeEncoder}(\mathcal{T}(\text{Role}_i), \text{Query}),
+% \end{align}
+% where $\mathcal{T}(\cdot)$ extracts the textual description of the current agent’s role and its corresponding prompt. The \texttt{NodeEncoder} can be implemented using lightweight text embedding models. This design aligns with the input format used in the multi-agent system as shown in Eq. \ref{mp_in_multi-agent}, where each agent receives a prompt composed of both its designated role and the current query.
+
+% % Through this simulation process, the GNN learns which connections and node features contribute most to accurate final predictions, enabling us to infer structural patterns that facilitate effective information propagation.
+
+% \subsection{Topology Generator via Dual-Graph Encoding}\label{dual_graph}
+% % To be completed
+% % \subsection{Topology Generator via Dual-Graph Encoding}
+% % To construct a topology that effectively balances error suppression and answer propagation, we propose a structure generator based on dual-graph encoding. Motivated by our previous analysis as shown in \textbf{Conclusion 1} and \textbf{2}, we leverage these complementary characteristics to guide the learning of favorable nodes and links that support correct information flow and suppress harmful signals.
+% To identify an effective communication topology that balances suppression of error (\textbf{Conclusion 1}) and insight propagation (\textbf{Conclusion 2}), we adopt a GNN-based autoencoder framework to generate a soft adjacency mask $\mathbf{M}$ over the agent interaction graph. Given an input adjacency matrix $\mathbf{A}$ and corresponding agent features $\mathbf{X}$, the generator applies a message-passing encoder to produce latent node representations, followed by an inner-product decoder to estimate pairwise connectivity:
+% \begin{equation}
+%     \mathbf{Z} = \operatorname{GNN}(\mathbf{A},\mathbf{X}), \mathbf{M} =  \sigma(\mathbf{Z}^{T}\mathbf{Z}),
+% \end{equation}
+% where $\sigma(\cdot)$ denotes the sigmoid function to ensure outputs are in $[0, 1]$.
+% To capture different topological biases, we instantiate this module twice using two predefined templates: a fully-connected graph $\mathbf{A}_{\text{dense}}$ that encourages answer diffusion, and a chain-structured graph $\mathbf{A}_{\text{sparse}}$ that emphasizes cautious, localized propagation. These yield two connectivity masks, $\mathbf{M}_{\text{dense}}$ and $\mathbf{M}_{\text{sparse}}$, which serve as the basis for fusion and final graph construction.
+
+% To generate a final adaptive topology that integrates the strengths of both dense and sparse perspectives, we introduce a simple yet effective fusion function:
+% \begin{equation}
+% \mathbf{M}_{\text{final}} = \operatorname{Fuse}(\mathbf{M}_{\text{dense}}, \mathbf{M}_{\text{sparse}}).
+% \end{equation}
+% The fusion function is designed to softly weight the two structural masks in a query-aware manner. Specifically, we employ a gating-based mechanism that takes the task query embedding $\mathcal{Q}$ as input and dynamically computes the combination of the two views. This mechanism captures high-level semantic dependencies between the query and structural preferences, allowing the system to favor either rapid propagation (dense) or cautious suppression (sparse) depending on task context.
+
+% Formally, we instantiate the fusion weights $\mathbf{\alpha} = [\alpha_{\text{dense}}, \alpha_{\text{sparse}}]$ using a lightweight feedforward gating network:
+% \begin{equation}
+% \alpha = \text{softmax}(\mathbf{W}_2 \cdot \text{ReLU}(\mathbf{W}_2 \mathcal{Q}+ \mathbf{b}_1) + \mathbf{b}_2),
+% \end{equation}
+% where $\mathbf{W}_1$, $\mathbf{W}_2$, $\mathbf{b}_1$, and $\mathbf{b}_2$ are learnable parameters. The final mask is then computed as:
+% \begin{equation}
+% \mathbf{M}_{\text{final}} = \alpha_{\text{dense}} \cdot \mathbf{M}_{\text{dense}} + \alpha_{\text{sparse}} \cdot \mathbf{M}_{\text{sparse}}.
+% \end{equation}
+% % The resulting $M_{\text{final}}$ is then directly adopted as the multi-agent communication topology, guiding the message-passing structure among agents during downstream reasoning. 
+% %Intuitively, it balances the advantages of dense propagation for answer transmission and sparse masking for error suppression, forming an adaptive and task-aware communication graph $\mathcal{G}_{\text{com}}$.
+% The final mask $\mathbf{M}_{\text{final}}$ is used to sample a discrete communication topology $\mathcal{G}$ that determines how messages flow between agents during inference, following the  edge sampling strategy proposed in~\citet{zhang2024cut}.
+
+% To optimize this structure generation process, we aim to maximize the utility of the resulting communication topology, which measures the correctness  the final output $\mathcal{O} = \mathcal{G}(\mathcal{Q}) $ under the learned communication topology. However, the utility function $\phi(\cdot)$ is typically non-differentiable under our task setting sicnce depends on downstream black-box reasoning (e.g., querying LLMs), we adopt the standard policy gradient method to estimate gradients and update model parameters:
+% % \begin{align}
+% % \nabla_{\Theta}\mathbf{E}_{\Theta\sim\Omega}\Big[\phi\big(\mathcal{G}(\mathcal{Q})\big)\Big]\approx \frac{1}{M}\sum_{m=1}^{M}\phi(\mathcal{O}_{m})\nabla_{\Theta}\log(P(\mathcal{G}_{m})),
+% % \end{align}
+% \begin{equation}
+%        \resizebox{.85\hsize}{!}{$\nabla_{\Theta}\mathbf{E}_{\Theta\sim\Omega}\Big[\phi\big(\mathcal{G}(\mathcal{Q})\big)\Big]\approx \frac{1}{M}\sum_{m=1}^{M}\phi(\mathcal{O}_{m})\nabla_{\Theta}\log(P(\mathcal{G}_{m}))$},
+%    \end{equation}
+% where the $\Theta\sim\Omega$ are learnable parameters in \ourmethod, $P(\mathcal{G}_{m})$ calculates the probability of $\mathcal{G}_{m}$ being sampled. $\phi(\mathcal{O}_{m})$ can be treated as the task-specific reward of the final answer produced under current topology.
+\begin{table*}[t]
+\vspace{-3mm}
+\centering
+\caption{Performance comparison (\%) on six benchmarks. The best results are highlighted in \textbf{bold}.}\vspace{-2mm}
+\label{tab:performance}
+\renewcommand{\arraystretch}{0.8} % 行高
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l|cccccc|c}
+\toprule
+\textbf{Method}       & \textbf{MMLU} & \textbf{GSM8K} & \textbf{AQuA} & \textbf{MultiArith} & \textbf{SVAMP} & \textbf{HumanEval} & \textbf{Avg.} \\
+\midrule
+Vanilla                                & 80.39      & 82.30          & 71.06              & 93.09        & 86.55          & 71.39             & 80.80         \\ \midrule
+CoT                              & 81.69 \scriptsize$\uparrow$1.30 &
+86.50 \scriptsize$\uparrow$4.20 &
+73.58 \scriptsize$\uparrow$2.52 &
+93.25 \scriptsize$\uparrow$0.16 &
+87.36 \scriptsize$\uparrow$0.81 &
+74.67 \scriptsize$\uparrow$3.28 &
+82.84 \scriptsize$\uparrow$2.04          \\
+SC (CoT)               &
+83.66 \scriptsize$\uparrow$3.27 &
+81.60 \scriptsize$\downarrow$0.70 &
+75.63 \scriptsize$\uparrow$4.57 &
+94.12 \scriptsize$\uparrow$1.03 &
+88.59 \scriptsize$\uparrow$2.04 &
+79.83 \scriptsize$\uparrow$8.44 &
+83.91 \scriptsize$\uparrow$3.11          \\
+ \midrule
+ Chain                              &83.01 \scriptsize$\uparrow$2.62 &
+88.30 \scriptsize$\uparrow$6.00 &
+74.05 \scriptsize$\uparrow$2.99 &
+93.27 \scriptsize$\uparrow$0.18 &
+87.17 \scriptsize$\uparrow$0.62 &
+81.37 \scriptsize$\uparrow$9.98 &
+84.53 \scriptsize$\uparrow$3.73          \\
+Tree              &
+81.04 \scriptsize$\uparrow$0.65 &
+85.20 \scriptsize$\uparrow$2.90 &
+71.23 \scriptsize$\uparrow$0.17 &
+93.68 \scriptsize$\uparrow$0.59 &
+88.91 \scriptsize$\uparrow$2.36 &
+80.53 \scriptsize$\uparrow$9.14 &
+83.43 \scriptsize$\uparrow$2.63        \\
+Complete                           &
+82.35 \scriptsize$\uparrow$1.96 &
+80.10 \scriptsize$\downarrow$2.20 &
+72.95 \scriptsize$\uparrow$1.89 &
+94.53 \scriptsize$\uparrow$1.44 &
+84.01 \scriptsize$\downarrow$2.54 &
+79.03 \scriptsize$\uparrow$7.64 &
+82.16 \scriptsize$\uparrow$1.36         \\
+Random               &
+84.31 \scriptsize$\uparrow$3.92 &
+86.90 \scriptsize$\uparrow$4.60 &
+76.48 \scriptsize$\uparrow$5.42 &
+94.08 \scriptsize$\uparrow$0.99 &
+87.54 \scriptsize$\uparrow$0.99 &
+82.66 \scriptsize$\uparrow$11.27 &
+85.33 \scriptsize$\uparrow$4.53        \\
+LLM-Debate                           &
+84.96 \scriptsize$\uparrow$4.57 &
+91.40 \scriptsize$\uparrow$9.10 &
+77.65 \scriptsize$\uparrow$6.59 &
+96.36 \scriptsize$\uparrow$3.27 &
+90.11 \scriptsize$\uparrow$3.56 &
+84.70 \scriptsize$\uparrow$13.31 &
+87.53 \scriptsize$\uparrow$6.73       \\
+ \midrule
+AgentPrune                 & 85.07 \scriptsize$\uparrow$4.57      & 91.10 \scriptsize$\uparrow$8.80          & 80.51 \scriptsize$\uparrow$9.45       & 94.65 \scriptsize$\uparrow$1.56               & 90.58 \scriptsize$\uparrow$4.03          & 86.75 \scriptsize$\uparrow$15.36              & 88.09 \scriptsize$\uparrow$7.29         \\
+AgentDropout              & 85.62 \scriptsize$\uparrow$5.23        & 91.70 \scriptsize$\uparrow$9.40          & 80.94 \scriptsize$\uparrow$9.88        & 95.60 \scriptsize$\uparrow$2.51               & 91.04 \scriptsize$\uparrow$4.49         & 85.98 \scriptsize$\uparrow$14.59              & 88.48 \scriptsize$\uparrow$7.68         \\
+G-designer             & 86.92 \scriptsize$\uparrow$6.53       & 93.80 \scriptsize$\uparrow$11.50         & 81.60 \scriptsize$\uparrow$10.54         & 96.50 \scriptsize$\uparrow$3.41            & 93.10 \scriptsize$\uparrow$6.55          & 88.33 \scriptsize$\uparrow$16.94             & 90.04 \scriptsize$\uparrow$9.24        \\  \midrule
+\ourmethod             & \textbf{88.90 \scriptsize$\uparrow$8.51}       & \textbf{95.20 \scriptsize$\uparrow$12.90}          & \textbf{83.49 \scriptsize$\uparrow$12.43}         & \textbf{96.83 \scriptsize$\uparrow$3.74}               & \textbf{94.70 \scriptsize$\uparrow$8.15}         & \textbf{89.15 \scriptsize$\uparrow$17.76}              & \textbf{91.38 \scriptsize$\uparrow$10.58}          \\  
+\bottomrule
+\end{tabular}
+}
+\vskip -1 em
+\end{table*}
+
+% \begin{table*}[t]
+% \centering
+% \caption{Performance comparison on six benchmarks. The best results are highlighted in bold.}
+% \label{tab:performance}
+% \renewcommand{\arraystretch}{0.8} % 行高
+% \resizebox{\textwidth}{!}{%
+% \begin{tabular}{l|cccccc|c}
+% \toprule
+% \textbf{Method}       & \textbf{MMLU} & \textbf{GSM8K} & \textbf{AQuA} & \textbf{MultiArith} & \textbf{SVAMP} & \textbf{HumanEval} & \textbf{Avg.} \\
+% \midrule
+% Vanilla                                & 80.39      & 82.30          & 71.06              & 93.09        & 86.55          & 71.39             & 80.80         \\ \midrule
+% CoT                              & 81.69 \scriptsize$\uparrow$1.30 &
+% 86.50 \scriptsize$\uparrow$4.20 &
+% 73.58 \scriptsize$\uparrow$2.52 &
+% 93.25 \scriptsize$\uparrow$0.16 &
+% 87.36 \scriptsize$\uparrow$0.81 &
+% 74.67 \scriptsize$\uparrow$3.28 &
+% 82.84 \scriptsize$\uparrow$2.04          \\
+% SC (CoT)               &
+% 83.66 \scriptsize$\uparrow$3.27 &
+% 81.60 \scriptsize$\downarrow$0.70 &
+% 75.63 \scriptsize$\uparrow$4.57 &
+% 94.12 \scriptsize$\uparrow$1.03 &
+% 88.59 \scriptsize$\uparrow$2.04 &
+% 79.83 \scriptsize$\uparrow$8.44 &
+% 83.91 \scriptsize$\uparrow$3.11          \\
+%  \midrule
+%  Chain                              &83.01 \scriptsize$\uparrow$2.62 &
+% 88.30 \scriptsize$\uparrow$6.00 &
+% 74.05 \scriptsize$\uparrow$2.99 &
+% 93.27 \scriptsize$\uparrow$0.18 &
+% 87.17 \scriptsize$\uparrow$0.62 &
+% 81.37 \scriptsize$\uparrow$9.98 &
+% 84.53 \scriptsize$\uparrow$3.73          \\
+% Tree              &
+% 81.04 \scriptsize$\uparrow$0.65 &
+% 85.20 \scriptsize$\uparrow$2.90 &
+% 71.23 \scriptsize$\uparrow$0.17 &
+% 93.68 \scriptsize$\uparrow$0.59 &
+% 88.91 \scriptsize$\uparrow$2.36 &
+% 80.53 \scriptsize$\uparrow$9.14 &
+% 83.43 \scriptsize$\uparrow$2.63        \\
+% Complete                           &
+% 82.35 \scriptsize$\uparrow$1.96 &
+% 80.10 \scriptsize$\downarrow$2.20 &
+% 72.95 \scriptsize$\uparrow$1.89 &
+% 94.53 \scriptsize$\uparrow$1.44 &
+% 84.01 \scriptsize$\downarrow$2.54 &
+% 79.03 \scriptsize$\uparrow$7.64 &
+% 82.16 \scriptsize$\uparrow$1.36         \\
+% Random               &
+% 84.31 \scriptsize$\uparrow$3.92 &
+% 86.90 \scriptsize$\uparrow$4.60 &
+% 76.48 \scriptsize$\uparrow$5.42 &
+% 94.08 \scriptsize$\uparrow$0.99 &
+% 87.54 \scriptsize$\uparrow$0.99 &
+% 82.66 \scriptsize$\uparrow$11.27 &
+% 85.33 \scriptsize$\uparrow$4.53        \\
+% LLM-Debate                           &
+% 84.96 \scriptsize$\uparrow$4.57 &
+% 91.40 \scriptsize$\uparrow$9.10 &
+% 77.65 \scriptsize$\uparrow$6.59 &
+% 96.36 \scriptsize$\uparrow$3.27 &
+% 90.11 \scriptsize$\uparrow$3.56 &
+% 84.70 \scriptsize$\uparrow$13.31 &
+% 87.53 \scriptsize$\uparrow$6.73       \\
+%  \midrule
+% AgentPrune                 & 85.07 \scriptsize$\uparrow$4.57      & 91.10 \scriptsize$\uparrow$8.80          & 80.51 \scriptsize$\uparrow$9.45       & 94.65 \scriptsize$\uparrow$1.56               & 90.58 \scriptsize$\uparrow$4.03          & 86.75 \scriptsize$\uparrow$15.36              & 88.09 \scriptsize$\uparrow$7.29         \\
+% AgentDropout              & 85.62 \scriptsize$\uparrow$5.23        & 91.70 \scriptsize$\uparrow$9.40          & 80.94 \scriptsize$\uparrow$9.88        & 95.60 \scriptsize$\uparrow$2.51               & 91.04 \scriptsize$\uparrow$4.49         & 85.98 \scriptsize$\uparrow$14.59              & 88.48 \scriptsize$\uparrow$7.68         \\
+% G-designer             & 86.92 \scriptsize$\uparrow$6.53       & 93.80 \scriptsize$\uparrow$11.50         & 81.60 \scriptsize$\uparrow$10.54         & 96.50 \scriptsize$\uparrow$3.41            & 93.10 \scriptsize$\uparrow$6.55          & 88.33 \scriptsize$\uparrow$16.94             & 90.04 \scriptsize$\uparrow$9.24        \\  \midrule
+% Ours             & \textbf{88.90 \scriptsize$\uparrow$8.51}       & \textbf{95.20 \scriptsize$\uparrow$12.90}          & \textbf{83.49 \scriptsize$\uparrow$12.43}         & \textbf{96.83 \scriptsize$\uparrow$3.74}               & \textbf{94.70 \scriptsize$\uparrow$8.15}         & \textbf{89.15 \scriptsize$\uparrow$17.76}              & \textbf{91.38 \scriptsize$\uparrow$10.58}          \\  
+% \bottomrule
+% \end{tabular}
+% }
+% \vskip -1 em
+% \end{table*}
+
+% \section{Method}
+% %我们提出的评价指标是一个事后检测方法，即我们需要标签才能评价，我们受他启发想通过学习的方法的到一个在这个评价指标上表现最好的方法，我们使用GNN模拟我们希望用GNN模拟多智能体消息传递的过程，并基于此来捕获保证答案快速传递的节点和链接
+% In order for us to capture the agents that can potentially get the correct answer and the dense substructures that can ensure fast propagation based on the fully connected graph:
+% \begin{equation}
+%     Z_{dense} = \text{GNN}(A_{dense},X), M_{dense} =  \sigma(Z_{dense}^{T}Z_{dense}),
+% \end{equation}
+% We start from the chain structure to identify the potentially problematic agents and build the bottleneck structure to ensure that once it makes a mistake, the error will not spread to a wide range and lead to the overall failure, which also ensures the security of the multi-agent system because it can avoid prompt attacks:
+% \begin{equation}
+%     Z_{sparse} = \text{GNN}(A_{sparse},X), M_{sparse} =  \sigma(Z_{sparse}^{T}Z_{sparse}),
+% \end{equation}
+% We use learnable parameters to add the two masks by weight to get the topology of the multi-agent processing the current query
+% \begin{equation}
+%     M_{final}= \text{Fuse}(M_{dense},M_{sparse}).
+% \end{equation}
+% where $\text{Fuse}$ can be an arbitrary fusion function, and we have used gating networks here.
+
+% \begin{equation}
+%     \nabla_{\Theta}\mathbf{E}_{\Theta\sim\Omega}\Big[u\big(\mathcal{G}_{com}(\mathcal{Q})\big)\Big]\approx\frac{1}{M}\sum_{k=1}^{M}u(a_{m}^{(K)})\nabla_{\Theta}\log(P(\mathcal{G}_{k})),
+% \end{equation}
+\section{Experiments}
+\subsection{Experimental Setup}
+\paragraph{Datasets} We evaluate \ourmethod on six benchmarks from three domains: general reasoning: MMLU~\cite{hendrycks2020measuring}, mathematical reasoning: GSM8K~\cite{cobbe2021training}, MultiArith~\cite{roy2016solving}, SVAMP~\cite{patel2021nlp}, and AQuA~\cite{ling2017program}, and code generation: HumanEval~\cite{chen2021evaluating}, following the evaluation setup adopted in G-designer~\cite{zhang2024g}. Details are in the Appendix~\ref{app:detail}.
+
+\noindent\textbf{Baselines} \ \  We consider a broad range of baselines covering both single-agent prompting strategies and multi-agent communication: 1) single-agent methods such as CoT~\cite{wei2022chain}, Self-Consistency~\cite{wang2022self}; 2) multi-agent systems with fixed topologies including Chain, Tree, Complete Graph, and Random Graph~\cite{qian2024scaling}; 3) LLM-Debate~\cite{du2023improving}; and 4) automated design approaches including AgentPrune~\cite{zhang2024cut}, AgentDrop~\cite{wang2025agentdropout}, and G-Designer~\cite{zhang2024g}. 
+
+\noindent \textbf{Implementation Details} \ \ We use GPT-4o throughout all experiments, accessed via the OpenAI API. A summarizer agent is designated to aggregate the dialogue history and produce the final answer, where the round $K=3$. This also corresponds to the number of GNN layers used. For agent representation, we implement the $\operatorname{NodeEncoder}(\cdot)$ using the pretrained \texttt{all-MiniLM-L6-v2}, with an embedding dimension $D=384$. We use 6 agents for the complex reasoning benchmark MMLU, 5 agents for HumanEval, and 4 agents for all mathematical reasoning benchmarks. Each experiment is optimized using $B \in \{40,60\}$ query samples.
+\subsection{Performance Comparison}
+\textbf{\ourmethod achieves state-of-the-art performance on all six benchmarks}. \ \ As shown in Table \ref{tab:performance}, \ourmethod obtains the highest average accuracy of \textbf{91.38\%}, outperforming all single-agent and multi-agent baselines which adopt the predefined or LLM-generated topology. Specifically, predefined topologies achieve an average performance of at most \textbf{85.53\%} (e.g., LLM-Debate), while automated design methods perform better, with G-designer reaching up to \textbf{90.04\%}. Even against recent best topology optimization methods, \ourmethod still achieves an average performance improvement of $\textbf{1.34\%}$. Experimental results verify that \ourmethod generates a better topology and achieves accurate and reliable decisions by balancing insight and error propagation. We provide the case study in the Appendix~\ref{app:case_study}.
+
+\begin{table}[t]
+\centering
+\caption{Results of ablation study.}
+
+
+
+
+
+\label{tab:ablation}
+\renewcommand{\arraystretch}{0.8} % 行高
+\vspace{-3mm}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{l|ccc|c}
+\toprule
+\textbf{Method}       & \textbf{MMLU} & \textbf{GSM8K} & \textbf{HumanEval} & \textbf{Average} \\ 
+\midrule
+Vanilla  & 80.39 & 82.30 & 71.39 & 78.02 \\
+\ourmethod  & \textbf{88.90} & \textbf{95.20} & \textbf{89.15} & \textbf{91.08} \\ \midrule
+w/o Dense & 84.85 & 91.10 & 86.57 & 87.51 \\
+w/o Sparse & 86.17 & 93.50 & 88.26 & 89.31 \\
+w/o Fusion & 85.23 & 92.80 & 87.07 & 88.37 \\
+
+\bottomrule
+
+\end{tabular}
+}
+\vskip -1 em
+\end{table}
+\subsection{Ablation Study}
+\textbf{All modules in \ourmethod are critical to maintaining strong reasoning performance.} We conduct ablation studies on MMLU, GSM8K, and HumanEval to evaluate the impact of different communication components: (1) \textbf{w/o Dense}, which removes the dense GNN branch; (2) \textbf{w/o Sparse}, which excludes the sparse GNN branch; and (3) \textbf{w/o Fusion}, which replaces the fusion module with a direct addition operation. As shown in Table~\ref{tab:ablation}, removing the dense GNN branch leads to the largest performance drop. For example, on GSM8K, accuracy decreases by $\textbf{4.1\%}$. The absence of either the sparse GNN branch or the fusion component also results in comparable degradation. These results suggest that the three modules interact synergistically, and removing any of them weakens the overall reasoning capacity of MAS. 
+\vspace{-5pt}
+\subsection{Token Efficiency}
+\textbf{\ourmethod achieves lower token cost with higher performance.}
+As shown in Figure~\ref{subfig:tokenMMLU} and ~\ref{subfig:tokenGSM8K}, although our approach does not explicitly pursue sparsity, it achieves comparable cost to sparsity-based G-designer while delivering significantly higher accuracy. This observation holds across both MMLU and GSM8K, where \ourmethod maintains efficient communication without compromising reasoning quality. Compared to predefined communication topologies such as fully connected graphs and LLM-Debate, \ourmethod substantially reduces token consumption which highlighting its ability to eliminate redundant interactions while preserving critical information flow.
+\vspace{-5pt}
+\subsection{Robustness Analysis}
+\textbf{\ourmethod demonstrates strong robustness against adversarial prompt attacks.}
+Following~\citet{zhuge2024gptswarm}, we simulate a system prompt attack by injecting adversarial prompts into a single agent. As shown in Figure~\ref{subfig:attack}, simple topologies such as chain and tree graphs suffer substantial degradation under such attacks, with performance drops up to $\textbf{11.8\%}$.  In contrast, \ourmethod exhibits strong robustness: the accuracy only drops by the least decrease of $\textbf{1.24\%}$. This robustness arises from our balanced topology design, which mitigates error propagation through bottleneck structures while promoting rapid consensus via densely connected reliable agents. 
+\begin{figure}[t]
+\vspace{-3mm}
+  \centering
+  % 第一行：两张气泡图
+  \subfloat[Token cost of MMLU]{%
+    \label{subfig:tokenMMLU}%
+    \includegraphics[width=0.5\columnwidth]{fig/MMLU_token.pdf}%
+  }\hfill
+  \subfloat[Token cost of GSM8K]{%
+    \label{subfig:tokenGSM8K}%
+    \includegraphics[width=0.5\columnwidth]{fig/GSM8K_token.pdf}%
+  }
+
+  \vspace{-1em} % 行间距
+
+  % 第二行：柱状图，两端对齐（stretch）
+  \makebox[\columnwidth][s]{%
+    \subfloat[Robustness under attack]{%
+      \label{subfig:attack}%
+      % 这里的 0.8\columnwidth 可以自行调节，上下边缘会自动“拉伸”对齐
+      \includegraphics[width=\columnwidth]{fig/MMLU_attack.pdf}%
+    }%
+  }
+\vspace{-3mm}
+  \caption{Experiments on token consumption and robustness against prompt injection attacks.}
+  \label{fig:three_plots_exp}
+\vspace{-3mm}
+\end{figure}
+
+\section{Conclusion}
+\vspace{-7pt}
+In this paper, we present \ourmethod, a topology optimization framework for LLM-based multi-agent systems, grounded in causal analysis of information propagation. By identifying that moderately sparse structures best balance error suppression and insight preservation, \ourmethod adaptively fuses dense and sparse views to form task-specific topologies. Experiments across reasoning, math, and code tasks show that \ourmethod consistently improves performance, enhances robustness, and reduces communication overhead.
+\section*{Limitation}
+While our method demonstrates strong performance on reasoning, math, and code generation tasks, the scope of evaluation remains limited. To better assess the generalizability of our framework, future work should explore more diverse task domains, such as real-world decision-making and open-domain dialogue. In addition, the current design relies on a fixed set of predefined agent roles and manually crafted prompts, which may limit adaptability in unfamiliar or evolving scenarios. Automatically discovering agent roles and optimizing prompts is a promising direction for improving robustness and flexibility.
+\section*{Ethics Statement}
+Our research focuses exclusively on scientific questions, with no involvement of human subjects, animals, or environmentally sensitive materials. Therefore, we foresee no ethical risks or conflicts of interest. We are committed to maintaining the highest standards of scientific integrity and ethics to ensure the validity and reliability of our findings.
+% \begin{table}[ht]
+% \centering
+% \caption{performance}
+% \label{tab:benchmark}
+% \begin{tabular}{@{}lccc*{6}{S[table-format=2.2]} @{}}
+% \toprule
+% \textbf{Method} & \textbf{Mul.} & \textbf{Ada.} & \textbf{Rob.} & \textbf{MMLU} & \textbf{GSM8K} & \textbf{MultiArith} & \textbf{SVAMP} & \textbf{AQuA} & \textbf{HumanEval} & \textbf{Avg.} \\ 
+% \midrule
+% Vanilla         & ✗ & ✗ & ✗ & 82.14       & 85.40       & 93.15        & 87.18       & 70.34      & 71.68       & 81.65     \\
+% CoT            & ✗ & ✗ & ✗ & 82.65       & 87.17       & 94.79        & 88.32       & 73.91       & 75.52       & 83.73     \\
+% ComplexCoT     & ✗ & ✗ & ✗ & 83.78       & 87.62       & 95.86        & 90.17       & 77.58       & 74.94       & 84.99     \\
+% SC (CoT)       & ✗ & ✗ & ✗ & 82.66       & 87.93       & 96.88        & 88.69       & 75.08       & 77.30       & 84.75     \\
+% SC (ComplexCoT)& ✗ & ✗ & ✗ & 83.65       & 86.14       & 96.94        & 89.72       & 77.69       & 77.94       & 85.35     \\
+% PHP            & ✓ & ✗ & ✗ & 83.45       & 95.50       & 98.10        & 90.02       & 79.00       & 82.96       & 88.17     \\
+% \midrule
+% Chain          & ✓ & ✗ & ✗ & 82.35       & 85.57       & 94.38        & 83.41       & 70.94       & 80.88       & 82.92     \\
+% Star           & ✓ & ✗ & ✗ & 80.79       & 85.55       & 93.79        & 88.09       & 68.57       & 75.65       & 82.07     \\
+% Tree           & ✓ & ✗ & ✗ & 81.89       & 84.56       & 94.60        & 89.25       & 72.84       & 77.38       & 83.42     \\
+% Complete Graph & ✓ & ✗ & ✗ & 83.15       & 86.49       & 97.20        & 89.48       & 79.21       & 83.75       & 86.55     \\
+% Random Graph   & ✓ & ✗ & ✗ & 83.76       & 86.14       & 95.46        & 85.41       & 74.07       & 82.66       & 84.58     \\
+% AutoGen        & ✓ & ✗ & ✗ & 82.13       & 90.06       & 93.80        & 88.44       & 73.65       & 85.41       & 85.58     \\
+% MetaGPT        & ✓ & ✗ & ✗ & {--}        & {--}        & {--}         & {--}        & {--}        & 85.90       & 84.90     \\
+% LLM-Blender    & ✓ & ✗ & ✗ & 81.22       & 89.17       & 94.27        & 88.77       & 77.05       & 86.09       & {--}      \\
+% LLM-Debate     & ✓ & ✗ & ✗ & 83.69       & 90.23       & 96.27        & 90.56       & 77.52       & 83.79       & 87.01     \\
+% DyLAN          & ✓ & ✗ & ✗ & 80.16       & 88.16       & 94.27        & 87.40       & 74.16       & 89.70       & 85.64     \\
+% GPTSwarm       & ✓ & ✗ & ✗ & 83.98       & 89.74       & 97.84        & 86.42       & 78.16       & 88.49       & 87.32     \\
+% \midrule
+% G-Designer     & ✓ & ✓ & ✓ & \textbf{84.50} & \textbf{95.07} & \textbf{98.30} & \textbf{91.85} & \textbf{79.47} & \textbf{89.90} & \textbf{89.84} \\
+% \bottomrule
+% \end{tabular}
+% \end{table}
+
+
+
+%目前提出了
+
+% \section{Engines}
+% \begin{assumption}
+% For a multi-agent system, there always exist a subgraph $G_{sub}$ from its communication topology $G$
+% \end{assumption}
+% To produce a PDF file, pdf\LaTeX{} is strongly recommended (over original \LaTeX{} plus dvips+ps2pdf or dvipdf).
+% The style file \texttt{acl.sty} can also be used with
+% lua\LaTeX{} and
+% Xe\LaTeX{}, which are especially suitable for text in non-Latin scripts.
+% The file \texttt{acl\_lualatex.tex} in this repository provides
+% an example of how to use \texttt{acl.sty} with either
+% lua\LaTeX{} or
+% Xe\LaTeX{}.
+
+% \section{Preamble}
+
+% The first line of the file must be
+% \begin{quote}
+% \begin{verbatim}
+% \documentclass[11pt]{article}
+% \end{verbatim}
+% \end{quote}
+
+% To load the style file in the review version:
+% \begin{quote}
+% \begin{verbatim}
+% \usepackage[review]{acl}
+% \end{verbatim}
+% \end{quote}
+% For the final version, omit the \verb|review| option:
+% \begin{quote}
+% \begin{verbatim}
+% \usepackage{acl}
+% \end{verbatim}
+% \end{quote}
+
+% To use Times Roman, put the following in the preamble:
+% \begin{quote}
+% \begin{verbatim}
+% \usepackage{times}
+% \end{verbatim}
+% \end{quote}
+% (Alternatives like txfonts or newtx are also acceptable.)
+
+% Please see the \LaTeX{} source of this document for comments on other packages that may be useful.
+
+% Set the title and author using \verb|\title| and \verb|\author|. Within the author list, format multiple authors using \verb|\and| and \verb|\And| and \verb|\AND|; please see the \LaTeX{} source for examples.
+
+% By default, the box containing the title and author names is set to the minimum of 5 cm. If you need more space, include the following in the preamble:
+% \begin{quote}
+% \begin{verbatim}
+% \setlength\titlebox{<dim>}
+% \end{verbatim}
+% \end{quote}
+% where \verb|<dim>| is replaced with a length. Do not set this length smaller than 5 cm.
+
+% \section{Document Body}
+
+% \subsection{Footnotes}
+
+% Footnotes are inserted with the \verb|\footnote| command.\footnote{This is a footnote.}
+
+% \subsection{Tables and figures}
+
+% See Table~\ref{tab:accents} for an example of a table and its caption.
+% \textbf{Do not override the default caption sizes.}
+
+% \begin{table}
+%   \centering
+%   \begin{tabular}{lc}
+%     \hline
+%     \textbf{Command} & \textbf{Output} \\
+%     \hline
+%     \verb|{\"a}|     & {\"a}           \\
+%     \verb|{\^e}|     & {\^e}           \\
+%     \verb|{\`i}|     & {\`i}           \\
+%     \verb|{\.I}|     & {\.I}           \\
+%     \verb|{\o}|      & {\o}            \\
+%     \verb|{\'u}|     & {\'u}           \\
+%     \verb|{\aa}|     & {\aa}           \\\hline
+%   \end{tabular}
+%   \begin{tabular}{lc}
+%     \hline
+%     \textbf{Command} & \textbf{Output} \\
+%     \hline
+%     \verb|{\c c}|    & {\c c}          \\
+%     \verb|{\u g}|    & {\u g}          \\
+%     \verb|{\l}|      & {\l}            \\
+%     \verb|{\~n}|     & {\~n}           \\
+%     \verb|{\H o}|    & {\H o}          \\
+%     \verb|{\v r}|    & {\v r}          \\
+%     \verb|{\ss}|     & {\ss}           \\
+%     \hline
+%   \end{tabular}
+%   \caption{Example commands for accented characters, to be used in, \emph{e.g.}, Bib\TeX{} entries.}
+%   \label{tab:accents}
+% \end{table}
+
+% As much as possible, fonts in figures should conform
+% to the document fonts. See Figure~\ref{fig:experiments} for an example of a figure and its caption.
+
+% Using the \verb|graphicx| package graphics files can be included within figure
+% environment at an appropriate point within the text.
+% The \verb|graphicx| package supports various optional arguments to control the
+% appearance of the figure.
+% You must include it explicitly in the \LaTeX{} preamble (after the
+% \verb|\documentclass| declaration and before \verb|\begin{document}|) using
+% \verb|\usepackage{graphicx}|.
+
+% \begin{figure}[t]
+%   \includegraphics[width=\columnwidth]{example-image-golden}
+%   \caption{A figure with a caption that runs for more than one line.
+%     Example image is usually available through the \texttt{mwe} package
+%     without even mentioning it in the preamble.}
+%   \label{fig:experiments}
+% \end{figure}
+
+% \begin{figure*}[t]
+%   \includegraphics[width=0.48\linewidth]{example-image-a} \hfill
+%   \includegraphics[width=0.48\linewidth]{example-image-b}
+%   \caption {A minimal working example to demonstrate how to place
+%     two images side-by-side.}
+% \end{figure*}
+
+% \subsection{Hyperlinks}
+
+% Users of older versions of \LaTeX{} may encounter the following error during compilation:
+% \begin{quote}
+% \verb|\pdfendlink| ended up in different nesting level than \verb|\pdfstartlink|.
+% \end{quote}
+% This happens when pdf\LaTeX{} is used and a citation splits across a page boundary. The best way to fix this is to upgrade \LaTeX{} to 2018-12-01 or later.
+
+% \subsection{Citations}
+
+% \begin{table*}
+%   \centering
+%   \begin{tabular}{lll}
+%     \hline
+%     \textbf{Output}           & \textbf{natbib command} & \textbf{ACL only command} \\
+%     \hline
+%     \citep{Gusfield:97}       & \verb|\citep|           &                           \\
+%     \citealp{Gusfield:97}     & \verb|\citealp|         &                           \\
+%     \citet{Gusfield:97}       & \verb|\citet|           &                           \\
+%     \citeyearpar{Gusfield:97} & \verb|\citeyearpar|     &                           \\
+%     \citeposs{Gusfield:97}    &                         & \verb|\citeposs|          \\
+%     \hline
+%   \end{tabular}
+%   \caption{\label{citation-guide}
+%     Citation commands supported by the style file.
+%     The style is based on the natbib package and supports all natbib citation commands.
+%     It also supports commands defined in previous ACL style files for compatibility.
+%   }
+% \end{table*}
+
+% Table~\ref{citation-guide} shows the syntax supported by the style files.
+% We encourage you to use the natbib styles.
+% You can use the command \verb|\citet| (cite in text) to get ``author (year)'' citations, like this citation to a paper by \citet{Gusfield:97}.
+% You can use the command \verb|\citep| (cite in parentheses) to get ``(author, year)'' citations \citep{Gusfield:97}.
+% You can use the command \verb|\citealp| (alternative cite without parentheses) to get ``author, year'' citations, which is useful for using citations within parentheses (e.g. \citealp{Gusfield:97}).
+
+% A possessive citation can be made with the command \verb|\citeposs|.
+% This is not a standard natbib command, so it is generally not compatible
+% with other style files.
+
+% \subsection{References}
+
+% \nocite{Ando2005,andrew2007scalable,rasooli-tetrault-2015}
+
+% The \LaTeX{} and Bib\TeX{} style files provided roughly follow the American Psychological Association format.
+% If your own bib file is named \texttt{custom.bib}, then placing the following before any appendices in your \LaTeX{} file will generate the references section for you:
+% \begin{quote}
+% \begin{verbatim}
+% \bibliography{custom}
+% \end{verbatim}
+% \end{quote}
+
+% You can obtain the complete ACL Anthology as a Bib\TeX{} file from \url{https://aclweb.org/anthology/anthology.bib.gz}.
+% To include both the Anthology and your own .bib file, use the following instead of the above.
+% \begin{quote}
+% \begin{verbatim}
+% \bibliography{anthology,custom}
+% \end{verbatim}
+% \end{quote}
+
+% Please see Section~\ref{sec:bibtex} for information on preparing Bib\TeX{} files.
+
+% \subsection{Equations}
+
+% An example equation is shown below:
+% \begin{equation}
+%   \label{eq:example}
+%   A = \pi r^2
+% \end{equation}
+
+% Labels for equation numbers, sections, subsections, figures and tables
+% are all defined with the \verb|\label{label}| command and cross references
+% to them are made with the \verb|\ref{label}| command.
+
+% This an example cross-reference to Equation~\ref{eq:example}.
+
+% \subsection{Appendices}
+
+% Use \verb|\appendix| before any appendix section to switch the section numbering over to letters. See Appendix~\ref{sec:appendix} for an example.
+
+% \section{Bib\TeX{} Files}
+% \label{sec:bibtex}
+
+% Unicode cannot be used in Bib\TeX{} entries, and some ways of typing special characters can disrupt Bib\TeX's alphabetization. The recommended way of typing special characters is shown in Table~\ref{tab:accents}.
+
+% Please ensure that Bib\TeX{} records contain DOIs or URLs when possible, and for all the ACL materials that you reference.
+% Use the \verb|doi| field for DOIs and the \verb|url| field for URLs.
+% If a Bib\TeX{} entry has a URL or DOI field, the paper title in the references section will appear as a hyperlink to the paper, using the hyperref \LaTeX{} package.
+
+% \section*{Limitations}
+
+% Since December 2023, a "Limitations" section has been required for all papers submitted to ACL Rolling Review (ARR). This section should be placed at the end of the paper, before the references. The "Limitations" section (along with, optionally, a section for ethical considerations) may be up to one page and will not count toward the final page limit. Note that these files may be used by venues that do not rely on ARR so it is recommended to verify the requirement of a "Limitations" section and other criteria with the venue in question.
+
+% \section*{Acknowledgments}
+
+% This document has been adapted
+% by Steven Bethard, Ryan Cotterell and Rui Yan
+% from the instructions for earlier ACL and NAACL proceedings, including those for
+% ACL 2019 by Douwe Kiela and Ivan Vuli\'{c},
+% NAACL 2019 by Stephanie Lukin and Alla Roskovskaya,
+% ACL 2018 by Shay Cohen, Kevin Gimpel, and Wei Lu,
+% NAACL 2018 by Margaret Mitchell and Stephanie Lukin,
+% Bib\TeX{} suggestions for (NA)ACL 2017/2018 from Jason Eisner,
+% ACL 2017 by Dan Gildea and Min-Yen Kan,
+% NAACL 2017 by Margaret Mitchell,
+% ACL 2012 by Maggie Li and Michael White,
+% ACL 2010 by Jing-Shin Chang and Philipp Koehn,
+% ACL 2008 by Johanna D. Moore, Simone Teufel, James Allan, and Sadaoki Furui,
+% ACL 2005 by Hwee Tou Ng and Kemal Oflazer,
+% ACL 2002 by Eugene Charniak and Dekang Lin,
+% and earlier ACL and EACL formats written by several people, including
+% John Chen, Henry S. Thompson and Donald Walker.
+% Additional elements were taken from the formatting instructions of the \emph{International Joint Conference on Artificial Intelligence} and the \emph{Conference on Computer Vision and Pattern Recognition}.
+
+% Bibliography entries for the entire Anthology, followed by custom entries
+%\bibliography{anthology,custom}
+% Custom bibliography entries only
+\bibliography{acl_latex}
+
+
+% \section{Methodology}
+% \appendix
+\newpage
+\clearpage
+\appendix
+% \section{Appendix}
+% \label{sec:appendix}
+
+% This is an appendix.
+\section{Related Work}
+\subsection{LLM-based Multi-Agent Systems}
+Large Language Models (LLMs) have demonstrated remarkable capabilities across a wide range of tasks, from reasoning~\cite{wang2024unleashing,wang2022self} and planning to dialogue~\cite{hu2024agentgen,yi2024survey} and programming~\cite{ishibashi2024self,zhang2024codeagent}. Extending from single-agent settings, recent work has explored organizing multiple LLM-based agents into collaborative systems, unlocking new potential through inter-agent interaction~\cite{guo2024large}. Representative systems adopt diverse coordination strategies, including sequential reasoning pipelines~\cite{wei2022chain}, debate-based role playing~\cite{li2024improving}, and centralized planning~\cite{zhuge2024gptswarm}. These advances highlight the importance of inter-agent communication in scaling LLM capabilities to more complex, open-ended tasks.
+\subsection{MAS as Graphs}
+The effectiveness of LLM-based MAS has been closely tied to the quality of their communication topologies~\cite{zhuge2024gptswarm}. Graphs provide a natural and expressive abstraction for modeling inter-agent interactions, enabling both structured information flow and flexible coordination~\cite{hu2024learning,zhou2025multi}. Early approaches adopt fixed topologies such as chains, stars, or fully connected graphs~\cite{qian2024scaling}, each offering different trade-offs in information sharing and control~\cite{li2024improving}. More recent research explores learnable communication graphs to enhance execution efficiency and scalability. For example, AgentPrune~\cite{zhang2024cut} introduces task-specific sparse masks to suppress redundant communication; AgentDrop~\cite{wang2025agentdropout} applies stochastic dropout to nodes and edges to improve robustness; and G-Designer~\cite{zhang2024g} dynamically generates query-dependent topologies for better task adaptation. While these methods improve computational efficiency and economic viability by learning compact and adaptive communication structures, they generally treat sparsity as a cost-saving mechanism without explicitly analyzing when or why sparse or dense topologies lead to better multi-agent outcomes.
+\section{Pseudo-code for \ourmethod}\label{appe:method_detail}
+Algorithm~\ref{alg:gdesigner} provides the detailed pseudo-code of \ourmethod, which takes the current query as input. \ourmethod comprises a lightweight language encoder, two GNNs, and a gated fusion network, ensuring efficiency during execution. In training, a subset of queries is used to construct communication topologies via \ourmethod, followed by multi-agent decision-making based on the generated topologies.
+\begin{table}[h]
+\centering
+\caption{Comparison of accuracy, time, and cost across different agent configurations. We sample 1000 questions from MMLU benchmark
+and utilize GPT-3.5 as the base LLM.}
+\label{tabel:cost}
+\renewcommand{\arraystretch}{1.1}  % 行间距稍微紧凑一些
+\begin{tabular}{l|ccc}
+\toprule
+\#Agents            & \textbf{5}      & \textbf{7}     & \textbf{9}     \\
+\midrule
+\textbf{Chain}     &               &               &               \\                                       
+Accuracy (\%)       & 63.33           & 64.55           & 65.07           \\
+Time (min)          & 53.11           & 90.94           & 126.15           \\
+Cost (USD)          & 4.18          & 10.04          & 15.38          \\
+\midrule
+\textbf{Complete Graph} &          &               &               \\
+Accuracy (\%)       & 61.83           & 62.16           & 62.71           \\
+Time (min)          & 80.85           & 114.29           & 236.44           \\
+Cost (USD)          & 5.78          & 14.49          & 31.67          \\
+\midrule
+\textbf{G-Designer}  &               &               &               \\
+Accuracy (\%)       & 64.08           & 65.82           & 66.01           \\
+Time (min)          & 57.14           & 94.32          & 138.18          \\
+Cost (USD)          & 4.30          & 11.37         & 16.35         \\
+\midrule
+\textbf{\ourmethod}&               &               &               \\
+Accuracy (\%)       & \textbf{65.47}  & \textbf{67.14}  & \textbf{67.82}  \\
+Time (min)          & 59.38           & 96.21           & 141.89           \\
+Cost (USD)          & 4.36          & 11.97         & 17.02        \\
+\bottomrule
+\end{tabular}
+\end{table}
+\section{Scalability in the number of agents}\label{app:agentnum}
+To evaluate the scalability of \ourmethod to larger multi-agent settings, we report its performance across systems with 5 to 9 agents, as shown in Table \ref{tabel:cost}. Notably, \ourmethod achieves the most significant performance gains as the number of agents increases. More importantly, while maintaining comparable computational cost and runtime to G-Designer, \ourmethod delivers consistently better results. Specifically, it achieves a $5.11\%$ improvement in accuracy while consuming only about half the token cost of a fully connected topology. These results demonstrate the scalability and potential of our method for enabling large-scale, autonomous multi-agent collaboration.
+\begin{figure*}[ht!]    % 常规操作\begin{figure}开头说明插入图片
+					% 后面跟着的[htbp]是图片在文档中放置的位置，也称为浮动体的位置，关于这个我们后面的文章会聊聊，现在不管，照写就是了
+					\centering    
+% 前面说过，图片放置在中间
+	\includegraphics[scale=0.45]{fig/casestudy.pdf}
+			
+					\caption{Case study of the communication topologies designed by \ourmethod on HumanEval and GSM8K benchmarks.}
+      % 整个图片的说明，注释写在{}内
+					\label{fig:case}           % 整个图片的标签编号，注意这里跟子图是一样的道理，标签不能重复 
+                    \vskip -1 em
+				\end{figure*}
+
+\begin{table*}[ht]
+\centering
+\caption{Dataset descriptions and statistics.}
+\label{tab:dataset_stats}
+\begin{tabular}{llllrl}
+\toprule
+\textbf{Category} & \textbf{Dataset} & \textbf{Answer Type} & \textbf{Metric} & \textbf{\#Test} & \textbf{License} \\
+\midrule
+General reasoning & MMLU & Multi-choice & Acc. & 153 & MIT License \\ \midrule
+\multirow{4}{*}{Math reasoning} & GSM8K & Number & Acc. & 1,319 & MIT License \\ 
+ & MultiArith & Number & Acc. & 600 & Unspecified \\
+ & SVAMP & Number & Acc. & 1,000 & MIT License \\
+ & AQuA & Multi-choice & Acc. & 254 & Apache-2.0 \\ \midrule
+Code generation & HumanEval & Code & Pass@1 & 164 & MIT License \\
+\bottomrule
+\end{tabular}
+\end{table*}
+\section{Dataset Statistic}\label{app:detail}
+We present the dataset statistics in Table \ref{tab:dataset_stats}, following the same experimental setup as G-Designer~\cite{zhang2024g}.
+\section{Case Study}\label{app:case_study}
+For the HumanEval task (case A in Figure~\ref{fig:case}), which requires symbolic reasoning and program synthesis, \ourmethod constructs a hierarchical communication structure: the \textbf{Project Manager} initiates task planning and forwards it to the \textbf{Algorithm Designer}, who devises logic that is implemented by the \textbf{Programming Expert}. Outputs are then verified by the \textbf{Test Analyst} and corrected by the \textbf{Bug Fixer}, forming a feedback loop that suppresses local errors while ensuring functional accuracy.
+
+For the GSM8K problem (case B in Figure~\ref{fig:case}), calculating how many friends can attend a party under budget constraints. \ourmethod topology to balance efficiency and error control. The \textbf{Mathematical Analyst} models the problem and communicates with the \textbf{Math Solver} for final computation. Simultaneously, the \textbf{Programming Expert} provides structural parsing to the \textbf{Inspector}, who ensures the calculation logic is sound, avoiding propagation of misunderstandings.
+
+These topologies align with our dual-view design by enabling efficient propagation of correct reasoning while suppressing misleading signals through targeted verification pathways.
+
+
+
+\begin{algorithm*}[t]
+\caption{Designing workflow of \ourmethod}
+\label{alg:gdesigner}
+
+\KwIn{Input query $\mathcal{Q}$, a $\mathrm{NodeEncoder}$, two \text{GNN}, a gating function, learning rate $\alpha$}
+
+\For{query $d\in\{1,2,\dots,D'\}$}{\Comment{Establish multi-agent network}
+    \For{node $i\in\{1,2,\dots,N\}$}{%
+        \(|\) $\mathbf{x}_i \gets \mathrm{NodeEncoder}\bigl(\mathcal{T}(\text{Role}_i), \mathcal{Q}_d\bigr)$\;
+    }
+    Obtain agent embeddings 
+      $\mathbf{X}\gets[\mathbf{x}_1,\mathbf{x}_2,\dots,\mathbf{x}_N]^\top$\;
+
+      Obtain query embeddings 
+     \(|\) $\mathbf{Q}_d \gets \mathrm{NodeEncoder}\bigl(\mathcal{Q}_d\bigr)$\;
+      \Comment{Forward process of \ourmethod}
+    % Obtain task-specific node 
+    %   $x_{\mathrm{task}}\gets \mathrm{NodeEncoder}(\mathcal{Q}_d)$\;
+
+    % Set anchor topology $A_{\mathrm{anchor}}${In our experiments, the anchor topology is simply set as the chain structure}
+    % Build multi-agent network 
+    Utilize the fully connected graph and chain to obtain two adjacency matrices $\mathbf{A}_{\text{dense}}$ and $\mathbf{A}_{\text{sparse}}$;
+    
+    Utilize $\mathbf{A}_{\text{dense}}$ and $\mathbf{A}_{\text{sparse}}$ to 
+    encode $\mathcal{G}$ into latent representations and decoding results in two soft masks $\mathbf{M}_{\text{dense}}$ and  $\mathbf{M}_{\text{sparse}}$:
+    
+    $\mathbf{Z}_{\text{dense}} = \operatorname{GNN}(\mathbf{A}_{\text{dense}},\mathbf{X}),$
+    $\mathbf{M}_{\text{dense}} =  \sigma(\mathbf{Z}_{\text{dense}}^{T}\mathbf{Z}_{\text{dense}})$
+
+    $\mathbf{Z}_{\text{sparse}} = \operatorname{GNN}(\mathbf{A}_{\text{sparse}},\mathbf{X}),$
+    $\mathbf{M}_{\text{sparse}} =  \sigma(\mathbf{Z}_{\text{sparse}}^{T}\mathbf{Z}_{\text{sparse}})$
+
+    Utilize a gating function to calculate the weight $\alpha$ based on the query $\mathcal{Q}$:
+
+    $\alpha = \text{softmax}(\mathbf{W}_2 \cdot \text{ReLU}(\mathbf{W}_1 \mathbf{Q}_d+ \mathbf{b}_1)) $
+
+    Fusing two masks based on their weights:
+
+    $\mathbf{M}_{\text{final}} = \alpha_{\text{dense}} \cdot \mathbf{M}_{\text{dense}} + \alpha_{\text{sparse}} \cdot \mathbf{M}_{\text{sparse}}.$
+
+    Obtain the new communication topology $\mathcal{G}$ by sampling from $\mathbf{M}_{\text{final}}$
+
+    \Comment{Guide multi-agent collaboration}
+    Obtain the the execution order of agents by topological sorting $\sigma = [v_{\sigma_1}, \dots, v_{\sigma_N}]$
+    
+    \For{$t\leftarrow 1$ \KwTo\ $K$}{%
+        \For{node $i\in \sigma $}{%
+        $\mathcal{R}_{i}^{(t)} = v_{i}(\mathcal{P}_{\text{sys}},\mathcal{P}^{(t)}_{\text{usr}})$\;
+    $\mathcal{P}^{(t)}_{\text{usr}}=\{\mathcal{Q}\} \cup \{\mathcal{R}_{j}^{(t)} | v_j\in \mathcal{N}(v_{i})\} $\;
+            % $R_i^{(t)} \gets v_i\bigl(P_{\mathrm{sys}}^{(t)},P_{\mathrm{usr}}^{(t)}\bigr)$\;
+            % $P_{\mathrm{usr}}^{(t)} = \{Q\}\;\cup\;\bigcup_{v_j\in\mathcal{N}_{\mathrm{in}}(v_i)}R_j^{(t)}$\;
+        }
+        $\mathcal{O}^{(t)} = \operatorname{Aggregate}(\mathcal{R}_{i}^{(t)} \dots \mathcal{R}_{n}^{(t)})$\;
+    }
+
+    \Comment{Update G-Designer parameters}
+    $\Theta^{d+1}\gets \Theta^d - \alpha\,\nabla_{\Theta}\mathcal{L}_{\mathrm{\ourmethod}}$\;
+}
+\end{algorithm*}
+\end{document}
+% \begin{table}[htbp]
+% \centering
+% \caption{Performance comparison across different agent topologies}
+% \label{tab:agent_comparison}
+% \begin{tabular}{l *{3}{S[table-format=3.2]} }
+% \toprule
+% \multicolumn{4}{c}{\textbf{Number of Agents}} \\
+% \cmidrule(lr){1-4}
+%  & \textbf{5} & \textbf{10} & \textbf{20} \\
+% \midrule
+
+% \textbf{Chain} \\
+% Accuracy (\%) & 70.59 & 71.24 & 71.98 \\
+% Time (min) & 15.73 & 30.20 & 56.18 \\
+% \#Prompt Tokens & 351,802 & 702,164 & 1,378,328 \\
+% Cost (USD) & 0.5228 & 1.0434 & 2.0482 \\
+% \addlinespace
+
+% \textbf{Complete Graph} \\
+% Accuracy (\%) & 71.90 & 72.16 & 72.51 \\
+% Time (min) & 16.85 & 34.21 & 66.47 \\
+% \#Prompt Tokens & 545,984 & 1,669,451 & 5,648,834 \\
+% Cost (USD) & 0.7161 & 2.1770 & 7.3662 \\
+% \addlinespace
+
+% \textbf{GPTSwarm} \\
+% Accuracy (\%) & 72.55 & 73.86 & 75.38 \\
+% Time (min) & 62.14 & 186.86 & 412.18 \\
+% \#Prompt Tokens & 3,055,236 & 9,048,465 & 30,317,341 \\
+% Cost (USD) & 4.2190 & 12.4961 & 41.4235 \\
+% \addlinespace
+
+% \textbf{G-Designer} \\
+% Accuracy (\%) & 73.20 & 74.51 & 77.82 \\
+% Time (min) & 19.26 & 36.04 & 68.89 \\
+% \#Prompt Tokens & 452,329 & 885,332 & 1,852,538 \\
+% Cost (USD) & 0.6036 & 1.2768 & 2.6713 \\
+% \bottomrule
+% \end{tabular}
+% \end{table}
+% \begin{table*}[]
+%     \centering
+%       \caption{Comparison of accuracy, time, token consumption, and cost across different agent configurations. We use the MMLU benchmark
+% and gpt-3.5-turbo as the base LLM}
+%     \begin{tabular}{lccc}
+
+% \hline
+% \#Agents & 5 & 7 & 9 \\
+% \hline
+% \textbf{Chain} & & & \\
+% Accuracy (\%) & 63.20 & 61.25 & 59.88 \\
+% Time (min) & 65.86 & 73.51 & 76.18 \\
+% Cost (USD) & 0.5228 & 1.0434 & 2.0482 \\
+% \hline
+% \textbf{Complete Graph} & & & \\
+% Accuracy (\%) & 71.90 & 72.16 & 72.51 \\
+% Time (min) & 16.85 & 34.21 & 66.47 \\
+% Cost (USD) & 0.7161 & 2.1770 & 7.3662 \\
+% \hline
+% \textbf{G-Designer} & & & \\
+% Accuracy (\%) & 72.55 & 73.86 & 75.38 \\
+% Time (min) & 62.14 & 186.86 & 412.18 \\
+% \#Prompt Tokens & 3,055,236 & 9,048,465 & 30,317,341 \\
+% Cost (USD) & 4.2190 & 12.4961 & 41.4235 \\
+% \hline
+% \ourmethod & & & \\
+% Accuracy (\%) & 73.20 & 74.51 & 77.82 \\
+% Time (min) & 19.26 & 36.04 & 68.89 \\
+% \#Prompt Tokens & 452,329 & 885,332 & 1,852,538 \\
+% Cost (USD) & 0.6036 & 1.2768 & 2.6713 \\
+% \hline
+% \end{tabular}
+%     \label{tab:my_label}
+% \end{table*}
+
+ 

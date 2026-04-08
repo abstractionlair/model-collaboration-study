@@ -1,0 +1,1115 @@
+%%%% ijcai25.tex
+
+\typeout{IJCAI--25 Instructions for Authors}
+
+% These are the instructions for authors for IJCAI-25.
+
+\documentclass{article}
+\pdfpagewidth=8.5in
+\pdfpageheight=11in
+
+% The file ijcai25.sty is a copy from ijcai22.sty
+% The file ijcai22.sty is NOT the same as previous years'
+\usepackage{ijcai25}
+
+% Use the postscript times font!
+\usepackage{times}
+\usepackage{soul}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage[small]{caption}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{booktabs}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage[switch]{lineno}
+
+
+
+
+
+
+
+
+
+
+\usepackage{subcaption}  
+% \usepackage{graphicx}  
+% \usepackage{lipsum}      
+
+\usepackage{forest}
+
+% \usepackage[table,xcdraw]{xcolor} 
+
+
+
+\usepackage{colortbl} 
+
+
+\usepackage{multirow} 
+\definecolor{Gray}{gray}{0.94}
+\usepackage{graphicx} 
+\usepackage{subcaption}  
+\NewDocumentCommand\emojidizzy{}{
+        \includegraphics[scale=0.0245]{figures/logo.png}
+}
+
+\usepackage{amsmath}
+% \usepackage{hyperref} 
+
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+\usepackage{threeparttable} 
+\usepackage{fontawesome}
+
+
+
+% \usepackage[dvipsnames]{xcolor}
+
+
+% Comment out this line in the camera-ready submission
+% \linenumbers
+
+\urlstyle{same}
+
+% the following package is optional:
+%\usepackage{latexsym}
+
+% See https://www.overleaf.com/learn/latex/theorems_and_proofs
+% for a nice explanation of how to define new theorems, but keep
+% in mind that the amsthm package is already included in this
+% template and that you must *not* alter the styling.
+\newtheorem{example}{Example}
+\newtheorem{theorem}{Theorem}
+
+% Following comment is from ijcai97-submit.tex:
+% The preparation of these files was supported by Schlumberger Palo Alto
+% Research, AT\&T Bell Laboratories, and Morgan Kaufmann Publishers.
+% Shirley Jowell, of Morgan Kaufmann Publishers, and Peter F.
+% Patel-Schneider, of AT\&T Bell Laboratories collaborated on their
+% preparation.
+
+% These instructions can be modified and used in other conferences as long
+% as credit to the authors and supporting agencies is retained, this notice
+% is not changed, and further modification or reuse is not restricted.
+% Neither Shirley Jowell nor Peter F. Patel-Schneider can be listed as
+% contacts for providing assistance without their prior permission.
+
+% To use for other conferences, change references to files and the
+% conference appropriate and use other authors, contacts, publishers, and
+% organizations.
+% Also change the deadline and address for returning papers and the length and
+% page charge instructions.
+% Put where the files are available in the appropriate places.
+
+
+% PDF Info Is REQUIRED.
+
+% Please leave this \pdfinfo block untouched both for the submission and
+% Camera Ready Copy. Do not include Title and Author information in the pdfinfo section
+\pdfinfo{
+/TemplateVersion (IJCAI.2025.0)
+}
+
+% \title{Ensembling Large Language Models: A Survey}
+
+\title{\emojidizzy Harnessing Multiple Large Language Models: A Survey on LLM Ensemble}
+
+% % Single author syntax
+% \author{
+%     Author Name
+%     \affiliations
+%     Affiliation
+%     \emails
+%     email@example.com
+% }
+
+% % Multiple author syntax (remove the single-author syntax above and the \iffalse ... \fi here)
+% \iffalse
+% \author{
+% First Author$^1$
+% \and
+% Second Author$^2$\and
+% Third Author$^{2,3}$\And
+% Fourth Author$^4$\\
+% \affiliations
+% $^1$First Affiliation\\
+% $^2$Second Affiliation\\
+% $^3$Third Affiliation\\
+% $^4$Fourth Affiliation\\
+% \emails
+% \{first, second\}@example.com,
+% third@other.example.com,
+% fourth@example.com
+% }
+% \fi
+
+
+
+
+% Multiple author syntax (remove the single-author syntax above and the \iffalse ... \fi here)
+\iffalse
+\author{
+First Author$^1$
+\and
+Second Author$^2$\and
+Third Author$^{2,3}$\And
+Fourth Author$^4$\\
+\affiliations
+$^1$First Affiliation\\
+$^2$Second Affiliation\\
+$^3$Third Affiliation\\
+$^4$Fourth Affiliation\\
+\emails
+\{first, second\}@example.com,
+third@other.example.com,
+fourth@example.com
+}
+\fi
+
+\author{Zhijun Chen\textsuperscript{\rm 1}, Jingzheng Li\textsuperscript{\rm 2}, Pengpeng Chen\textsuperscript{\rm 3}, Zhuoran Li\textsuperscript{\rm 1}, Kai Sun\textsuperscript{\rm 4}, 
+Yuankai Luo\textsuperscript{\rm 1},  \\
+Qianren Mao\textsuperscript{\rm 2}, 
+Ming Li\textsuperscript{\rm 5}, 
+Likang Xiao\textsuperscript{\rm 1}, 
+Dingqi Yang\textsuperscript{\rm 6}, 
+Yikun Ban\textsuperscript{\rm 1}, 
+Hailong Sun\textsuperscript{\rm 1,*}, 
+Philip S. Yu\textsuperscript{\rm 7,*}
+    \affiliations
+    \textsuperscript{\rm 1}State Key Laboratory of Complex \&  Critical Software Environment, Beihang University, Beijing, China\\
+    \textsuperscript{\rm 2}Zhongguancun Laboratory, Beijing, China\\
+    \textsuperscript{\rm 3}Aviation System Engineering Institute of China, Beijing, China\\
+    \textsuperscript{\rm 4}Xi’an Jiaotong University, Xi’an, China\\
+        \textsuperscript{\rm 5}Tsinghua University, Beijing, China\\
+    \textsuperscript{\rm 6}University of Macau, Macau SAR, China\\
+    \textsuperscript{\rm 7}University of Illinois at Chicago, Chicago, USA\\
+    \emails{
+    \{zhijunchen, jingzhengli, chenpp, lizhuoranget, sunkai, luoyk, xiaolik, yikunb, sunhl\}@buaa.edu.cn,  maoqr@zgclab.edu.cn, mingli\_thu@tsinghua.edu.cn,
+    dingqiyang@um.edu.mo, psyu@uic.edu \\
+    }  
+}
+
+
+
+
+
+
+
+
+
+
+\begin{document}
+
+\maketitle
+
+\begin{NoHyper}
+\def\thefootnote{}\footnotetext{*Corresponding authors.}
+\end{NoHyper}
+
+
+
+\begin{abstract}
+
+LLM Ensemble---which involves the comprehensive use of multiple large language models (LLMs), each aimed at handling user queries during downstream inference, to benefit from their individual strengths---has gained substantial attention recently. The widespread availability of LLMs, coupled with their varying strengths and out-of-the-box usability, has profoundly advanced the field of LLM Ensemble. This paper presents the first systematic review of recent developments in LLM Ensemble. First, we introduce our taxonomy of LLM Ensemble and discuss several related research problems. Then, we provide a more in-depth classification of the methods under the broad categories of ``ensemble-before-inference, ensemble-during-inference, ensemble-after-inference'', and review all relevant methods. Finally, we introduce related benchmarks and applications, summarize existing studies, and suggest several future research directions. 
+
+
+\faGithub~\href{https://github.com/junchenzhi/Awesome-LLM-Ensemble}{
+  \textcolor[rgb]{0.0, 0.4039, 0.5843}{https://github.com/junchenzhi/Awesome-LLM-Ensemble}
+}
+
+% \faGithub~\href{https://github.com/junchenzhi/Awesome-LLM-Ensemble}{
+%   \textcolor{MidnightBlue}{https://github.com/junchenzhi/Awesome-LLM-Ensemble}
+% }
+
+% \faGithub~\href{https://github.com/junchenzhi/Awesome-LLM-Ensemble}{
+%   \textcolor[rgb]{0.098, 0.098, 0.439}{https://github.com/junchenzhi/Awesome-LLM-Ensemble}
+% }
+\end{abstract}
+
+
+
+
+
+\section{Introduction}
+\label{Introduction}
+
+
+In recent years, the landscape of artificial intelligence has been dramatically reshaped by the development of Large Language Models (LLMs), including Gemini~\cite{team2023gemini}, GPT-4~\cite{achiam2023gpt}, Llama~\cite{touvron2023llama}, and the recently introduced DeepSeek~\cite{liu2024deepseek}.
+The success of these LLMs continues to fuel widespread research enthusiasm, with a remarkable total of over 182,000 large language models now accessible in the Hugging Face library.~\footnote{\url{https://huggingface.co/models}.}
+
+
+Behind this research enthusiasm, however, we can identify two main aspects: 
+1) \textit{The performance concerns}: 
+The direct out-of-the-box capability of LLMs (from zero-shot inference) and their indirect out-of-the-box capability (from in-context-learning few-shot inference) still raise performance worries, including accuracy, hallucinations, and misalignment with human intent, among others;
+2) \textit{The varying strengths and weaknesses of LLMs, each with different inference costs}: 
+Due to differences in architecture, parameter size, tokenization, dictionary, training data, and methodology, these LLMs exhibit substantial variability and their responses can differ significantly.
+With the above two aspects in mind and drawing on the spirit of Ensemble Learning~\cite{mohammed2023comprehensive,zhou2021ensemble,dong2020survey}, it is natural to consider that, for each task query, rather than persistently relying on a single LLM based on public rankings or other criteria, it might be more advantageous to simultaneously consider multiple LLM candidates (usable out-of-the-box) and harness their distinct strengths.
+This is exactly what the recently emerging field of \textit{LLM Ensemble} explores.
+
+
+
+
+\begin{figure*}[t!]
+    \centering
+    \begin{minipage}{0.31\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/before.pdf}  % 替换为您的图片路径
+        \subcaption{Ensemble before inference.}  % 子图标题
+        \label{figure-a}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.31\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/during.pdf}  % 替换为您的图片路径
+        \subcaption{Ensemble during inference.}  % 子图标题
+         \label{figure-b}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.31\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/after.pdf}  % 替换为您的图片路径
+        \subcaption{Ensemble after inference.}  % 子图标题
+         \label{figure-c}
+    \end{minipage}
+    \caption{Illustration of the LLM Ensemble taxonomy. (Note that for \textit{(b) ensemble-during-inference}, there is also a \textit{(b3) process-level ensemble} approach not depicted in the figure, 
+     due to layout considerations and the status that this approach is instantiated by a single method.)}
+    \label{figure-1}
+\end{figure*}
+
+
+Existing LLM Ensemble methods can be broadly categorized into three types, depending on the sequence of \textit{LLM inference} and \textit{ensemble}:
+1) 
+\textit{Ensemble-before-inference} approach, utilizes the given query information while considering the diverse characteristics of all LLM candidates to route an appropriate model for inference (this approach is similar to the \textit{hard voting}  strategy in Ensemble Learning);
+2)
+\textit{Ensemble-during-inference} approach, aggregates incomplete responses (e.g., token-level information) from multiple LLMs during the decoding process and feeds the combined result back into all the models;
+3)
+\textit{Ensemble-after-inference} approach, performs the ensemble after full responses (instead of fragments) have been generated by all models or a subset of them.
+Despite the emergence of numerous methods derived from these broad paradigms recently, there is still no formal survey that offers a comprehensive review of the core ideas and related research in the rapidly evolving field of LLM Ensemble.
+
+\newpage
+
+We present the first comprehensive survey on LLM Ensemble, introducing recent advances and focusing on taxonomy, related problems, methods, benchmarks, applications, and future directions. 
+We hope that this survey will provide a thorough review for researchers and inspire further exploration.
+
+
+
+
+
+
+
+
+
+
+\section{LLM Ensemble Taxonomy and Related Problems}
+
+\subsection{LLM Ensemble Taxonomy}
+\label{Taxonomy-section}
+
+
+This section formally introduces our LLM Ensemble taxonomy, illustrated by the schematic shown in Figure~\ref{figure-1} and the detailed taxonomy in Figure~\ref{Fig: Taxonomy}.
+As mentioned in Section~\ref{Introduction}, the following three broad categories of LLM Ensemble exist.
+
+
+
+\textbf{(a) Ensemble before inference.}
+In essence, this approach employs a routing algorithm prior to LLM inference to allocate a specific query to the most suitable model, allowing the selected model that is specialized for the query and typically more cost-efficient inference to perform the task.
+As illustrated in Figure~\ref{figure-a} and Figure~\ref{Fig: Taxonomy}, existing methods can be classified into two categories, depending on whether the router necessitates the use of pre-customized data for pre-training: 
+(a1) \textit{pretrained router} and (a2) \textit{non-pretrained router}.
+
+
+
+\textbf{(b) Ensemble during inference.}
+As the most granular form of ensemble among the three broad categories, this type of approach encompasses: (b1) \textit{token-level ensemble} methods, integrate the token-level outputs of multiple models at the finest granularity of decoding;
+(b2) \textit{span-level ensemble} methods, perform ensemble at the level of a sequence fragment (e.g., a span of four words); 
+(b3) 
+\textit{process-level ensemble} methods, select the optimal reasoning process step-by-step within the reasoning chain for a given complex reasoning task. 
+\textit{Note that for these ensemble-during-inference methods, the aggregated text segments will be concatenated with the preceding text and fed back into the models.}
+
+
+\textbf{(c) Ensemble after inference.}
+These methods can be classified into two categories: 
+(c1) \textit{Non-cascade} methods, perform ensemble by integrating multiple complete responses contributed from all LLM candidates;
+(c2) \textit{Cascade} methods, consider both performance and inference costs, progressively performing inference through a chain of LLM candidates ranked primarily by model size to identify the most suitable response and terminate the cascade process.
+
+
+
+
+
+
+\subsection{Related Problems}
+Here we briefly introduce the closely related problems.
+
+\textbf{LLM Merging}, also known as \textbf{LLM Fusion}~\cite{yang2024model,yang2025cabs,ruan2025task}, integrates parameters from various LLMs to construct a universal model without requiring original training data or extensive computation. 
+It is highly relevant to LLM Ensemble, as both promote knowledge fusion and transfer.
+
+\textbf{LLM  Collaboration} leverages the distinct strengths of each model to approach tasks with increased flexibility~\cite{du2023improving,lu2024merge,chen2025survey,tran2025multi,zhang2025if}. 
+Unlike LLM Ensemble where models are employed with equal status to \textit{directly faced to user queries}, the collaboration approach assigns distinct roles to each LLM, exchanging response information to enhance task resolution.
+
+\textbf{Weak Supervision}~\cite{zhang2021wrench,chen2023neural,zhang2022survey,ratner2017snorkel}, 
+sometimes referred to as
+\textbf{Learning from Crowds}~\cite{chen2021structured,chen2022adversarial,zhang2022knowledge}, uses weak labels contributed from multiple weak annotation sources to perform information aggregation~\cite{chen2023black,zheng2017truth} (corresponding \textit{non-cascade ensemble after inference} in LLM Ensemble) or directly train a classifier~\cite{zhang2021wrench}, yet most methods focus on classification
+rather than general open-ended generation tasks.
+
+
+
+
+
+\begin{figure*}[t!]
+	\centering
+	\resizebox{\textwidth}{!}{
+	\begin{forest}
+  for tree={
+  grow=east,
+  reversed=true,
+  anchor=base west,
+  parent anchor=east,
+  child anchor=west,
+  base=left,
+  font=\small,
+  rectangle,
+  draw,
+  rounded corners,align=left,
+  minimum width=2.5em,
+  inner xsep=4pt,
+  inner ysep=1pt,
+  },
+  where level=1{text width=5em,fill=blue!10}{},
+  where level=2{text width=5em,font=\footnotesize,fill=pink!30}{},
+  where level=3{font=\footnotesize,yshift=0.26pt,fill=yellow!20}{},
+  [LLM \\ Ensemble\\ methods,fill=green!20
+        [(a) Ensemble-before-\\inferece (Sec.~\ref{Ensemble-before-inference}),text width=7.6em
+            [(a1) Pretrained router,text width=7.8em
+              [\emph{Classification-based:} \cite{shnitzer2023large} / \cite{srivatsa2024harnessing} / \cite{ong2024routellm} / Hybrid-LLM~\cite{dinghybrid} / \\  SelectLLM \cite{maurya2024selectllm} / Routoo~\cite{mohammadshahi2024routoo}
+              ]
+              [\emph{Reward-based:} Zooter~\cite{lu2024routing} / Bench-CoE~\cite{wang2024bench} / \cite{li2025llm} / MetaLLM~\cite{nguyen2024metallm} /\\   TO-Router~\cite{stripelis2024tensoropera}
+              ]
+               [\emph{Assignment-based:} FORC~\cite{vsakota2024fly} / HomoRouter~\cite{mu2024adaptive}
+              ]
+            ]
+            [(a2) Non-pretrained  router,text width=9.8em [Eagle~\cite{zhao2024eagle} / PickLLM~\cite{sikeridis2024pickllm} / Blending~\cite{lu2024blending}
+               ]
+            ]
+        ]
+        [(b) Ensemble-during-\\inference (Sec.~\ref{Ensemble-during-inference}),text width=7.6em
+            [(b1) Token-level ensemble,text width=9.6em
+              [\emph{Aggregation-based:} 1) Vocabulary alignment: GaC~\cite{yu2024breaking} / DeePEn~\cite{huang2024ensemble} / EVA~\cite{xu2024bridging}  \\ / 2) Others: UniTe~\cite{yao2024determine} / PackLLM~\cite{mavromatis2024pack} / CDS~\cite{jin2024collaborative}  / \cite{li2024purifying}
+              ]
+              [\emph{Selection-based:} CITER~\cite{zheng2025citer}
+              ]
+          ]
+          [(b2) Span-level  ensemble, text width=9.6em
+            [Cool-Fusion~\cite{liu2024cool} / SweetSpan~\cite{xu2025hit} / SpecFuse~\cite{lv2024specfuse}
+            ]
+          ]
+            [(b3) Process-level ensemble, text width=10.1em
+            [LE-MCTS~\cite{park2024ensembling} 
+            ]
+          ]
+        ]
+        [(c) Ensemble-after-\\inference (Sec.~\ref{Ensemble-after-inference}),text width=7.6em
+          [(c1) Non-cascade,text width=6.4em
+            [\emph{Selection-based:} Agent-Forest~\cite{li2024more} / Smoothie~\cite{guhasmoothie} / MoRE~\cite{si2023getting}]
+             [\emph{Selection-then-regeneration:} LLM-Blender~\cite{jiang2023llm} / URG~\cite{lv2024urg} / LLM-TOPLA~\cite{tekin2024llm}  ]
+            ]
+          [(c2) Cascade, text width=5.4em
+            [\emph{Unsupervised:} EcoAssistant~\cite{zhang2023ecoassistant} / \cite{yuelarge} / Model Cascading~\cite{varshney2022model}   / \\  neural caching~\cite{ramirez2023cache} / Cascade Routing~\cite{dekoninck2024unified} ] 
+             [\emph{Supervised:}   ~\cite{jitkrittum2024does} / \cite{gupta2024language} / FrugalGPT~\cite{chen2023frugalgpt} / AutoMix~\cite{aggarwal2023automix} /  \\ DER~\cite{hu2024dynamic} /   ]
+            ]
+        ]
+    ]
+\end{forest}
+	}
+	\caption{Taxonomy of LLM Ensemble methods.}
+	\label{Fig: Taxonomy}
+\end{figure*}
+
+
+
+
+
+\newpage
+
+
+\section{Methodology}
+\label{Methodology}
+
+
+In this section, following the taxonomy in Section~\ref{Taxonomy-section}, we systematically review the three types of methods—ensemble before inference, ensemble during inference and ensemble after inference—in Sections~\ref{Ensemble-before-inference}, ~\ref{Ensemble-during-inference}, and ~\ref{Ensemble-after-inference}, respectively.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Ensemble Before Inference}
+\label{Ensemble-before-inference}
+
+
+As mentioned in Section~\ref{Taxonomy-section}, two categories of ensemble-before-inference approaches exist: 
+\textit{pretrained router} and \textit{non-pretrained router}.
+(a1) Pretrained router approach can be further classified into: 
+\textit{classification-based} methods, \textit{reward-based} methods and \textit{assignment-based} methods.
+For these methods, to effectively learn and deploy a pretrained router model, 
+a series of critical phases need to be executed, from data
+preparation to router model training, evaluation and router model deployment/serving.
+(a2)
+The non-pretrained router approach designs some selection strategies to build the router model. 
+Below we present a review of these methods and provide a comprehensive summary in Table~\ref{tab:Ensemble-before-inference}.
+
+
+
+
+
+
+
+
+
+
+
+\subsubsection{3.1.1 (a1) Pretrained Router}
+
+\paragraph{Classification-based methods.}
+Shnitzer et al.~\shortcite{shnitzer2023large} are the first to present the pretrained router model for selecting the most suitable LLM for a given query.
+They transform the model selection problem into multiple binary classification problems, where each aims to predict whether a specific LLM will correctly respond to an input query. 
+Theoretically, Srivatsa et al.~\shortcite{srivatsa2024harnessing} adopt classifier-based and clustering-based routing methods, introducing theoretical upper bounds to evaluate the models.
+Similarly, Ong et al.~\shortcite{ong2024routellm} formulate the LLM routing problem to explore the trade-off between cost and response quality. 
+Their router training framework, based on human preference data and augmentation techniques, demonstrates over 2$\times$ cost savings on widely used benchmarks. Hybrid-LLM~\cite{dinghybrid} shares similarities with the framework of Ong et al.~\shortcite{ong2024routellm} but differs in three key ways: it uses synthetic preference labels derived via BARTScore, relies on a single BERT-based router architecture, and limits evaluation to in-domain generalization.
+SelectLLM \cite{maurya2024selectllm} uses a multi-label classifier to model the capabilities of different LLMs and selects LLMs through confidence-based policies.
+Routoo~\cite{mohammadshahi2024routoo} decomposes the LLM router problem into two core components: classification-based performance prediction and cost-aware selection.
+Through their collaboration, these components enable Routoo to route queries to the most appropriate LLM, balancing cost and performance.
+
+
+
+\setlength{\cmidrulewidth}{0.01em}  % 控制 \cmidrule 的线条粗细
+\begin{table*}[t!]
+\hspace*{-0.cm}  % 向左移动表格 1cm，调整这个值来获得适当的效果
+    % \centering
+    % \small
+  \scalebox{0.64}{
+    \begin{tabular}{llcc c c c c}
+    \toprule
+    & \textbf{Methods}    &  \textbf{Un-/Supervised} &\textbf{Goals}   & \textbf{Loss functions} &\textbf{Tasks}&  \textbf{Generalization}    & \textbf{Code} \\
+    \midrule
+    \multirow{ 13}{*}{(a1)}   &
+    % \multirow{13}{*}{\rotatebox{90}{pretrained}}
+\cellcolor[rgb]{ .867, .922, .969}\cite{shnitzer2023large}  & \cellcolor[rgb]{ .867, .922, .969}Supervised &\cellcolor[rgb]{ .867, .922, .969}Performance & \cellcolor[rgb]{ .867, .922, .969}Binary CE loss&\cellcolor[rgb]{ .867, .922, .969}Generation&\cellcolor[rgb]{ .867, .922, .969}\xmark&\cellcolor[rgb]{ .867, .922, .969}-\\
+  &
+\cite{srivatsa2024harnessing}   & Un-/Supervised &Performance & Class-balanced CE loss/Clustering&Reasoning&\cmark&\href{https://github.com/kvadityasrivatsa/llm-routing}{\textcolor{gray}{[Link]}}\\
+  &
+\cellcolor[rgb]{ .867, .922, .969}\cite{ong2024routellm}  & \cellcolor[rgb]{ .867, .922, .969}Supervised &\cellcolor[rgb]{ .867, .922, .969}Performance and cost & \cellcolor[rgb]{ .867, .922, .969}Binary CE loss&\cellcolor[rgb]{ .867, .922, .969}Generation&\cellcolor[rgb]{ .867, .922, .969}\cmark&\cellcolor[rgb]{ .867, .922, .969}\href{https://github.com/lm-sys/RouteLLM}{\textcolor{gray}{[Link]}}\\
+  &
+Hybrid-LLM~\cite{dinghybrid}  & Supervised &Performance and cost & Binary CE loss&Generation&\xmark&\href{ https://github.com/m365-core/hybrid_llm_routing}{\textcolor{gray}{[Link]}}\\
+  &
+\cellcolor[rgb]{ .867, .922, .969}SelectLLM \cite{maurya2024selectllm}   & \cellcolor[rgb]{ .867, .922, .969}Supervised &\cellcolor[rgb]{ .867, .922, .969}Performance, cost & \cellcolor[rgb]{ .867, .922, .969}Class-balanced CE loss&\cellcolor[rgb]{ .867, .922, .969}Understanding/Reasoning&\cellcolor[rgb]{ .867, .922, .969}\xmark&\cellcolor[rgb]{ .867, .922, .969}-\\
+  &
+Routoo~\cite{mohammadshahi2024routoo}  & Supervised& Performance and cost &CE loss&  Classification&\xmark&-\\
+
+  &
+\cellcolor[rgb]{ .867, .922, .969}Zooter~\cite{lu2024routing}   & \cellcolor[rgb]{ .867, .922, .969}Supervised &\cellcolor[rgb]{ .867, .922, .969}Performance & \cellcolor[rgb]{ .867, .922, .969}KL divergence&\cellcolor[rgb]{ .867, .922, .969}Generation&\cellcolor[rgb]{ .867, .922, .969}\cmark&\cellcolor[rgb]{ .867, .922, .969}-\\
+
+  &
+Bench-CoE~\cite{wang2024bench}   & Supervised &Performance&  CE loss&Generation&\cmark&\href{https://github.com/ZhangXJ199/Bench-CoE}{\textcolor{gray}{[Link]}}\\
+  &
+\cellcolor[rgb]{ .867, .922, .969}\cite{li2025llm}   & \cellcolor[rgb]{ .867, .922, .969}Supervised &\cellcolor[rgb]{ .867, .922, .969}Performance and cost & \cellcolor[rgb]{ .867, .922, .969}Negative log-likelihood loss&\cellcolor[rgb]{ .867, .922, .969}Generation&\cellcolor[rgb]{ .867, .922, .969}\cmark&\cellcolor[rgb]{ .867, .922, .969}-\\
+  &
+MetaLLM~\cite{nguyen2024metallm}  & Supervised &Performance & Mean square error& Classification&\xmark&\href{https://github.com/mail-research/MetaLLM-wrapper/}{\textcolor{gray}{[Link]}}\\
+  &
+\cellcolor[rgb]{ .867, .922, .969}TO-Router~\cite{stripelis2024tensoropera}   & \cellcolor[rgb]{ .867, .922, .969}Supervised &\cellcolor[rgb]{ .867, .922, .969}Perf., cost and query time & \cellcolor[rgb]{ .867, .922, .969}KL divergence&\cellcolor[rgb]{ .867, .922, .969}Generation&\cellcolor[rgb]{ .867, .922, .969}\cmark&\cellcolor[rgb]{ .867, .922, .969}-\\
+  &
+FORC~\cite{vsakota2024fly}& Supervised &Performance and cost & Avg. of multi-metric integration&Generation&\cmark&\href{https://github.com/epfl-dlab/forc}{\textcolor{gray}{[Link]}}\\
+  &
+\cellcolor[rgb]{ .867, .922, .969}HomoRouter~\cite{mu2024adaptive}& \cellcolor[rgb]{ .867, .922, .969}Supervised &\cellcolor[rgb]{ .867, .922, .969}Performance and cost & \cellcolor[rgb]{ .867, .922, .969}Mean square error &\cellcolor[rgb]{ .867, .922, .969}Generation&\cellcolor[rgb]{ .867, .922, .969}\cmark&\cellcolor[rgb]{ .867, .922, .969}-\\
+% Tryage~\cite{hari2023tryage}&Supervised&Performance&KL divergence&Generation&No&\\
+% \hline 
+\cmidrule{2-8} 
+ \multirow{ 3}{*}{(a2)}  
+   &
+Eagle~\cite{zhao2024eagle} & Unsupervised & Performance and cost & - & Generation  &\xmark&-\\
+ &
+\cellcolor[rgb]{ .867, .922, .969}PickLLM~\cite{sikeridis2024pickllm}  &\cellcolor[rgb]{ .867, .922, .969}Supervised & \cellcolor[rgb]{ .867, .922, .969}Perf., cost and query time& \cellcolor[rgb]{ .867, .922, .969}-&\cellcolor[rgb]{ .867, .922, .969}Generation&\cellcolor[rgb]{ .867, .922, .969}\cmark&\cellcolor[rgb]{ .867, .922, .969}- \\
+
+  &
+Blending~\cite{lu2024blending} & Unsupervised & Performance and cost & - & Conversation  &\xmark&-\\
+
+    \bottomrule
+    \end{tabular}
+    }
+    \caption{Summary of ensemble-before-inference methods.}
+    \label{tab:Ensemble-before-inference}
+\end{table*}
+
+
+
+
+
+\paragraph{Reward-based methods.}
+Zooter~\cite{lu2024routing} is an efficient reward-guided routing method for integrating existing LLMs.
+It uses the scores of reward models as supervision signals to train the routing function through a reward distillation mechanism, achieving efficient routing of queries to specialized LLMs.
+Unlike previous fine-grained routing methods, Bench-CoE~\cite{wang2024bench}  
+takes into account both query-level and subject-level routing strategies.
+To address the performance-cost dilemma, Li et al.~\shortcite{li2025llm} formulate the LLM selection process as a multi-armed bandit problem, optimizing the trade-off between performance and cost.
+MetaLLM~\cite{nguyen2024metallm} optimizes a scalarized reward and operates on a fixed set of LLMs, limiting the learned policy to specific user preferences and a predefined set of models.
+TO-Router system~\cite{stripelis2024tensoropera} effectively balances query execution time, cost, and model performance through dynamic routing, integrating multiple LLM experts into a unified query interface. 
+
+
+
+
+
+\paragraph{Assignment-based methods.}
+FORC~\cite{vsakota2024fly} provides a variety of assignment strategies, including both cost-insensitive strategies and cost-sensitive strategies. Users can choose the appropriate strategy according to different needs and constraints to achieve the best balance between cost and performance.
+In the retrieval-augmented generation (RAG) scenario, given a set of homogeneous search tools and user queries, HomoRouter~\cite{mu2024adaptive} is trained to predict the score of the LLM calling each tool to process the 
+% query,
+% and then the query is assigned to the best tool according to different allocation strategies.
+
+
+\subsubsection{3.1.2 (a2) Non-Pretrained Router}
+Unlike learning-based routers, Eagle~\cite{zhao2024eagle} is a training-free router, which employs the ELO ranking to update the scores of LLMs based on pairwise comparison results. 
+% For each comparison, the observed score and the expected score are calculated to determine the score change of the LLM, thereby evaluating the relative skill level of the LLM and providing the highest quality responses to users within the given budget.
+For each comparison, the observed scores and the expected scores are calculated to determine the score changes of the LLMs, thereby evaluating the relative skill levels of the LLMs and providing the highest quality responses to users within the given budget.
+PickLLM~\cite{sikeridis2024pickllm} adopts reinforcement learning to dynamically route queries to the most appropriate LLMs. By designing a weighted reward function, it comprehensively considers multiple factors such as cost, query time, and response accuracy.
+% Blending~\cite{lu2024blending} introduces a simple yet effective conversational AI method, which randomly selects different responses of multiple chat AIs, breaking the traditional model of relying on a single chat model.
+% It effectively combines the advantages of multiple small models and significantly improves the performance of chat AI while maintaining a low inference cost.
+Blending~\cite{lu2024blending} introduces a simple yet effective conversational AI method that randomly selects responses from multiple small chat AIs, deviating from the traditional reliance on a single chat model and enhancing performance while maintaining low inference costs.
+
+
+
+
+
+
+
+
+
+
+
+
+
+\setlength{\cmidrulewidth}{0.01em}  
+
+\begin{table*}[t]
+\hspace*{-0.4cm}  % 向左移动表格 1cm，调整这个值来获得适当的效果
+\scalebox{0.69}{
+\fontsize{9pt}{9pt}
+
+\begin{threeparttable}  
+% \begin{tabular}{lcc >{\columncolor{LightCyan}}c}
+\scalebox{0.95}{
+\begin{tabular}{llcc c c c c c c }
+\toprule
+&\textbf{Methods}    &  \textbf{Granularities} &\textbf{Main Strategies}   &\textbf{Unsup.}  & \textbf{\# Models}$^\dag$  & \textbf{Other Traits$^{\S}$}  & \textbf{Efficiency-Aware}  & \textbf{Tasks} & \textbf{Code} \\
+
+\midrule
+\multirow{8}{*}{(b1)} &
+\cellcolor[rgb]{ .867, .922, .969}GaC~\cite{yu2024breaking} &\cellcolor[rgb]{ .867, .922, .969}Token  & \cellcolor[rgb]{ .867, .922, .969}Averaging agg.,Vocabulary align.  &\cellcolor[rgb]{ .867, .922, .969}\cmark   &\cellcolor[rgb]{ .867, .922, .969}$\geq 2$   &\cellcolor[rgb]{ .867, .922, .969}Union dictionary  &\cellcolor[rgb]{ .867, .922, .969}\xmark  & \cellcolor[rgb]{ .867, .922, .969}Generation & \cellcolor[rgb]{ .867, .922, .969}\href{https://github.com/yaoching0/GaC}{\textcolor{gray}{[Link]}}\\
+&
+
+DeePEn~\cite{huang2024ensemble} &Token  & Aggregation,Vocabulary align.  &\cmark   &$\geq 2$  & Relative representation &  \xmark&Generation & \href{https://github.com/OrangeInSouth/DeePEn}{\textcolor{gray}{[Link]}}\\
+&
+\cellcolor[rgb]{ .867, .922, .969}EVA~\cite{xu2024bridging}   & \cellcolor[rgb]{ .867, .922, .969}Token & \cellcolor[rgb]{ .867, .922, .969}Averaging agg.,Vocabulary align.  & \cellcolor[rgb]{ .867, .922, .969}\cmark  & \cellcolor[rgb]{ .867, .922, .969}$\geq 2$    & \cellcolor[rgb]{ .867, .922, .969}Relative representation  &  \cellcolor[rgb]{ .867, .922, .969}\xmark & \cellcolor[rgb]{ .867, .922, .969}Generation & \cellcolor[rgb]{ .867, .922, .969}\href{https://github.com/xydaytoy/EVA}{\textcolor{gray}{[Link]}}\\
+&
+
+UniTe~\cite{yao2024determine} &Token  &Averaging agg.,TOP-K union   & \cmark  &$\geq 2$  & Union dictionary &\cmark  & Generation& \textcolor{gray}{-}\\
+
+&
+\cellcolor[rgb]{ .867, .922, .969}PackLLM~\cite{mavromatis2024pack} &\cellcolor[rgb]{ .867, .922, .969}Token  &\cellcolor[rgb]{ .867, .922, .969}Weighted avg. agg.,Perplexity   & \cellcolor[rgb]{ .867, .922, .969}\cmark &\cellcolor[rgb]{ .867, .922, .969}$\geq 2$  & \cellcolor[rgb]{ .867, .922, .969}Greedy optimization &\cellcolor[rgb]{ .867, .922, .969}\xmark  &\cellcolor[rgb]{ .867, .922, .969}Generation & \cellcolor[rgb]{ .867, .922, .969}\href{https://github.com/cmavro/PackLLM}{\textcolor{gray}{[Link]}}\\
+
+
+&
+CDS~\cite{jin2024collaborative} &Token  &Weighted-averaging agg.   &\xmark  & $\geq2$ &  Critical token classifier&\xmark   & Generation &  \textcolor{gray}{-}\\
+
+&
+\cellcolor[rgb]{ .867, .922, .969}\cite{li2024purifying} &\cellcolor[rgb]{ .867, .922, .969}Token  &\cellcolor[rgb]{ .867, .922, .969}Weighted-averaging agg.   &\cellcolor[rgb]{ .867, .922, .969}\cmark  & \cellcolor[rgb]{ .867, .922, .969}$=2$ &  \cellcolor[rgb]{ .867, .922, .969}Reduce negative issues  &\cellcolor[rgb]{ .867, .922, .969}\xmark   & \cellcolor[rgb]{ .867, .922, .969}Generation &  \cellcolor[rgb]{ .867, .922, .969}\textcolor{gray}{-}\\
+
+&
+CITER~\cite{zheng2025citer} & Token &Token-Level routing (selection)   &\xmark  &$= 2$ &Reinforcement learning  &\cmark  & Generation& \href{https://github.com/aiming-lab/CITER}{\textcolor{gray}{[Link]}}\\
+
+\cmidrule{2-10} 
+
+\multirow{3}{*}{(b2)}
+& 
+\cellcolor[rgb]{ .867, .922, .969}Cool-Fusion~\cite{liu2024cool} &\cellcolor[rgb]{ .867, .922, .969}Span  & \cellcolor[rgb]{ .867, .922, .969}Generation-assessment-selection  & \cellcolor[rgb]{ .867, .922, .969}\cmark & \cellcolor[rgb]{ .867, .922, .969}$\geq 2$ &\cellcolor[rgb]{ .867, .922, .969}Perplexity, common words &\cellcolor[rgb]{ .867, .922, .969}\xmark  &\cellcolor[rgb]{ .867, .922, .969}Generation & \cellcolor[rgb]{ .867, .922, .969}\textcolor{gray}{-}\\
+&
+SweetSpan~\cite{xu2025hit}  & Span  &   Generation-assessment-selection &  \cmark &  $\geq 2$ &  Perplexity, fixed-length &  \xmark  & Generation &  \textcolor{gray}{-}\\
+&
+\cellcolor[rgb]{ .867, .922, .969}SpecFuse~\cite{lv2024specfuse}  &\cellcolor[rgb]{ .867, .922, .969}Span  &\cellcolor[rgb]{ .867, .922, .969}Generation-assessment-selection   & \cellcolor[rgb]{ .867, .922, .969}\cmark & \cellcolor[rgb]{ .867, .922, .969}$\geq 2$ & \cellcolor[rgb]{ .867, .922, .969}Perplexity, fixed-length & \cellcolor[rgb]{ .867, .922, .969}\cmark &\cellcolor[rgb]{ .867, .922, .969}Generation & \cellcolor[rgb]{ .867, .922, .969}\textcolor{gray}{-}\\
+
+\cmidrule{2-10} 
+\multirow{1}{*}{(b3)}
+&
+ LE-MCTS~\cite{park2024ensembling} & Process  &  Reasoning process selection  & \xmark  & $\geq 2$  &  Monte Carlo Tree 
+Search &  \xmark  & Reasoning & \textcolor{gray}{-} \\
+\bottomrule
+\end{tabular}
+}
+\begin{tablenotes}
+ % \footnotesize   
+\small
+% \normalsize
+% \large
+\item[1] $\S$: 
+``Other Traits$^{\S}$'' denotes
+unique and relatively important capabilities, modules or characteristics that are noteworthy.
+\item[2] $\dag$:  It denotes to the number of models that can be used in the ensemble.
+\end{tablenotes}
+\end{threeparttable} 
+}
+\smallskip
+\hfil
+\captionsetup{type=table,skip=5pt}
+  \caption{Summary of ensemble-during-inference methods.}
+    \label{tab:Ensemble-during-inference}
+\end{table*}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Ensemble During Inference}
+\label{Ensemble-during-inference}
+
+
+
+We present a comprehensive review of \textit{token-level}, \textit{span-level}, and \textit{process-level} ensemble methods in the following subsections and offer a summary analysis in Table~\ref{tab:Ensemble-during-inference}.
+
+
+\subsubsection{3.2.1 (b1) Token-Level Ensemble}
+\label{Token-level Ensemble}
+
+
+For token-level ensemble-during-inference methods, at each decoding time-step, 1) \textit{aggregation} approach \cite{yu2024breaking,huang2024ensemble,xu2024bridging,yao2024determine,mavromatis2024pack,jin2024collaborative} produces the final token distribution for generation by (weighted) averaging token-level probability distributions from different models, whereas 2) \textit{selection} 
+approach~\cite{park2024ensembling} opts to directly adopt the output token from a selected single model.
+
+
+
+\paragraph{Aggregation-based methods.}
+When attempting token-level aggregation, one encounters a dilemma---the \textit{vocabulary discrepancies} across different LLMs, which produce varying embedding lengths, impede the fusion and averaging of multiple probability distributions, creating a substantial obstacle during ensemble.
+
+
+Thus, several methods~\cite{yu2024breaking,huang2024ensemble,xu2024bridging} focus on addressing the \textit{vocabulary alignment} issue.
+\textbf{\textit{(i)}}
+GaC~\cite{yu2024breaking} is the most straightforward method, which constructs a new   ``union dictionary'' by combining the vocabularies of multiple models to include all tokens from each dictionary, and subsequently projects the distribution information derived from each model onto this new merged dictionary for averaging aggregation.
+\textbf{\textit{(ii)}}
+Further, DeePEn~\cite{huang2024ensemble} and EVA~\cite{xu2024bridging} project the output distributions of multiple models at the current time step into a shared \textit{relative}/\textit{pivot space}, followed by either an averaging aggregation~\cite{huang2024ensemble} or a weighted aggregation~\cite{huang2024ensemble,xu2024bridging} to derive an unified final distribution, where the mapping process is grounded in the relative representations theory~\cite{moschella2022relative}.
+Under this same idea, one key distinction between the two methods lies in their approach to constructing the dictionary for the relative/pivot space.
+
+
+
+Furthermore, there are several alternative methods that do not prioritize dictionary alignment as their core objective: UniTe~\cite{yao2024determine} and PackLLM~\cite{mavromatis2024pack} directly adopt existing alignment techniques,  CDS~\cite{jin2024collaborative} and Li et al. ~\shortcite{li2024purifying} employ homogeneous models in their context without the need for alignment.
+Specifically:
+\textbf{\textit{(i)}}
+Yao et al.~\shortcite{yao2024determine} propose UniTe, which focuses solely on the TOP-K portion of each model’s output distribution and employs the aforementioned union dictionary-based alignment strategy~\cite{yu2024breaking} for performing averaging aggregation,  avoiding the need for full vocabulary alignment and reducing computational overhead.
+\textbf{\textit{(ii)}}
+Mavromatis et al.~\shortcite{mavromatis2024pack} present a \textit{weighted} averaging approach, where the weights were determined by the \textit{perplexity} of each model at that specific time step, serving as an indicator of whether the current input aligns with the respective model's expertise.
+Here we present the formal definition of \textit{perplexity} (considering that it is a crucial concept also employed in other related methods~\cite{liu2024cool,xu2025hit}).
+Given a tokenized input prompt or sequence $S=(x_0, x_1, \ldots, x_t)$,
+\begin{equation}
+\operatorname{PPL}_k(S)=\exp \{-\frac{1}{t} \sum_i^t \log p_k(x_i\mid x_{<i})\},
+\label{perplexity}
+\end{equation}
+where $\log p_k(x_i\mid x_{<i})$ is the log-likelihood of 
+$i$-token given the preceding tokens $x_{<i}$ according to model $M_k$.
+Further, a relatively complex variant of this approach is derived from a perplexity-based greedy optimization problem.
+\textbf{\textit{(iii)}}
+CDS~\cite{jin2024collaborative} ensembles the outputs of multiple homogeneous models (derived from a single ancestor model after pre-training or fine-tuning/alignment) at key decoding points (determined by a critical token classifier), enabling the utilization of their complementary advantages to enhance the factuality of the generation.
+\textbf{\textit{(iv)}}
+Focusing on a different goal,
+Li et al. ~\shortcite{li2024purifying} reduce negative issues during the deployment of LLMs, such as copyright infringement and data poisoning, by integrating the token-level outputs of a benign small model with a large model using weighted aggregation.
+
+
+
+\paragraph{Selection-based methods.}
+As a separate class of approaches, Zheng et al.~\shortcite{zheng2025citer} train a router driven by reinforcement learning to determine, at each token-level step, whether the output from a small model or a potentially triggered subsequently larger model should be \textit{selected}, offering an efficiency-aware solution.
+
+
+
+
+\subsubsection{3.2.2 (b2) Span-Level Ensemble}
+\label{Span-level Ensemble}
+
+
+Existing span-level ensemble methods ~\cite{liu2024cool,xu2025hit,lv2024specfuse}  all adhere to a ``generation-assessment-selection'' pipeline. 
+These methods first employ multiple large models to generate word-containing fragments, then utilize the concept of \textit{perplexity}, as mentioned before (Equation~\ref{perplexity}), to make each model score all generated model responses, ultimately selecting the fragment with the highest cumulative score.
+The key distinction lies in that Gool-Fusion~\cite{liu2024cool}
+have each source LLM individually generate text segments until
+the word boundary of each segment is common to all LLMs, whereas SweetSpan~\cite{xu2025hit} and SpaceFuse~\cite{lv2024specfuse} adopt a more straightforward approach by setting the span as a fragment with a fixed word count. 
+Furthermore, SpaceFuse~\cite{lv2024specfuse} introduces a model exit mechanism during each task execution phase to optimize computational resource usage.
+
+
+\subsubsection{3.2.3 (b3) Process-Level Ensemble}
+\label{Process-level Ensemble}
+
+Confronted with complex step-by-step reasoning tasks, Park et al.~\shortcite{park2024ensembling} use a trained Monte Carlo Tree Search strategy at each reasoning step to select the output with the highest reward value from multiple model reasoning outputs, thereby identifying the most accurate reasoning chain.
+
+
+
+
+
+
+
+
+
+
+
+\setlength{\cmidrulewidth}{0.01em}  
+
+
+\begin{table*}[t]
+\hspace*{-0.6cm}  % 向左移动表格 1cm，调整这个值来获得适当的效果
+\scalebox{0.72}{
+\fontsize{9pt}{9pt}
+
+\begin{threeparttable}  
+% \begin{tabular}{lcc >{\columncolor{LightCyan}}c}
+\scalebox{0.93}{
+\begin{tabular}{llcc c c c c c }
+\toprule
+& \textbf{Methods}    &  \textbf{Un-/Supervised} &\textbf{Main Strategies}   & \textbf{\# Models}  & \textbf{Other Traits$^{\S}$}  & \textbf{Efficiency-aware}  & \textbf{Tasks} & \textbf{Code} \\
+
+\midrule
+\multirow{6}{*}{(c1)}
+&\cellcolor[rgb]{ .867, .922, .969}Agent-Forest~\cite{li2024more}  & \cellcolor[rgb]{ .867, .922, .969}Unsupervised & \cellcolor[rgb]{ .867, .922, .969}Similarity-based selection & \cellcolor[rgb]{ .867, .922, .969}$ >  2$& \cellcolor[rgb]{ .867, .922, .969} Scaling property & \cellcolor[rgb]{ .867, .922, .969}\xmark &  \cellcolor[rgb]{ .867, .922, .969}Cls./Generation & \cellcolor[rgb]{ .867, .922, .969}\href{https://github.com/MoreAgentsIsAllYouNeed/AgentForest}{\textcolor{gray}{[Link]}}\\
+
+& Smoothie~\cite{guhasmoothie} & Unsupervised& Similarity-based selection  & $ >  2$  & Graphical model &\xmark  &Generation  & \href{https://github.com/HazyResearch/smoothie}{\textcolor{gray}{[Link]}}\\
+
+&\cellcolor[rgb]{ .867, .922, .969}MoRE~\cite{si2023getting} & \cellcolor[rgb]{ .867, .922, .969}Supervised & \cellcolor[rgb]{ .867, .922, .969} 
+Supervised Sim.-based sel. & \cellcolor[rgb]{ .867, .922, .969}$ >  2$  & \cellcolor[rgb]{ .867, .922, .969}Feature engineering & \cellcolor[rgb]{ .867, .922, .969}\xmark&\cellcolor[rgb]{ .867, .922, .969}  Reasoning & \cellcolor[rgb]{ .867, .922, .969}\href{https://github.com/NoviScl/MoRE}{\textcolor{gray}{[Link]}}\\
+
+&LLM-Blender~\cite{jiang2023llm}  & Supervised & Selection-then-regeneration  & $ >  2$  & Pairwise ranking& \xmark & Generation &\href{https://github.com/yuchenlin/LLM-Blender}{\textcolor{gray}{[Link]}}\\\  
+
+&\cellcolor[rgb]{ .867, .922, .969}LLM-TOPLA~\cite{tekin2024llm}  & \cellcolor[rgb]{ .867, .922, .969}Supervised & \cellcolor[rgb]{ .867, .922, .969}Selection-then-regeneration  & \cellcolor[rgb]{ .867, .922, .969}$ >  2$  & \cellcolor[rgb]{ .867, .922, .969}  Maximising diversity & \cellcolor[rgb]{ .867, .922, .969}\xmark & \cellcolor[rgb]{ .867, .922, .969}Generation & \cellcolor[rgb]{ .867, .922, .969}\href{https://github.com/git-disl/llm-topla}{\textcolor{gray}{[Link]}}\\
+
+&URG~\cite{lv2024urg}  & Supervised & Selection-then-regeneration & $ >  2$ & Unified processes &\cmark & Cls./Generation & -\\
+\cmidrule{2-9} 
+\multirow{10}{*}{(c2)}  & \cellcolor[rgb]{ .867, .922, .969}EcoAssistant~\cite{zhang2023ecoassistant} 	& \cellcolor[rgb]{ .867, .922, .969}Unsupervised & \cellcolor[rgb]{ .867, .922, .969}User judgment & \cellcolor[rgb]{ .867, .922, .969}$\geq 2$ & \cellcolor[rgb]{ .867, .922, .969}Prompt engineering & \cellcolor[rgb]{ .867, .922, .969}\cmark & \cellcolor[rgb]{ .867, .922, .969}Code generation & \cellcolor[rgb]{ .867, .922, .969}\href{https://github.com/JieyuZ2/EcoAssistant}{\textcolor{gray}{[Link]}}\\
+&  \cite{yuelarge}  & Unsupervised  & Answer consistency & $\geq 2$$^{\dag}$ &Sampling and checking &\cmark  &Reasoning & \href{https://github.com/MurongYue/LLM_MoT_cascade}{\textcolor{gray}{[Link]}}\\
+&  \cellcolor[rgb]{ .867, .922, .969}Model Cascading~\cite{varshney2022model}	& \cellcolor[rgb]{ .867, .922, .969}Unsupervised & \cellcolor[rgb]{ .867, .922, .969}Class uncertainty &  \cellcolor[rgb]{ .867, .922, .969}$\geq 2$  & \cellcolor[rgb]{ .867, .922, .969}Cascade-pioneer &\cellcolor[rgb]{ .867, .922, .969}\cmark & \cellcolor[rgb]{ .867, .922, .969}Classification & \cellcolor[rgb]{ .867, .922, .969}\textcolor{gray}{-}\\
+&   neural caching~\cite{ramirez2023cache}	& Unsupervised & Class unc./Ans. cons. & $= 2$  & Distillation  & \cmark &Classification  & \href{https://github.com/guillemram97/neural-caching}{\textcolor{gray}{[Link]}} \\
+
+&  \cellcolor[rgb]{ .867, .922, .969}Cascade Routing~\cite{dekoninck2024unified}	& \cellcolor[rgb]{ .867, .922, .969}Unsupervised & \cellcolor[rgb]{ .867, .922, .969}Class uncertainty  & \cellcolor[rgb]{ .867, .922, .969}$>2$  &\cellcolor[rgb]{ .867, .922, .969}Routing-equipped &\cellcolor[rgb]{ .867, .922, .969}\cmark  &\cellcolor[rgb]{ .867, .922, .969}Classification  &\cellcolor[rgb]{ .867, .922, .969}\href{https://github.com/eth-sri/cascade-routing}{\textcolor{gray}{[Link]}} \\
+
+&  \cite{jitkrittum2024does}	& Supervised & (Upgraded) Class unc. & $\geq2$$^{\dag}$ & Post-hoc deferral & \cmark & Classification & \textcolor{gray}{-} \\
+
+&  \cellcolor[rgb]{ .867, .922, .969}FrugalGPT~\cite{chen2023frugalgpt} 	& \cellcolor[rgb]{ .867, .922, .969}Supervised &  \cellcolor[rgb]{ .867, .922, .969}Score function  &\cellcolor[rgb]{ .867, .922, .969}$\geq2$& \cellcolor[rgb]{ .867, .922, .969}Prompt engineering, etc.& \cellcolor[rgb]{ .867, .922, .969}\cmark &  \cellcolor[rgb]{ .867, .922, .969}Query answering &\cellcolor[rgb]{ .867, .922, .969}\textcolor{gray}{-}\\
+
+&  \cite{gupta2024language} 	& Supervised & Score function 
+& $=2$ & Quantile features & \cmark & Generation & \textcolor{gray}{-}\\
+
+&  \cellcolor[rgb]{ .867, .922, .969}AutoMix~\cite{aggarwal2023automix}	& \cellcolor[rgb]{ .867, .922, .969}Supervised & \cellcolor[rgb]{ .867, .922, .969}MDP &\cellcolor[rgb]{ .867, .922, .969}$\geq2$ &\cellcolor[rgb]{ .867, .922, .969}Routing-equipped, etc.&\cellcolor[rgb]{ .867, .922, .969}\cmark &\cellcolor[rgb]{ .867, .922, .969}Reasoning &\cellcolor[rgb]{ .867, .922, .969}\textcolor{gray}{-}\\
+
+% \midrulef
+% SkillAggregation & 66.70 & 71.18 \\
+&  DER~\cite{hu2024dynamic} / & Supervised & MDP,Ans. Cons. &$\geq2$ &Routing-equipped&\cmark &Reasoning&\textcolor{gray}{-} \\
+\bottomrule
+\end{tabular}
+}
+\begin{tablenotes}
+ % \footnotesize   
+\small
+% \normalsize
+% \large
+\item[1] $\S$: 
+``Other Traits$^{\S}$'' denotes 
+unique and relatively important capabilities, modules or characteristics that are noteworthy.
+Beyond the introduction already provided in the main text,  
+Zhang et al.~\shortcite{zhang2023ecoassistant} \\
+ employ some prompt engineering, and Yue et al.~\shortcite{yuelarge} use the customized sampling and checking techniques.
+\item[2] $\dag$: ``$\geq2$$^{\dag}$'' denotes  that the study considers a 2-models cascade scenario in its methodology introduction/derivation, but it can be easily adapted to K-models cascade scenarios.
+\end{tablenotes}
+\end{threeparttable} 
+}
+\smallskip
+\hfil
+\captionsetup{type=table,skip=5pt}
+  \caption{Summary of ensemble-after-inference methods.}
+    \label{tab:Ensemble-after-inference}
+\end{table*}
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Ensemble After Inference}
+\label{Ensemble-after-inference}
+
+
+We review the \textit{non-cascade} and \textit{cascade} methods in the following, and provide a summary analysis in Table~\ref{tab:Ensemble-after-inference}.
+
+
+\subsubsection{3.3.1 (c1) Non-Cascade}
+
+As shown in Figure~\ref{Fig: Taxonomy} and Table~\ref{tab:Ensemble-after-inference}, existing non-cascade methods fall into two categories: 1) \textit{selection-based}, which is dedicated to selecting a single response from multiple candidates~\cite{li2024more,guhasmoothie,si2023getting}, and 2) \textit{selection-then-regeneration}, which involves initially selecting a subset of candidate responses and subsequently feeding this refined subset into a generative model for regeneration to obtain the final output~\cite{jiang2023llm,tekin2024llm,lv2024urg}.
+
+
+
+
+
+\paragraph{Selection-based methods.}
+First, as \textit{unsupervised} methods, Agent-Forest~\cite{li2024more}  and Smoothie~\cite{guhasmoothie}  essentially leverage the similarity between model responses for selection and adhere to a majority voting (MV) principle:
+\textit{selecting the response that exhibits the highest degree of similarity to the others as the final answer}. 
+Specifically, \textbf{\textit{(i)}}
+Li et al.~\shortcite{li2024more} obtain multiple responses by repeatedly querying a single model (equivalent to utilizing outputs from multiple homogeneous models) and employ the MV ensemble, discovering a scaling property associated with ensembling more responses; they use BLEU scores and occurrence frequencies to quantify the similarities between responses for generation and classification tasks, respectively.
+\textbf{\textit{(ii)}}
+Guha et al. ~\shortcite{guhasmoothie} input multiple $<$query, response$>$ pairs into  SentenceBERT~\cite{reimers2019sentence}, leveraging the Euclidean distance between the resulting low-dimensional encoded vectors as a measure of similarity; and their method is theoretically supported by a constructed graphical model.
+
+
+Further, as a \textit{supervised} method, MoRE~\cite{si2023getting} utilizes some training data to train a random forest classifier for selecting among multiple responses, using the response similarity among LLMs as one of the constructed features.
+
+
+
+
+\paragraph{Selection-then-regeneration methods.}
+These methods stem from the pioneering work LLM-Blender, introduced by Jiang et al.~\shortcite{jiang2023llm}.
+\textbf{\textit{(i)}}
+LLM-Blender uses some training data to train the ``PairRanker'' selection module in the first phase, serving to select a subset from multiple responses,  and to train the ``GenFuser'' generator in the subsequent phase for synthesizing the final response.
+\textbf{\textit{(ii)}}
+Building upon LLM-Blender, the improvement made by LLM-TOPLA~\cite{tekin2024llm} mainly lies in optimizing the selection process in the first step by ``maximizing the diversity among multiple response candidates''.  
+\textbf{\textit{(iii)}}
+In addition, URG~\cite{lv2024urg} proposes an end-to-end framework that integrates selection and regeneration, aiming to avoid the time consumption and error propagation caused by the original two separate processes.
+
+
+
+
+
+
+\subsubsection{3.3.2 (c2) Cascade}
+Methodologically, all cascade methods revolve around the \textit{deferral rule}/\textit{decision maker}: determining whether to adopt the output of the current model at hand or to invoke a subsequent, more powerful model.
+As shown in Figure~\ref{Fig: Taxonomy} and Table~\ref{tab:Ensemble-after-inference}, this line of methods can be classified into two categories: \textit{unsupervised methods} and  \textit{supervised methods}.
+
+
+
+
+\paragraph{Unsupervised methods.}
+As shown in Table~\ref{tab:Ensemble-after-inference}, these methods can be further categorized into three types according to the pivotal ``main strategy'': \textit{user judgment}~\cite{zhang2023ecoassistant}, \textit{answer consistency}~\cite{yuelarge,ramirez2023cache}, and \textit{class uncertainty}~\cite{varshney2022model,ramirez2023cache,dekoninck2024unified}.
+
+
+
+As one most straightforward method, Zhang et al. \shortcite{zhang2023ecoassistant}  propose a cascade method, EcoAssistant, that utilizes \textit{user judgment} rather than \textit{machine algorithms} to determine whether the obtained result are satisfactory and whether the cascading inference should be terminated.
+
+
+
+
+Further, Yue et al.~\shortcite{yuelarge} introduce a method based on \textit{answer consistency}—more precisely, on the observation of whether the inference results generated from multiple identical/diverse prompts exhibit sufficient uniformity—to solve the cascade problem for in-context-learning reasoning tasks.
+The underlying intuition is that, \textit{if a weaker LLM produces highly consistent answers for a given task, it demonstrates strong confidence in solving the problem, and its most consistent answer is likely correct; therefore, invoking a stronger LLM is unnecessary.}
+In addition, the strategies provided by the method ``neural caching''~\cite{ramirez2023cache} also contain the answer consistency.
+
+
+
+
+Last but certainly not least, a critically important category of approaches is grounded in \textit{class uncertainty}------an approach that also manifests in the following ``supervised methods''. 
+Class uncertainty, sometimes also referred to as \textit{confidence}~\cite{varshney2022model,ramirez2023cache,jitkrittum2024does}, can be implemented through various variants, including Maximum Softmax Probability~\cite{varshney2022model}, Distance To Uniform Distribution~\cite{varshney2022model}, Margin Sampling~\cite{ramirez2023cache}, and Prediction Entropy~\cite{ramirez2023cache}. 
+However,  at its core, it evaluates whether the probability of the dominant class inferred by the current model exceeds a sufficient threshold.
+When this probability is sufficiently high---signifying adequate confidence---the cascading process is concluded; otherwise, it proceeds.
+Specifically, 
+\textbf{\textit{(i)}}  ``Model Cascading''~\cite{varshney2022model} pioneers this approach. 
+\textbf{\textit{(ii)}} Ram\'{i}rez et al.~\shortcite{ramirez2023cache} propose the  ``neural caching'' embedded the class uncertainty strategy.
+Its cascading process involves only \textit{two}  models, and during the task execution phase, the weaker model continuously learns from the distillation outputs of the stronger model to enhance its capabilities for better handling subsequent tasks.
+\textbf{\textit{(iii)}}
+Dekoninck et al. ~\shortcite{dekoninck2024unified} apply the routing approach in the cascading process and theoretically prove that, under certain conditions, their method essentially adopts the class uncertainty strategy.
+
+
+
+
+
+\paragraph{Supervised methods.}
+Unlike the aforementioned unsupervised cascade methods, supervised cascade methods use some training data to train cascade-related modules, including \textit{post-hoc deferral based on upgraded class-uncertainty strategy}~\cite{jitkrittum2024does}, \textit{scoring functions}~\cite{chen2023frugalgpt,gupta2024language}, and \textit{Markov Decision Processes (MDPs)}~\cite{aggarwal2023automix,hu2024dynamic}.
+
+
+
+
+\setlength{\cmidrulewidth}{0.01em}  % 控制 \cmidrule 的线条粗细
+
+\begin{table*}[t!]
+\hspace*{1.3cm}  % 向左移动表格 1cm，调整这个值来获得适当的效果
+\scalebox{0.7}{
+\fontsize{9pt}{9pt}
+
+\begin{threeparttable}  
+% \begin{tabular}{lcc >{\columncolor{LightCyan}}c}
+\scalebox{0.94}{
+\begin{tabular}{llcc    c}
+\toprule
+ & \textbf{Approaches}    &  \textbf{Ensemble Strategies} &\textbf{Ensemble Granularities}     & \textbf{Ensemble Goals}   \\
+
+\midrule
+
+\multirow{2}{*}{(a) Ensemble before inference}
+
+ & (a1) Pretrained router &Selection  & Response-level     \({\tiny\clubsuit}\)    & Performance (and cost) \\
+
+
+ & (a2) Non-pretrained router &Selection  & Response-level \({\tiny\clubsuit}\)  &Performance and cost   \\
+
+\cmidrule{1-5} 
+
+\multirow{3}{*}{(b) Ensemble during inference}
+
+ & (b1) Token-level ensemble & \text{5/6} Aggregation, \text{1/6} Selection  & Token-level     \({\tiny\clubsuit}\)  \({\tiny\clubsuit}\)  \({\tiny\clubsuit}\)   &Performance$^{\S}$  \\
+
+ & (b2) Span-level ensemble &Selection  & Span-level    \({\tiny\clubsuit}\)  \({\tiny\clubsuit}\)  &Performance \\
+
+ & (b3) Process-level ensemble &Selection  & Process-level   \({\tiny\clubsuit}\)  \({\tiny\clubsuit}\)    &Performance   \\
+
+\cmidrule{1-5} 
+
+\multirow{2}{*}{(c) Ensemble after inference}
+ &(c1) Non cascade &\text{3/6} Selection, \text{3/6} Regeneration  & Response-level   \({\tiny\clubsuit}\) &Performance   \\
+ &(c2) Cascade &Selection  & Response-level  \({\tiny\clubsuit}\)  &Performance and cost   \\
+
+
+\bottomrule
+\end{tabular}
+}
+\begin{tablenotes}
+ % \footnotesize   
+\small
+% \normalsize
+% \large
+\item[1] \({\tiny\clubsuit}\): It represents the level of granularity, and a higher quantity indicates finer ensemble granularity.
+\item[2] $^{\S}$: As a specific example and as introduced in Section~\ref{Token-level Ensemble}, Li et al. ~\shortcite{li2024purifying} primarily aim to minimize the negative issues of large models during deployment.
+\end{tablenotes}
+\end{threeparttable} 
+}
+\smallskip
+\hfil
+\captionsetup{type=table,skip=5pt}
+  \caption{Summary analysis of the key attributes of LLM Ensemble approaches.}
+    \label{summary-final}
+\end{table*}
+
+
+
+
+
+Specifically, \textbf{\textit{(i)}} Jitkrittum et al.~\shortcite{jitkrittum2024does} use the training data to learn a cascade method called \textit{post-hoc deferral}; and the core idea is that, in contrast to aforementioned \textit{class-uncertainty}
+cascade methods~\cite{varshney2022model,ramirez2023cache,dekoninck2024unified} which solely focus on the class uncertainty of the current model’s output, it also takes into account the estimated uncertainty of the next, stronger model’s output.
+\textbf{\textit{(ii)}} Further, Chen et al.~\shortcite{chen2023frugalgpt} and Gupta et al.~\shortcite{gupta2024language} use the training data to learn a \textit{scoring function} that produces a confidence score regarding the current model’s output, enabling cascading judgments.
+The key difference lies in that Chen et al.~\shortcite{chen2023frugalgpt} utilize input features contributed by $<$query, response$>$ pairs during the scoring function learning process; whereas Gupta et al.~\shortcite{gupta2024language}, aiming to better integrate the class-uncertainty idea in general generation tasks, employ ``Quantile'' features constructed from token-level class uncertainty information within the response in the binary classification-based scoring function learning.
+\textbf{\textit{(iii)}} 
+Both Aggarwal et al.~\shortcite{aggarwal2023automix} and Hu et al.~\shortcite{hu2024dynamic} adopt the aforementioned idea of ``introducing routing in the cascading process''~\cite{dekoninck2024unified} and train an MDP for decision-making.
+Aggarwal et al.~\shortcite{aggarwal2023automix} directly determine both ``whether to terminate the cascade and which stronger model to route to'' within the MDP, whereas  Hu et al.~\shortcite{hu2024dynamic}  decide ``which stronger model to route to'' in the MDP and additionally implement an answer-consistency strategy for cascading decisions.
+
+
+
+
+
+
+
+\section{Benchmarks and Applications}
+In this section, we briefly discuss popular benchmarks and applications in LLM Ensemble.
+First, there are two classic benchmarks specifically tailored for LLM Ensemble evaluation: 
+1) Benchmark \textsc{MixInstruct} proposed by Jiang et al. \shortcite{jiang2023llm}, which serves to assess the \textit{performance} of LLM Ensemble, covers various instruction-following tasks and includes 11 popular large language models
+% (such as Alpaca, Vicuna, etc.) 
+alongside 11K test samples;
+2) Benchmark \textsc{RouterBench} proposed by Hu et al.~\shortcite{hu2024routerbench}, 
+which can be used to evaluate methods that consider both \textit{performance and inference costs}, especially suitable for ensemble-before-inference methods.
+Moreover, in terms of applications, beyond the methods outlined in Section~\ref{Methodology}, the concept of LLM Ensemble has found applications in a variety of more specialized tasks and domains. 
+For instance, Lee et al. ~\shortcite{lee2023ensemble} leverage the ROUGE-L metric to assess the similarity of generated text and employed a similarity-based selection strategy for ensemble to produce Instruction-Tuning data; 
+additionally, several studies focus on win rate evaluation~\cite{gao2024bayesian}, SQL generation~\cite{gundabathula2024promptmind}, and so on.
+
+
+
+
+
+
+
+
+\section{Discussion}
+
+
+
+
+\subsection{Summarization}
+
+
+Here we provide a summary analysis of three LLM Ensemble paradigms and seven LLM Ensemble approaches, as illustrated in Table~\ref{summary-final}, considering the most critical methodological attributes:
+\textit{ensemble strategy}, \textit{granularity} and \textit{ensemble goal}.
+
+
+
+From the perspective of ensemble strategy, \textit{aggregation} methods (involving the average or weighted ensemble of all model outputs) are more sophisticated compared to \textit{selection}-based methods, which select a single output (equivalent to a \textit{hard voting} process). 
+However, \textit{regeneration}-based methods are burdened by the additional need for large model-specific training data preparation and model training.
+From the perspective of ensemble granularity, it is apparent that \textit{response}-level ensemble methods are relatively coarse-grained; while methods with finer granularity, particularly token-level ensemble methods, can
+more effectively harness the distribution information from each model during the decoding phase.
+Further, from the perspective of ensemble goals, (b) ensemble-during-inference methods and (c1) non-cascaded-based methods, unconstrained by cost considerations, can employ more flexible ensemble strategies beyond \textit{selection} and utilize finer-grained ensemble approaches, ultimately yielding greater performance improvement potential.
+
+
+
+
+
+
+\subsection{Existing Limitations and Future Directions}
+
+
+\paragraph{Principled span-level ensemble-during-inference approach.}
+Ensemble-during-inference methods based on span-level ensemble already provide an adequate granularity.
+Nevertheless, current segment segmentation techniques are still overly simplistic (e.g., rigidly defining segment lengths as fixed values, such as a 4-word sequence).
+Shifting to a more principled segment segmentation approach could provide richer, more valuable information for the subsequent ensemble process.
+
+
+\paragraph{Sophisticated unsupervised non-cascade ensemble-after-inference approach.}
+To achieve optimal performance, and in cases where frequent calls to the output distributions of different models during the decoding phase are not feasible, non-cascade ensemble-after-inference approach, which integrates the responses from multiple large models to derive the final answer, is highly practical.
+However, these methods are often limited either by relying on a simplistic pairwise similarity measure between different outputs, or requiring additional generation-oriented supervised learning components, thereby sacrificing generalization.
+Hence, the development of more sophisticated, unsupervised non-cascade ensemble-after-inference methods holds considerable importance.
+
+
+
+\paragraph{General cascade approach.}
+Existing cascade methods, compared to ensemble-before-inference methods, can also address the cost-considered ensemble problem, with the added benefit of utilizing model responses during the cascade process to select the most appropriate output.
+However, most of these methods are not designed for generation tasks, and the only generation-oriented one relies on supervised learning, losing generalization.
+Thus, developing a general-purpose unsupervised cascade approach would mark significant progress.
+
+
+
+
+
+\section{Conclusion}
+
+LLM Ensemble stands as a direct manifestation of ensemble learning in the era of large language models. 
+The accessibility, diversity, and out-of-the-box usability of large language models have made the spirit of ensemble learning shine even brighter, fueled by the rapidly developing LLM Ensemble studies.
+This paper provides a comprehensive taxonomy and a review of the methods in the field of LLM Ensemble, introduces relevant applications and benchmarks, conducts a summative analysis of these methods, and proposes several potential research directions.
+We hope that this review will offer valuable insights to researchers and inspire further advancements in LLM Ensemble and related research areas.
+
+
+% \newpage
+
+%% The file named.bst is a bibliography style file for BibTeX 0.99c
+
+
+\bibliographystyle{named}
+% \bibliography{ijcai25}
+{{\footnotesize\bibliography{ijcai25}}}
+% {{\scriptsize\bibliography{ijcai25}}}
+
+\end{document}
+

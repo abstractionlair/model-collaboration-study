@@ -1,0 +1,560 @@
+%File: formatting-instructions-latex-2025.tex
+%release 2025.0
+\documentclass[letterpaper]{article} % DO NOT CHANGE THIS
+\usepackage{aaai25}  % DO NOT CHANGE THIS
+\usepackage{times}  % DO NOT CHANGE THIS
+\usepackage{helvet}  % DO NOT CHANGE THIS
+\usepackage{courier}  % DO NOT CHANGE THIS
+\usepackage[hyphens]{url}  % DO NOT CHANGE THIS
+\usepackage{graphicx} % DO NOT CHANGE THIS
+\urlstyle{rm} % DO NOT CHANGE THIS
+\def\UrlFont{\rm}  % DO NOT CHANGE THIS
+\usepackage{natbib}  % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\usepackage{caption} % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\frenchspacing  % DO NOT CHANGE THIS
+\setlength{\pdfpagewidth}{8.5in}  % DO NOT CHANGE THIS
+\setlength{\pdfpageheight}{11in}  % DO NOT CHANGE THIS
+%
+% These are recommended to typeset algorithms but not required. See the subsubsection on algorithms. Remove them if you don't have algorithms in your paper.
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{booktabs} 
+\usepackage{multirow} 
+\usepackage{graphicx}
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+%
+% These are are recommended to typeset listings but not required. See the subsubsection on listing. Remove this block if you don't have listings in your paper.
+\usepackage{newfloat}
+\usepackage{listings}
+\DeclareCaptionStyle{ruled}{labelfont=normalfont,labelsep=colon,strut=off} % DO NOT CHANGE THIS
+\lstset{%
+	basicstyle={\footnotesize\ttfamily},% footnotesize acceptable for monospace
+	numbers=left,numberstyle=\footnotesize,xleftmargin=2em,% show line numbers, remove this entire line if you don't want the numbers.
+	aboveskip=0pt,belowskip=0pt,%
+	showstringspaces=false,tabsize=2,breaklines=true}
+\floatstyle{ruled}
+\newfloat{listing}{tb}{lst}{}
+\floatname{listing}{Listing}
+%
+% Keep the \pdfinfo as shown here. There's no need
+% for you to add the /Title and /Author tags.
+\pdfinfo{
+/TemplateVersion (2025.1)
+}
+
+% DISALLOWED PACKAGES
+% \usepackage{authblk} -- This package is specifically forbidden
+% \usepackage{balance} -- This package is specifically forbidden
+% \usepackage{color (if used in text)
+% \usepackage{CJK} -- This package is specifically forbidden
+% \usepackage{float} -- This package is specifically forbidden
+% \usepackage{flushend} -- This package is specifically forbidden
+% \usepackage{fontenc} -- This package is specifically forbidden
+% \usepackage{fullpage} -- This package is specifically forbidden
+% \usepackage{geometry} -- This package is specifically forbidden
+% \usepackage{grffile} -- This package is specifically forbidden
+% \usepackage{hyperref} -- This package is specifically forbidden
+% \usepackage{navigator} -- This package is specifically forbidden
+% (or any other package that embeds links such as navigator or hyperref)
+% \indentfirst} -- This package is specifically forbidden
+% \layout} -- This package is specifically forbidden
+% \multicol} -- This package is specifically forbidden
+% \nameref} -- This package is specifically forbidden
+% \usepackage{savetrees} -- This package is specifically forbidden
+% \usepackage{setspace} -- This package is specifically forbidden
+% \usepackage{stfloats} -- This package is specifically forbidden
+% \usepackage{tabu} -- This package is specifically forbidden
+% \usepackage{titlesec} -- This package is specifically forbidden
+% \usepackage{tocbibind} -- This package is specifically forbidden
+% \usepackage{ulem} -- This package is specifically forbidden
+% \usepackage{wrapfig} -- This package is specifically forbidden
+% DISALLOWED COMMANDS
+% \nocopyright -- Your paper will not be published if you use this command
+% \addtolength -- This command may not be used
+% \balance -- This command may not be used
+% \baselinestretch -- Your paper will not be published if you use this command
+% \clearpage -- No page breaks of any kind may be used for the final version of your paper
+% \columnsep -- This command may not be used
+% \newpage -- No page breaks of any kind may be used for the final version of your paper
+% \pagebreak -- No page breaks of any kind may be used for the final version of your paperr
+% \pagestyle -- This command may not be used
+% \tiny -- This is not an acceptable font size.
+% \vspace{- -- No negative value may be used in proximity of a caption, figure, table, section, subsection, subsubsection, or reference
+% \vskip{- -- No negative value may be used to alter spacing above or below a caption, figure, table, section, subsection, subsubsection, or reference
+\usepackage{amsmath}
+\setcounter{secnumdepth}{0} %May be changed to 1 or 2 if section numbers are desired.
+
+% The file aaai25.sty is the style file for AAAI Press
+% proceedings, working notes, and technical reports.
+%
+
+% Title
+
+% Your title must be in mixed case, not sentence case.
+% That means all verbs (including short verbs like be, is, using,and go),
+% nouns, adverbs, adjectives should be capitalized, including both words in hyphenated terms, while
+% articles, conjunctions, and prepositions are lower case unless they
+% directly follow a colon or long dash
+\title{Debate Helps Weak-to-Strong Generalization}
+\author{
+    %Authors
+    % All authors must be in the same font size and format.
+    Hao Lang,
+    Fei Huang,
+    Yongbin Li \thanks{Corresponding author.}
+}
+\affiliations{
+    Tongyi Lab\\
+    \{hao.lang, f.huang, shuide.lyb\}@alibaba-inc.com
+%
+% See more examples next
+}
+
+%Example, Single Author, ->> remove \iffalse,\fi and place them surrounding AAAI title to use it
+\iffalse
+\title{My Publication Title --- Single Author}
+\author {
+    Author Name
+}
+\affiliations{
+    Affiliation\\
+    Affiliation Line 2\\
+    name@example.com
+}
+\fi
+
+\iffalse
+%Example, Multiple Authors, ->> remove \iffalse,\fi and place them surrounding AAAI title to use it
+\title{My Publication Title --- Multiple Authors}
+\author {
+    % Authors
+    First Author Name\textsuperscript{\rm 1,\rm 2},
+    Second Author Name\textsuperscript{\rm 2},
+    Third Author Name\textsuperscript{\rm 1}
+}
+\affiliations {
+    % Affiliations
+    \textsuperscript{\rm 1}Affiliation 1\\
+    \textsuperscript{\rm 2}Affiliation 2\\
+    firstAuthor@affiliation1.com, secondAuthor@affilation2.com, thirdAuthor@affiliation1.com
+}
+\fi
+
+
+% REMOVE THIS: bibentry
+% This is only needed to show inline citations in the guidelines document. You should not need it and can safely delete it.
+\usepackage{bibentry}
+% END REMOVE bibentry
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Common methods for aligning already-capable models with desired behavior rely on the ability of humans to provide supervision.
+However, future superhuman models will surpass the capability of humans.
+Therefore, humans will only be able to weakly supervise superhuman models.
+This expected deficiency of human evaluation would weaken the safety of future AI systems.
+Scalable oversight and weak-to-strong generalization are two complementary approaches to tackle this issue.
+In this paper, we attempt to combine the strengths of these two approaches to further improve alignment.
+Specifically, we investigate ways of improving human supervision with a strong pretrained model and then supervise the strong model with enhanced weak human supervision.
+To make iterative empirical progress, we consider an analogy: can we use a strong model to improve weak model supervision and then use it to supervise the strong model?
+We empirically test it by finetuning a small weak model on ground truth labels with the additional help from a large strong model, and then finetuning the strong model on labels generated by the weak model.
+We find that debate can assist a weak model in extracting trustworthy information from an untrustworthy strong model, which provides leverage as context on samples when training a weak model.
+We also show that an ensemble of weak models helps exploit long arguments generated by strong model debaters and obtain a more robust supervision estimate.
+Extensive experiments on the OpenAI weak-to-strong NLP benchmarks show that the combination approach leads to better alignment, which indicates that debate has the potential to help weak-to-strong generalization.
+\end{abstract}
+
+% Uncomment the following to link to your code, datasets, an extended version or similar.
+%
+% \begin{links}
+%     \link{Code}{https://aaai.org/example/code}
+%     \link{Datasets}{https://aaai.org/example/datasets}
+%     \link{Extended version}{https://aaai.org/example/extended-version}
+% \end{links}
+
+\section{Introduction}
+
+Current AI alignment techniques heavily rely on the availability of human labelled data, such as human demonstrations for supervised finetuning (SFT)~\cite{wei2021finetuned,chung2024scaling} and human preferences for reinforcement learning from human feedback (RLHF)~\cite{christiano2017deep,ouyang2022training,bai2022training}.
+These techniques can be leveraged to build the most capable AI systems currently deployed~\cite{OpenAI2023Gpt-4,Anthropic2023Introducing}.
+
+However, as models grow increasingly more capable, they will surpass the ability of humans~\cite{CAIS2023Statement}.
+In that case, even human experts can not reliably verify the quality or correctness of model outputs, and the role of human evaluation will evolve into non-experts overseeing experts~\cite{amodei2016concrete,bowman2022measuring,burns2023weak,khan2024debating}.
+The expected deficiency of human evaluation will limit the effectiveness of most existing alignment approaches~\cite{casper2023open,mcaleese2024llm}.
+Moreover, these predicted inaccurate training signals could lead to reward overoptimization and reward tampering during policy training that seriously weakens its safety~\cite{gao2023scaling,denison2024sycophancy}.
+
+There are two complementary approaches to tackle the above issue: scalable oversight (SO) and weak-to-strong generalization (W2SG)~\cite{JAN2023Combining}.
+SO approaches aim to improve the ability of humans to supervise more capable models, such that accurately labelled data can be used for alignment~\cite{bowman2022measuring}.
+Instead of improving human supervision, W2SG approaches finetune a strong pretrained model to generalize accurately from weak human supervision~\cite{burns2023weak}.
+
+We note that most prior SO and W2SG techniques are studied separately.
+In contrast, we attempt to combine the strength of SO and W2SG to further improve AI alignment.
+We investigate ways of improving human supervision with a strong pretrained model and then supervise the strong model with enhanced weak human supervision.
+To make iterative empirical progress, we consider an analogy~\cite{burns2023weak,kenton2024scalable}: can we use a strong model to improve weak model supervision and then use it to supervise the strong model?
+
+In this paper, we empirically test it by finetuning a small weak model on ground truth labels with the additional help of knowledge from a large strong model, and then finetuning the strong model on labels generated by the weak model.
+We assume a strong model pretrained on internet-scale data can provide contextual information on samples when training a weak model~\cite{brown2020language}.
+This gives us hope that a weak-strong model team could create a better weak supervisor to elicit the capabilities of the strong model.
+
+A major challenge in building a weak-strong model team involves finding ways of extracting trustworthy information from untrustworthy models~\cite{bowman2022measuring}.
+More specifically, strong pretrained models have huge capabilities but are not well aligned with human values and intentions~\cite{leike2018scalable,ji2023ai}.
+Thus, a strong model may intentionally mislead us by generating unfaithful facts or making false claims, which could cause damage when applied for creating a weak supervisor~\cite{michael2023debate}.
+
+Another challenge is that a weak model (with a small model size) may lack the capacity to fully process long contexts generated by the strong model, which are filled with irrelevant noises for tasks at hand.
+Meanwhile, recent studies also show that the performance of large language models (LLMs) is closely related to the model size and the complexity of hard problems may exceed the capacity of a single weak model~\cite{xu2023retrieval,chung2024scaling}.
+
+In this study, we demonstrate that debate can help weak models more reliably extract information from strong models.
+Concretely, given a question, two instances of a strong pretrained model are randomly assigned two opposing answers, and then the two instances (debaters) argue with each other over the answer~\cite{michael2023debate,khan2024debating,kenton2024scalable}.
+In a debate, it is harder to lie than to refute a lie, i.e., if a debater makes false claims, its opponent can convincingly point out flaws in its arguments~\cite{irving2018ai}.
+Hence, these arguments from the debate can inform a weak model about the merits and flaws of each side and provide leverage as contextual information in weak model training.
+
+To fully exploit long arguments generated by strong model debaters, we train an ensemble of weak models.
+We aggregate predictions of multiple weak models to obtain a more robust supervision estimate over any single one~\cite{ganaie2022ensemble}.
+In particular, we explore two types of ensembles: \textit{debate ensembles}, where different members of the ensemble differ in the random seed used during debate sampling, and \textit{finetune ensembles}, where members differ only in the random seed used during weak model finetuning.
+We find that debate ensembles consistently outperform a single weak model and finetune ensembles.
+The main contributions of this study are summarized as follows:
+
+\begin{itemize}
+    \item We show the first demonstration of a simple combination of scalable oversight and weak-to-strong generalization approaches, which leads to better alignment on the OpenAI weak-to-strong NLP benchmarks. 
+    \item We find that debate can assist a weak model in extracting trustworthy information from a capable but untrustworthy strong model, which provides leverage as contextual information on samples when training a weak model. We also show that debate outperforms alternative scalable oversight techniques in our settings. 
+    \item We show that an ensemble of weak models helps obtain a more robust supervision estimate. We find that diversity of the ensemble is vital, and that a debate ensemble that contains members that do not share a debate sampling seed leads to better performances.
+\end{itemize}
+
+Although with the help of knowledge from a strong model, creating a better weak supervisor to elicit the capabilities of the strong model is only one way in which scalable oversight and weak-to-strong generalization techniques can be combined, our results pave the way for further research on hybrid superhuman alignment methods~\cite{JAN2023Combining}.
+We provide empirical evidences in NLP domains indicating that debate helps weak-to-strong generalization.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width = 0.83\linewidth]{debate.pdf}
+\caption{\textbf{Illustration of debate}. Illustration of the debate procedure between debater A and debater B.}
+\label{fig:framework}
+\end{figure*}
+
+\section{Related Work}
+
+\textbf{AI alignment.} The goal of AI alignment is to steer already-capable models to behave in line with human values and intentions~\cite{leike2018scalable,ji2023ai}.
+Current alignment methods finetune pretrained LLMs using imitation learning on human demonstrations~\cite{bain1995framework,atkeson1997robot,wei2021finetuned,chung2024scaling}, reinforcement learning from human feedback (RLHF)~\cite{christiano2017deep,stiennon2020learning,ouyang2022training,bai2022training}, or direct alignment algorithms like direct preference optimization (DPO)~\cite{rafailov2024direct,rafailov2024scaling}.
+Both imitation learning and preference learning rely on high-quality human supervision, a demand that becomes increasingly challenging as models become more capable than humans~\cite{amodei2016concrete}.
+
+\paragraph{Scalable oversight.} Scalable oversight techniques seek to improve the ability of humans to supervise more capable models~\cite{bowman2022measuring}.
+This is typically pursued through taking advantage of special problem structure, such as the assumption that evaluation is easier than generation~\cite{karp1975computational,goodfellow2014generative} or decomposability~\cite{christiano2018supervising}.
+There have been many promising scalable oversight proposals in theory, including Recursive Reward Modeling~\cite{leike2018scalable}, Debate~\cite{irving2018ai}, Market-Making~\cite{Hubinger2020market}, Self-Critique~\cite{saunders2022self}, and many more~\cite{lightman2023let,mcaleese2024llm,sun2024easy}.
+Recent empirical studies in this direction demonstrate that human-machine teams can improve evaluation accuracy on question answering tasks over the human-only baseline~\cite{bowman2022measuring}.
+
+Debate was originally proposed for AI safety~\cite{irving2018ai}.
+From then on, a body of work has explored the usability of debate for scalable oversight, with human or LLM debaters~\cite{parrish2022single,parrish2022two,michael2023debate,khan2024debating,kenton2024scalable}.
+These studies are all conducted to improve inference-time judge accuracy, while in our work debate is leveraged to train a better weak supervisor.
+We could in turn use the weak supervisor to align strong models.
+LLM-based debate has also been investigated in several other applications, like translation~\cite{liang2023encouraging}, text assessment~\cite{chan2023chateval}, reasoning and content generation~\cite{du2023improving}. 
+
+\paragraph{Weak-to-strong generalization.} In contrast to improving human supervision, weak-to-strong generalization techniques finetune a strong pretrained model to generalize well from weak human supervision~\cite{burns2023weak}.
+The hope for these techniques is that strong pretrained models should already have good representations of the alignment-relevant tasks.
+Therefore, we simply need a weak supervisor to elicit what the strong model already knows.
+Recently, a theoretical framework is introduced to understand weak-to-strong generalization with misfit error~\cite{charikar2024quantifying}.
+Prior work has mainly explored how to supervise a strong model with a fixed weak supervisor, while in this work we also attempt to train a better weak supervisor with the help of the strong model.
+
+\paragraph{Ensemble methods.} Our work is also related to existing works that use ensembles by combining predictions of several models~\cite{ganaie2022ensemble}.
+In the context of AI alignment, reward model ensembles are investigated to mitigate reward overoptimization when finetuning models with RLHF~\cite{coste2023reward,eisenstein2023helping}.
+Most similar to our work, \citet{liu2024co} propose to assemble a diverse set of specialized weak supervisors for weak-to-strong generalization.
+In contrast, in our work, we aim to use an ensemble of weak models with different seeds to fully exploit long arguments generated by strong model debaters.
+
+
+\section{Preliminaries}
+
+We review the weak-to-strong generalization pipeline in~\cite{burns2023weak}, which has also been adopted in subsequent work~\cite{liu2024co,charikar2024quantifying}.
+It usually consists of three phases:
+
+\paragraph{1. Create the weak supervisor.} We create the weak supervisor by finetuning a small pretrained model on ground truth labels.
+We call the performance of the weak supervisor the \textit{weak performance}.
+
+\paragraph{2. Train a strong student model.} We train a strong student model by finetuning a large pretrained model on weak labels generated by the weak supervisor.
+We call its performance the \textit{weak-to-strong performance}.
+
+\paragraph{3. Train a strong ceiling model.} We train a strong ceiling model by finetuning a large pretrained model on ground truth labels.
+We call this model’s resulting performance the \textit{strong ceiling performance}.
+
+To measure the fraction of the performance gap that the strong student model can recover with weak supervision, we define the performance gap recovered (PGR) using the above three performances:
+
+\begin{equation} 
+\mathrm{PGR}= \frac{\text{weak-to-strong}-\text{weak}}{\text{strong ceiling}-\text{weak}}. \nonumber
+\end{equation}
+
+
+\begin{table*}[t]
+    \centering
+    \small
+    \begin{tabular}{C{50pt} |C{35pt} |  L{360pt} }
+    \toprule
+    \textbf{Debate Turn} & \textbf{Debater} & \textbf{Prompt} \\
+    \midrule
+     First & A & \textit{There is a science knowledge question, followed by an answer}. Debate with another opponent for whether the answer is \textit{correct} or \textit{incorrect}. Construct your argument for why the answer is \textit{correct}.\\
+    \midrule
+     Second & B & \textit{There is a science knowledge question, followed by an answer}. Debate with another opponent for whether the answer is \textit{correct} or \textit{incorrect}. Construct your argument for why the answer is \textit{incorrect} and list out flaws in your opponent’s argument.\\
+     \midrule
+     Third & A & \textit{There is a science knowledge question, followed by an answer}. Debate with another opponent for whether the answer is \textit{correct} or \textit{incorrect}. Construct the counterargument to opponent’s argument.\\
+    \bottomrule
+    \end{tabular}
+    \caption{\textbf{Prompts to induce debate on a binary classification problem}. The binary classification problem is converted from the SciQ dataset. Two answer choices \textit{correct} and \textit{incorrect} are randomly assigned to debater A and B. Debate runs for three turns. We also append the current debate transcript to the prompt.}
+    \label{tab:prompt}
+\end{table*}
+
+\section{Methods}
+
+\subsection{Overview}
+
+In this study, we build the strong student model following three steps:
+\textbf{1.} Generate arguments from the debate between two instances of a large pretrained model;
+\textbf{2.} Train an ensemble of weak models using these debate arguments;
+\textbf{3.} Train a strong student model using labels that are constructed by the weak model ensemble.
+
+\subsection{Argument Generation through Debate}
+
+We assume large pretrained models embed broad-coverage knowledge that can help a variety of tasks~\cite{brown2020language}.
+Our goal is to extract trustworthy information from a capable but untrustworthy strong model via debate~\cite{bowman2022measuring}.
+So we could in turn use the trustworthy information to help train a better weak model.
+
+We first describe the debate protocol we investigated to elicit truth from strong models, following~\cite{michael2023debate,khan2024debating,kenton2024scalable}.
+Given a question and its two answer choices (one correct, one incorrect), two instances of a large pretrained model (debaters) are randomly assigned to argue for these two opposing answers.
+Debate is turn-based textual exchanges between the two debaters, which take turns to review arguments from previous turns and generate their arguments for the next turn.
+After a pre-determined number of turns, the debate is ended and the transcript of arguments from the debate is kept.
+During the debate, each debater presents the most compelling evidences for its assigned answer and arguments to explain why its opponent’s claims are false.
+
+Concretely, debate runs for three turns in this work.
+At the start of a turn, debaters are prompted with instructions outlining the problem, their assigned answer, and the current debate transcript.
+The prompts to induce debate are illustrated in Table~\ref{tab:prompt}.
+%The full prompts for all tasks studied in this work are provided in the appendix.
+
+We illustrate an overview of this debate procedure in Figure~\ref{fig:framework}.
+We can observe that Debater B is on the side of an incorrect answer and incentivized to present misleading arguments.
+However, in the next turn, Debater A convincingly points out these false claims and thus Debater B can not easily get away.
+This observation conforms to the claim, i.e., it is harder to lie than to refute a lie.~\cite{irving2018ai}.
+These arguments from the debate can provide valuable information about the merits and flaws of each side, which have the potential to significantly advance the capabilities of weak models.
+
+\subsection{Weak Model Ensemble Training}
+
+For each input sample of weak models, we append it with the kept debate transcript.
+We train a weak model by finetuning a small pretrained model on these augmented samples with ground truth labels.
+We note that the debate transcripts generated in a multi-turn debate are long, which may be difficult for a weak model to fully process.
+Therefore, we train an ensemble of weak models $\{W_1,...,W_k\}$ to help improve robustness~\cite{lakshminarayanan2017simple}.
+
+We explore two types of ensembles: \textit{debate ensembles}, where the debate transcript used by each member is generated with a different random seed, and \textit{finetune ensembles}, where all members share the same debate transcript, but use a different seed when finetuned on the augmented samples.
+Debate ensembles are much more expensive to train, but are more diverse and thus likely to lead to a more robust prediction.
+Unless stated otherwise, we train an ensemble consisting of four individual weak models.
+
+\subsection{Training Strong Models using Ensembles}
+
+We finally train a strong student model by finetuning a large pretrained model on weak labels constructed by the weak model ensemble.
+We simply take the mean of the predictions from different weak models within the ensemble as the weak label for each training sample~\cite{ganaie2022ensemble}.
+
+\section{Experiments}
+
+\subsection{Tasks}
+
+We adopt the evaluation protocol of prior work~\cite{burns2023weak}, and conduct experiments in NLP tasks on four classification datasets: SciQ~\cite{welbl2017crowdsourcing}, BoolQ~\cite{clark2019boolq}, CosmosQA~\cite{huang2019cosmos}, and AnthropicHH~\cite{bai2022training}.
+We convert each dataset to a binary classification problem.
+For multiple-choice datasets, given a data point with a question $Q$ and $k$ candidate answers $A$, we construct $k$ new data points of the form $(Q, A_i)$, where the label is $1$ for the correct
+answers and $0$ for all the incorrect answers.
+We also keep the same number of correct and incorrect answers per question to maintain class balance.
+
+\begin{table*}[t]
+    \centering
+    \small
+    
+    \begin{tabular}{l|l|cc|cc|cc|cc}
+    \toprule
+    \multicolumn{1}{l|}{\multirow{2}{*}{\textbf{Performance}}} & \multicolumn{1}{l|}{\multirow{2}{*}{\textbf{Method}}} & \multicolumn{2}{c|}{\textbf{SciQ}} & \multicolumn{2}{c|}{\textbf{BoolQ}} & \multicolumn{2}{c|}{\textbf{CosmosQA}} & \multicolumn{2}{c}{\textbf{AnthropicHH}} \\
+    \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} &  Acc. &  PGR &  Acc. &  PGR &  Acc. &  PGR &  Acc. &  PGR \\
+    \midrule
+    Weak performance & & 90.0 &   & 86.0 &  & 87.5 &  & 48.8 &  \\
+    \midrule
+    \multirow{4}{*}{Weak-to-strong performance} & Finetune & 91.5 & 44.1 & 88.0 & 51.3& 88.2 & 30.4& 49.5 & 35.0\\
+    & Finetune w/ aux. loss & 91.4 & 41.2 & 88.2 & 56.4& 87.9 & 17.4& 49.5 & 35.0\\
+    & Finetune w/ pro. loss & 91.6 & 47.1 & 88.1 & 53.8& 88.1 & 26.1&  49.2 & 20.0\\
+    & \textbf{Ours} & \textbf{92.6} & \textbf{76.5} & \textbf{88.7} & \textbf{69.2} & \textbf{88.8} & \textbf{56.5}& \textbf{50.2} & \textbf{70.0}\\
+    \midrule
+    Strong ceiling performance & & 93.4 &   & 89.9 &  & 89.8 &  & 50.8 &  \\
+    \bottomrule
+    \end{tabular}
+    \caption{\textbf{Debate improves weak-to-strong generalization}. Test accuarcy (\%) and performance gap recovered (PGR) (\%) of our approach and baselines on the binary classification tasks converted from NLP classification datasets. Here, our approach uses debate ensembles. Accuracy of weak and strong models trained with ground truth are reported as weak performance and strong ceiling performance, respectively. }
+    \label{tab:main_result}
+\end{table*}
+
+\subsection{Experimental Setups and Metrics}
+
+We randomly sample at most 20k data points from each task and split them in half.
+We train a weak model on the first half of the data points and use its prediction on the other half as the weak labels.
+The weak labels are soft labels~\cite{hinton2015distilling}.
+We report the accuracy and performance gap recovered (PGR) of the strong student model on the test set in all tasks.
+The weak performance for PGR is the performance of the naively finetuned small model.
+
+\subsection{Implementation Details}
+
+Our implementations of data preprocessing, weak and strong model training are based on the OpenAI weak-to-strong codebase and its default hyper-parameters~\cite{burns2023weak}.
+Specifically, we use Qwen/Qwen-7B as the small pretrained model for training weak models.
+Meanwhile, we use Qwen/Qwen-14B as the large pretrained model for generating debate arguments and training strong models.
+Both Qwen/Qwen-7B and Qwen/Qwen-14B are open-sources, which can aid reproducibility~\cite{bai2023qwen}.
+We do not use pretrained models from the GPT-2 family for training weak models~\cite{radford2019language}, because they lack the capability required for scalable oversight techniques like working closely with strong models~\cite{bowman2022measuring}.
+
+For each converted binary classification problem, we use the two candidate answers per question as the two opposing answers, which are randomly assigned to the two strong model debaters in a debate.
+In order to adapt weak and strong models to the binary classification setting, we equip each model with a linear classification head with two outputs on top of the encoder.
+We train all models for two epochs with a batch size of 32.
+We conduct all experiments on a single 8×A100 machine.
+
+\subsection{Baselines}
+
+We compare our approach with competitive baseline approaches:
+1. \textbf{Finetune}~\cite{burns2023weak} naively finetunes strong pretrained models on labels generated by a weak model;
+2. \textbf{Finetune w/ aux. loss}~\cite{burns2023weak} finetunes strong models with an auxiliary confidence loss, which reinforces the strong model’s confidence in its own predictions when they disagree with the weak labels;
+3. \textbf{Finetune w/ pro. loss}~\cite{burns2023weak} finetunes strong models with a confidence-like loss which sets the cross entropy targets to the product of weak labels and strong model predictions.
+We also report the \textbf{weak performance} and the \textbf{strong ceiling performance} defined in the preliminaries section.
+Note that the strong ceiling performance is generally regarded as the upper bound of the \textbf{weak-to-strong performance} when only weak labels are considered.
+
+\subsection{Main Results}
+
+In Table~\ref{tab:main_result}, we report the results of each approach on the binary classification tasks converted from SciQ, BoolQ, CosmosQA, and AnthropicHH datasets.
+Here, our approach uses debate ensembles.
+In each task, we observe that PGRs of strong student models finetuned on weak labels are all positive.
+This indicates that student models consistently outperform their weak supervisors across all weak-to-strong generation approaches and tasks that we studied.
+Simultaneously, this promising weak-to-strong generalization also suggests that our experimental settings can help make iterative empirical progress in tackling the weak supervision issue for aligning future superhuman models.
+
+At the same time, we find that our approach significantly outperforms each strong student baseline, including the naive baseline finetuned on weak labels or more sophisticated baselines equipped with a confidence loss term on all four tasks.
+Compared with the promising baseline Finetune w/ aux. loss, our approach brings up from a PGR of $41.2\%$ to $76.5\%$ in SciQ, $56.4\%$ to $69.2\%$ in BoolQ, $17.4\%$ to $56.5\%$ in CosmosQA, and $35.0\%$ to $70.0\%$ in AnthropicHH.
+Our approach also obtains the best test accuracy among all compared strong students.
+The performance gain demonstrates the advantage of extracting trustworthy information from the strong model via debate, which helps create a better weak supervisor to elicit the capabilities of the strong model.
+
+In addition, we also see that adding a confidence loss to the standard cross entropy objective (Finetune w/ aux. loss and Finetune w/ pro. loss) generally gives a modest boost in generalization performance.
+In our experimental settings, the gaps in compute between weak and strong models are not significantly large, which may limit their performances.
+
+\subsection{Ablation Studies}
+
+\begin{table*}[t]
+    \centering
+    \small
+    \begin{tabular}{L{60pt} |  L{360pt} }
+    \toprule
+    \textbf{Protocol} & \textbf{Prompt} \\
+    \midrule
+     Consultancy   & \textit{There is a science knowledge question, followed by an answer}. Construct your argument for why the answer is \textit{[random answer]}.\\
+    \midrule
+     Market-Making & \textit{There is a science knowledge question, followed by an answer}. Construct your argument for why the answer is \textit{[unselected answer]}.\\
+    \bottomrule
+    \end{tabular}
+    \caption{\textbf{Prompts to induce consultancy and market-making}. The binary classification problem is converted from the SciQ dataset. The two answer choices are correct and incorrect. \textit{[random answer]} is the answer randomly sampled from the two candidate answers. \textit{[unselected answer]} is the answer that is not selected by the weak supervisor (the naively finetuned small model) based on its prediction. We also append the current transcript to the prompt.}
+    \label{tab:prompt2}
+\end{table*}
+
+
+\begin{table*}[t]
+    \centering
+    \small
+    \begin{tabular}{l|cc|cc|cc|cc}
+    \toprule
+    \multicolumn{1}{l|}{\multirow{2}{*}{\textbf{Method}}} & \multicolumn{2}{c|}{\textbf{SciQ}} & \multicolumn{2}{c|}{\textbf{BoolQ}} & \multicolumn{2}{c|}{\textbf{CosmosQA}} & \multicolumn{2}{c}{\textbf{AnthropicHH}} \\
+    \multicolumn{1}{l|}{} &  Acc. &  PGR &  Acc. &  PGR &  Acc. &  PGR &  Acc. &  PGR \\
+    \midrule
+    Consultancy & 91.5 & 44.1 & 87.8 & 46.2 & 88.3 & 34.8& 49.3 & 25.0\\
+    Market-Making & 91.6 & 47.1 & 87.6 & 41.0& 88.2 & 30.4& 49.5 & 35.0\\
+    \midrule
+    \textbf{Ours} & \textbf{92.6} & \textbf{76.5} & \textbf{88.7} & \textbf{69.2} & \textbf{88.8} & \textbf{56.5}& \textbf{50.2} & \textbf{70.0}\\
+    \bottomrule
+    \end{tabular}
+   \caption{\textbf{Ablation on different scalable oversight approaches}. Here, our approach uses debate ensembles.}
+    \label{tab:ab_so}
+\end{table*}
+
+
+Finally, we provide comprehensive ablation studies to understand the efficacy of debate for weak-to-strong generation.
+
+\paragraph{Ablation on different scalable oversight approaches.} We demonstrate the effectiveness of debate as a mechanism to extract trustworthy information from a capable but untrustworthy strong model by replacing it with other alternative scalable oversight approaches: Consultancy~\cite{michael2023debate} and Market-Making~\cite{Hubinger2020market}.
+\begin{itemize}
+    \item \textbf{Consultancy.} In consultancy, there is only one consultant instead of two debaters. The consultant is an instance of a large pretrained model. Given a question and its two answer choices (one correct, one incorrect), the consultant is assigned to argue for one of these answers, with a 50\% chance of each. During the consultancy, the consultant provides evidences for its assigned answer. The transcript is kept at the end of the consultancy.
+    \item \textbf{Market-Making}. In market-making, there is a single debater. The debater is an instance of a large pretrained model and aims to generate arguments that change some model's beliefs on the answer to a question. Given a question and its two candidate answers, we let the weak supervisor (the naively finetuned small model) select an answer based on its prediction. Accordingly, the debater is assigned to argue for the unselected answer. The transcript is kept at the end.
+\end{itemize}
+
+Specifically, consultancy and market-making run for a single turn. At the start of each turn, the consultant and the debater are provided with a prompt describing the task, the assigned answer, and the transcript.
+The prompts to induce consultancy and market-making are illustrated in Table~\ref{tab:prompt2}.
+
+Results in Table~\ref{tab:ab_so} show that debate used in our approach performs better than all other variants in terms of test accuracy and PGR across all four tasks.
+These results validate our claim that debate can help elicit truth from a strong model, at least better than consultancy and market-making in our settings.
+Meanwhile, we should note that consultancy is a relatively weak baseline to beat, because there is a 50-50 chance of the consultant arguing for the incorrect answer.
+
+\begin{table*}[h]
+    \centering
+    \small
+    \begin{tabular}{l|cc|cc|cc|cc}
+    \toprule
+    \multicolumn{1}{l|}{\multirow{2}{*}{\textbf{Method}}} & \multicolumn{2}{c|}{\textbf{SciQ}} & \multicolumn{2}{c|}{\textbf{BoolQ}} & \multicolumn{2}{c|}{\textbf{CosmosQA}} & \multicolumn{2}{c}{\textbf{AnthropicHH}} \\
+    \multicolumn{1}{l|}{} &  Acc. &  PGR &  Acc. &  PGR &  Acc. &  PGR &  Acc. &  PGR \\
+    \midrule
+    Single weak model & 91.7 & 50.0 & 88.2 & 56.4 & 88.4 & 39.1& 49.5 & 35.0\\
+    Finetune ensembles & 91.8 & 52.9 & 88.3 & 59.0& 88.4 & 39.1& 49.7 & 45.0\\
+    \midrule
+    \textbf{debate ensembles} & \textbf{92.6} & \textbf{76.5} & \textbf{88.7} & \textbf{69.2} & \textbf{88.8} & \textbf{56.5}& \textbf{50.2} & \textbf{70.0}\\
+    \bottomrule
+    \end{tabular}
+   \caption{Ablation on weak model ensemble. }
+    \label{tab:ab_em}
+\end{table*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width = 0.55\linewidth]{em.pdf}
+\caption{\textbf{Ablation study on the cardinality of the ensemble}. Here, our approach uses debate ensembles.}
+\label{fig:cardinality}
+\end{figure*}
+
+\begin{figure*}[!h]
+\centering
+\includegraphics[width = 0.55\linewidth]{turn.pdf}
+\caption{\textbf{Ablation on the number of turns of debate}. Here, our approach uses debate ensembles.}
+\label{fig:turns}
+\end{figure*}
+
+\paragraph{Ablation on weak model ensemble.} We analyze the impact of weak model ensemble on obtaining a robust weak supervision estimate for weak-to-strong generalization.
+In Table~\ref{tab:ab_em}, we compare three weak model ensemble methods of increasing computational cost: single weak model, finetune ensembles, and debate ensembles.
+Single weak model is an individual small model finetuned on the samples augmented with debate transcripts.
+Finetune ensembles and debate ensembles are described in the methods section.
+
+We find that debate ensembles consistently improve performance over individual weak models and finetune ensembles across all the tasks.
+On the contrary, finetune ensembles relatively improve performance over individual weak models in 3 out of 4 tasks and are comparable in the other.
+These results suggest that the diversity of generated debate arguments is the key to the success of weak model ensemble, which helps create a better weak supervisor.
+At the same time, an individual small weak model may lack the capability to fully exploit long arguments from the debate, as a result, leading to limited performances.
+
+\paragraph{Ablation on the cardinality of the ensemble.} Recall that our weak model ensemble method introduces an additional hyperparameter cardinality.
+The cardinality is the size of the ensemble.
+We analyze the impact of the cardinality of the ensemble on the final performance.
+In Figure~\ref{fig:cardinality}, we increase weak model members used in the ensemble on SciQ and AnthropicHH tasks.
+We can observe that there is a significant gap between 3-member and 4-member ensembles.
+On the other hand, the performance of 4-member, 5-member, and 6-member ensembles is quite similar.
+It suggests that 4-member ensemble is likely to work best and diminishing returns will occur after this point.
+
+\paragraph{Ablation on the number of turns of debate.} Next, we analyze the impact of the number of turns of debate on the final performance.
+In Figure~\ref{fig:turns}, we increase the debate length for up to 6 turns on SciQ and AnthropicHH tasks.
+We find that more turns of debate do not increase the final performance.
+We observe that strong model debaters like Qwen/Qwen-14B suffer from the inability to effectively process long debate transcripts and follow instructions, as turns continue, as shown by a consistent decrease in test accuracy after 3 turns.
+We used 3 turns of debate in this work because it is the minimum interaction between debaters to extract the truth from the strong model.
+For instance, the two debaters can critique their opponent in turn 2 and turn 3, respectively.
+
+\section{Limitations and Conclusion}
+
+\paragraph{Limitations.}
+In this work, we attempt to combine the strength of two complementary approaches, i.e., scalable oversight and weak-to-strong generalization, to tackle the issue of weak supervision for aligning future superhuman models.
+For this purpose, we explore a simple combination method, i.e., extracting trustworthy information via debate from strong models and using it to create a better weak supervisor to elicit the capabilities of strong models.
+Although our proposed method is found to be effective in all our experiments and ablation studies, there are many more ways to combine scalable oversight and weak-to-strong generalization, such as Task decomposition + W2SG~\cite{JAN2023Combining}.
+More empirical work is needed in this area.
+
+In our setup, the difference between strong and weak models is only in the size of pretrained models. In the future, stronger models may also differ in reasoning and planning abilities.
+Furthermore, the gaps in compute between weak and strong models are not significantly large in this work (7B vs. 14B).
+It would be interesting to verify our conclusions on more large and advanced models, such as Qwen/Qwen2-72B~\cite{qwen2}.
+Finally, our approach is expensive as it requires both two instances of debaters and a multi-turn debate procedure.
+
+\paragraph{Conclusion.}
+In this paper, we present an approach to improve the performance of weak-to-strong generalization via debate.
+We believe the perspective of having scalable oversight and weak-to-strong generalization methods working in combination to tackle the weak supervision issue will prove to be a fruitful area of research in superhuman alignment.
+
+\bibliography{aaai25}
+
+\end{document}

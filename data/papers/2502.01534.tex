@@ -1,0 +1,1672 @@
+
+\documentclass{article} % For LaTeX2e
+\usepackage{iclr2026_conference,times}
+
+% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+%%%%% NEW MATH DEFINITIONS %%%%%
+
+\usepackage{amsmath,amsfonts,bm}
+
+% Mark sections of captions for referring to divisions of figures
+\newcommand{\figleft}{{\em (Left)}}
+\newcommand{\figcenter}{{\em (Center)}}
+\newcommand{\figright}{{\em (Right)}}
+\newcommand{\figtop}{{\em (Top)}}
+\newcommand{\figbottom}{{\em (Bottom)}}
+\newcommand{\captiona}{{\em (a)}}
+\newcommand{\captionb}{{\em (b)}}
+\newcommand{\captionc}{{\em (c)}}
+\newcommand{\captiond}{{\em (d)}}
+
+% Highlight a newly defined term
+\newcommand{\newterm}[1]{{\bf #1}}
+
+
+% Figure reference, lower-case.
+\def\figref#1{figure~\ref{#1}}
+% Figure reference, capital. For start of sentence
+\def\Figref#1{Figure~\ref{#1}}
+\def\twofigref#1#2{figures \ref{#1} and \ref{#2}}
+\def\quadfigref#1#2#3#4{figures \ref{#1}, \ref{#2}, \ref{#3} and \ref{#4}}
+% Section reference, lower-case.
+\def\secref#1{section~\ref{#1}}
+% Section reference, capital.
+\def\Secref#1{Section~\ref{#1}}
+% Reference to two sections.
+\def\twosecrefs#1#2{sections \ref{#1} and \ref{#2}}
+% Reference to three sections.
+\def\secrefs#1#2#3{sections \ref{#1}, \ref{#2} and \ref{#3}}
+% Reference to an equation, lower-case.
+\def\eqref#1{equation~\ref{#1}}
+% Reference to an equation, upper case
+\def\Eqref#1{Equation~\ref{#1}}
+% A raw reference to an equation---avoid using if possible
+\def\plaineqref#1{\ref{#1}}
+% Reference to a chapter, lower-case.
+\def\chapref#1{chapter~\ref{#1}}
+% Reference to an equation, upper case.
+\def\Chapref#1{Chapter~\ref{#1}}
+% Reference to a range of chapters
+\def\rangechapref#1#2{chapters\ref{#1}--\ref{#2}}
+% Reference to an algorithm, lower-case.
+\def\algref#1{algorithm~\ref{#1}}
+% Reference to an algorithm, upper case.
+\def\Algref#1{Algorithm~\ref{#1}}
+\def\twoalgref#1#2{algorithms \ref{#1} and \ref{#2}}
+\def\Twoalgref#1#2{Algorithms \ref{#1} and \ref{#2}}
+% Reference to a part, lower case
+\def\partref#1{part~\ref{#1}}
+% Reference to a part, upper case
+\def\Partref#1{Part~\ref{#1}}
+\def\twopartref#1#2{parts \ref{#1} and \ref{#2}}
+
+\def\ceil#1{\lceil #1 \rceil}
+\def\floor#1{\lfloor #1 \rfloor}
+\def\1{\bm{1}}
+\newcommand{\train}{\mathcal{D}}
+\newcommand{\valid}{\mathcal{D_{\mathrm{valid}}}}
+\newcommand{\test}{\mathcal{D_{\mathrm{test}}}}
+
+\def\eps{{\epsilon}}
+
+
+% Random variables
+\def\reta{{\textnormal{$\eta$}}}
+\def\ra{{\textnormal{a}}}
+\def\rb{{\textnormal{b}}}
+\def\rc{{\textnormal{c}}}
+\def\rd{{\textnormal{d}}}
+\def\re{{\textnormal{e}}}
+\def\rf{{\textnormal{f}}}
+\def\rg{{\textnormal{g}}}
+\def\rh{{\textnormal{h}}}
+\def\ri{{\textnormal{i}}}
+\def\rj{{\textnormal{j}}}
+\def\rk{{\textnormal{k}}}
+\def\rl{{\textnormal{l}}}
+% rm is already a command, just don't name any random variables m
+\def\rn{{\textnormal{n}}}
+\def\ro{{\textnormal{o}}}
+\def\rp{{\textnormal{p}}}
+\def\rq{{\textnormal{q}}}
+\def\rr{{\textnormal{r}}}
+\def\rs{{\textnormal{s}}}
+\def\rt{{\textnormal{t}}}
+\def\ru{{\textnormal{u}}}
+\def\rv{{\textnormal{v}}}
+\def\rw{{\textnormal{w}}}
+\def\rx{{\textnormal{x}}}
+\def\ry{{\textnormal{y}}}
+\def\rz{{\textnormal{z}}}
+
+% Random vectors
+\def\rvepsilon{{\mathbf{\epsilon}}}
+\def\rvtheta{{\mathbf{\theta}}}
+\def\rva{{\mathbf{a}}}
+\def\rvb{{\mathbf{b}}}
+\def\rvc{{\mathbf{c}}}
+\def\rvd{{\mathbf{d}}}
+\def\rve{{\mathbf{e}}}
+\def\rvf{{\mathbf{f}}}
+\def\rvg{{\mathbf{g}}}
+\def\rvh{{\mathbf{h}}}
+\def\rvu{{\mathbf{i}}}
+\def\rvj{{\mathbf{j}}}
+\def\rvk{{\mathbf{k}}}
+\def\rvl{{\mathbf{l}}}
+\def\rvm{{\mathbf{m}}}
+\def\rvn{{\mathbf{n}}}
+\def\rvo{{\mathbf{o}}}
+\def\rvp{{\mathbf{p}}}
+\def\rvq{{\mathbf{q}}}
+\def\rvr{{\mathbf{r}}}
+\def\rvs{{\mathbf{s}}}
+\def\rvt{{\mathbf{t}}}
+\def\rvu{{\mathbf{u}}}
+\def\rvv{{\mathbf{v}}}
+\def\rvw{{\mathbf{w}}}
+\def\rvx{{\mathbf{x}}}
+\def\rvy{{\mathbf{y}}}
+\def\rvz{{\mathbf{z}}}
+
+% Elements of random vectors
+\def\erva{{\textnormal{a}}}
+\def\ervb{{\textnormal{b}}}
+\def\ervc{{\textnormal{c}}}
+\def\ervd{{\textnormal{d}}}
+\def\erve{{\textnormal{e}}}
+\def\ervf{{\textnormal{f}}}
+\def\ervg{{\textnormal{g}}}
+\def\ervh{{\textnormal{h}}}
+\def\ervi{{\textnormal{i}}}
+\def\ervj{{\textnormal{j}}}
+\def\ervk{{\textnormal{k}}}
+\def\ervl{{\textnormal{l}}}
+\def\ervm{{\textnormal{m}}}
+\def\ervn{{\textnormal{n}}}
+\def\ervo{{\textnormal{o}}}
+\def\ervp{{\textnormal{p}}}
+\def\ervq{{\textnormal{q}}}
+\def\ervr{{\textnormal{r}}}
+\def\ervs{{\textnormal{s}}}
+\def\ervt{{\textnormal{t}}}
+\def\ervu{{\textnormal{u}}}
+\def\ervv{{\textnormal{v}}}
+\def\ervw{{\textnormal{w}}}
+\def\ervx{{\textnormal{x}}}
+\def\ervy{{\textnormal{y}}}
+\def\ervz{{\textnormal{z}}}
+
+% Random matrices
+\def\rmA{{\mathbf{A}}}
+\def\rmB{{\mathbf{B}}}
+\def\rmC{{\mathbf{C}}}
+\def\rmD{{\mathbf{D}}}
+\def\rmE{{\mathbf{E}}}
+\def\rmF{{\mathbf{F}}}
+\def\rmG{{\mathbf{G}}}
+\def\rmH{{\mathbf{H}}}
+\def\rmI{{\mathbf{I}}}
+\def\rmJ{{\mathbf{J}}}
+\def\rmK{{\mathbf{K}}}
+\def\rmL{{\mathbf{L}}}
+\def\rmM{{\mathbf{M}}}
+\def\rmN{{\mathbf{N}}}
+\def\rmO{{\mathbf{O}}}
+\def\rmP{{\mathbf{P}}}
+\def\rmQ{{\mathbf{Q}}}
+\def\rmR{{\mathbf{R}}}
+\def\rmS{{\mathbf{S}}}
+\def\rmT{{\mathbf{T}}}
+\def\rmU{{\mathbf{U}}}
+\def\rmV{{\mathbf{V}}}
+\def\rmW{{\mathbf{W}}}
+\def\rmX{{\mathbf{X}}}
+\def\rmY{{\mathbf{Y}}}
+\def\rmZ{{\mathbf{Z}}}
+
+% Elements of random matrices
+\def\ermA{{\textnormal{A}}}
+\def\ermB{{\textnormal{B}}}
+\def\ermC{{\textnormal{C}}}
+\def\ermD{{\textnormal{D}}}
+\def\ermE{{\textnormal{E}}}
+\def\ermF{{\textnormal{F}}}
+\def\ermG{{\textnormal{G}}}
+\def\ermH{{\textnormal{H}}}
+\def\ermI{{\textnormal{I}}}
+\def\ermJ{{\textnormal{J}}}
+\def\ermK{{\textnormal{K}}}
+\def\ermL{{\textnormal{L}}}
+\def\ermM{{\textnormal{M}}}
+\def\ermN{{\textnormal{N}}}
+\def\ermO{{\textnormal{O}}}
+\def\ermP{{\textnormal{P}}}
+\def\ermQ{{\textnormal{Q}}}
+\def\ermR{{\textnormal{R}}}
+\def\ermS{{\textnormal{S}}}
+\def\ermT{{\textnormal{T}}}
+\def\ermU{{\textnormal{U}}}
+\def\ermV{{\textnormal{V}}}
+\def\ermW{{\textnormal{W}}}
+\def\ermX{{\textnormal{X}}}
+\def\ermY{{\textnormal{Y}}}
+\def\ermZ{{\textnormal{Z}}}
+
+% Vectors
+\def\vzero{{\bm{0}}}
+\def\vone{{\bm{1}}}
+\def\vmu{{\bm{\mu}}}
+\def\vtheta{{\bm{\theta}}}
+\def\va{{\bm{a}}}
+\def\vb{{\bm{b}}}
+\def\vc{{\bm{c}}}
+\def\vd{{\bm{d}}}
+\def\ve{{\bm{e}}}
+\def\vf{{\bm{f}}}
+\def\vg{{\bm{g}}}
+\def\vh{{\bm{h}}}
+\def\vi{{\bm{i}}}
+\def\vj{{\bm{j}}}
+\def\vk{{\bm{k}}}
+\def\vl{{\bm{l}}}
+\def\vm{{\bm{m}}}
+\def\vn{{\bm{n}}}
+\def\vo{{\bm{o}}}
+\def\vp{{\bm{p}}}
+\def\vq{{\bm{q}}}
+\def\vr{{\bm{r}}}
+\def\vs{{\bm{s}}}
+\def\vt{{\bm{t}}}
+\def\vu{{\bm{u}}}
+\def\vv{{\bm{v}}}
+\def\vw{{\bm{w}}}
+\def\vx{{\bm{x}}}
+\def\vy{{\bm{y}}}
+\def\vz{{\bm{z}}}
+
+% Elements of vectors
+\def\evalpha{{\alpha}}
+\def\evbeta{{\beta}}
+\def\evepsilon{{\epsilon}}
+\def\evlambda{{\lambda}}
+\def\evomega{{\omega}}
+\def\evmu{{\mu}}
+\def\evpsi{{\psi}}
+\def\evsigma{{\sigma}}
+\def\evtheta{{\theta}}
+\def\eva{{a}}
+\def\evb{{b}}
+\def\evc{{c}}
+\def\evd{{d}}
+\def\eve{{e}}
+\def\evf{{f}}
+\def\evg{{g}}
+\def\evh{{h}}
+\def\evi{{i}}
+\def\evj{{j}}
+\def\evk{{k}}
+\def\evl{{l}}
+\def\evm{{m}}
+\def\evn{{n}}
+\def\evo{{o}}
+\def\evp{{p}}
+\def\evq{{q}}
+\def\evr{{r}}
+\def\evs{{s}}
+\def\evt{{t}}
+\def\evu{{u}}
+\def\evv{{v}}
+\def\evw{{w}}
+\def\evx{{x}}
+\def\evy{{y}}
+\def\evz{{z}}
+
+% Matrix
+\def\mA{{\bm{A}}}
+\def\mB{{\bm{B}}}
+\def\mC{{\bm{C}}}
+\def\mD{{\bm{D}}}
+\def\mE{{\bm{E}}}
+\def\mF{{\bm{F}}}
+\def\mG{{\bm{G}}}
+\def\mH{{\bm{H}}}
+\def\mI{{\bm{I}}}
+\def\mJ{{\bm{J}}}
+\def\mK{{\bm{K}}}
+\def\mL{{\bm{L}}}
+\def\mM{{\bm{M}}}
+\def\mN{{\bm{N}}}
+\def\mO{{\bm{O}}}
+\def\mP{{\bm{P}}}
+\def\mQ{{\bm{Q}}}
+\def\mR{{\bm{R}}}
+\def\mS{{\bm{S}}}
+\def\mT{{\bm{T}}}
+\def\mU{{\bm{U}}}
+\def\mV{{\bm{V}}}
+\def\mW{{\bm{W}}}
+\def\mX{{\bm{X}}}
+\def\mY{{\bm{Y}}}
+\def\mZ{{\bm{Z}}}
+\def\mBeta{{\bm{\beta}}}
+\def\mPhi{{\bm{\Phi}}}
+\def\mLambda{{\bm{\Lambda}}}
+\def\mSigma{{\bm{\Sigma}}}
+
+% Tensor
+\DeclareMathAlphabet{\mathsfit}{\encodingdefault}{\sfdefault}{m}{sl}
+\SetMathAlphabet{\mathsfit}{bold}{\encodingdefault}{\sfdefault}{bx}{n}
+\newcommand{\tens}[1]{\bm{\mathsfit{#1}}}
+\def\tA{{\tens{A}}}
+\def\tB{{\tens{B}}}
+\def\tC{{\tens{C}}}
+\def\tD{{\tens{D}}}
+\def\tE{{\tens{E}}}
+\def\tF{{\tens{F}}}
+\def\tG{{\tens{G}}}
+\def\tH{{\tens{H}}}
+\def\tI{{\tens{I}}}
+\def\tJ{{\tens{J}}}
+\def\tK{{\tens{K}}}
+\def\tL{{\tens{L}}}
+\def\tM{{\tens{M}}}
+\def\tN{{\tens{N}}}
+\def\tO{{\tens{O}}}
+\def\tP{{\tens{P}}}
+\def\tQ{{\tens{Q}}}
+\def\tR{{\tens{R}}}
+\def\tS{{\tens{S}}}
+\def\tT{{\tens{T}}}
+\def\tU{{\tens{U}}}
+\def\tV{{\tens{V}}}
+\def\tW{{\tens{W}}}
+\def\tX{{\tens{X}}}
+\def\tY{{\tens{Y}}}
+\def\tZ{{\tens{Z}}}
+
+
+% Graph
+\def\gA{{\mathcal{A}}}
+\def\gB{{\mathcal{B}}}
+\def\gC{{\mathcal{C}}}
+\def\gD{{\mathcal{D}}}
+\def\gE{{\mathcal{E}}}
+\def\gF{{\mathcal{F}}}
+\def\gG{{\mathcal{G}}}
+\def\gH{{\mathcal{H}}}
+\def\gI{{\mathcal{I}}}
+\def\gJ{{\mathcal{J}}}
+\def\gK{{\mathcal{K}}}
+\def\gL{{\mathcal{L}}}
+\def\gM{{\mathcal{M}}}
+\def\gN{{\mathcal{N}}}
+\def\gO{{\mathcal{O}}}
+\def\gP{{\mathcal{P}}}
+\def\gQ{{\mathcal{Q}}}
+\def\gR{{\mathcal{R}}}
+\def\gS{{\mathcal{S}}}
+\def\gT{{\mathcal{T}}}
+\def\gU{{\mathcal{U}}}
+\def\gV{{\mathcal{V}}}
+\def\gW{{\mathcal{W}}}
+\def\gX{{\mathcal{X}}}
+\def\gY{{\mathcal{Y}}}
+\def\gZ{{\mathcal{Z}}}
+
+% Sets
+\def\sA{{\mathbb{A}}}
+\def\sB{{\mathbb{B}}}
+\def\sC{{\mathbb{C}}}
+\def\sD{{\mathbb{D}}}
+% Don't use a set called E, because this would be the same as our symbol
+% for expectation.
+\def\sF{{\mathbb{F}}}
+\def\sG{{\mathbb{G}}}
+\def\sH{{\mathbb{H}}}
+\def\sI{{\mathbb{I}}}
+\def\sJ{{\mathbb{J}}}
+\def\sK{{\mathbb{K}}}
+\def\sL{{\mathbb{L}}}
+\def\sM{{\mathbb{M}}}
+\def\sN{{\mathbb{N}}}
+\def\sO{{\mathbb{O}}}
+\def\sP{{\mathbb{P}}}
+\def\sQ{{\mathbb{Q}}}
+\def\sR{{\mathbb{R}}}
+\def\sS{{\mathbb{S}}}
+\def\sT{{\mathbb{T}}}
+\def\sU{{\mathbb{U}}}
+\def\sV{{\mathbb{V}}}
+\def\sW{{\mathbb{W}}}
+\def\sX{{\mathbb{X}}}
+\def\sY{{\mathbb{Y}}}
+\def\sZ{{\mathbb{Z}}}
+
+% Entries of a matrix
+\def\emLambda{{\Lambda}}
+\def\emA{{A}}
+\def\emB{{B}}
+\def\emC{{C}}
+\def\emD{{D}}
+\def\emE{{E}}
+\def\emF{{F}}
+\def\emG{{G}}
+\def\emH{{H}}
+\def\emI{{I}}
+\def\emJ{{J}}
+\def\emK{{K}}
+\def\emL{{L}}
+\def\emM{{M}}
+\def\emN{{N}}
+\def\emO{{O}}
+\def\emP{{P}}
+\def\emQ{{Q}}
+\def\emR{{R}}
+\def\emS{{S}}
+\def\emT{{T}}
+\def\emU{{U}}
+\def\emV{{V}}
+\def\emW{{W}}
+\def\emX{{X}}
+\def\emY{{Y}}
+\def\emZ{{Z}}
+\def\emSigma{{\Sigma}}
+
+% entries of a tensor
+% Same font as tensor, without \bm wrapper
+\newcommand{\etens}[1]{\mathsfit{#1}}
+\def\etLambda{{\etens{\Lambda}}}
+\def\etA{{\etens{A}}}
+\def\etB{{\etens{B}}}
+\def\etC{{\etens{C}}}
+\def\etD{{\etens{D}}}
+\def\etE{{\etens{E}}}
+\def\etF{{\etens{F}}}
+\def\etG{{\etens{G}}}
+\def\etH{{\etens{H}}}
+\def\etI{{\etens{I}}}
+\def\etJ{{\etens{J}}}
+\def\etK{{\etens{K}}}
+\def\etL{{\etens{L}}}
+\def\etM{{\etens{M}}}
+\def\etN{{\etens{N}}}
+\def\etO{{\etens{O}}}
+\def\etP{{\etens{P}}}
+\def\etQ{{\etens{Q}}}
+\def\etR{{\etens{R}}}
+\def\etS{{\etens{S}}}
+\def\etT{{\etens{T}}}
+\def\etU{{\etens{U}}}
+\def\etV{{\etens{V}}}
+\def\etW{{\etens{W}}}
+\def\etX{{\etens{X}}}
+\def\etY{{\etens{Y}}}
+\def\etZ{{\etens{Z}}}
+
+% The true underlying data generating distribution
+\newcommand{\pdata}{p_{\rm{data}}}
+% The empirical distribution defined by the training set
+\newcommand{\ptrain}{\hat{p}_{\rm{data}}}
+\newcommand{\Ptrain}{\hat{P}_{\rm{data}}}
+% The model distribution
+\newcommand{\pmodel}{p_{\rm{model}}}
+\newcommand{\Pmodel}{P_{\rm{model}}}
+\newcommand{\ptildemodel}{\tilde{p}_{\rm{model}}}
+% Stochastic autoencoder distributions
+\newcommand{\pencode}{p_{\rm{encoder}}}
+\newcommand{\pdecode}{p_{\rm{decoder}}}
+\newcommand{\precons}{p_{\rm{reconstruct}}}
+
+\newcommand{\laplace}{\mathrm{Laplace}} % Laplace distribution
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Ls}{\mathcal{L}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\emp}{\tilde{p}}
+\newcommand{\lr}{\alpha}
+\newcommand{\reg}{\lambda}
+\newcommand{\rect}{\mathrm{rectifier}}
+\newcommand{\softmax}{\mathrm{softmax}}
+\newcommand{\sigmoid}{\sigma}
+\newcommand{\softplus}{\zeta}
+\newcommand{\KL}{D_{\mathrm{KL}}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\standarderror}{\mathrm{SE}}
+\newcommand{\Cov}{\mathrm{Cov}}
+% Wolfram Mathworld says $L^2$ is for function spaces and $\ell^2$ is for vectors
+% But then they seem to use $L^2$ for vectors throughout the site, and so does
+% wikipedia.
+\newcommand{\normlzero}{L^0}
+\newcommand{\normlone}{L^1}
+\newcommand{\normltwo}{L^2}
+\newcommand{\normlp}{L^p}
+\newcommand{\normmax}{L^\infty}
+
+\newcommand{\parents}{Pa} % See usage in notation.tex. Chosen to match Daphne's book.
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\Tr}{Tr}
+\let\ab\allowbreak
+
+
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{booktabs} % for professional tables
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+% \usepackage[colorlinks=true, linkcolor=purple!70!black, citecolor=purple!70!black, urlcolor=purple!70!black]{hyperref}
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{wrapfig}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{url}
+\usepackage{forest}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{colortbl}
+\usepackage{pifont}
+\usepackage{enumitem}
+\usepackage{tabulary}
+\usepackage{colortbl}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{pgf} % Include the pgf package for pgfmathsetmacro
+\usepackage[skins,breakable]{tcolorbox}
+
+\definecolor{mypurple}{HTML}{9474DE} % DodgerBlue
+\definecolor{myblue}{HTML}{88C4E0} % LimeGreen
+
+% if you use cleveref..
+\usepackage[capitalize,noabbrev]{cleveref}
+\newcommand{\yue}[1]{{\small\color{red}{\bf [yue: #1]}}}
+\newcommand\ming[1]{\textcolor{purple}{Ming: #1}}
+\newenvironment{mingblock}[1][purple]
+  {\par\color{#1}\ignorespaces}
+  {\par\ignorespacesafterend}
+
+
+\title{\textit{Preference Leakage}: A Contamination Problem in LLM-as-a-judge}
+
+% Authors must not appear in the submitted version. They should be hidden
+% as long as the \iclrfinalcopy macro remains commented out below.
+% Non-anonymous submissions will be rejected without review.
+
+\author{\textbf{Dawei Li}\thanks{\ \ Equal contribution.}~$^{1}$,
+\textbf{Renliang Sun$^{*2}$},
+\textbf{Yue Huang$^{3}$},
+\textbf{Ming Zhong$^{4}$},
+\textbf{Bohan Jiang$^{1}$}, \\
+\textbf{Jiawei Han$^{4}$},
+\textbf{Xiangliang Zhang$^{3}$},
+\textbf{Wei Wang$^{2}$},
+\textbf{Huan Liu$^{1}$} \\
+$^{1}$Arizona State University,\ $^{2}$University of California, Los Angeles, \\
+$^{3}$University of Notre Dame,\ $^{4}$University of Illinois Urbana-Champaign \\
+\texttt{daweili5@asu.edu}
+}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to \LaTeX{} to determine where to break
+% the lines. Using \AND forces a linebreak at that point. So, if \LaTeX{}
+% puts 3 of 4 authors names on the first line, and the last on the second
+% line, try using \AND instead of \And before the third author name.
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+%\iclrfinalcopy % Uncomment for camera-ready version, but NOT for submission.
+\iclrfinalcopy
+\begin{document}
+
+
+\maketitle
+
+
+\begin{abstract}
+  Large Language Models (LLMs) as judges and LLM-based data synthesis have emerged as two fundamental LLM-driven data annotation methods in model development. While their combination significantly enhances the efficiency of model training and evaluation, little attention has been given to the potential contamination brought by this new model development paradigm. In this work, we expose preference leakage, a contamination problem in LLM-as-a-judge caused by the relatedness between the synthetic data generators and LLM-based evaluators. To study this issue, we first define three common relatednesses between the data generator LLM and the judge LLM: being the same model, having an inheritance relationship, and belonging to the same model family. Through extensive experiments, we empirically confirm the bias of judges towards their related student models caused by preference leakage across multiple LLM baselines and benchmarks. Further analysis suggests that preference leakage is a pervasive and real-world problem that is harder to detect compared to previously identified biases in LLM-as-a-judge scenarios. All of these findings imply that preference leakage is a widespread and challenging problem in the area of LLM-as-a-judge.
+  We release all codes and data at: \url{https://github.com/David-Li0406/Preference-Leakage}\footnote{More resources on LLM-as-a-judge are on the website: \url{https://llm-as-a-judge.github.io/}}.
+\end{abstract}
+
+
+\section{Introduction}
+Recent advancements in Large Language Models (LLMs)~\cite{achiam2023gpt,jaech2024openai,tong2024can,zhang2024shifcon,tan2024interpreting,tan2025probing,huang2026rethinking} have empowered various downstream tasks and applications. However, this also poses substantial challenges to the automatic evaluation of these models. Representatively, LLM-based AI agents' focus transfer from traditional natural language processing tasks~\cite{yang2023new,zhang2023assisting} to real-world \cite{liu2023agentbench, huang2023metatool}, open-ended response generation \cite{wu2024unigen}, which greatly limits the applicability of traditional n-gram matching methods (e.g., BLEU \cite{papineni2002bleu} and ROUGE \cite{lin2004rouge})~\cite{liu2016not,reiter2018structured} or model-based evaluators~\cite{zhangbertscore, unieval} for evaluation. 
+
+% LLM-as-a-judge & its bias
+To address these challenges, the paradigm of LLM-as-a-judge~\cite{zheng2023judging,li2024generation,jiang2024assessing,zhong2024law,li2025exploring,qu2025efficient} has been proposed, designed to leverage LLM as evaluators to assess response quality. By combining powerful LLMs with well-designed prompting strategies, LLM-as-a-judge enables human-like evaluation of long-form and open-ended generation in a more cost-efficient and scalable manner. 
+However, recent studies point out some weaknesses of such an assessment. For instance, \citet{ye2024justice} explores various biases and vulnerabilities of LLM-as-a-judge, highlighting the importance of developing a reliable and fair LLM-based evaluation system.
+
+
+In this work, we aim to highlight a subtle yet critical bias in LLM-as-a-Judge: \textit{Preference Leakage}. This issue arises when \textit{the LLMs used for data generation and evaluation are closely related, causing the preference of the LLM evaluators to leak to the student models through synthetic data and thus inflating the evaluation score} (as illustrated in Figure~\ref{fig:overview}). Synthetic data generated by LLMs~\cite{gan2023ziya2,tan2024large,li2024contextualization,li2024dalk} has become a cornerstone of model training~\cite{lee2025distillation}. When combined with LLM-as-a-Judge, they offer significant efficiency gains in model development. However, limited attention has been given to the potential contamination that occurs when the generator and evaluator LLMs share a close relationship. During our preliminary study, we find this issue is particularly pervasive in popular LLM-as-a-judge benchmarks (e.g., AlpacaEval 2.0~\cite{dubois2024length} and Arena-Hard~\cite{li2024crowdsourced}) and LLM-relevant studies (more details can be found in Appendix~\ref{Preliminary Study of Preference Leakage in Real World}), due to the common reliance on the most advanced LLMs, such as GPT-4~\cite{achiam2023gpt}, for both data synthesis and evaluation to ensure the highest quality outputs. In our work, we reveal this relatedness—akin to the overlap between training data and evaluation sets in traditional data contamination—would introduce a systematic bias of judge LLMs towards their related student models (i.e., the model distilled by the data generator which is related to the judge). Compared to other biases in LLM-as-a-Judge, such as length bias or egocentric bias~\cite{ye2024justice,panickssery2024llm}, preference leakage is subtler and more challenging to detect, especially given that most LLMs do not disclose their training data. 
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.9\linewidth]{Figure/overview.pdf}
+    \vspace{-10pt}
+    \caption{Overview of preference leakage. We make a comparison between data leakage and preference leakage and present three types of relatedness: being the same model, having an inheritance relationship and belonging to the same model family.}
+    \label{fig:overview}
+    \vspace{-10pt}
+\end{figure*}
+
+% our analysis & findings
+To investigate and reveal the preference leakage problem, we first define three relatednesses between data generator LLM and judge LLM: being the same model, having an inheritance relationship, and belonging to the same model family. Each of these scenarios is commonly encountered in real-world applications. Then, we pose and answer three core research questions about preference leakage:
+
+
+\begin{itemize}[leftmargin=*,itemsep=1pt]
+    \vspace{-2mm}
+    \item \textbf{RQ1: Does preference leakage introduce systematic biases in LLM-based evaluation?} To answer it, we conduct experiments with various LLM baselines in two widely recognized LLM-as-a-judge benchmarks, also introduce the preference leakage score to quantify the bias caused by preference leakage. The analysis results suggest an obvious bias of judging LLMs toward their related student models due to preference leakage.
+    \vspace{-1mm}
+    \item \textbf{RQ2: What is the severity of preference leakage under various scenarios?} We conduct experiments under various data mixing strategies, relatedness settings, tuning techniques and real-world applications to address it, finding that preference leakage consistently affects judge LLMs. Moreover, the severity of preference leakage correlates with the degree of relatedness between the data generator and LLM judges, as well as the proportion of synthetic data.
+    \vspace{-1mm}
+    \item \textbf{RQ3: What are the underlying mechanisms causing preference leakage?} For this question, we analyze LLMs' recognition capabilities on their related student models' generation as well as the distribution of bias across different question types and judgment dimensions. The analysis reveals that preference leakage is a subtle, hard-to-detect issue for the LLM evaluators, particularly affecting subjective questions and judgment dimensions.
+\end{itemize}
+
+
+% contribution
+To summarize, our contributions in this work are as follows:
+\begin{itemize}[leftmargin=*,itemsep=1pt]
+    \vspace{-1mm}
+    \item For the first time, we introduce preference leakage, a contamination issue arising from the relatedness between the data generator and judge LLMs.
+    \vspace{-1mm}
+    \item We conduct extensive experiments across various LLMs and benchmarks to study how and to what extent the potential bias brought by preference leakage influences judgment.
+    \vspace{-1mm}
+    \item Our further analysis reveals that preference leakage is prevalent in diverse scenarios and difficult for judge LLMs to detect, providing valuable insights for future research on this challenging issue.
+\end{itemize}
+
+\section{Related Work}
+
+
+\textbf{LLM-as-a-Judge.} LLM-as-a-Judge, introduced by \citet{zheng2023judging}, leverages LLMs to automatically evaluate responses and assign rewards. This approach has gained widespread adoption in areas such as model alignment \cite{zhang-etal-2024-self} and benchmarking \cite{liu2023alignbench,zhang2024balancing,gao2023human,zhong2024law,beigi2024can,li2026toolprmbench}, driving significant progress in the field. Building on this concept, \citet{zhuge2024agent} proposed Agent-as-a-Judge, where agentic systems are employed to evaluate other agentic systems. Additionally, Prometheus, a series of open-source LLMs tailored for LLM-as-a-Judge \cite{kim2023prometheus, kim2024prometheus}, addresses the prohibitive costs associated with proprietary models, further democratizing the technology.
+
+% Despite its promising potential, recent studies have highlighted the vulnerabilities and limitations of LLM-as-a-Judge. Notable concerns include biases during evaluation. For example, \citet{zheng2023judging} identify position bias, where LLMs may favor responses based on their order in the input, thereby compromising fairness. Other studies \cite{ye2024justice, koo2023benchmarking, chen2024humans, zheng2023judging, huang2024position} further emphasize the risks of evaluation biases. \citet{thakur2024judging} assessed the judgment capabilities of LLM judges, finding that only the most advanced models align reasonably well with human evaluators. Moreover, a recent study \cite{10.1145/3658644.3690291} revealed the susceptibility of LLM-as-a-Judge to adversarial attacks, leading to incorrect judgments. In this paper, we explore another critical vulnerability of LLM-as-a-Judge—preference leakage—which poses additional risks to the reliability of this evaluation paradigm.
+
+Despite its promising potential, recent studies have highlighted the vulnerabilities and biases of LLM-as-a-Judge~\cite{zheng2023judging,ye2024justice, koo2023benchmarking, chen2024humans, zheng2023judging, huang2024position,thakur2024judging,10.1145/3658644.3690291}. Among these, egocentric bias, where LLM evaluators tend to favor their generations~\cite{koo2024benchmarking, liu2024llms, wataoka2024self, xu2024pride, rando2025adversarial, panickssery2024llm, chen2025llm}, is most closely related to the preference leakage proposed in this work. 
+
+However, in contrast to the relatively straightforward setting of egocentric bias, preference leakage presents a more complex and dynamic challenge. It can arise from various types of relatedness between data-generating and evaluating LLMs, as well as the intricate flow of synthetic data among modern LLMs~\cite{tan2024large}. Moreover, detecting preference leakage is also more challenging, given LLMs often do not disclose their training data and the difficulty in distillation quantification~\cite{wadhwa2025taught, lee2025distillation}.
+
+
+
+% \citet{zheng2023judging} examined the LLM-as-a-judge in detail, pointing out the multiple biases such as positional bias, self-enhancement bias that may exist when the LLM serves as a judge.
+
+\textbf{Data Leakage.} The possible overlap between training data and evaluation benchmarks has become a central issue, since LLMs are usually trained on extensive web corpora 
+\cite{dodge2021documenting}. This phenomenon, known as data leakage, can artificially improve the performance of LLMs and undermine the reliability of the assessment \cite{deng2024unveiling, jiang2024investigating,li2025s}. Several researchers have proposed methods to detect and mitigate data contamination. \citet{deng2024investigating} proposed a retrieval-based approach to assess the degree of overlap between pre-training text and benchmark data. \citet{golchin2023time} have developed ``guided instruction'' to flag contaminated instances. \citet{dong2024generalization} proposed the CDD method to identify peaks in the output distribution to detect data contamination. Several studies analyze data leakage for specific LLMs \cite{balloccu2024leak,xu2024benchmark} and report contamination such as cross-language contamination \cite{yao2024data} and task contamination \cite{li2024task} that can evade traditional detection methods. To address data contamination issues, \citet{ni2024mixeval} have used web user query detection and benchmark mixture. \citet{white2024livebench} use the most recent information to update the problem.
+
+% Despite these efforts, data contamination remains a complex and challenging problem. The surge in synthetic pre-training data and the lack of open-source pre-training data pose a significant obstacle to solving this problem \cite{li2024open}.
+\subsection{LLMs as Oracles: A New Avenue for Contamination}
+
+With the advent of LLMs, these models are increasingly employed as ``oracles'' in various scenarios: for both synthetic data generation ($M_G$) and employed as evaluators ($M_J$) to automate the assessment. While these approaches enhance scalability and efficiency, they also introduce potential risks. Specifically, if the LLM used for data generation ($M_G$) and the LLM used for evaluation ($M_J$) are not independent, a new contamination—preference leakage—can emerge, biasing evaluation outcomes.
+
+\subsection{Defining Preference Leakage in LLM-based Evaluation}
+
+Formally, to define preference leakage, we consider the following entities in models development:
+
+\begin{itemize}[leftmargin=*,itemsep=1pt,topsep=2pt,parsep=1pt]
+    \item \textbf{Data Generator LLM, $M_G$}, defining a conditional distribution $P_{M_G}(y|x)$ for generating an output $y$ given a prompt $x$, forming the synthetic dataset $D_{syn}$ for student LLMs training.
+    \item \textbf{Student LLM, $M_S$}, trained on data generated by $M_G$, producing an output distribution $P_{M_S}(y|x)$.
+    \item \textbf{Judge LLM, $M_J$}, providing a scoring function $S_{M_J}(y|x)$ that assesses output $y$ for prompt $x$.
+\end{itemize}
+
+Preference leakage occurs when the evaluation score assigned by $M_J$ to $M_S$'s outputs is inflated due to an underlying relatedness between $M_G$ and $M_J$. This implies that $M_J$ may favor outputs from $M_S$ not solely based on their intrinsic quality, but because they exhibit spurious features (e.g., style, format, wording) inherited from $M_G$, to which $M_J$ is predisposed due to this relatedness:
+
+\begin{equation}
+\label{eq:pref_leakage}
+    E_{x, y_S \sim P_{M_S}}[S_{M_J}(y_S|x) | M_G \sim_{rel} M_J] > E_{x, y_S \sim P_{M_S}}[S_{M_{J'}}(y_S|x) | M_G \not\sim_{rel} M_{J'}],
+\end{equation}
+
+where $y_S$ are outputs from $M_S$. The relation $M_G \sim_{rel} M_J$ denotes that judge $M_J$ is related to $M_G$, while $M_G \not\sim_{rel} M_{J'}$ denotes that an alternative judge $M_{J'}$ is not related to $M_G$ and possess comparable intrinsic quality assessment capabilities to $M_J$. The expectation is taken over the input distribution $\mathcal{X}$ and the trained Student LLM's output distribution $P_{M_S}$.
+
+\subsection{Type of LLM ``Relatedness''}
+
+The condition $M_G \sim_{rel} M_J$ in Equation~\ref{eq:pref_leakage} encapsulates several ways the Data Generator LLM and Judge LLM can be interconnected. We identify three common types in the real world:
+
+\begin{itemize}[leftmargin=*,itemsep=1pt,topsep=2pt,parsep=1pt]
+    \item \textbf{Being the Same Model:} The most direct form of relatedness occurs when the Data Generator LLM and the Judge LLM are the exact same model instance:
+    \begin{equation}
+        M_G \equiv M_J.
+    \end{equation}
+    In this scenario, the inherent preferences in the model that shape its generative distribution $P_{M_G}(y|x)$ are precisely the same as those guiding its evaluation via the scoring function $S_{M_G}(y|x)$.
+
+    \item \textbf{Inheritance Relationship:} One model's development is directly based on another, either by fine-tuning the existing model or by training a new model on the other's outputs, for instance:
+    \begin{equation}
+         M_J \leftarrow \text{FineTune}(M_G, D_{train}) \quad \text{or} \quad M_J \leftarrow \text{FineTune}(M_{base}, D_{syn_G}),
+    \end{equation}
+    where $D_{train}$ represents general training data used to adapt $M_G$ into $M_J$, $M_{base}$ is a base model, and $D_{syn_G}$ denotes synthetic data generated by $M_G$. This type of relationship is bidirectional; $M_G$ can similarly inherit from $M_J$ through analogous processes. In such cases, the descendant model is likely to internalize and thus favor the preferences, styles, or biases of its progenitor.
+
+    \item \textbf{Within the Same Model Family:} The Data Generator LLM $M_G$ and Judge LLM $M_J$ belong to the same model family (e.g., different versions or sizes of GPT). Models within such a family typically share a common architectural blueprint ($A_X$) and are often developed from foundational models pre-trained on substantially overlapping datasets ($D_X$).
+    This shared foundation ($A_X, D_X$) would lead to correlated preferences and systemic biases characteristic of the common origin:
+    \begin{equation}
+        M_k \in \text{Family}(A_X, D_X) \quad \text{for } k \in \{G, J\}.
+    \end{equation}
+\end{itemize}
+
+% Due to these forms of relatedness, the preferences of the Judge LLM $M_J$ (e.g., regarding format, style, and wording) can be inadvertently aligned with those of the Data Generator LLM $M_G$. This alignment can cause the trained Student LLM $M_S$, trained on data from $M_G$, to receive inflated scores from $M_J$, not necessarily due to superior generalizable performance but due to echoing $M_G$'s leaked preferences.
+
+% In this section, we first provide the formal definition of data contamination as the preliminary (Section~\ref{Preliminary: Data Contamination}). Based on the concept, we demonstrate how LLM-based data synthesis and evaluation can lead to the evolving preference leakage problem (Section~\ref{From Data to Preference Leakage}).
+
+% \subsection{Preliminary: Data Leakage}
+% \label{Preliminary: Data Contamination}
+
+% Data leakage, also known as data contamination, refers to the inadvertent inclusion of information from the evaluation benchmarks into the training corpus thus creating an overlap between training and testing sets~\cite{kaufman2012leakage}. This overlap would significantly influence the evaluation fairness by inflating the models' performance since the model has prior exposure to and memorized information that it's expected to generalize during testing~\cite{elangovan2021memorization}.
+
+% Formally, let $T$ represent the training corpus and $E$ be the evaluation set during test time. Data contamination occurs if:
+% \begin{equation}
+%     T \cap E \neq \emptyset,
+% \end{equation}
+% where $\cap$ denotes the intersection between the two sets. Such overlap violates the fundamental assumption that training and testing datasets should be disjoint to ensure an unbiased assessment of the model's generalization ability.
+
+% \ming{Overall, I found the formulation in this section a bit too brief and unclear in places. For example, the symbol $\cap$ is standard for data instance overlap in section 3.1, but its use to also denote LLM overlap in preference leakage in the subsequent parts struck me as a conflicting application of the symbol. Thus, I've drafted new content for sections 3.2 and following, which I hope offers a clearer formulation and definition of these concepts. These are just for your reference, so feel free to make any modifications or deletions as you see fit.}
+
+% \begin{mingblock}[purple]
+% \subsection{LLMs as Oracles: A New Avenue for Contamination}
+
+% With the advent of LLMs, these models are increasingly employed as ``oracles'' in various capacities. LLMs are used to generate synthetic data ($M_G$) for pre-training, SFT, and RL. Concurrently, the ``LLM-as-a-judge'' paradigm uses LLMs ($M_J$) to automate the evaluation of model outputs. While these approaches enhance scalability and efficiency, they also introduce complexities. Specifically, if the LLM used for data generation ($M_G$) and the LLM used for evaluation ($M_J$) are not independent, a new form of contamination—preference leakage—can emerge, biasing evaluation outcomes.
+
+% \subsection{Defining Preference Leakage in LLM-based Evaluation}
+
+% Formally, to define preference leakage, we consider the following entities:
+
+% \begin{itemize}[leftmargin=*,itemsep=1pt,topsep=2pt,parsep=1pt]
+%     \item \textbf{Data Generator LLM, $M_G$}, defining a conditional probability distribution $P_{M_G}(y|x)$ for generating an output $y$ given a prompt $x$.
+%     \item \textbf{Trained Student LLM, $M_S$}, trained on synthetic data $D_{syn}$ produced by $M_G$, resulting in an output distribution $P_{M_S}(y|x)$.
+%     \item \textbf{Judge LLM, $M_J$}, providing a scoring function $S_{M_J}(y|x)$ that assesses the quality of output $y$ for prompt $x$.
+% \end{itemize}
+
+% Preference leakage occurs when the evaluation score assigned by $M_J$ to $M_S$'s outputs is inflated due to an underlying relatedness between $M_G$ and $M_J$. This implies that $M_J$ may favor outputs from $M_S$ not solely based on their intrinsic quality, but because they exhibit characteristics (e.g., style, format, content biases) inherited from $M_G$, to which $M_J$ is predisposed due to this relatedness. Concretely, preference leakage is indicated if, for $M_S$:
+
+% \begin{equation}
+% \label{eq:pref_leakage}
+%     E_{x, y_S \sim P_{M_S}}[S_{M_J}(y_S|x) | M_G \sim_{rel} M_J] > E_{x, y_S \sim P_{M_S}}[S_{M_{J'}}(y_S|x) | M_G \not\sim_{rel} M_{J'}],
+% \end{equation}
+
+% where $y_S$ are outputs from $M_S$. The relation $M_G \sim_{rel} M_J$ denotes that judge $M_J$ is related to $M_G$, while $M_G \not\sim_{rel} M_{J'}$ denotes that an alternative judge $M_{J'}$ is not related to $M_G$. $M_{J'}$ should ideally possess comparable intrinsic quality assessment capabilities to $M_J$. The expectation is taken over the input distribution $\mathcal{X}$ and the Trained LLM's output distribution $P_{M_S}$.
+
+% \subsection{Defining LLM ``Relatedness''}
+
+% The condition $M_G \sim M_J$ in Equation~\ref{eq:pref_leakage} encapsulates several ways the Data Generator LLM and Judge LLM can be interconnected, potentially fostering preference leakage. We identify three primary types:
+
+% \begin{itemize}[leftmargin=*,itemsep=1pt,topsep=2pt,parsep=1pt]
+%     \item \textbf{Being the Same Model:} The most direct form of relatedness occurs when the Data Generator LLM and the Judge LLM are the exact same model instance.
+%     \begin{equation}
+%         M_G \equiv M_J.
+%     \end{equation}
+%     In this scenario, the inherent preferences, stylistic biases, and knowledge embedded in the model that shape its generative distribution $P_{M_G}(y|x)$ are precisely the same as those guiding its evaluation via the scoring function $S_{M_G}(y|x)$.
+
+%     \item \textbf{Inheritance Relationship:} One model's development is directly based on another, either by fine-tuning the existing model or by training a new model predominantly on the other's outputs. For instance, Judge LLM $M_J$ may inherit from Data Generator LLM $M_G$ if $M_J$ is a fine-tuned version of $M_G$, or if $M_J$ is fine-tuned on synthetic data generated by $M_G$:
+%     \begin{equation}
+%          M_J \leftarrow \text{FineTune}(M_G, D_{train}) \quad \text{or} \quad M_J \leftarrow \text{FineTune}(M_{base}, D_{syn_G}),
+%     \end{equation}
+%     where $D_{train}$ represents general training data used to adapt $M_G$ into $M_J$, $M_{base}$ is a base model (which could be $M_G$ or another model), and $D_{syn_G}$ denotes synthetic data generated by $M_G$. This type of relationship is bidirectional; $M_G$ can similarly inherit from $M_J$ through analogous processes. In such cases, the descendant model is likely to internalize and thus favor the preferences, styles, or biases of its progenitor.
+
+%     \item \textbf{Within the Same Model Family:} The Data Generator LLM $M_G$ and Judge LLM $M_J$ belong to the same model family (e.g., different versions or sizes of GPT, Gemini, Llama). Models within such a family typically share a common architectural blueprint ($A_X$) and are often developed from foundational models pre-trained on substantially overlapping, large-scale datasets ($D_X$).
+%     This shared foundation ($A_X, D_X$) means that even if $M_G$ and $M_J$ are distinct, they are likely to exhibit correlated preferences and systemic biases characteristic of their common origin. Their development can be abstractly represented as:
+%     \begin{equation}
+%         M_k \in \text{Family}(A_X, D_X) \quad \text{for } k \in \{G, J\}.
+%     \end{equation}
+% \end{itemize}
+
+% Due to these forms of relatedness, the preferences of the Judge LLM $M_J$ (e.g., regarding format, style, and wording) can be inadvertently aligned with those of the Data Generator LLM $M_G$. This alignment can cause the Trained Student LLM $M_S$, trained on data from $M_G$, to receive inflated scores from $M_J$, not necessarily due to superior generalizable performance but due to echoing $M_G$'s leaked preferences.
+% \end{mingblock}
+
+% \subsection{From Data Leakage to Preference Leakage}
+% \label{From Data to Preference Leakage}
+
+% With the advent of LLMs, synthetic data generated by these models~\cite{tan2024large} has been widely adopted in various stages of model training, including pre-training, reinforcement learning with AI feedback (RLAIF) and supervised fine-tuning. Concurrently, the concept of LLM-as-a-judge has emerged, where LLMs are employed to automate the evaluation process. While these LLM-as-an-oracle approaches reduce human effort in data annotation, significantly enhancing the efficiency and scalability of model training and evaluation, they also blur the lines between models and data, introducing evolving challenges~\cite{shumailov2024ai,dai2024bias}.
+
+% In this work, we examine the evolving contamination problem brought by LLM-as-a-oracle and formally propose the concept of preference leakage. This refers to a situation in which the LLMs used for synthetic data generation and evaluation are related. Formally, we define this as:
+% \begin{equation}
+%     LLM_{G} \cap LLM_{J} \neq \emptyset,
+% \end{equation}
+% where $LLM_{G}$ and $LLM_{J}$ denote the LLMs used for training data generation and evaluation. $\cap$ represents the relatedness between the two (sets of) LLMs. This relatedness may involve:
+% \begin{itemize}[leftmargin=*,itemsep=1pt]
+%     \item \textbf{Being the same model:} the data generator and evaluator are the same model:
+%     \begin{equation}
+%         LLM_{G} = LLM_{J}.
+%     \end{equation}
+%     \item \textbf{Inheritance relationship:} one model is trained on synthetic data generated by the other:
+%     \begin{equation}
+%         LLM_{G} = \text{Inherit}(LLM_{J}),
+%     \end{equation}
+%     \begin{equation}
+%         LLM_{J} = \text{Inherit}(LLM_{G}).
+%     \end{equation}
+%     \item \textbf{Within the same model family:} the data generator and evaluator belong to the same model family (e.g., GPT family~\cite{achiam2023gpt} and Gemini family~\cite{team2024gemini}):
+%     \begin{equation}
+%         LLM_{G}, LLM_{J} \in F_{X}.
+%     \end{equation}
+% \end{itemize}
+% Due to this relatedness, the preference of the judge models (e.g., format, style and wording) can be leaked to the student models through the synthetic data, resulting in non-trivial bias from the judge LLMs during the test time.
+
+\section{Main Experiment}
+
+% \begin{figure*}[h]
+%     \centering
+%     \includegraphics[width=1.0\linewidth]{Figure/ArenaHard_result.pdf}
+%     \vspace{-15pt}
+%     \caption{Judgment results with GPT-4o, LLaMA-3.3 and Gemini-1.5 on Arena-Hard.} %Which one is better? Judgments revealing significant judge bias toward GPT-4o, LLaMA-3.3 and Gemini-1.5 on Arena-Hard.
+
+%     \label{fig:ArenaHard}
+% \end{figure*}
+
+
+\subsection{Experiment Setup}
+
+\textbf{Models.} We choose three powerful LLMs as data generator/ judge models. They are GPT-4o-2024-11-20~\cite{achiam2023gpt}, Gemini-1.5-flash~\cite{team2024gemini}, and LLaMA-3.3-70B-Instruct-turbo~\cite{dubey2024llama}. For the student model, we choose Mistral-7B-v0.1~\cite{jiang2023mistral} and Qwen-2.5-14B~\cite{yang2024qwen2}. To avoid potential preference leakage due to distilling data from other LLMs during the instruction-tuning process, we choose to use the \textsc{-pre-trained} version rather than the \textsc{-instruct} version of these student models.
+
+\textbf{Evaluation Datasets.} We choose two representative pairwise evaluation datasets, Arena-Hard \cite{li2024crowdsourced} and AlpacaEval 2.0 \cite{dubois2024length}, to evaluate the trained student models. Arena-Hard includes 500 challenging questions in English. Additionally, the evaluation agreement between Arena-Hard and LMArena~\cite{zheng2023judging}'s hard prompts achieved a 96.7\% Spearman correlation, demonstrating the consistency of Arena-Hard with human preferences~\cite{li2024crowdsourced}. AlpacaEval 2.0 is an improved evaluation method based on AlpacaEval \cite{li2023alpacaeval} and contains 805 questions. Compared to version 1.0, AlpacaEval 2.0 significantly reduces the effect of text length on the evaluation results.
+
+\textbf{Implementation Details.} 
+% same model & sft setting
+% model pair
+In our main experiment, we examine the preference leakage introduced by using the same data generator and evaluator in supervised fine-tuning (SFT). We will discuss other relatedness and learning methods in Section~\ref{Further Analysis}. To obtain synthetic datasets, We first randomly sample 30,000 prompts from the Ultrafeedback dataset \cite{cui2024ultrafeedback}. The Ultrafeedback dataset includes instructions from several publicly available high-quality datasets such as TruthfulQA \cite{lin2022truthfulqa}, FalseQA \cite{hu2023won}, and Evol-Instruct \cite{xu2023wizardlm}. For each data generator model, we provide these prompts for them to produce synthetic responses, resulting in three synthetic instruction datasets. We then use each dataset to supervised fine-tune the student model, obtaining three different versions for each baseline: Mistral/ Qwen-GPT-4o, Mistral/ Qwen-Gemini-1.5 and Mistral/ Qwen-LLaMA-3.3. After that, we pair each two student models and obtain three model pairs. For each model pair, we perform the pairwise comparison using the three judge models respectively.
+
+
+% \begin{figure*}[h]
+%     \centering
+%     \includegraphics[width=1.0\linewidth]{Figure/alpacaeval_result.pdf}
+%     \vspace{-15pt}
+%     \caption{Judgment results with GPT-4o, LLaMA-3.3 and Gemini-1.5 on AlpacaEval 2.0. Different from Arena-Hard, there is no tie in AlpacaEval 2.0.}%Which one is better? Judgments revealing significant judge bias toward GPT-4o, LLaMA-3.3 and Gemini-1.5 on AlpacaEval 2.0.
+%     \label{fig:alpacaeval}
+%     \vspace{-5pt}
+% \end{figure*}
+
+
+\textbf{Metrics}
+% preference leakage score
+% human annotation
+Based on our hypothesis, preference leakage would lead to bias of judge LLMs towards their related student models. Following this principle, we design the preference leakage score $\text{PLS}(i, j)$ to measure the bias in model pair $(i, j)$ caused by preference leakage:
+\begin{equation}
+    \text{PLS}(i, j) = \frac{\left(\frac{\text{WR}(i, i) - \text{AVG}(i, j)}{\text{AVG}(i, j)}\right) + \left(\frac{\text{WR}(j, j) - \text{AVG}(j, i)}{\text{AVG}(j, i)}\right)}{2},
+\end{equation}
+\begin{equation}
+    \text{AVG}(i, j) = \frac{\text{WR}(i, i) + \text{WR}(i, j)}{2}.
+\end{equation}
+Here $\text{WR}(i, j)$ represents the win-rate score from judge model $j$ to student model $i$. Intuitively, a large preference leakage score indicates that the two judge models demonstrate strong bias toward their related student models, suggesting a significant preference leakage phenomenon.
+
+The main experiments in Section 4 and the mitigation analyses in Sections 5.4 and 5.7 are designed for complementary purposes. The main experiments focus on controlled and interpretable measurement of preference leakage itself—quantifying the phenomenon across models and conditions while minimizing confounding factors such as human labeling noise. In contrast, the mitigation analyses prioritize realism and external validity, using human-labeled benchmarks and metrics. Since these setups involve labeled data rather than automatically computed PLS, they serve as realistic extensions that test mitigation feasibility in practical LLM-as-a-judge scenarios. More details about model training and metric explanation can be found in Appendix~\ref{Experiment Detail}.
+
+% While our proposed preference leakage score quantifies the degree of preference leakage in each model pair, we also perform manual annotation to assess the preference leakage in each individual model. We randomly select 100 questions from AlpacaEval 2.0 and have three well-trained annotators perform pairwise comparisons independently for each response pair. After the annotation, the majority voting is applied to each response pair to get the final annotation results. 
+% % \wei{was the annotation done independently and then taken majority votes?}
+
+
+
+\begin{table}[h!]
+\centering
+\vspace{-10pt}
+\caption{Preference leakage score result on Arena-Hard and AlpacaEval 2.0. The \colorbox{myblue}{blue} background indicates a negative preference leakage score value and the \colorbox{mypurple}{purple} background indicates a positive value. The deeper the color, the larger the absolute value.}
+\vspace{5pt}
+\renewcommand{\arraystretch}{1.0}
+\begin{tabular}{llccc}
+\toprule[1.5pt]
+\textbf{Model}                          & \textbf{Data Generator/ Judge Pair}            & \textbf{Arena-Hard}                      & \textbf{AlpacaEval 2.0}                  & \textbf{Avg.}                           \\ \hline
+& GPT-4o \& Gemini-1.5     & \cellcolor[HTML]{C1AFEC}28.7\% & \cellcolor[HTML]{D7CBF2}18.4\% & \cellcolor[HTML]{CCBDEF}23.6\% \\
+& GPT-4o \& LLaMA-3.3      & \cellcolor[HTML]{FBFDFE}-1.5\% & \cellcolor[HTML]{FCFBFE}1.4\%  & \cellcolor[HTML]{FEFEFE}-0.1\% \\
+\multirow{-3}{*}{Mistral-7B}   & LLaMA-3.3 \& Gemini-1.5 & \cellcolor[HTML]{E2DAF6}13.1\% & \cellcolor[HTML]{D4C7F1}19.8\% & \cellcolor[HTML]{DBD1F4}16.4\% \\  \hline
+& GPT-4o \& Gemini-1.5     & \cellcolor[HTML]{AF97E6}37.1\%   & \cellcolor[HTML]{D7CBF2}18.6\% & \cellcolor[HTML]{C3B1EC}27.9\%                         \\
+& GPT-4o \& LLaMA-3.3      & \cellcolor[HTML]{FCFCFE}1.0\%    & \cellcolor[HTML]{FAF8FD}2.3\%  & \cellcolor[HTML]{FBFAFD}1.7\%                          \\
+\multirow{-3}{*}{Qwen-2.5-14B} & LLaMA-3.3 \& Gemini-1.5 & \cellcolor[HTML]{C8B8EE}25.4\%   & \cellcolor[HTML]{D7CBF2}18.4\% & \cellcolor[HTML]{D0C2F0}21.9\%    \\ \toprule[1.5pt]           
+\end{tabular}
+\label{tab:pls}
+\vspace{-10pt}
+\end{table}
+
+
+\subsection{Main Results}
+\label{Result Analysis}
+
+In our main experiment, we aim to provide insights into RQ1.
+
+\textbf{Preference leakage exists in most model pairs.} The original judgment results from Arena-Hard and AlpacaEval 2.0, along with the calculated preference leakage scores, are shown in Table~\ref{tab:pls}. As the results demonstrate, in most model pairs (except Mistral-GPT-4o vs Mistral-LLaMA-3.3 and Qwen-GPT-4o vs Qwen-LLaMA-3.3), the judge LLMs exhibit a strong preference toward their related student models, leading to large positive values in the preference leakage scores. This finding suggests that preference leakage, along with the resulting bias, is widespread in SFT when the data generator and evaluator are the same.
+
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=0.5\linewidth]{Figure/llama_mtbench_result.pdf}
+%     \vspace{-10pt}
+%     \caption{Comparison between GPT-4 and human's judgment for LLaMA-2 from MTBench.}
+%     \label{fig:llama}
+%     \vspace{-10pt}
+% \end{figure}
+
+% \begin{figure*}[h!]
+%     \centering
+%     \includegraphics[width=1.0\linewidth]{Figure/human_result.pdf}
+%     \vspace{-15pt}
+%     \caption{Manual annotation result on 100 randomly selected samples from AlpacaEval 2.0.}
+%     \label{fig:human annotation}
+%     \vspace{-15pt}
+% \end{figure*}
+
+% \textbf{Evaluators' bias towards certain LLMs can be inherited by its student models.} From Figure~\ref{fig:ArenaHard} and Figure~\ref{fig:alpacaeval}, we find an obvious preference of GPT-4o towards Mistral/ Qwen-LLaMA-3.3 and this leads to the low preference leakage score in the Mistral-GPT-4o vs Mistral-LLaMA-3.3 and Qwen-GPT-4o vs Qwen-LLaMA-3.3 pairs. To investigate the source of this preference, we examine whether the GPT-4 evaluator has a bias toward LLaMA series models. Using the MTBench~\cite{zheng2023judging} dataset, which includes pairwise comparison judgments from both humans and GPT-4, we compare GPT-4's and human evaluators' judgments on LLaMA-2 vs other models (including Vicuna, Alpaca, GPT-3.5, and GPT-4, which are preferred by GPT-4 due to preference leakage or egocentric bias) and LLaMA-2 vs Claude. The results, shown in Figure~\ref{fig:llama}, reveal a clear preference for LLaMA-2 by GPT-4. Consequently, we conclude that evaluators' bias can be inherited. In this case, GPT-4’s bias toward LLaMA has been passed on to LLaMA’s student models. This inheritance, combined with the opaque training data of LLMs, makes preference leakage a more complex and challenging problem.
+
+
+% \textbf{Model pairs with similar performance tend to have more obvious preference leakage.} As shown in Table~\ref{tab:pls}, we observe that the preference leakage scores for Mistral-GPT-4o vs Mistral-Gemini-1.5 and Qwen-GPT-4o vs Qwen-Gemini-1.5 (23.6\% and 27.9\% respectively) are consistently higher than that for Mistral-LLaMA-3.3 vs Mistral-Gemini-1.5 and Qwen-LLaMA-3.3 vs Qwen-Gemini-1.5 (16.4\% and 21.9\% respectively). We think that this is largely due to 
+% %that one possible explanation for this is 
+% the more comparable performance between the student models of GPT-4o and Gemini-1.5. Intuitively, when the quality of the two responses is similar, the evaluator may rely more heavily on its inherent preferences to make a judgment, thereby exacerbating the preference leakage issue.
+
+\textbf{Smaller student models cause even more bias from judge LLMs.} To investigate the impact of student model size on the degree of preference leakage, we conduct additional experiments using various sizes of the LLaMA-3, Qwen-2.5 and Qwen-3 models. As shown in Figure~\ref{fig:ratio_size} (a), a notable finding is that the smallest models (LLaMA-3-1B, Qwen-2.5-3B and Qwen-3-1.7B) exhibit the highest PL scores than their larger counterparts, indicating greater bias from preference leakage. This trend contrasts with the influence of model size in data contamination, where larger models are typically more susceptible~\cite{bordt2023elephants}. We assume that this gap arises from the differing learning capabilities and behaviors of large and small LLMs: while larger models are more prone to memorizing~\cite{duan2024uncovering} information that exacerbates data contamination. Compared with them, smaller models may only be able to learn those spurious features that repeatedly occurs (e.g., format), leading to more serious preference leakage.
+
+% Another observation from Table~\ref{tab:pls} is that the overall preference leakage score for Qwen-2.5-14B is higher than that for Mistral-7B. Drawing on insights from previous studies on data leakage, which suggest that larger and more powerful LLMs are more capable of memorizing extensive information and are thus more susceptible to data contamination~\cite{bordt2023elephants,duan2024uncovering}, we attribute this difference in preference leakage to the size and capabilities of the student LLMs. We assume that larger student models, due to their better performance and generalization abilities, are more capable of learning and memorizing the hidden preference pattern from the synthetic data, thus leading to a more serious preference leakage.
+
+\textbf{Different benchmarks result in varying degrees of bias under preference leakage.} Another observation from Table~\ref{tab:pls} and Figure~\ref{fig:ratio_size} (a) is that the PL scores in ArenaHard are generally higher than those in AlpacaEval 2.0. One possible explanation is the difference in question difficulty between the two benchmarks, as ArenaHard contains more challenging questions. Additionally, it may also stem from differences in the distribution of question types, the impact of which on preference leakage will be further analyzed in Section~\ref{Impact on Question Type Judgment Dimension}.
+
+% \textbf{Different data generator/ judge LLMs result in varying degrees of bias under preference leakage.} While we have concluded that student model pairs with similar performance or more powerful student models tend to exhibit greater preference leakage, we also examine whether different data generator and judge LLMs contribute to varying degrees of preference leakage. Analyzing the manual annotation results presented in Table~\ref{fig:human annotation}, we observe that Gemini-1.5 shows a strong bias toward its students, followed by GPT-4o, with LLaMA-3.3 displaying the least bias. This variation in preference leakage may stem from differences in the level of leaked preference in the synthetic responses generated by the data generator LLMs. For instance, an LLM with a distinctive style or format in its responses offers more opportunities for student models to learn these characteristics, potentially leading to more pronounced preference leakage during evaluation. Future work could 
+% further quantify the extent of leaked preference for each data generator model.
+
+\begin{figure*}[h]
+    \centering
+    \subfigure[PLS on models with various sizes. We conduct the experiment with GPT-4o and Gemini as data generators and judges.]{
+        \includegraphics[width=0.44\linewidth]{Figure/pls_size.pdf}
+    }
+    \hspace{0.03\linewidth}
+    \subfigure[Experiment results on data mixing. `Manual' and `Synthetic represent mixing with manually-written data and other synthetic data, respectively.]{
+        \includegraphics[width=0.47\linewidth]{Figure/ratio.pdf}
+    }
+    \vspace{-5pt}
+    \label{fig:ratio_size}
+    \caption{Experiment results on additional models and data mixing settings.}
+    \vspace{-15pt}
+\end{figure*}
+
+
+\section{Further Analysis}
+\label{Further Analysis}
+
+In this section, we conduct data mixing analysis, relatedness analysis, learning method analysis, and real-world impact analysis (Section~\ref{Data Mixing Analysis} - \ref{Real-world Impact Analysis}) to answer RQ2. Due to the cost consideration, we conduct these analyses on Mistral-GPT-4o vs Mistral-Gemini-1.5. Moreover, we perform recognition analysis and category analysis to answer RQ3. Additionally, we also benchmark and explore various calibration methods to address preference leakage in Section~\ref{Exploring Mitigation Method for Preference Leakage}.
+
+
+\subsection{Data Mixing Analysis}
+\label{Data Mixing Analysis}
+
+In real-world applications, synthetic data from a single LLM is often mixed with manually-written data or other multi-source synthetic data to train student models. To mimic these scenarios and explore how much synthetic data could lead to preference leakage, we conduct a data mixing analysis. Specifically, we randomly sample 10\%, 30\%, 50\%, and 70\% from the original synthetic dataset and mix it with manually-written data and multi-source synthetic data, respectively, in order to maintain a consistent total volume of training data (30,000). For the manually-written data, we sample from the data pool collected in Section~\ref{Results under Different Learning Methods}. For the multi-source synthetic data, we use the original synthetic data from Ultrafeedback, which includes responses generated by various LLMs (e.g., WizardLM, Flcon, etc.). After obtaining the mixing training data, we train the student models using SFT and calculate their preference leakage scores based on the judgment results. Figure~\ref{fig:ratio_size} (b) presents the results with two mixing strategies across two benchmarks.
+
+\textbf{The degree of preference leakage is directly proportional to the amount of synthetic data.} We observe a strong correlation between the proportion of synthetic data in the mixture and the preference leakage score, with no clear threshold separating cases with preference leakage from those without. This suggests that preference leakage can occur even with a small amount of leaked synthetic data, posing significant challenges for its detection.
+
+
+\subsection{Relatedness Analysis}
+\label{Results under Different Correlations}
+
+
+
+We demonstrate the impact of different relatedness conditions between the data generator and the judge LLM on the preference leakage problem, as shown in Table \ref{tab:relatedness}. 
+
+\textbf{Preference leakage under inheritance settings causes obvious bias of judges towards their related students.} For the inheritance relationship, we consider the situation where the data generator is inherited from the judge model. We conducted the following two experiments: (1). we give the same instructions again as in the SFT stage (Inheritance w/ same ins.), or (2). we sample the same number of different instructions from the Ultrafeedback (Inherence w/ different ins.). Then, we let the fine-tuned Mistral model generate the answers and use these generated data to fine-tune a new Mistral student model. From the results, with the same instructions, the average preference leakage score is 19.3\%. In comparison, the score with different instructions is 22.3\%. Firstly, in an inheritance setting, data generators can inherit judges' preferences, which are then passed on to new student models, thereby compromising the fairness of their evaluation. Second, even when different instructions are used, judges' preferences leaked to data generators can still be transferred to the new student model through synthetic data, leading to a high preference leakage score.
+
+\begin{wraptable}{r}{0.5\textwidth}
+\vspace{-20pt}
+% \vspace{5pt}
+% \vspace{-15pt}
+\caption{Preference leakage score in different relatedness between the data generator and the judging LLM.}
+\vspace{5pt}
+\centering
+\scalebox{0.75}{
+\begin{tabular}{lccc}
+\toprule[1.5pt]
+& \textbf{Arena-Hard}    & \textbf{AlpacaEval 2.0}     & \textbf{Avg.}                           \\ \hline
+Same Model  & \cellcolor[HTML]{C1AFEC}28.7\% & \cellcolor[HTML]{D7CBF2}18.4\% & \cellcolor[HTML]{CCBDEF}23.6\% \\ \hline
+\begin{tabular}[c]{@{}l@{}}Inheritance\\   - w/ same ins.\end{tabular}        & \cellcolor[HTML]{D8CDF3}17.8\% & \cellcolor[HTML]{D2C5F1}20.7\% & \cellcolor[HTML]{D5C9F2}19.3\% \\
+\begin{tabular}[c]{@{}l@{}}Inheritance\\   - w/ different ins.\end{tabular}   & \cellcolor[HTML]{D7CCF2}18.3\% & \cellcolor[HTML]{C6B5ED}26.3\% & \cellcolor[HTML]{CFC1F0}22.3\% \\ \hline
+\begin{tabular}[c]{@{}l@{}}Same Family\\   - w/ same series\end{tabular}      & \cellcolor[HTML]{E9E2F8}10.1\% & \cellcolor[HTML]{EEE9F9}7.6\%  & \cellcolor[HTML]{EBE6F9}8.9\%  \\
+\begin{tabular}[c]{@{}l@{}}Same Family\\   - w/ different series\end{tabular} & \cellcolor[HTML]{F7F5FC}3.3\%  & \cellcolor[HTML]{FAF8FD}2.2\%  & \cellcolor[HTML]{F9F7FD}2.8\%  \\ \toprule[1.5pt]
+\end{tabular}
+}
+\label{tab:relatedness}
+\vspace{-10pt}
+\end{wraptable}
+
+\textbf{Models within the same series tend to cause more significant bias.} For two models within the same family, we consider two settings: (1) Same series, where training data is generated by GPT-4o and Gemini-1.5-flash, and judged by GPT-4-turbo and Gemini-1.5-pro; (2) Different series, where training data is still generated by GPT-4o and Gemini-1.5-flash, but judged by GPT-3.5-turbo and Gemini-1.0-pro.
+In the same series setting, the average preference leakage score is 8.9\%, indicating that despite using different models for data generation and judgment, their relatedness in terms of model family leads to some preference leakage. In contrast, the different series setting yields a significantly lower leakage score of 2.8\%, likely due to differences in architecture, training data, and other factors, reducing the influence of model-related biases in evaluation.
+
+
+
+\subsection{Learning Method Analysis}
+\label{Results under Different Learning Methods}
+
+
+\begin{wraptable}{r}{0.5\textwidth}
+\vspace{-22pt}
+% \vspace{5pt}
+\caption{Preference leakage score in different learning methods.}
+\vspace{5pt}
+\centering
+\small
+\scalebox{0.9}{
+\begin{tabular}{lccc}
+\toprule[1.5pt]
+    & \textbf{Arena-Hard}                      & \textbf{AlpacaEval 2.0}                  & \textbf{Avg.}                           \\ \hline
+SFT & \cellcolor[HTML]{C1AFEC}28.7\% & \cellcolor[HTML]{D7CBF2}18.4\% & \cellcolor[HTML]{CCBDEF}23.6\% \\
+DPO & \cellcolor[HTML]{EEE9F9}7.7\%  & \cellcolor[HTML]{F9F7FD}2.7\%  & \cellcolor[HTML]{F3F0FB}5.2\%  \\
+ICL & \cellcolor[HTML]{F5FAFC}-4.2\% & \cellcolor[HTML]{FCFDFE}-1.1\% & \cellcolor[HTML]{F8FBFD}-2.7\% \\ \toprule[1.5pt]
+\end{tabular}
+}
+\label{tab:learning method}
+\vspace{-10pt}
+\end{wraptable}
+
+
+We also compare three learning methods, supervised fine-tuning (SFT), direct preference optimization (DPO) \cite{rafailov2024direct}, and in-context learning (ICL) \cite{dong2024survey}, to explore the different influences to them under preference leakage. We first build a data pool based on human-written instruction-tuning data from OASST \cite{kopf2024openassistant}, LIMA \cite{zhou2024lima}, and MOSS \cite{Sun2024MOSS} to supervised fine-tune the pre-trained model. For DPO, we sample 2 responses for each instruction from sampled UltraFeedback instruction and prompt each data generator to produce the pairwise feedback. Then we use the DPO loss to further train the fine-tuned policy on each synthetic pairwise dataset.  Appendix~\ref{Learning Method Analysis Details} shows the prompt we use to craft synthetic pairwise feedback. For ICL, we sample 4 instruction-response pairs from each LLMs' synthetic dataset as the demonstration during inference.
+
+\textbf{Tuning approaches would leak judges' preference to the student models.} Various learning methods show significant differences in preference leakage scores across learning methods. SFT exhibits the highest average leakage score at 23.6\%.
+% In contrast, DPO achieves a much lower score of 5.2\%, likely because its focus on preferences helps minimize the unintended transfer of judge model biases.
+In contrast, DPO achieves a much lower score of 5.2\%, which is consistent with previous studies in data contamination that pairwise optimization can reduce the risk of memorizing or contaminating sensitive training data compared to straightforward supervised fine-tuning~\cite{hayesmeasuring}.
+Meanwhile, ICL, which relies on contextual examples without model tuning, is least affected by the data generator’s preferences, resulting in the lowest leakage scores.
+
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=0.5\linewidth]{Figure/ratio.pdf}
+%     \vspace{-10pt}
+%     \caption{Experiment results on data mixing. `Manual' represents the original synthetic data mixed with manually-written data. `Synthetic' represents the original data mixed with other synthetic data.}
+%     \label{fig:ratio}
+%     \vspace{-15pt}
+% \end{figure}
+
+
+\subsection{Real-world Impact Analysis}
+\label{Real-world Impact Analysis}
+
+
+\begin{table}[h]
+\centering
+\vspace{-10pt}
+\caption{Impact analysis of preference leakage in real-world LLM-as-a-Judge leaderboards. For each bias type, we assess its impact by calculating the ranking difference of the corresponding model in LMArena and AlpacaEval 2.0, obtained by subtracting the ranking in AlpacaEval 2.0 from that in LMArena. A larger positive ranking difference indicates AlpacaEval 2.0 ranks the target models in higher positions, denoting a greater impact of the corresponding bias.}
+\vspace{5pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lccc}
+\toprule[1.5pt]
+\textbf{Bias Type}          & \textbf{Evaluator}                              & \textbf{Target Models}                  & \textbf{Ranking Difference} \\ \hline
+Egocentric Bias    & \multirow{2}{*}{GPT-4 Preview} & GPT-4 Preview             & 1.00               \\
+Preference Leakage &                                        & Vicuna 7B/ 13B/ 33B & \textbf{1.33} \\
+\toprule[1.5pt]
+\end{tabular}
+\label{tab:real-world}
+\vspace{-10pt}
+\end{table}
+
+
+In this section, we investigate the impact of preference leakage in real-world LLM-as-a-Judge leaderboards. While broader leaderboard coverage would enhance external validity, few student–teacher (distillation) pairs are publicly documented, and most leaderboards lack the metadata needed for controlled cross-model comparisons. Moreover, re-evaluating all leaderboard entries with alternate judges would be computationally prohibitive at the current scale. Therefore, we focus on AlpacaEval and LMArena as interpretable case studies and leave large-scale multi-judge re-evaluations for future work. To quantify the effect of each bias type, we calculate the ranking difference of each target model in LMArena and AlpacaEval 2.0.
+
+As shown in Table~\ref{tab:real-world}, both egocentric bias and preference leakage result in a positive ranking difference, indicating that both lead to evaluator bias favoring the target models. Notably, the ranking difference associated with preference leakage is even higher than that of egocentric bias, highlighting the substantial impact of preference leakage on real-world LLM-as-a-Judge leaderboards.
+
+\subsection{Can Judges Recognize Student Models?}
+
+\begin{wraptable}{l}{0.5\textwidth}
+\vspace{-20pt} % <-- 把表整体往上提
+\centering
+\caption{Student recognition (binary classification) and response classification results (three-class classification). SR: Student Recognition, RC: Response Classification.}
+\vspace{5pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{cccc}
+\toprule[1.2pt] % 建议用 1.2pt 更协调
+\multirow{2}{*}{\textbf{Task}} & \multirow{2}{*}{\textbf{Model}} & \multicolumn{2}{c}{\textbf{Accuracy}} \\
+\cmidrule(lr){3-4}
+& & \textbf{Pointwise} & \textbf{Pairwise} \\ \midrule
+\multirow{3}{*}{SR} & GPT-4o & 41.0\% & 52.0\% \\
+& Gemini-1.5 & 53.2\% & 44.2\% \\
+& LLaMA-3.3 & 41.8\% & 29.8\% \\ \midrule
+RC & BERT & \multicolumn{2}{c}{82.4\%} \\
+\bottomrule[1.2pt]
+\end{tabular}
+\label{tab:recognition}
+\vspace{-5pt} % <-- 减小表格下方空白
+\end{wraptable}
+
+Previous studies demonstrate the LLM judges can recognize and thus prefer their own generation~\cite{panickssery2024llm}. In this work, we pose a similar question: \textit{Does preference leakage also source from the LLM judges' recognition of their related student models' generation?} To study this, we follow~\citet{panickssery2024llm} to prompt the three judge LLMs and test whether they could recognize their related student models' generation. Additionally, we split three student models' generation into training and testing sets, and train a BERT classifier to perform a three-class classification inspired by the previous study on detecting human-AI text \cite{zhang-etal-2024-llm}. For student recognition, we follow~\citet{panickssery2024llm} to use both pointwise and pairwise settings. Due to the space limitation, more detailed prompting and training settings can be found in Appendix~\ref{Recogniton Analysis Details}.
+
+\textbf{Judge LLMs do not show good performance in recognizing the generation of their student models.} As the result presented in Table~\ref{tab:recognition}, we find that the recognition performance of each judge LLM in the content of related students is poor, with accuracy around the performance of random guesses. This suggests that preference leakage is subtler and harder-to-detect for judge LLMs, in contrast to the more obvious egocentric bias.
+
+\textbf{Certain features embedded in student models through synthetic data.} Although judge LLMs do not perform well in related student recognition, we notice the fine-tuned BERT classification demonstrates a high accuracy score in classifier responses generated by each student model. This suggests that certain characteristics—such as style and format—are embedded in the student models through the synthetic responses. This finding further supports the existence of preference leakage and lays the groundwork for future research aimed at detecting and preventing it. For example, an external detector estimating model-relatedness could provide an auxiliary confidence signal to calibrate or penalize biased judgments.
+
+\subsection{Impact on Question Type \& Judgment Dimension}
+\label{Impact on Question Type Judgment Dimension}
+
+
+\begin{figure*}[h]
+    \centering
+    \subfigure[Question Type]{
+        \includegraphics[width=0.48\linewidth]{Figure/category_data.pdf}
+    }
+    \subfigure[Judgment dimension]{
+        \includegraphics[width=0.48\linewidth]{Figure/category_dimension.pdf}
+    }
+    \vspace{-10pt}
+    \caption{Category analysis results on question type and judgment dimension.}
+    \label{fig:category}
+    \vspace{-5pt}
+\end{figure*}
+
+
+In this section, we explore the impact of preference leakage across various question types and judgment dimensions. For the question type analysis, we first propose several general question types based on the question clusters introduced by Arena-Hard. Then, we prompt GPT-4o to map each question in Arena-Hard and AlpacaEval to one of the question types and calculate the preference leakage score for each question category. For the judgment dimension analysis, we follow the judgment dimensions introduced by~\citet{liu2023alignbench} and also utilize GPT-4o to map the rationale generated by judge LLMs to one or multiple judgment dimensions. More detailed prompt can be found in Appendix~\ref{Category Analysis Details}. The analysis results are presented in Figure~\ref{fig:category}. 
+% \wei{judgment dimension or judgment dimension?}
+
+\textbf{Subjective question and judgment dimension tend to lead to more bias.} For question type analysis, we find objective questions with a definitive answer, like mathematical ones, demonstrate the least preference leakage. By contrast, subjective questions that have more than one standard answer, such as programming and writing, usually lead to a more obvious preference leakage. This observation is also applied to judgment dimension analysis, as objective dimensions (like completeness) have an overall lower leakage degree compared with subjective ones (like fairness). This suggests that preference leakage tends to be more significant in objective questions and dimensions, where the contaminated model is more likely to receive biased preference.
+
+\subsection{Effect of Spurious Features on Preference Leakage}
+
+\begin{table}[h!]
+\centering
+\small
+\caption{Effect of removing spurious features on the PLS. We consider style, format and wording as potential spurious features in this analysis.}
+\label{tab:spurious}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Setting} & \textbf{GPT \& Gemini} & \textbf{GPT \& LLaMA} & \textbf{LLaMA \& Gemini} \\
+\midrule
+Baseline & 17.5\% & 2.3\% & 18.8\% \\
+-- w/o style & 9.0\% & 3.3\% & 14.6\% \\
+-- w/o format & 9.8\% & 1.9\% & 14.5\% \\
+-- w/o wording & 11.2\% & 2.4\% & 18.2\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+To further validate that spurious stylistic or formatting cues contribute to preference leakage, we conduct an additional ablation experiment focusing on three major feature categories: style, format, and wording. Using the Qwen-3-8B model as the rewriting model, we apply a paraphrasing pipeline to selectively remove each type of spurious feature from model responses before evaluation. We employ Gemini-2.0 as the judge model since Gemini-1.5 is no longer available at the time we did this experiment. The rewriting process ensures that the semantic content of each response remains intact while selectively neutralizing surface-level artifacts such as syntactic rhythm, punctuation patterns, and lexical framing cues. By isolating these variables, the experiment provides a more direct lens into how superficial similarity between generator and judge responses shapes preference leakage.
+
+The resulting PLS are reported in Table~\ref{tab:spurious}. We observe notable reductions in PLS for the two model pairs that originally exhibited the strongest leakage (GPT \& Gemini, LLaMA \& Gemini), confirming that removing spurious stylistic alignment substantially mitigates bias. Among the three feature types, eliminating style and format yields the largest decrease in leakage, suggesting that judges tend to rely heavily on stylistic regularities—such as tone consistency, sentence cadence, and punctuation density—when forming preference judgments. In contrast, removing wording-level features (e.g., synonym substitution or phrase order changes) produces only minor improvements, implying that lexical similarity alone is not the dominant driver. Interestingly, the magnitude of reduction varies across judge families: GPT-based judges appear especially responsive to stylistic coherence, while LLaMA-based judges are more influenced by formatting regularity. This diversity in sensitivity indicates that each model family has distinct perceptual priors about linguistic structure, which can amplify different forms of spurious correlation. Overall, these findings empirically substantiate our mechanistic explanation that stylistic and formatting artifacts embedded in student models act as hidden conduits for preference leakage, shaping judge behavior through subtle surface-level mimicry rather than semantic alignment.
+
+
+\subsection{Exploring Mitigation Method for Preference Leakage}
+\label{Exploring Mitigation Method for Preference Leakage}
+\begin{wraptable}{r}{0.45\textwidth}
+\vspace{-22pt}
+\caption{Error Bias with various mitigation methods (lower is better).}
+\vspace{5pt}
+\centering
+\small
+\scalebox{0.95}{
+\begin{tabular}{lc}
+\toprule[1.5pt]
+\textbf{Method} & \textbf{Error Bias} \\
+\midrule
+Base & 17.8 \\
++ Prompting & 18.3 \\
++ Chain-of-Thought & 15.6 \\
++ Paraphrase & 18.7 \\
++ Auto Calibration & 20.7 \\
++ Contextual Calibration & \textbf{7.3} \\
+\bottomrule[1.5pt]
+\end{tabular}
+}
+\vspace{-10pt}
+\label{tab:error_bias}
+\end{wraptable}
+To benchmark and explore mitigation methods for preference leakage, we collected human‑labeled pairwise judgments from several reward benchmarks, including PPE~\cite{perez2022ppe}, MTBench~\cite{zheng2023mtbench}, and Human Preference~\cite{chiang2024chatbot}. Using GPT‑4 as the target model, we selected samples in which one of the responses was generated by GPT‑4’s related student (e.g., Vicuna, Alpaca). We then tested several mitigation methods on this dataset, including prompting, chain‑of‑thought (CoT), paraphrasing, auto‑calibration, and contextual calibration. The explored mitigation strategies can be grouped into two complementary layers: (i) Input- or reasoning-level debiasing (prompting, CoT, paraphrasing) that modifies inputs or reasoning chains; and (ii) Output-level calibration (auto- or contextual calibration) that adjusts scores post-hoc. We further propose a new metric, Error Bias, based on human‑labeled judgments: $\mathrm{ErrorBias} =\frac{N_{\text{target-prefer-other-win}}}{N_{\text{other-win}}}-\frac{N_{\text{other-prefer-target-win}}}{N_{\text{target-win}}}$. Intuitively, this metric quantifies the difference between target‑preferred errors and other‑preferred errors; a value close to 0 indicates that preference leakage is mitigated. Our preliminary results show that contextual calibration with an additional held‑out set for bias adjustment is the most effective, reducing Error Bias from 17.8 to 7.3. We provide a more detailed explanation about each method in Appendix~\ref{Mitigation Methods Details}.
+
+\section{Conclusion}
+In this work, we formally highlight the preference leakage problem in LLM-as-a-judge systems. The results of our main experiment, measured using the proposed preference leakage score, reveal a clear bias in each judge toward their respective student model. We also observe that this bias is more pronounced in certain question types and smaller student models. Furthermore, we conduct additional analysis on various factors, including the relationship between the data generator and judge LLMs, model tuning techniques, data mixing strategies, and real-world applications. Our findings suggest that preference leakage can cause significant bias across diverse scenarios. Finally, we investigate the underlying mechanisms of preference leakage, demonstrating that it is a challenging and hard-to-detect issue, especially in subjective questions and judgment dimensions.
+
+\newpage
+\section*{Ethics Statement}
+We adhere to the ICLR Code of Ethics. No private, sensitive, or personally identifiable data are involved. Our work does not raise foreseeable ethical concerns or produce harmful societal outcomes.
+
+\section*{Reproducibility Statement}
+Reproducibility is central to our work. All datasets used in our experiments are standard benchmarks that are publicly available. We provide full details of the training setup, model architectures, and evaluation metrics in the main paper and appendix. Upon acceptance, we will release our codebase, including scripts for preprocessing, training, and evaluation, along with configuration files and documentation to facilitate exact reproduction of our results. Random seeds and hyperparameters will also be included to further ensure reproducibility.
+
+\section*{Acknowledgement}
+This work was supported by the U.S. Department of Defense, Army Research Office (Award No. W911NF-24-2-0175). The views and conclusions contained in this document are those of the authors and should not be interpreted as representing official policies, either expressed or implied, of DOD or ARO.
+
+\bibliography{iclr2026_conference}
+\bibliographystyle{iclr2026_conference}
+
+\appendix
+
+\onecolumn
+
+\section{The Use of LLMs for Writing}
+We employed Google's Gemini 2.5 Pro and OpenAI's GPT-5 as writing assistance tools during the preparation of this manuscript. Their role was exclusively for language refinement, such as improving readability and rephrasing for clarity in an academic writing style. This usage aligns with standard academic practices for language polishing.
+
+\section{Preliminary Study of Preference Leakage in Real World}
+\label{Preliminary Study of Preference Leakage in Real World}
+
+In our preliminary study, we investigate whether preference leakage is a real-world issue in mainstream leaderboards and benchmarks. To this end, we examine two widely used LLM-as-a-judge leaderboards (AlpacaEval 2.0 and Arena-Hard) and a well-known benchmark (MTBench). All three rely on GPT-4 as the judge model and report pairwise judgment results for various LLMs. Our analysis reveals that several candidate models distilled from GPT-4 or other GPT-series models (e.g., Vicuna and Alpaca) appear across all these leaderboards and benchmarks, suggesting that preference leakage is a pervasive issue in these datasets. Besides, we also examine if preference leakage exists in LLM-relevant research studies and also find a bunch of work utilizing the same or related model(s) to do distillation/ data synthesis and evaluation~\cite{yang2023new,liumakes,leerlaif,li2024selective,wang2024bpo,sun2024fostering}. All of these suggest preference leakage to be a widespread problem in both LLM-as-a-judge datasets and LLM-relevant research.
+
+
+\section{Experiment Details}
+\label{Experiment Detail}
+
+\subsection{Training Details}
+We use LLaMA-Factory~\cite{zheng2024llamafactory}, an efficient LLM tuning library for our experiment. The maximum sequence length is set to 1024 tokens, and a cutoff length of 1024 tokens is enforced to prevent excessive tokenization. The data preprocessing will be done in parallel with 16 workers to speed up the preparation process. The training use a per-device batch size of 2, with gradient accumulation over 2 steps to simulate a larger batch size for SFT and a per-device batch size of 1, with gradient accumulation over 4 steps to simulate a larger batch size for DPO. The learning rate is set to 1.0e-5 and each model will be trained for 3 epochs. A cosine learning rate scheduler is used with a warmup ratio of 0.1 to gradually increase the learning rate during the initial steps. All of the experiments use BF16 precision to speed up training while maintaining numerical stability. All the experiments are conducted in an 8 Nvidia A100 GPU cluster with CUDA version 11.8.
+
+
+\begin{table}[h!]
+\caption{A case on AlpacaEval 2.0 with the model pair Mistral-GPT-4o vs Mistral-Gemini-1.5 to demonstrate how the preference leakage score is calculated.}
+\centering
+\begin{tabular}{lcc}
+\toprule[1.5pt]
+\multirow{2}{*}{Judge Model} & \multicolumn{2}{c}{Mistral-GPT-4o vs Mistral-Gemini-1.5} \\ \cmidrule(l){2-3}
+                             & Mistral-GPT-4o Wins       & Mistral-Gemini-1.5 Wins      \\ \hline
+GPT-4o                       & 55.1\%                    & 44.9\%                       \\
+Gemini-1.5                   & 36.8\%                    & 63.2\%                       \\ \hline
+Preference Leakage Score     & \multicolumn{2}{c}{18.4\%}   \\ \toprule[1.5pt]                           
+\end{tabular}
+\label{tab:pls case}
+\end{table}
+
+
+\subsection{Detailed Explanation for Preference Leakage Score}
+We present a case in Table~\ref{tab:pls case} to show how we calculate the preference leakage score for the Mistral-GPT-4o vs Mistral-Gemini-1.5 pair on AlpacaEval 2.0. Based on the definition of preference leakage score, we first calculate: 
+\begin{equation}
+    \text{AVG}(\text{Mistral-GPT-4o}, \text{Mistral-Gemini-1.5})=\frac{55.1 + 36.8}{2}=45.95\%
+\end{equation}
+\begin{equation}
+    \text{AVG}(\text{Mistral-Gemini-1.5},\text{Mistral-GPT-4o})=\frac{63.2 + 44.9}{2}=54.05\%
+\end{equation}
+After that, we calculate the preference leakage score:
+\begin{equation}
+    \text{PLS}(\text{Mistral-GPT-4o},\text{Mistral-Gemini-1.5})=\frac{\left(\frac{55.1 - 45.95}{45.95}\right) + \left(\frac{63.2 - 54.05}{54.05}\right)}{2}=18.4\%
+\end{equation}
+.
+
+
+\subsection{Manual Annotation Details \& Results}
+While we have concluded that student model pairs with similar performance or more powerful student models tend to exhibit greater preference leakage, we also examine whether different data generator and judge LLMs contribute to varying degrees of preference leakage. We randomly sample 100 questions from AlpacaEval 2.0 and ask three well-trained annotators to conduct pairwise comparisons of the responses from each model pair for these questions. For annotation efficiency, we also develop an annotation tool that involves the function of uploading multiple model responses, jumping to specific problems, and downloading annotation results (Figure~\ref{fig:tool}). After annotation, we adopt the majority voting to get the final label for each response pair. We also calculate the average agreement of three annotators and find it to be 78.6, indicating a relatively consistent annotation result.
+
+Analyzing the manual annotation results presented in Figure~\ref{fig:human annotation}, we observe that Gemini-1.5 shows a strong bias toward its students, followed by GPT-4o, with LLaMA-3.3 displaying the least bias. This variation in preference leakage may stem from differences in the level of leaked preference in the synthetic responses generated by the data generator LLMs. For instance, an LLM with a distinctive style or format in its responses offers more opportunities for student models to learn these characteristics, potentially leading to more pronounced preference leakage during evaluation. Future work could further quantify the extent of leaked preference for each data generator model.
+
+\subsection{Mitigation Methods Details}
+\label{Mitigation Methods Details}
+
+\paragraph{Dataset Construction.}
+To systematically benchmark preference leakage, we curate a pairwise judgment corpus by consolidating three widely used human–labeled reward datasets: \textbf{PPE}~\cite{perez2022ppe}, \textbf{MTBench}~\cite{zheng2023mtbench}, and the \textbf{Human Preference} dataset~\cite{chiang2024chatbot}. 
+Each dataset contains prompts and paired model outputs annotated with human preferences. 
+We treat \textsc{GPT-4} as the \emph{target model} and identify instances where one response originates from \textsc{GPT-4} and the other from a related open–source ``student'' model (e.g., Vicuna, Alpaca). 
+
+\paragraph{Mitigation Methods.}
+We evaluate five representative strategies designed to counteract preference leakage:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Prompting.} A straightforward baseline that refines evaluation instructions to explicitly warn against self-preference, encouraging the evaluator to remain impartial and judge outputs solely on content quality and relevance.
+    \item \textbf{Chain-of-Thought (CoT).} Augments the evaluation prompt by encouraging the model to articulate an explicit step-by-step reasoning process prior to producing its final decision, thereby reducing unconscious style matching.
+    \item \textbf{Paraphrasing.} Reduces lexical and stylistic overlap between the evaluator and candidate outputs by paraphrasing prompts or responses before evaluation, mitigating familiarity-driven bias.
+    \item \textbf{Auto-Calibration.} Estimates a global bias term from a held-out calibration set by analyzing the evaluator’s log-probabilities of choosing the target versus the student, then shifts future predictions to offset this bias.
+    \item \textbf{Contextual Calibration.} Extends auto-calibration by learning context-dependent bias adjustments. 
+    For each evaluation scenario, bias is estimated from a similar held-out set and applied dynamically at inference time, offering finer-grained debiasing and achieving the strongest reduction in preference leakage.
+\end{itemize}
+
+\begin{figure*}[h!]
+    \centering
+    \includegraphics[width=1.0\linewidth]{Figure/human_result.pdf}
+    \vspace{-15pt}
+    \caption{Manual annotation result on 100 randomly selected samples from AlpacaEval 2.0.}
+    \label{fig:human annotation}
+\end{figure*}
+
+\section{Additional Experiments}
+
+Due to the space limitation, we put further experiments and analysis in the Appendix.
+
+\subsection{Original Experiment Results for PLS Calculation}
+
+\begin{figure*}[h]
+    \centering
+    \includegraphics[width=1.0\linewidth]{Figure/alpacaeval_result.pdf}
+    \vspace{-15pt}
+    \caption{Judgment results with GPT-4o, LLaMA-3.3 and Gemini-1.5 on AlpacaEval 2.0. Different from Arena-Hard, there is no tie in AlpacaEval 2.0.}%Which one is better? Judgments revealing significant judge bias toward GPT-4o, LLaMA-3.3 and Gemini-1.5 on AlpacaEval 2.0.
+    \label{fig:alpacaeval}
+    \vspace{-5pt}
+\end{figure*}
+
+\begin{figure*}[h]
+    \centering
+    \includegraphics[width=1.0\linewidth]{Figure/ArenaHard_result.pdf}
+    \vspace{-15pt}
+    \caption{Judgment results with GPT-4o, LLaMA-3.3 and Gemini-1.5 on Arena-Hard.} %Which one is better? Judgments revealing significant judge bias toward GPT-4o, LLaMA-3.3 and Gemini-1.5 on Arena-Hard.
+
+    \label{fig:ArenaHard}
+\end{figure*}
+
+\subsection{Stability Assessment of Experimental Results}
+
+Based on the results from three repeated experiments (Table~\ref{tab:repeat}), we observe consistently low variance across different comparisons, indicating high stability in performance measurements. This suggests that the conclusions drawn from these experiments are reliable and not significantly affected by random fluctuations, thereby strengthening the validity of our findings.
+
+\begin{table}[ht]
+\centering
+\caption{Mean and variance of experimental results across two benchmarks in Mistral-7B-v0.1.}
+\label{tab:stability_results}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Model Pairs} & \textbf{Mean} & \textbf{Variance} \\
+\midrule
+\multicolumn{3}{l}{\textit{ArenaHard}} \\
+mistral-GPT4o vs mistral-Gemini-3.3 & 28.67 & 0.063 \\
+mistral-GPT4o vs mistral-LLAMA-3.3  &  0.50 & 0.910 \\
+mistral-LLAMA vs mistral-Gemini     & 12.93 & 0.583 \\
+\midrule
+\multicolumn{3}{l}{\textit{AlpacaEval 2.0}} \\
+mistral-GPT4o vs mistral-Gemini-3.3 & 19.20 & 0.490 \\
+mistral-GPT4o vs mistral-LLAMA-3.3  &  0.20 & 1.240 \\
+mistral-LLAMA vs mistral-Gemini     & 19.87 & 0.013 \\
+\bottomrule
+\end{tabular}
+\label{tab:repeat}
+\end{table}
+
+\subsection{Prompt Sensitivity Analysis}
+\label{app:prompt_sensitivity}
+We examined the robustness of the \emph{Preference Leakage Score (PLS)} under different evaluation prompts.  
+Two LLM-as-a-judge protocols were used: \textsc{ArenaHard} and \textsc{AlpacaEval 2.0}, each with distinct prompts and question sets.  
+We rewrote the prompts for both protocols and re-ran the evaluations.
+
+\begin{table}[h]
+\centering
+\caption{PLS under different evaluation prompts.}
+\small
+\begin{tabular}{lccc}
+\toprule
+Judge Pair & Prompt 1 & Prompt 2 & Dataset \\
+\midrule
+\multirow{2}{*}{GPT-4o vs Gemini-1.5} & 18.4\% & 16.5\% & AlpacaEval 2.0 \\
+ & 28.7\% & 38.7\% & ArenaHard \\
+\multirow{2}{*}{GPT-4o vs LLaMA-3.3} & 1.4\% & -1.2\% & AlpacaEval 2.0 \\
+ & -1.5\% & 4.5\% & ArenaHard \\
+\multirow{2}{*}{LLaMA-3.3 vs Gemini-1.5} & 19.8\% & 17.9\% & AlpacaEval 2.0 \\
+ & 13.1\% & 15.8\% & ArenaHard \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+PLS remained consistently $>0$ for key model pairs; \textsc{AlpacaEval 2.0} was more stable to prompt changes than \textsc{ArenaHard}.
+
+\subsection{Statistical Significance Tests}
+\label{app:significance}
+We tested the hypothesis $\mathrm{PLS} > 0$ using a non-parametric bootstrap with 10{,}000 resamples over 500 prompts in \textsc{ArenaHard}.
+
+\begin{table}[h]
+\centering
+\caption{Bootstrap significance results for PLS $>$ 0. $^{***}$: $p<0.001$, $^{**}$: $p<0.01$.}
+\small
+\begin{tabular}{lccc}
+\toprule
+Judge Pair & Student & PLS (\%) & Significance \\
+\midrule
+GPT-4o vs Gemini-1.5 & Mistral-7B & 28.5 & $^{***}$ \\
+GPT-4o vs LLaMA-3.3 & Mistral-7B & -1.1 & n.s. \\
+LLaMA-3.3 vs Gemini-1.5 & Mistral-7B & 7.4 & $^{**}$ \\
+GPT-4o vs Gemini-1.5 & Qwen-2.5-14B & 37.9 & $^{***}$ \\
+GPT-4o vs LLaMA-3.3 & Qwen-2.5-14B & 1.2 & n.s. \\
+LLaMA-3.3 vs Gemini-1.5 & Qwen-2.5-14B & 26.3 & $^{***}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Language Generalization}
+\label{app:chinese_generalization}
+To test cross-lingual generalization, we synthesized Chinese SFT data (using Moss-3 instructions) and evaluated with Chinese versions of \textsc{ArenaHard} (m-\textsc{ArenaHard}) and \textsc{XAlpacaEval}. Judges were GPT-4o and Gemini-1.5; the student model was Qwen-3-8B.
+
+\begin{table}[h]
+\centering
+\caption{PLS in English vs. Chinese.}
+\small
+\begin{tabular}{lccc}
+\toprule
+Language & AlpacaEval 2.0 & ArenaHard & Avg \\
+\midrule
+English & 17.4\% & 33.9\% & 25.7\% \\
+Chinese & 12.3\% & 51.8\% & 32.1\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Significant preference leakage also appears in the Chinese setting.
+
+\subsection{Expanded Judge–Student Pairs}
+\label{app:expanded_pairs}
+We added the judge model Claude-3.5-Sonnet to form three new judge pairs: GPT-4o \& Claude-3.5, Gemini \& Claude-3.5, and LLaMA-3.3 \& Claude-3.5.  
+Student models: Mistral-7B and Qwen-2.5-14B.
+
+\begin{table}[h]
+\centering
+\caption{PLS of new judge pairs (negative values indicate no leakage).}
+\small
+\begin{tabular}{lccc}
+\toprule
+Judge Pair & ArenaHard & AlpacaEval 2.0 & Avg \\
+\midrule
+\multicolumn{4}{l}{\textbf{Mistral-7B}} \\
+GPT-4o \& Claude-3.5 & 12.2\% & 8.6\% & 10.4\% \\
+Gemini \& Claude-3.5 & 16.5\% & 7.1\% & 11.8\% \\
+LLaMA-3.3 \& Claude-3.5 & -4.4\% & -2.6\% & -3.5\% \\
+\multicolumn{4}{l}{\textbf{Qwen-2.5-14B}} \\
+GPT-4o \& Claude-3.5 & 13.0\% & 10.4\% & 11.7\% \\
+Gemini \& Claude-3.5 & 18.5\% & 11.1\% & 14.8\% \\
+LLaMA-3.3 \& Claude-3.5 & 0.0\% & 1.7\% & 0.9\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Student Model Scaling}
+\label{app:student_scaling}
+We tested PLS on a wider range of student sizes within the Qwen and LLaMA families.
+
+\begin{table}[h]
+\centering
+\small
+\caption{PLS (\%) for different student sizes.}
+\begin{tabular}{lccc}
+\toprule
+Student & ArenaHard & AlpacaEval 2.0 & Avg \\
+\midrule
+LLaMA-3-1B & 35.4 & 18.2 & 26.8 \\
+LLaMA-3-3B & 32.5 & 16.4 & 24.5 \\
+LLaMA-3-8B & 30.9 & 15.8 & 23.4 \\
+Qwen-2.5-0.5B & 40.9 & 21.2 & 31.1 \\
+Qwen-2.5-1.5B & 38.0 & 23.2 & 30.6 \\
+Qwen-2.5-3B & 50.7 & 20.1 & 35.4 \\
+Qwen-2.5-7B & 32.2 & 22.1 & 27.2 \\
+Qwen-2.5-14B & 37.1 & 18.6 & 27.9 \\
+Qwen-3-0.6B & 39.8 & 23.8 & 31.8 \\
+Qwen-3-1.7B & 40.0 & 20.1 & 30.2 \\
+Qwen-3-4B & 30.9 & 17.2 & 24.1 \\
+Qwen-3-8B & 33.9 & 17.4 & 25.7 \\
+Qwen-3-14B & 31.7 & 19.4 & 25.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Within each family, smaller models generally exhibit higher PLS.
+
+\subsection{Mitigation Methods and Error Bias Metric}
+\label{app:mitigation}
+We explored mitigation methods on a human-labeled reward dataset, including: prompting, chain-of-thought (CoT), paraphrasing, auto-calibration, and contextual calibration.  
+We introduced the \emph{Error Bias} metric:
+
+\begin{equation}
+\mathrm{ErrorBias} =
+\frac{N_{\text{target-prefer-other-win}}}{N_{\text{other-win}}}
+-
+\frac{N_{\text{other-prefer-target-win}}}{N_{\text{target-win}}}.
+\end{equation}
+
+% \begin{table}[h]
+% \centering
+% \small
+% \begin{tabular}{lc}
+% \toprule
+% Method & Error Bias \\
+% \midrule
+% Base & 17.8 \\
+% + Prompting & 18.3 \\
+% + Chain-of-Thought & 15.6 \\
+% + Paraphrase & 18.7 \\
+% + Auto Calibration & 20.7 \\
+% + Contextual Calibration & \textbf{7.3} \\
+% \bottomrule
+% \end{tabular}
+% \caption{Error Bias with mitigation methods (lower is better).}
+% \end{table}
+\begin{tcolorbox}[breakable, title=Pairwise Feedback Prompt, label=More Cases]
+\small
+\ttfamily
+
+Please act as an impartial judge and evaluate the quality of the responses provided by two AI assistants to the user question displayed below. Your evaluation should consider correctness and helpfulness. You will be given assistant A's answer, and assistant B's answer. Your job is to evaluate which assistant's answer is better. You should independently solve the user question step-by-step first. Then compare both assistants' answers with your answer. Identify and correct any mistakes. Avoid any position biases and ensure that the order in which the responses were presented does not influence your decision. Do not allow the length of the responses to influence your evaluation. Do not favor certain names of the assistants. Be as objective as possible. After providing your explanation, output your final verdict by strictly following this format: "[[A]]" if 
+assistant A is better, "[[B]]" if assistant B is better.
+
+\vspace{4mm}
+\#\# Instruction: {}
+
+\vspace{4mm}
+[The Start of Assistant A's Answer]
+
+[RESPONSE A]
+
+[The End of Assistant A's Answer]
+
+\vspace{4mm}
+[The Start of Assistant B's Answer]
+
+[RESPONSE B]
+
+[The End of Assistant B's Answer]
+
+\vspace{4mm}
+Please output the generated content in a json format, for example:
+\{
+"reason": // string, reasons behind the chosen preferred answer
+"prefered answer": // string, the prefered answer you selected, [[A]] or [[B]]
+\}
+
+\vspace{4mm}
+Formatted the abovementioned schema and produce the reason and preferred answer:
+
+
+\end{tcolorbox}
+\label{}
+\begin{tcolorbox}[breakable, title=Pointwise Recognition Prompt, label=More Cases]
+\small
+\ttfamily
+Given an instruction and a response, your task is to judge whether this response is generated by a model that is trained on a synthetic dataset you produced (your student model).
+
+\vspace{4mm}
+\#\# Instruction: [INSTRUCTION]
+
+\vspace{4mm}
+\#\# Response: [Response]
+
+\vspace{4mm}
+Please output the generated content in a json format, for example:
+{{
+"reason": // string, reasons behind the judgment
+"judgment": // string, whether the answer is generated by your student model, choose from yes or no
+}}
+
+\vspace{4mm}
+Formatted the abovementioned schema and produce the reason and judgment:
+
+
+\end{tcolorbox}
+\label{}
+\begin{tcolorbox}[breakable, title=Pairwise Recognition Prompt, label=More Cases]
+\small
+\ttfamily
+Given an instruction and two responses, your task is to judge which response is generated by a model that is trained on a synthetic dataset you produced (your student model).
+
+\vspace{4mm}
+\#\# Instruction: [INSTRUCTION]
+
+\vspace{4mm}
+\#\# Response1: [Response 1]
+
+\vspace{4mm}
+\#\# Response2: [Response 2]
+
+\vspace{4mm}
+Please output the generated content in a json format, for example:
+{{
+"reason": // string, reasons behind the judgment
+"judgment": // int, 1 or 2, means response1 or response2 is from your student model 
+}}
+
+\vspace{4mm}
+Formatted the abovementioned schema and produce the reason and judgment:
+
+
+\end{tcolorbox}
+\label{}
+For response classification, we split all the response from three student models into training (80\%) and testing (20\%) subsets. Then, we finetune a BERT-base-uncased model in the training set. The model is trained for 3 epochs with a learning rate of 2e-5, a batch size of 16 for both training and evaluation, and a weight decay of 0.01, with evaluations conducted at the end of each epoch.
+
+
+\section{Category Analysis Details}
+\label{Category Analysis Details}
+The tables below present the prompt we use for question type and judgment dimension cateogory analysis.
+%\label{Category Analysis Details}
+\begin{tcolorbox}[breakable, title=Question Type Categorization Prompt, label=More Cases]
+\small
+\ttfamily
+Given a question, please categorize it to one of the following categories:
+
+\vspace{4mm}
+1. Computer Science \& Programming
+
+2. Mathematics \& Statistics
+
+3. Science \& Engineering
+
+4. Business \& Finance
+
+5. Writing \& Communication
+
+6. Social \& Daily Life
+
+7. Others
+
+\vspace{4mm}
+\#\# Question: [QUESTION]
+
+\vspace{4mm}
+Please output the generated content in a json format, for example:
+\{
+"question category": // string, specific category name, such as "Computer Science \& Programming"
+\}
+
+\vspace{4mm}
+Formatted the abovementioned schema and categorize the given question:
+
+
+\end{tcolorbox}
+\label{}
+\begin{tcolorbox}[breakable, title=Judgment Dimension Categorization Prompt, label=test]
+\small
+\ttfamily
+Given a pairwise comparison judgment made by an AI, please categorize each considered aspect in the rationale to one of the following categories:
+
+\vspace{4mm}
+\{
+    
+    \vspace{2mm}
+    "Factuality": "Whether the information provided in the response is accurate, based on reliable facts and data.",
+
+    \vspace{2mm}
+    "User Satisfaction": "Whether the response meets the user's question and needs, and provides a comprehensive and appropriate answer to the question.",
+
+    \vspace{2mm}
+    "Logical Coherence": "Whether the response maintains overall consistency and logical coherence between different sections, avoiding self-contradiction.",
+
+    \vspace{2mm}
+    "Richness": "Whether the response includes rich info, depth, context, diversity, detailed explanations and examples to meet user needs and provide a comprehensive understanding.",
+
+    \vspace{2mm}
+    "Creativity": "Whether the response is innovative or unique, providing novel insights or solutions.",
+
+    \vspace{2mm}
+    "Fairness and Responsibility": "Whether the advice or information provided in the response is feasible, carries acertain degree of responsibility, and considers potential risks and consequences.",
+
+    \vspace{2mm}
+    "Completeness": "Whether the response provides sufficient information and details to meet the user's needs, and whether it avoids omitting important aspects.",
+
+    \vspace{2mm}
+    "Clarity": "Whether the response is clear and understandable, and whether it uses concise language and structure so that the user can easily understand it.",
+
+    \vspace{2mm}
+    "Others": "Other aspects which is not listed above."
+
+\}
+
+\vspace{4mm}
+\#\# Judgment: [JUDGMENT]
+
+\vspace{4mm}
+Please output the generated content in a json format, for example:
+\{
+"Factuality": // list, all aspects that belong to this category, such as ["correctness", "mistakes"]
+...
+\}
+
+\vspace{4mm}
+Formatted the abovementioned schema and categorize aspects in the judgment:
+
+
+\end{tcolorbox}
+\label{}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\linewidth]{Figure/annotation_tool.png}
+    \caption{The annotation tool we develop for annotation efficiency.}
+    \label{fig:tool}
+\end{figure}
+
+\section{Broader Impact}
+\label{Broader Impact}
+By revealing preference leakage, this work could help build more trustworthy and ethically grounded AI systems. The relatedness between data generators and evaluators can systematically bias evaluations, potentially compromising the fairness and reliability of the automatic evaluation paradigm. These biased evaluations may indirectly affect downstream tasks such as AI alignment and decision-making systems, leading to unintended ethical risks. To mitigate preference leakage, we hope that researchers will propose more reliable evaluation methods, diversify training data sources, and develop contamination-resistant benchmarks in the future.
+
+
+\end{document}
