@@ -14,47 +14,41 @@ For durable state, see `docs/design/system-architecture.md` and
 
 ## Phase
 
-Inspiration → Question transition, with system infrastructure being
-built in parallel. Typed IR, surface authoring layer, and minimal
-executor all exist; CCR and ReConcile run end-to-end against a
-deterministic fake client. Formal research question committed
-(capability-first, compute-matched). `experimental-design_draft.md`
-currently under revision based on preliminary Codex/Gemini feedback:
-Phase 1 narrowed to executable-scoring only (walk-before-run), dollar-
-denominated compute, D' homogeneous-protocol control added, Variable
-K (identity blinding) locked, condition B selector held constant.
-Second-pass multi-model review will follow the edit.
+Design phase **complete**. Experimental design promoted from draft
+to `docs/research/experimental-design.md` on 2026-04-14 after four
+rounds of Codex and Gemini review (both signed off). Phase 1 is
+scoped to executable scoring only, compute is denominated in
+dollars (as caps), the condition matrix is A/B/C/D/D'/E framed as
+macro-models composed from typed IR building blocks, and the
+statistical plan pre-registers a Protocol × Stratum interaction
+test with an automatic fallback to the middle band if power is
+thin. System infrastructure (typed IR, executor) already exists
+from the parallel track. Next: experiment-spec layer and real
+`ModelClient` adapters.
 
 
 ## Next up
 
-1. Fourth editing pass on `experimental-design_draft.md` to adopt
-   the macro-model framing: each condition is a fully-specified
-   macro-model (context → response mapping) composed from typed
-   IR building blocks. Selectors drop to "an aggregation building
-   block that some macro-models contain." Also fold in Codex's
-   remaining round-three points: pin each condition to a single
-   concrete specification (no `or` branches), separate
-   infrastructure failures from capability failures, clarify
-   budget tiers as caps.
-2. Build the experiment-spec layer — the piece between the IR and a
-   real run. Prompts, model assignments, task slices, dollar budgets,
-   metrics.
-3. Express conditions A, B, C, D', E from the experimental design in
-   `src/protocols/` as typed IR terms. ReConcile already covers D;
-   none of A/B/C/D'/E need new IR primitives.
-4. Wire a real `ModelClient` (Anthropic + OpenAI adapters) with
-   retry/backoff/rate-limit handling.
+1. Build the experiment-spec layer — the piece between the IR and a
+   real run. Prompts, model assignments, task slices, dollar budget
+   caps, metrics.
+2. Express macro-models A, B, C, D', E from the experimental design
+   in `src/protocols/` as typed IR compositions. ReConcile already
+   covers D; none of A/B/C/D'/E need new IR primitives. D' is just
+   D instantiated with a homogeneous pool.
+3. Wire a real `ModelClient` (Anthropic + OpenAI adapters) with
+   retry/backoff/rate-limit handling. Infrastructure failures must
+   be separated from capability failures per the design doc.
+4. Pre-kickoff: run the power analysis gate that the experimental
+   design specifies, to decide whether the full three-stratum
+   interaction test is feasible or the middle-band-only fallback
+   applies.
 
 
 ## Currently routed to
 
-`docs/research/experimental-design_draft.md` — fourth pass in
-progress 2026-04-14. Adopting the macro-model framing: each
-condition is a function from context to response, built from
-typed IR building blocks. The building-block layer is shared
-infrastructure for replicating papers and for future automated
-search; individual macro-models are the experimental units.
+None. Design phase complete; next active artifact will be the
+experiment-spec layer once it has a file.
 
 
 ## Blockers

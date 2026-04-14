@@ -142,8 +142,11 @@ Update when a file is added or repurposed.
 - `docs/research/inspiration.md` — extracted insights.
 - `docs/research/protocol-inventory.md` — semi-formal protocol
   notation, 37+ variants, 19 structural variables.
-- `docs/research/experimental-design_draft.md` — rewritten
-  2026-04-14, awaiting multi-model review.
+- `docs/research/experimental-design.md` — promoted 2026-04-14
+  after four rounds of Codex + Gemini review. Macro-model
+  framing, Phase 1 scoped to executable scoring, pre-registered
+  Protocol × Stratum interaction as primary statistical test
+  with a pre-declared middle-band fallback.
 - `docs/research/judge-design-notes_draft.md` — judge protocol
   detail, feeds the experimental design.
 - `docs/research/human-validation-notes_draft.md` — staged human

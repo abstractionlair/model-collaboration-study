@@ -133,6 +133,85 @@ on CCR.
 
 ---
 
+## 2026-04-14 Experimental design promoted — macro-model framing, executable-only Phase 1
+
+**Decision:** Promote `docs/research/experimental-design.md` out
+of draft after four rounds of independent review by Codex and
+Gemini. Both reviewers signed off on the structure and the
+macro-model framing in the fourth round. The load-bearing
+commitments this promotion locks in:
+
+- **Macro-model framing.** A collaborative pipeline *is* a
+  model — a function from context to response built from
+  smaller input models. The experimental question becomes
+  whether macro-models can be more capable than any of their
+  input models at matched dollar cost. The unit of experimental
+  comparison is a fully-specified macro-model; the typed IR
+  building blocks in `src/ir/` are the shared substrate.
+- **Phase 1 scope: executable scoring only.** No LLM-as-judge
+  apparatus in Phase 1. Walk-before-run. Makes the measurement
+  unarguable and decouples the protocol question from the
+  judge-reliability question. Open-ended tasks and the LLM-judge
+  apparatus return in Phase 2, calibrated against Phase 1
+  results.
+- **Compute unit: US dollars, as caps.** Dollar-denominated
+  budget tiers ($X, $2X, $4X) with $X anchored to the single-
+  model one-pass cost. Tiers are caps, not exact-spend targets
+  — macro-models that spend less than the cap are rewarded in
+  the dollars-per-solved-task metric.
+- **Condition matrix: A / B / C / D / D' / E.** Each pinned to
+  one concrete macro-model specification composed of typed IR
+  building blocks, with no `or` branches. D' is a homogeneous
+  counterpart to D added for the cleanest heterogeneity
+  comparison the matrix can support.
+- **Statistical primary test: Protocol × Stratum interaction,
+  pre-registered.** Three difficulty strata (30–40%, 45–55%,
+  60–70% one-shot success for the best subject model). Fallback
+  to the middle band alone is pre-declared and triggers
+  automatically if a pre-kickoff power analysis against an
+  assumed utility curve yields below 80% power.
+- **Variable K (identity blinding) locked** as a fixed default
+  across all conditions in Phase 1.
+- **Infrastructure failures separated from capability failures.**
+  Infra failures (Docker, network, rate limits) are retried and
+  do not count against the dollar budget. Capability failures
+  are scored normally.
+
+**Alternatives considered:**
+
+- Running Phase 1 with LLM judges on open-ended tasks. Rejected
+  in favor of walk-before-run: fewer load-bearing assumptions
+  at once, unarguable measurement, Phase 2 calibrated against
+  Phase 1 results.
+- Token-based compute matching. Rejected in favor of dollars
+  because tokens don't compose across tokenizers and dollars
+  are the real-world binding constraint.
+- Pooling strata for the primary statistical test. Rejected
+  because the strata hypothesis predicts opposing effects
+  across strata that would average to approximately zero.
+- "Selector discipline" as a cross-cutting rule imposed from
+  outside each protocol. Rejected in favor of treating
+  aggregation as a typed IR building block that some
+  macro-models contain and others do not — the non-oracle
+  property falls out of the type system rather than needing
+  its own enforcement machinery.
+
+**Rationale:** The four review rounds converged rather than
+diverging — round one found structural issues, round two found
+substantive flaws (the selector-as-oracle trap and the pooled-
+primary-test trap), round three addressed those with both
+reviewers nearly approving, and round four adopted the
+macro-model framing that turned several round-three fixes from
+procedural discipline into structural properties. Both reviewers
+ended round four recommending promotion with no substantive
+reservations.
+
+**Status:** Active. Gates the experiment-spec layer and the
+real `ModelClient` work. The pre-kickoff power analysis is an
+operational gate, not a design gate.
+
+---
+
 ## 2026-04-08 Small models as subjects, frontier models as judges
 
 **Decision:** Use small/mid-tier models (e.g. Haiku, GPT mini, Gemini

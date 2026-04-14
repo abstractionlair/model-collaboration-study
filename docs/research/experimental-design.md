@@ -1,42 +1,44 @@
-# Experimental Design — Draft
+# Experimental Design
 
-> **Status: DRAFT, awaiting formal review.**
-> Rewritten 2026-04-14 against the committed research question. The
-> previous version of this file predated the motivation pivot from
-> "oversight quality" to capability-enhancement.
+> **Status: Promoted 2026-04-14** after four rounds of independent
+> review by Codex (`mcs-coord`) and Gemini (`mcs-coord-gemini`).
+> Both reviewers signed off on the structure and the macro-model
+> framing.
 >
-> **Second-pass revision 2026-04-14** (same day) in response to
-> preliminary feedback from Codex and Gemini: Phase 1 narrowed to
-> executable-scoring only (walk-before-run), compute denominated in
-> dollars, a homogeneous-protocol control (D') added to isolate the
-> heterogeneity axis, Variable K (identity blinding) locked as a
-> fixed default, and Condition B's selector held constant with the
-> multi-model conditions.
+> The draft went through four passes on 2026-04-14:
 >
-> **Third-pass revision 2026-04-14** (same day) in response to
-> second-pass feedback: the selector-as-oracle flaw Gemini
-> identified is fixed (internal selectors are now part of each
-> protocol's definition, non-oracle, counting toward the dollar
-> budget); the statistical plan is switched to a pre-registered
-> Protocol × Stratum interaction as the primary test (Gemini) to
-> avoid the pooled-average trap; the "what the matrix isolates"
-> claims are rewritten to be modest per Codex, with D' → D no
-> longer claimed to fully separate lineage diversity from price
-> arbitrage; tie-breaking, partial-credit, and hard-failure
-> policies are specified for executable scoring.
+> 1. Rewritten against the committed research question (pivot
+>    from "oversight quality" to capability-enhancement).
+> 2. Scope narrowed to executable-scoring only (walk-before-run,
+>    Phase 1 avoids the LLM-as-judge apparatus entirely);
+>    compute denominated in dollars; D' homogeneous control
+>    added; Variable K (identity blinding) locked; Condition B's
+>    selector aligned.
+> 3. Selector-as-oracle flaw (Gemini) fixed by internalizing
+>    selection; statistical plan switched to a pre-registered
+>    Protocol × Stratum interaction as the primary test; "what
+>    the matrix isolates" claims rewritten modestly (Codex);
+>    tie-breaking, partial-credit, and hard-failure policies
+>    specified.
+> 4. Macro-model framing adopted as the primary conceptual
+>    vocabulary: a collaborative pipeline *is* a model, built
+>    from smaller input models. Selectors collapse to "an
+>    aggregation building block that some macro-models contain."
+>    Each condition pinned to one concrete specification;
+>    infrastructure failures separated from capability failures;
+>    budget tiers clarified as caps. Middle-band fallback rule
+>    pre-declared with concrete thresholds.
 >
-> **Fourth-pass revision 2026-04-14** (same day) to adopt the
-> macro-model framing explicitly: a collaborative pipeline *is*
-> a model — a macro-model composed from smaller input models —
-> and the experimental question is whether macro-models can be
-> more capable than their input models at matched cost. Under
-> that framing, selectors stop being a special design category
-> and become one kind of typed IR building block (an aggregation
-> step) that some macro-models contain and others don't. Each
-> condition is pinned to one concrete macro-model with no `or`
-> branches. Infrastructure failures are separated from capability
-> failures. Budget tiers clarified as caps. This version still
-> has not been through the formal Design-phase review.
+> Full review history and per-round feedback live in the
+> `mcs-coord` and `mcs-coord-gemini` sessions. The substantive
+> decisions that survived into this version are summarized in
+> the Validation status section at the end of this document.
+>
+> **Operational gate before Phase 1 kickoff:** run the
+> pre-declared power analysis described in the Statistical plan
+> section. If power for the interaction test is below 80%
+> against the assumed utility curve, the middle-band fallback
+> triggers automatically.
 
 ---
 
@@ -55,6 +57,19 @@ The question commits the design to four starting structural axes —
 are the variables the experiment must isolate. Other axes from the
 protocol inventory may be added later if Phase 1 results suggest
 they are load-bearing, but these four are the floor.
+
+**The four-axis question is answered across Phase 1 plus follow-on
+ablations, not by Phase 1 alone.** Phase 1 is a screen of
+macro-model families with one surgical heterogeneity control
+(D → D'). It directly tests the heterogeneity axis and, through
+the A → B and B → D' comparisons, puts a first bound on whether
+review/revise structure helps inside a fixed pool. The critique
+format axis and the round count axis are explicitly deferred to
+follow-on ablations on whichever macro-model family Phase 1
+surfaces as most promising. Those ablations are part of the
+experimental program, not a separate phase. Phase 1 is not
+expected to, and is not designed to, isolate all four axes on
+its own.
 
 The compute-matched constraint is load-bearing: any multi-model
 result that fails to beat a compute-matched single-model baseline
@@ -571,11 +586,48 @@ D = X' %, B = Y' %") — the only constraint is that the
 statistical primacy is on the interaction, not the pooled
 average.
 
-**Fallback if power is too thin to detect the interaction.**
-Collapse Phase 1 to the middle band (45–55%) only, with the
-other two strata deferred to Phase 2 or dropped. This preserves
-the cleanest signal at the cost of the "when does it help"
-granularity.
+### Pre-declared middle-band fallback rule
+
+The interaction test is more demanding than a main-effect test
+at the same effect size — Gemini's rule of thumb is that
+interaction tests need roughly 4× the instance count of a
+main-effect test at equivalent power. To avoid launching an
+underpowered confirmatory test, the fallback from the
+interaction test to the middle band is **pre-declared and
+triggered automatically** by a power analysis that runs before
+Phase 1 kicks off. The rule:
+
+1. **Pre-specified assumed utility curve.** Protocol effect on
+   success rate, absolute, relative to the compute-matched
+   single-model baseline:
+   - easy band (60–70%): **−5 percentage points**
+   - middle band (45–55%): **+10 percentage points**
+   - hard band (30–40%): **0 percentage points**
+   These are the effect sizes the strata hypothesis actually
+   commits to. They are deliberately modest.
+2. **Pre-specified power threshold.** The primary
+   Protocol × Stratum interaction test must achieve at least
+   **80% power** against the assumed utility curve at α = 0.05,
+   using the Phase 1 task-instance count per stratum per
+   condition that the dollar budget supports.
+3. **Pre-kickoff power analysis.** Before any production run
+   starts, estimate power against the assumed utility curve at
+   the actual Phase 1 N per stratum per condition.
+4. **Automatic fallback trigger.** If estimated power is below
+   80%, Phase 1 is automatically collapsed to the middle band
+   (45–55%) alone. The primary test becomes a main-effect test
+   of protocol on success rate within the middle band; the
+   easy and hard strata are deferred to Phase 2 or dropped.
+   The strata hypothesis as a full curve is no longer tested
+   in Phase 1 if the fallback triggers; the narrower claim
+   "does the protocol help in the middle band" remains
+   answerable.
+
+The fallback is not a judgment call at kickoff. It is a
+pre-registered rule keyed on a number computed from a fixed
+assumed utility curve and the actual matrix size. This
+preempts the "run the experiment, see it's underpowered, then
+post-hoc narrow the claim" failure mode.
 
 
 ## Compute Budget Structure

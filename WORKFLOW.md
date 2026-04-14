@@ -13,7 +13,7 @@ one is for lives there; this file is procedures and templates only.
 | Inspiration | Extracted insights from exploratory conversations | `docs/research/inspiration.md` |
 | Literature review | Synthesis of existing work, paper references | `docs/literature/` |
 | Research question | Question, sub-questions, hypotheses | Currently committed inline in `CLAUDE.md`; will move to `docs/research/question.md` if it grows beyond a paragraph |
-| Experimental design | Protocol, variables, baselines, metrics | `docs/research/experimental-design.md` (draft at `experimental-design_draft.md` awaiting multi-model review) |
+| Experimental design | Protocol, variables, baselines, metrics | `docs/research/experimental-design.md` (promoted 2026-04-14 after four rounds of Codex + Gemini review) |
 | Pilot | Small-scale feasibility test | `data/pilot/` |
 | Implementation | Experiment code (orchestration, prompts, evaluation) | `src/` |
 | Execution | Raw results | `data/` |

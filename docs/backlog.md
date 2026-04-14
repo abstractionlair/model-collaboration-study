@@ -31,7 +31,7 @@ appropriate artifact (if it's work).
   case demands.
 
 - **Adversarial debate condition.** Flagged in
-  `experimental-design_draft.md` as a meaningful extra axis but
+  `experimental-design.md` as a meaningful extra axis but
   deferred from the Phase 1 matrix on compute-cost grounds. Revisit
   after Phase 1 results.
 
