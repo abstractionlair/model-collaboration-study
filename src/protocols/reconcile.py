@@ -51,7 +51,6 @@ def reconcile(
     return bind(
         refined,
         lambda r: finalize(weighted_vote(r, par_score(models, r))),
-        name="refined",
     )
 
 

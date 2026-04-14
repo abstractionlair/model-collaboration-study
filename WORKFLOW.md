@@ -1,8 +1,9 @@
 # Workflow Reference
 
 Detailed procedures and templates for the project workflow. For the
-overall shape, principles, and current phase, see
-[CLAUDE.md](CLAUDE.md).
+overall shape, principles, file map, and current phase, see
+[CLAUDE.md](CLAUDE.md). The canonical list of files and what each
+one is for lives there; this file is procedures and templates only.
 
 
 ## Phases
@@ -11,34 +12,18 @@ overall shape, principles, and current phase, see
 |-------|----------|----------|
 | Inspiration | Extracted insights from exploratory conversations | `docs/research/inspiration.md` |
 | Literature review | Synthesis of existing work, paper references | `docs/literature/` |
-| Research question | Question, sub-questions, hypotheses | `docs/research/question.md` |
-| Experimental design | Protocol, variables, baselines, metrics | `docs/research/experimental-design.md` |
+| Research question | Question, sub-questions, hypotheses | Currently committed inline in `CLAUDE.md`; will move to `docs/research/question.md` if it grows beyond a paragraph |
+| Experimental design | Protocol, variables, baselines, metrics | `docs/research/experimental-design.md` (draft at `experimental-design_draft.md` awaiting multi-model review) |
 | Pilot | Small-scale feasibility test | `data/pilot/` |
 | Implementation | Experiment code (orchestration, prompts, evaluation) | `src/` |
 | Execution | Raw results | `data/` |
 | Analysis | Processed results, figures, statistical tests | `analysis/` |
 | Write-up | Paper or report | `paper/` |
 
-
-## Directory Structure
-
-```
-docs/
-  literature/
-    synthesis.md               # Thematic synthesis of existing work
-    papers.md                  # Reference list with relevance notes
-  research/
-    inspiration.md             # Extracted insights from exploratory conversations
-    question.md                # Research question, sub-questions, hypotheses
-    experimental-design.md     # Protocol, variables, baselines, metrics
-  reviews/                     # Multi-model review artifacts
-  decisions.md                 # Decision log
-src/                            # Experiment code
-data/                           # Experimental results
-  pilot/                        # Pilot run results
-analysis/                       # Analysis code and outputs
-paper/                          # Write-up
-```
+Note: a parallel **system-infrastructure track** runs alongside
+these phases — the typed IR, the executor, the planned
+experiment-spec layer, and the real `ModelClient` adapters.
+See `docs/design/system-architecture.md`.
 
 
 ## The Experiment Loop

@@ -3,8 +3,8 @@
 The core IR in ast.py is the object of study — it's what gets
 type-checked, serialized, traversed, and mutated. This module is the
 authoring front-end: lowercase factory functions that read like math,
-hide enum verbosity, and expose the Let binding as an Expr method
-instead of a classmethod with keyword arguments.
+hide enum verbosity, and wrap the Let binding in a free function
+`bind()` that takes a closure body.
 
 Protocol definitions should import from here, not from ast directly.
 The core IR stays the source of truth; this module only changes how
@@ -13,7 +13,7 @@ humans (and models) write protocol definitions.
 
 from __future__ import annotations
 
-from typing import Callable, TypeVar
+from typing import Callable, Optional, TypeVar
 
 from .ast import (
     Expr,
@@ -148,12 +148,11 @@ def weighted_vote(
 
 
 # ============================================================================
-# Let binding as an Expr method
+# Let binding as a free function
 # ============================================================================
 # Instead of Let.make(value=..., body_fn=lambda v: ...) which reads as
-# ceremony, we want `.let(lambda r: ...)` as a method call on the
-# value expression. This reads left-to-right: "bind this value, then
-# use it in this body."
+# ceremony, `bind(value, lambda r: ...)` reads left-to-right: "bind
+# this value, then use it in this body."
 
 T1 = TypeVar("T1")
 T2 = TypeVar("T2")
@@ -162,7 +161,7 @@ T2 = TypeVar("T2")
 def bind(
     value: Expr[T1],
     body: Callable[[Expr[T1]], Expr[T2]],
-    name: str = "v",
+    name: Optional[str] = None,
 ) -> Expr[T2]:
     """Bind a value to a name within a body expression.
 
@@ -170,11 +169,14 @@ def bind(
         result = bind(
             rounds(3, models, par_gen(models, q)),
             lambda r: finalize(weighted_vote(r, par_score(models, r))),
-            name="refined",
         )
 
     The body receives a fresh Var of the same type as the value and
     returns an Expr using it. The binding is stored as a first-order
     Let node internally for serialization and traversal.
+
+    `name` is an optional debug hint for the generated variable name.
+    Omit it unless a specific name aids readability in describe()
+    output — the generated name is always fresh either way.
     """
-    return Let.make(value=value, body_fn=body, hint=name)
+    return Let.make(value=value, body_fn=body, hint=name or "v")

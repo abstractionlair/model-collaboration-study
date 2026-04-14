@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from itertools import count
-from typing import Any, Callable, Generic, TypeVar
+from typing import Any, Callable, ClassVar, Generic, TypeVar
 
 from .types import (
     Answer,
@@ -47,8 +47,21 @@ class Expr(Generic[T]):
     An Expr[T] is a protocol step that, when evaluated, produces a
     value of type T. Composition happens by nesting Expr instances
     as fields on other Expr instances.
+
+    Each concrete subclass exposes a `result_type` attribute — the
+    runtime reification of T. Fixed-type nodes (Gen, Review, etc.)
+    declare it as a ClassVar; nodes whose output type depends on
+    their children (Var, Let) carry it as an instance field or
+    property. This is how the mutation engine and other runtime
+    consumers introspect node types without relying on
+    typing.get_args() or mypy metadata.
+
+    The attribute is declared as a ClassVar on the base so most
+    subclasses can simply assign a constant; Var overrides it with
+    an instance field and Let with a property, since their output
+    type depends on children.
     """
-    pass
+    result_type: ClassVar[Any] = None
 
 
 # ============================================================================
@@ -62,6 +75,7 @@ class QueryVar(Expr[Query]):
     Treated as a bound variable in the AST — its concrete value is
     supplied at execution time, not at AST construction time.
     """
+    result_type: ClassVar[Any] = Query
     name: str = "q"
 
 
@@ -75,6 +89,7 @@ class Gen(Expr[Answer[Draft]]):
 
     Type: Model -> Query -> Answer[Draft]
     """
+    result_type: ClassVar[Any] = Answer[Draft]
     model: str
     query: Expr[Query]
 
@@ -97,6 +112,7 @@ class Review(Expr[Critique[Answer[Draft]]]):
     These annotations are the main structural knobs for CCR and
     its same-session baselines.
     """
+    result_type: ClassVar[Any] = Critique[Answer[Draft]]
     model: str
     target: Expr[Answer[Draft]]
     context: ContextMode
@@ -116,6 +132,7 @@ class Revise(Expr[Answer[Draft]]):
     The result is still a Draft — revision doesn't finalize. Use
     Finalize to mark a draft as committed.
     """
+    result_type: ClassVar[Any] = Answer[Draft]
     model: str
     draft: Expr[Answer[Draft]]
     critique: Expr[Critique[Answer[Draft]]]
@@ -136,6 +153,7 @@ class Finalize(Expr[Answer[Final]]):
     steps refuse to accept still-in-progress drafts where only a
     final answer is meaningful.
     """
+    result_type: ClassVar[Any] = Answer[Final]
     draft: Expr[Answer[Draft]]
 
 
@@ -157,6 +175,7 @@ class ParGen(Expr[list[Answer[Draft]]]):
     draft from models[i]. This alignment is an invariant enforced at
     execution time.
     """
+    result_type: ClassVar[Any] = list[Answer[Draft]]
     models: list[str]
     query: Expr[Query]
 
@@ -178,6 +197,7 @@ class ReviseRound(Expr[list[Answer[Draft]]]):
     and Revise nodes would be more explicit but much more verbose
     for larger model pools.
     """
+    result_type: ClassVar[Any] = list[Answer[Draft]]
     models: list[str]
     drafts: Expr[list[Answer[Draft]]]
     context: ContextMode
@@ -195,6 +215,7 @@ class Rounds(Expr[list[Answer[Draft]]]):
     rounds" a local mutation — flip one integer field — instead
     of a structural tree edit.
     """
+    result_type: ClassVar[Any] = list[Answer[Draft]]
     n: int
     models: list[str]
     drafts: Expr[list[Answer[Draft]]]
@@ -211,6 +232,7 @@ class ParScore(Expr[list[Score[Answer[Draft]]]]):
     Aligned with the models list: result[i] is the confidence
     models[i] assigns to drafts[i].
     """
+    result_type: ClassVar[Any] = list[Score[Answer[Draft]]]
     models: list[str]
     drafts: Expr[list[Answer[Draft]]]
 
@@ -230,6 +252,7 @@ class WeightedVote(Expr[Answer[Draft]]):
     this in Finalize. This separates the structural operation
     (selection) from the semantic status (committed vs in-progress).
     """
+    result_type: ClassVar[Any] = Answer[Draft]
     drafts: Expr[list[Answer[Draft]]]
     scores: Expr[list[Score[Answer[Draft]]]]
 
@@ -255,10 +278,14 @@ class Var(Expr[T], Generic[T]):
     The type parameter T is a phantom — it carries no runtime data.
     Mypy will check uses of Var[T] against contexts expecting Expr[T],
     but cannot verify that the binding actually produces a T at
-    construction time. Runtime type checks (or property tests) can
-    catch mismatches.
+    construction time. The `result_type` field is the runtime
+    reification of T, propagated from the bound value's result_type
+    when the Var is created inside Let.make.
     """
     name: str
+    # Instance field, not ClassVar: each Var can reference a different
+    # bound value with a different result type.
+    result_type: Any = None  # type: ignore[misc]
 
 
 @dataclass(frozen=True)
@@ -270,10 +297,23 @@ class Let(Expr[T2], Generic[T1, T2]):
     Constructed via Let.make(value, lambda v: body_using(v)).
     The lambda captures the binding by Python closure; we
     immediately apply it to a fresh Var to get a static body.
+
+    Alpha-equivalence note: `var_name` is debug metadata only. Two
+    Lets that differ solely in their generated variable name are
+    semantically identical and should compare equal under an
+    alpha-aware equality check. The current dataclass-generated
+    __eq__ is NOT alpha-aware (it compares var_name by string).
+    Callers that need alpha-equivalence should use a dedicated
+    structural comparison; this will be revisited when serialization
+    and canonicalization land.
     """
     var_name: str
     value: Expr[T1]
     body: Expr[T2]
+
+    @property
+    def result_type(self) -> Any:
+        return self.body.result_type
 
     @classmethod
     def make(
@@ -290,6 +330,6 @@ class Let(Expr[T2], Generic[T1, T2]):
         management.
         """
         var_name = _fresh_var_name(hint)
-        var: Var[T1] = Var(name=var_name)
+        var: Var[T1] = Var(name=var_name, result_type=value.result_type)
         body = body_fn(var)
         return cls(var_name=var_name, value=value, body=body)

@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+#
+# commit-msg hook: ensure docs/status.md stays current.
+#
+# Fires when a commit touches substantive files without also staging
+# docs/status.md. Substantive = anything that changes what the next
+# session should know is going on:
+#
+#   src/                  (code)
+#   docs/research/        (research artifacts)
+#   docs/design/          (system design)
+#   docs/decisions.md     (decision log)
+#   WORKFLOW.md           (procedures)
+#   CLAUDE.md             (project brief / norms)
+#
+# Bypass: include the literal string [skip-status] in the commit
+# message, ideally with a one-line reason. Bypasses are visible in
+# git log; a pattern of them indicates either the hook is
+# miscalibrated or the discipline is slipping.
+
+set -e
+
+msg_file="$1"
+msg=$(cat "$msg_file")
+
+# Explicit bypass
+if echo "$msg" | grep -q '\[skip-status\]'; then
+    exit 0
+fi
+
+# Skip merge commits — they carry other people's work, not a status update
+if git rev-parse -q --verify MERGE_HEAD >/dev/null 2>&1; then
+    exit 0
+fi
+
+# Gather staged files (added, modified, copied, renamed)
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+
+# Substantive-file pattern
+substantive_re='^(src/|docs/research/|docs/design/|docs/decisions\.md$|WORKFLOW\.md$|CLAUDE\.md$)'
+
+# If no substantive files, there's nothing to check
+if ! echo "$staged" | grep -qE "$substantive_re"; then
+    exit 0
+fi
+
+# If status.md is already staged, the discipline is satisfied
+if echo "$staged" | grep -q '^docs/status\.md$'; then
+    exit 0
+fi
+
+# Substantive changes without status.md — reject with a clear message
+substantive_files=$(echo "$staged" | grep -E "$substantive_re" | sed 's/^/    /')
+
+cat >&2 <<EOF
+
+✖ commit-msg hook: docs/status.md was not updated alongside
+  substantive changes.
+
+  Staged substantive files:
+$substantive_files
+
+  Options:
+    1. Update docs/status.md to reflect what's now next, stage it,
+       and re-commit. This is the preferred path.
+    2. Add "[skip-status] <one-line reason>" to the commit message
+       to bypass this check. Use only for genuinely trivial commits
+       where the status wouldn't meaningfully change.
+
+  Why this hook exists: status.md is the session-start router. If
+  it drifts behind the code, the next session starts stale. See
+  CLAUDE.md for the full working-norm discussion.
+
+EOF
+
+exit 1
