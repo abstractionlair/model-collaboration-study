@@ -19,18 +19,23 @@ built in parallel. Typed IR, surface authoring layer, and minimal
 executor all exist; CCR and ReConcile run end-to-end against a
 deterministic fake client. Formal research question committed
 (capability-first, compute-matched). `experimental-design_draft.md`
-rewritten against it, awaiting multi-model review before promotion.
+currently under revision based on preliminary Codex/Gemini feedback:
+Phase 1 narrowed to executable-scoring only (walk-before-run), dollar-
+denominated compute, D' homogeneous-protocol control added, Variable
+K (identity blinding) locked, condition B selector held constant.
+Second-pass multi-model review will follow the edit.
 
 
 ## Next up
 
-1. Multi-model review of `docs/research/experimental-design_draft.md`
-   by Codex and Gemini.
+1. Edit `experimental-design_draft.md` to reflect the Phase 1 scope
+   narrowing and matrix restructuring; send revised draft back to
+   Codex and Gemini for second-pass review.
 2. Build the experiment-spec layer — the piece between the IR and a
-   real run. Prompts, model assignments, task slices, budgets,
-   judge config, metrics.
-3. Express conditions A, B, C, E from the experimental design in
-   `src/protocols/`. ReConcile already covers D; none of A/B/C/E
+   real run. Prompts, model assignments, task slices, dollar budgets,
+   metrics.
+3. Express conditions A, B, C, D', E from the experimental design in
+   `src/protocols/`. ReConcile already covers D; none of A/B/C/D'/E
    need new IR primitives.
 4. Wire a real `ModelClient` (Anthropic + OpenAI adapters) with
    retry/backoff/rate-limit handling.
@@ -38,8 +43,9 @@ rewritten against it, awaiting multi-model review before promotion.
 
 ## Currently routed to
 
-`docs/research/experimental-design_draft.md` — rewritten 2026-04-14,
-awaiting multi-model review.
+`docs/research/experimental-design_draft.md` — under revision
+2026-04-14 (second pass), narrowing Phase 1 to executable-scoring
+only and restructuring the condition matrix.
 
 
 ## Blockers
