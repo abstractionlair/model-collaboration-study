@@ -11,8 +11,20 @@
 > dollars, a homogeneous-protocol control (D') added to isolate the
 > heterogeneity axis, Variable K (identity blinding) locked as a
 > fixed default, and Condition B's selector held constant with the
-> multi-model conditions. This version still has not been through
-> the formal Design-phase review.
+> multi-model conditions.
+>
+> **Third-pass revision 2026-04-14** (same day) in response to
+> second-pass feedback: the selector-as-oracle flaw Gemini
+> identified is fixed (internal selectors are now part of each
+> protocol's definition, non-oracle, counting toward the dollar
+> budget); the statistical plan is switched to a pre-registered
+> Protocol × Stratum interaction as the primary test (Gemini) to
+> avoid the pooled-average trap; the "what the matrix isolates"
+> claims are rewritten to be modest per Codex, with D' → D no
+> longer claimed to fully separate lineage diversity from price
+> arbitrage; tie-breaking, partial-credit, and hard-failure
+> policies are specified for executable scoring. This version
+> still has not been through the formal Design-phase review.
 
 ---
 
@@ -155,96 +167,149 @@ in order of complexity. Conditions A and B are the single-model
 baselines that the compute-matched constraint requires — they are
 not heterogeneous protocols, but the research question is unanswerable
 without them. Condition D' is a homogeneous-protocol counterpart
-to D, added to cleanly isolate heterogeneity from protocol effect.
+to D, added to give a cleaner heterogeneity comparison inside a
+fixed protocol family.
 
-**Selector discipline.** Every condition's final answer is
-selected by the *same mechanism*: executable scoring. For
-SWE-bench-style tasks this is patch acceptance / tests passing;
-for LiveCodeBench it is test execution; for BFCL it is
-executability on the declared tool surface. No LLM judge
-participates in final selection in Phase 1. This is critical:
-holding the selector constant across conditions means any
-difference between conditions is attributable to the protocol,
-not to a difference in measurement apparatus.
+### Selectors are part of the protocol
 
-Within-protocol selection (e.g., E's meta-reviewer choosing which
-critique points to forward, or a writer choosing whether to
-accept a revision suggestion) is LLM-based and is part of what
-the protocol is. That's fine — those are the subject under
-study, not the instrument of measurement.
+Every protocol with more than one candidate answer must commit to
+**exactly one final submission** before that submission is
+scored. The mechanism that collapses multiple candidates into one
+submission is the protocol's **internal selector**, and each
+protocol defines its own. Two otherwise-identical pipelines that
+differ in their selector are different pipelines.
+
+**Internal selectors must be non-oracle.** They must not have
+access to the final executable scoring mechanism at selection
+time. If a protocol could run the tests on each candidate and
+submit whichever passes, the entire experiment collapses into
+Pass@N on the task suite — consensus-building protocols would
+lose mechanically to independent-sampling protocols because
+consensus suppresses output variance. Pass@N rewards variance,
+so any protocol that reduces variance (which collaborative ones
+typically do) is structurally disadvantaged. That comparison
+would be measuring search-space coverage, not collaboration
+effectiveness. Gemini flagged this in the second-pass review.
+
+Legal internal selectors include:
+
+- **Self-consistency / majority vote** on the final submission
+  (feasible when answers are comparable token-for-token or via a
+  canonicalization step).
+- **Peer-LLM judgment** — a model from the subject pool (or
+  another peer-level instance), blinded to identities, choosing
+  among candidates without access to the executable ground
+  truth.
+- **Protocol-native aggregation** — e.g., ReConcile's
+  confidence-weighted voting on revised answers.
+
+Isolating comparisons (most importantly D → D') hold the
+internal selector constant across the two conditions as part of
+holding "protocol family" constant. Comparisons across different
+protocol families (e.g., B vs. D, or D vs. E) will typically
+involve different selectors, and that is fine: the selector is
+part of what defines the protocol, and varying it is part of
+what we are studying.
+
+**Internal protocol calls count toward the dollar budget.**
+Critiques, meta-reviews, revisions, and the internal selector's
+own calls all spend budget. The final executable scoring step
+does not count toward the protocol's budget (it is the
+evaluator, not part of the pipeline).
 
 ### The matrix
 
+Each condition specifies its internal selector alongside its
+structural shape. Selectors are non-oracle and count toward the
+dollar budget.
+
 - **A. Single-model, one pass.** Best single subject model, one
-  generation, submitted as-is. Reference point for "what does
-  one model alone get you at 1× cost."
+  generation, submitted as-is. No internal selector needed —
+  there is only one candidate. Reference point for "what does
+  one model alone get you at $X."
 
 - **B. Single-model, repeat-and-select.** Same best subject
-  model, N independent samples at the dollar budget for the
-  tier, final candidate chosen by *the same executable selector
-  used in the multi-model conditions*. Critical: without this,
-  multi-model "wins" could be confounded with inference-time
-  compute (or with a different selector). Codex and Gemini both
-  flagged the selector confound as the most dangerous seam in
-  the earlier draft.
+  model, N independent samples at the tier's dollar budget.
+  Internal selector: **self-consistency / majority vote** where
+  the task permits canonicalization, else a **peer-LLM judge**
+  from the subject pool (blinded, no test access). The key
+  discipline is that this selector is not the executable scorer.
+  Without this condition, multi-model "wins" could be confounded
+  with inference-time compute spent by a single model.
 
-- **C. Heterogeneous parallel generation + executable selection.**
-  N different subject models answer independently; the
-  executable selector picks the submitted answer. No critique
-  or revision. Tests whether lineage diversity alone produces a
-  real gain at matched dollars. Contrast with B: same selector,
-  same budget, different pool composition.
+- **C. Heterogeneous parallel generation + peer-LLM selection.**
+  N different subject models answer independently; a peer-LLM
+  from the subject pool (blinded, no test access) selects the
+  submission. No critique or revision. Tests whether lineage
+  diversity alone produces a real gain at matched dollars when
+  combined with peer-LLM selection.
 
 - **D. Heterogeneous ReConcile-style.** N different subject
   models answer independently; each draft reviewed by 1–2 other
   models (identities blinded — see Variable K); writers revise
-  once from structured feedback; executable selector picks the
-  submission. Roughly the ReConcile shape in
-  `src/protocols/reconcile.py`.
+  once from structured feedback; **protocol-native aggregation**
+  (ReConcile-style confidence-weighted voting on the revised
+  answers) selects the submission. Roughly the ReConcile shape
+  in `src/protocols/reconcile.py`, though the mapping is loose
+  — ReConcile's convincing-samples mechanism and exact
+  aggregation details are not yet reflected in the IR version.
 
-- **D'. Homogeneous ReConcile-style.** Same topology as D but N
-  instances of the *same* best single subject model play the
-  writer and reviewer roles (identities still blinded; each
-  instance presented as "a peer AI"). Gemini's proposed control.
-  The D → D' comparison isolates heterogeneity from protocol
-  effect: if D beats D' at matched dollars, lineage diversity
-  adds something beyond the review-and-revise machinery; if
-  D' ≈ D, the machinery is doing the work.
+- **D'. Homogeneous ReConcile-style.** Same topology and same
+  internal selector as D, but N instances of the *same* best
+  single subject model play the writer and reviewer roles
+  (identities still blinded; each instance presented as "a peer
+  AI"). Gemini's proposed control. Holding selector constant
+  with D is part of what makes the D → D' comparison clean.
 
 - **E. Hierarchical variant.** Writers produce drafts; reviewers
   critique; a separate meta-reviewer synthesizes critiques;
-  writers revise once; executable selector picks the submission.
+  writers revise once. Internal selector: the meta-reviewer's
+  aggregation logic itself, or a peer-LLM judge on the final
+  revised submissions — defined as part of the protocol.
   Typically cheaper than all-to-all cross-talk. Usually run as
-  heterogeneous, but a homogeneous E' could be added as a
-  follow-on if D → D' gives an interesting signal.
+  heterogeneous; a homogeneous E' could be added as a follow-on
+  if D → D' gives an interesting signal.
 
-### What the matrix isolates
+### What the matrix tests
 
-The comparisons that matter:
+The comparisons the design supports, stated modestly:
 
-- **A → B:** protocol-free compute scaling within a single model.
-  Controls for "is inference-time compute doing the work by
+- **A → B:** protocol-free compute scaling within a single
+  model. The cleanest isolating comparison in the matrix:
+  controls for "is inference-time compute doing the work by
   itself?"
-- **B → D':** protocol effect with pool composition held
-  constant (homogeneous). Isolates the contribution of
-  review/revise machinery.
-- **D' → D:** heterogeneity with protocol held constant.
-  Isolates lineage diversity.
-- **D' → C:** heterogeneity benefit without the review/revise
-  machinery at all (C is heterogeneous parallel; D' is
-  homogeneous ReConcile). Useful for cross-checking.
-- **D → E:** topology variation with heterogeneity and protocol
-  family held constant.
+- **B → D':** the protocol-family comparison *with pool
+  composition held constant*. Tests whether review/revise
+  machinery helps *at all*, inside a single model. Not a pure
+  isolation of "machinery" — B and D' also differ in their
+  internal selectors (majority vote vs. ReConcile aggregation).
+  The comparison is "does the D-family machinery beat the
+  B-family baseline on the same pool?" not "does review/revise
+  machinery in isolation help."
+- **D' → D:** heterogeneous pool composition vs. homogeneous,
+  with protocol family and internal selector held constant
+  *under market prices*. This is the cleanest heterogeneity
+  comparison the matrix supports. It does not, by itself,
+  separate lineage diversity from price arbitrage — the
+  heterogeneous pool includes cheaper models and therefore buys
+  more tokens at matched dollars. See the Compute Budget
+  Structure section for the arbitrage discussion and the
+  proposed pinned-price follow-on.
+- **C vs. D vs. E:** family-level comparisons of three
+  heterogeneous protocol shapes at matched dollars. These are
+  not isolating comparisons — each family differs in topology,
+  selector, and round structure. They are screen-level
+  comparisons: "which family is most worth isolating in
+  follow-on work?"
 
 This is an intentionally screened matrix, not an exhaustive
-factorial. Critique-format (C-axis) and round-count (D-axis)
-variations are not in the primary matrix; they are reserved for
-follow-on ablations on whichever condition family Phase 1
-identifies as most promising. Codex flagged the earlier draft's
-ambiguity between "screen" and "isolating experiment" — this is
-the resolution: Phase 1 is a screen of protocol families *plus*
-one isolating control (D' for heterogeneity), with finer-grain
-axis isolation happening in follow-on work.
+factorial. Phase 1 is a **screen of protocol families** (A, B,
+C, D, E) **plus one surgical isolating control** (D' for
+heterogeneity inside the D family). Finer-grain axis isolation
+(critique format, round count) is reserved for follow-on
+ablations on whichever family Phase 1 surfaces as most
+promising. Codex flagged the earlier draft's ambiguity between
+"screen" and "isolating experiment"; this is the resolution.
 
 Additional conditions to consider, not committed to the primary
 Phase 1 matrix:
@@ -354,7 +419,7 @@ Both are LLM-judged by construction and would reintroduce the
 judge-apparatus question Phase 1 is explicitly deferring. These
 return in Phase 2 as part of the open-ended-helpfulness arm.
 
-### Task difficulty calibration
+### Task difficulty strata
 
 Calibrate task difficulty so the best single subject model
 succeeds in a measurable regime — not near 0% (where nothing
@@ -363,25 +428,67 @@ executable benchmarks the calibration lever is *selection*:
 pick a subset where the best subject model lands in the target
 band, rather than constructing buckets de novo.
 
-Use difficulty strata rather than a single target:
+Use three strata rather than a single target:
 
-- 30–40% one-shot success (harder for subjects)
-- 45–55% one-shot success (middle zone)
-- 60–70% one-shot success (easier for subjects)
+- **30–40%** one-shot success (harder for subjects)
+- **45–55%** one-shot success (middle zone)
+- **60–70%** one-shot success (easier for subjects)
 
-The strata hypothesis (Gemini's framing): collaboration helps
-most in the middle band, degrades slightly on easy items
-(reviewer-induced hallucinations on correct code), and fails on
-very hard items (the blind leading the blind). Averaging across
-a single wide band would wash out this threshold dynamic, which
-is exactly what the research question asks about ("when does a
-protocol outperform"). Keep the strata.
+The strata exist because the research question asks **when** —
+not just whether — a protocol outperforms. "When" is a gating
+question, and the strata are how it is operationalized.
 
-Codex's concern that three strata fragment statistical power is
-real but addressable: stratify post-hoc for analysis while
-pooling for the primary pre-registered statistical test. This
-preserves both the threshold-dynamic signal and the headline
-power.
+### The strata hypothesis
+
+Collaboration protocols are expected to exhibit a utility curve
+across task difficulty (Gemini's framing):
+
+- **Easy band (60–70%):** collaboration may slightly *degrade*
+  performance. Reviewers "find" issues in already-correct drafts
+  and introduce changes that make them worse.
+- **Middle band (45–55%):** collaboration shines. The draft is
+  often close but flawed; a reviewer who catches the flaw
+  enables a substantive revision.
+- **Hard band (30–40%):** collaboration fails or is neutral.
+  Neither writer nor reviewer reliably knows the right answer,
+  so review adds noise without adding signal ("the blind leading
+  the blind").
+
+If this hypothesis is right, the protocol effect *depends on*
+difficulty. A pooled main-effect test averages a negative easy
+effect, a positive middle effect, and a null hard effect into
+approximately zero — the trap Gemini flagged.
+
+### Statistical plan
+
+**Primary pre-registered test:** the **Protocol × Stratum
+interaction**. Specifically, "does the protocol's effect on
+success rate differ systematically across the three strata in
+the direction predicted by the strata hypothesis?" This directly
+tests the "when" in the research question.
+
+**Pre-specified stratified estimates:** protocol effect within
+each stratum (easy, middle, hard), reported alongside the
+interaction test. Because these are pre-specified (not
+post-hoc), they are not fishing — they are the concrete form the
+interaction takes.
+
+**Pooled main effect:** reported as a secondary descriptive
+summary, not as the primary finding. A null pooled effect does
+not kill the result if the interaction is significant; a
+positive pooled effect is a bonus, not a requirement.
+
+**Reporting flow:** the narrative can read as a drilldown
+("overall score at $2X: D = X%, B = Y%; within the middle band,
+D = X' %, B = Y' %") — the only constraint is that the
+statistical primacy is on the interaction, not the pooled
+average.
+
+**Fallback if power is too thin to detect the interaction.**
+Collapse Phase 1 to the middle band (45–55%) only, with the
+other two strata deferred to Phase 2 or dropped. This preserves
+the cleanest signal at the cost of the "when does it help"
+granularity.
 
 
 ## Compute Budget Structure
@@ -534,13 +641,38 @@ constraint.
 Phase 1 uses **executable scoring only**. Per task bucket:
 
 - **SWE-bench:** patch application and test suite execution
-  inside the per-instance Docker environment.
+  inside the per-instance Docker environment. **Binary score**
+  per instance: the full per-instance test suite either passes
+  or does not.
 - **LiveCodeBench:** test execution against the declared test
-  set.
-- **BFCL:** executability on the declared tool surface
-  (argument validity, invocation success, output-shape match).
-- **Private set (if included):** executable check paired with
-  each item at authoring time.
+  set. **Fractional score** per instance: fraction of declared
+  tests that pass.
+- **BFCL:** executability on the declared tool surface.
+  **Binary score** per instance: argument validity + invocation
+  success + output-shape match.
+- **Private set (if included):** per-item executable check
+  paired at authoring time. Binary or fractional depending on
+  the check.
+
+**Success rate** is the aggregation: for binary buckets, fraction
+of instances scored positively; for fractional buckets, mean
+fractional score across instances. Stratum-level success rate
+is computed the same way within each stratum.
+
+**Tie-breaking.** For any comparison where two conditions finish
+with identical success rates at a matched budget tier (e.g.
+both at 0% or both at 100% within a small stratum), the
+tie-breaker is **dollars per solved task** — i.e. the cheaper
+condition wins. If neither solves anything, the tie stands and
+is reported as such.
+
+**Handling of hard failures** (Docker environment refuses to
+build, API returns a malformed response, network errors): the
+task instance is retried up to three times on transient errors;
+after that the instance is scored as a failure for that
+condition. All retries are counted toward the dollar budget.
+The number of hard failures per condition is recorded as a
+diagnostic.
 
 Blinded model identities still matter for the *internal* work
 of protocols that include critique steps (Variable K) — see
@@ -610,40 +742,62 @@ These need decisions before the matrix is finalized:
 
 ## Validation status
 
-This document has been through one round of preliminary feedback
-from Codex (`mcs-coord`) and Gemini (`mcs-coord-gemini`) on an
-earlier 2026-04-14 version. The current revision (second pass
-on 2026-04-14) folds in the convergent points from that
-feedback:
+This document has been through two rounds of preliminary
+feedback from Codex (`mcs-coord`) and Gemini (`mcs-coord-gemini`)
+on 2026-04-14. The current revision (third pass, same day)
+folds in the substantive points from both rounds.
 
-- Condition B's selector is explicitly held constant with the
-  multi-model conditions (both reviewers flagged this as the
-  most dangerous seam).
-- D' (homogeneous ReConcile) added as a heterogeneity isolator
-  (Gemini's explicit recommendation; matches Codex's concern
-  that the earlier matrix conflated protocol with pool
-  composition).
-- K (identity blinding) locked as fixed default (Gemini's
-  explicit recommendation).
-- Phase 1 scope narrowed to executable scoring only
-  (originated in this project's own reconsideration of
-  "walk-before-run"; decouples from the judge-apparatus
-  question).
-- Compute unit switched to US dollars (addresses Codex's
-  request that the compute proxy be made explicit, chooses
-  dollars over tokens for the reasons in Compute Budget
-  Structure).
-- Difficulty strata kept rather than collapsed (Gemini's
-  threshold-dynamic argument) but with post-hoc stratification
-  for analysis and pooled pre-registered primary test
-  (addresses Codex's power concern).
-- Adversarial debate deferred (both reviewers agreed).
+**From the first round** (converged):
+
+- Condition B's selector needed to be held constant with the
+  multi-model conditions. (Addressed structurally by scoping
+  Phase 1 to executable scoring.)
+- D' (homogeneous ReConcile) added as a heterogeneity-comparison
+  control inside the D family.
+- K (identity blinding) locked as fixed default.
+- Compute unit switched to US dollars.
+- Adversarial debate deferred.
+
+**From the first round** (project-originated, not from reviewers
+but interacted with their concerns): Phase 1 scope narrowed to
+executable scoring only (walk-before-run).
+
+**From the second round** (substantive):
+
+- **Selector-as-oracle flaw (Gemini):** the second-pass draft
+  used executable scoring as the internal selector, which
+  turns B into Pass@N and mechanically disadvantages
+  consensus-building protocols. Fixed: internal selectors are
+  now part of each protocol's definition, non-oracle
+  (majority vote, peer-LLM judgment, or protocol-native
+  aggregation), counting toward the dollar budget. Executable
+  scoring is the final evaluator only.
+- **Statistical-plan trap (Gemini):** pooling strata for the
+  primary test averages opposing threshold effects to null.
+  Fixed: the primary pre-registered test is now the Protocol
+  × Stratum interaction, with stratified estimates as
+  pre-specified detail and the pooled average as secondary
+  descriptive summary. Fallback to the middle band alone if
+  power is too thin for the interaction.
+- **Overreaching isolation claims (Codex):** D' → C and D → E
+  were described as isolating comparisons, but each changes
+  multiple things. Fixed: those are now described as
+  family-level screen comparisons, not isolations. D' → D is
+  still the heterogeneity comparison but is described as
+  isolating "heterogeneous pool composition within a fixed
+  protocol family under market prices" — not lineage diversity
+  in a pure sense, because of price arbitrage.
+- **Tie-breaking and partial-credit policy (Codex):** now
+  specified in the Scoring section.
+- **Internal calls count toward the budget (Codex):** now
+  explicitly stated.
 
 Before promotion to `experimental-design.md`, this revision
 still needs:
 
-- Second-pass review from Codex and Gemini against the revised
-  matrix.
+- Third-pass review from Codex and Gemini against the latest
+  matrix — confirmation that the substantive fixes from round
+  two actually resolve the issues they flagged.
 - Cross-check against `protocol-inventory.md` that no
   load-bearing axis was dropped.
 - Dollar cost estimate for the full Phase 1 matrix at the

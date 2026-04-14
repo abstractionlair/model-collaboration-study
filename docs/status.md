@@ -28,9 +28,15 @@ Second-pass multi-model review will follow the edit.
 
 ## Next up
 
-1. Edit `experimental-design_draft.md` to reflect the Phase 1 scope
-   narrowing and matrix restructuring; send revised draft back to
-   Codex and Gemini for second-pass review.
+1. Third editing pass on `experimental-design_draft.md` to fold in
+   second-pass feedback from Codex and Gemini: (a) selector is
+   part of each protocol's definition (non-oracle, per-protocol);
+   (b) pre-register Protocol × Stratum interaction as primary
+   statistical test; (c) modest-claim rewrite of "What the matrix
+   isolates"; (d) tie-breaking and partial-credit policy for
+   executable scoring; (e) explicit statement that protocol-internal
+   calls count toward the dollar budget. Send revised draft for a
+   third review.
 2. Build the experiment-spec layer — the piece between the IR and a
    real run. Prompts, model assignments, task slices, dollar budgets,
    metrics.
@@ -43,9 +49,11 @@ Second-pass multi-model review will follow the edit.
 
 ## Currently routed to
 
-`docs/research/experimental-design_draft.md` — under revision
-2026-04-14 (second pass), narrowing Phase 1 to executable-scoring
-only and restructuring the condition matrix.
+`docs/research/experimental-design_draft.md` — third pass in
+progress 2026-04-14. Fixing the selector-as-oracle flaw Gemini
+flagged, switching to pre-registered Protocol × Stratum
+interaction as primary test, tightening the "what the matrix
+isolates" claims per Codex.
 
 
 ## Blockers
