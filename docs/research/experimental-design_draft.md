@@ -102,18 +102,25 @@ labels in parentheses):
 Additional axes the experiment commits to varying or measuring,
 even though not named in the research question:
 
-- **Selection rule** (inventory: F) — majority vote, single judge,
-  judge panel, verifier-aided selection.
-- **Judge information regime** (inventory: G) — final answers
-  only, process traces, reference-guided judging.
 - **Capability gap** (inventory: H) — weaker reviewers checking
   stronger writers, peers checking peers, stronger reviewers
-  checking weaker writers.
-- **Task type** (inventory: I) — verifiable coding/tool tasks
-  versus open-ended helpfulness/reasoning.
+  checking weaker writers. In Phase 1, capability gap is mostly
+  flat (the three subject models are near each other in
+  capability); real gap-varying comes in later phases.
+- **Task type** (inventory: I) — Phase 1 is restricted to
+  verifiable coding/tool tasks. Open-ended helpfulness/reasoning
+  is deferred to Phase 2 along with the LLM-judge apparatus.
 - **Interaction framing** (inventory: B) — collaborative review
   versus adversarial debate. Treated as a higher-cost ablation,
-  not a primary axis.
+  deferred from Phase 1.
+
+**Selection rule** (inventory: F) and **judge information
+regime** (inventory: G) are not varied in Phase 1. With
+executable scoring, the selection rule is fixed to "pick the
+candidate that passes the executable check" (or the one that
+passes the most tests, for partial-credit cases), and there is
+no judge to vary the information regime of. These become IVs in
+Phase 2 when LLM-judged open-ended tasks enter the suite.
 
 Inventory variables E (session context), J (confidence weighting),
 K (identity blinding), L (judgment format pairwise vs pointwise),
@@ -291,11 +298,10 @@ subagent-style work:
 - Claude Haiku 4.5 (Anthropic)
 - Gemini 2.5 Flash (Google)
 
-**Judges.** Frontier models from different families. Use cross-family
-judging (the leave-one-family-out rule: OpenAI doesn't judge GPT
-outputs, Anthropic doesn't judge Claude outputs, etc.) to mitigate
-self-preference bias. See `judge-design-notes_draft.md` for the
-full judge protocol.
+**Judges (Phase 1).** None. Final scoring is executable. Frontier
+models only enter as judges in Phase 2, when open-ended tasks
+join the suite. See `judge-design-notes_draft.md` for that
+deferred planning.
 
 **Pricing anchors** (per 1M tokens in/out, captured during the
 exploratory phase — verify before kickoff):
@@ -481,9 +487,10 @@ vendor-specific feature stacks rather than the protocol structure:
   for GPT-5.4 mini; Google advises specific stable models rather
   than preview aliases).
 
-These constraints apply to the *subject* models. The judge model
-is allowed richer affordances where the judge protocol calls for
-them (e.g. execution-aided judging on coding tasks).
+These constraints apply to the subject models. In Phase 1 there
+is no judge model; scoring is executable. In Phase 2 the judge
+will be allowed richer affordances (e.g. execution-aided
+judging on coding tasks) per the Phase 2 design.
 
 
 ## Critique Rubric
@@ -550,9 +557,10 @@ Phase 2's judge validation.
 
 ## Phased Execution
 
-1. **Phase 1: Method validation.** API models, automated judging,
-   full protocol matrix. Establishes which protocol design choices
-   matter.
+1. **Phase 1: Method validation on verifiable tasks.** API
+   models, executable scoring only, protocol screen plus the D'
+   heterogeneity isolator. Establishes which protocol design
+   choices matter on tasks where ground truth is mechanical.
 2. **Phase 2: Transfer testing.** Test the top 2–3 conditions with
    self-hosted open models to check whether Phase 1 results
    transfer outside the frontier-API substrate.
