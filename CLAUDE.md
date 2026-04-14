@@ -8,8 +8,14 @@ oversight quality improves, degrades, or is wasted compute?"
 
 ## Current Phase
 
-**Inspiration** — extracting useful content from the exploratory
-conversations that started the project into `docs/research/inspiration.md`.
+**Inspiration → Question transition, with DSL infrastructure being
+built in parallel.** Protocol inventory is mature; the typed IR and
+surface layer exist at `src/ir/` and `src/protocols/`. Next substantive
+work is the executor.
+
+**See [docs/status.md](docs/status.md) at session start** — it has the
+current state, immediate next actions, and pointers to everything
+that's been decided.
 
 
 ## Model Guidance
@@ -73,12 +79,18 @@ structure, review procedures, and templates.
 
 ### Key artifacts
 
-- `docs/research/inspiration.md` — extracted insights (current phase)
+- `docs/status.md` — rolling snapshot of project state, read first
+- `docs/research/inspiration.md` — extracted insights
+- `docs/research/protocol-inventory.md` — semi-formal notation, 37+
+  protocol variants, 19 structural variables
 - `docs/research/question.md` — research question (not yet written)
 - `docs/research/experimental-design.md` — protocol and variables (not yet written)
-- `docs/literature/` — literature synthesis (to be populated)
+- `docs/literature/` — literature search, paper votes, full text for voted papers
 - `docs/reviews/` — multi-model review artifacts
+- `docs/discussions/` — joint design discussions with Codex/Gemini
 - `docs/decisions.md` — decision log
+- `src/ir/` — typed protocol IR (core + surface authoring layer)
+- `src/protocols/` — protocols expressed in the IR (CCR, ReConcile so far)
 
 ### When to consult WORKFLOW.md
 

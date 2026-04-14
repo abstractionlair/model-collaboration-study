@@ -1,0 +1,1450 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification</title>
+<!--Generated on Tue Mar 17 08:00:07 2026 by LaTeXML (version 0.8.8) http://dlmf.nist.gov/LaTeXML/.-->
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="stylesheet" href="/static/browse/0.3.4/css/arxiv-html-papers-20260131.css" type="text/css">
+<script src="/static/browse/0.3.4/js/arxiv-html-papers-20260131.js"></script>
+<script>
+  // Restore the saved color scheme preference, or
+  // enact the browser preference if "automatic", 
+  // without expecting DOM load to have completed.
+  //
+  // Also restore any saved readingmode and ToC display preferences.
+  function initializeReadingPreferences() {
+    let saved_theme = localStorage.getItem("ar5iv_theme") || "automatic";
+    if (saved_theme === "automatic") {
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        saved_theme = "dark";
+      }
+    }
+    if (saved_theme == "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+
+    const tocDisplay = localStorage.getItem('arxiv_html_paper_toc_display');
+    if (tocDisplay) {
+      document.documentElement.setAttribute("data-toc-display", tocDisplay);
+    }
+    const readingMode = localStorage.getItem('arxiv_html_paper_reading_mode');
+    if (readingMode) {
+      document.documentElement.setAttribute("data-reading-mode", readingMode);
+    }
+  }
+  // Run as soon as JS starts, to minimize repainting
+  initializeReadingPreferences();
+</script>
+<link rel="apple-touch-icon" sizes="180x180"
+  href="/static/browse/0.3.4/images/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32"
+  href="/static/browse/0.3.4/images/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16"
+  href="/static/browse/0.3.4/images/icons/favicon-16x16.png">
+<link rel="manifest" href="/static/browse/0.3.4/images/icons/site.webmanifest">
+<link rel="mask-icon" href="/static/browse/0.3.4/images/icons/safari-pinned-tab.svg" color="#5bbad5">
+<link rel="stylesheet" type="text/css" media="screen" href="https://use.typekit.net/utz6mli.css">
+</head>
+<body>
+<dialog id="modal-form" aria-labelledby="modal-title" closedby="any">
+  <form id="modal-form-content" method="dialog" enctype="multipart/form-data">
+    <header class="modal-header">
+      <h5 id="modal-title" class="modal-title">Report GitHub Issue</h5>
+      <button type="submit" formnovalidate class="modal-close" aria-label="Close">×</button>
+    </header>
+
+    <div class="modal-body">
+      <label for="form_title">Title:</label>
+      <input class="form-control" id="form_title" name="form_title" required placeholder="Enter title">
+
+      <p id="selectedTextModalDescription" hidden>Content selection saved. Describe the issue below:</p>
+
+      <label for="description">Description:</label>
+      <textarea class="form-control" id="description" name="description" required maxlength="500"
+        placeholder="500 characters maximum"></textarea>
+    </div>
+
+    <footer class="modal-footer">
+      <button type="submit" value="internal-report" class="sr-only modal-submit">Submit without GitHub</button>
+      <button type="submit" value="github-report" class="modal-submit">Submit in GitHub</button>
+    </footer>
+  </form>
+</dialog>
+
+<header class="arxiv-html-header">
+  <div class="html-header-logo">
+    <a href="/">
+      <img alt="arXiv logo" class="logo desktop-only" width="100"
+        src="/static/browse/0.3.4/images/arxiv-logo-one-color-white.svg">
+      <span class="sr-only">Back to arXiv</span>
+    </a>
+  </div>
+  <!--TOC, dark mode, links-->
+  <nav class="html-header-nav">
+    <a class="header-button hover-effect desktop-only" href="https://info.arxiv.org/about/accessible_HTML.html"
+      target="_blank">Why HTML?</a>
+    <a class="header-button" title="Report an Issue" href="#" title="Report an issue"
+      onclick="event.preventDefault(); showModalForm();">
+      <svg role="presentation" class="mobile-only toggle-icon" aria-hidden="true" height="1.25rem"
+        viewBox="0 0 640 640">
+        <path
+          d="M224 160C224 107 267 64 320 64C373 64 416 107 416 160L416 163.6C416 179.3 403.3 192 387.6 192L252.5 192C236.8 192 224.1 179.3 224.1 163.6L224.1 160zM569.6 172.8C580.2 186.9 577.3 207 563.2 217.6L465.4 290.9C470.7 299.8 474.7 309.6 477.2 320L576 320C593.7 320 608 334.3 608 352C608 369.7 593.7 384 576 384L480 384L480 416C480 418.6 479.9 421.3 479.8 423.9L563.2 486.4C577.3 497 580.2 517.1 569.6 531.2C559 545.3 538.9 548.2 524.8 537.6L461.7 490.3C438.5 534.5 395.2 566.5 344 574.2L344 344C344 330.7 333.3 320 320 320C306.7 320 296 330.7 296 344L296 574.2C244.8 566.5 201.5 534.5 178.3 490.3L115.2 537.6C101.1 548.2 81 545.3 70.4 531.2C59.8 517.1 62.7 497 76.8 486.4L160.2 423.9C160.1 421.3 160 418.7 160 416L160 384L64 384C46.3 384 32 369.7 32 352C32 334.3 46.3 320 64 320L162.8 320C165.3 309.6 169.3 299.8 174.6 290.9L76.8 217.6C62.7 207 59.8 186.9 70.4 172.8C81 158.7 101.1 155.8 115.2 166.4L224 248C236.3 242.9 249.8 240 264 240L376 240C390.2 240 403.7 242.8 416 248L524.8 166.4C538.9 155.8 559 158.7 569.6 172.8z" />
+      </svg>
+      <span class="desktop-only">Report Issue</span></a>
+    <!--back to abstract-->
+    <a class="header-button" title="Back to abstract page" aria-label="Back to abstract page"
+      href="/abs/2603.16244v1">
+      <svg class="mobile-only toggle-icon" role="presentation" height="1.25rem" viewBox="0 0 512 512" fill="#ffffff"
+        aria-hidden="true">
+        <path
+          d="M502.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224 192 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128zM160 96c17.7 0 32-14.3 32-32s-14.3-32-32-32L96 32C43 32 0 75 0 128L0 384c0 53 43 96 96 96l64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l64 0z">
+        </path>
+      </svg>
+      <span class="desktop-only">Back to Abstract</span>
+    </a>
+    <!-- PDF download link -->
+    <a class="header-button" title="Download PDF" href="/pdf/2603.16244v1"
+      target="_blank">
+      <svg class="mobile-only toggle-icon" role="presentation" height="1.25rem" viewBox="0 0 576 542">
+        <path
+          d="M208 48L96 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16l80 0 0 48-80 0c-35.3 0-64-28.7-64-64L32 64C32 28.7 60.7 0 96 0L229.5 0c17 0 33.3 6.7 45.3 18.7L397.3 141.3c12 12 18.7 28.3 18.7 45.3l0 149.5-48 0 0-128-88 0c-39.8 0-72-32.2-72-72l0-88zM348.1 160L256 67.9 256 136c0 13.3 10.7 24 24 24l68.1 0zM240 380l32 0c33.1 0 60 26.9 60 60s-26.9 60-60 60l-12 0 0 28c0 11-9 20-20 20s-20-9-20-20l0-128c0-11 9-20 20-20zm32 80c11 0 20-9 20-20s-9-20-20-20l-12 0 0 40 12 0zm96-80l32 0c28.7 0 52 23.3 52 52l0 64c0 28.7-23.3 52-52 52l-32 0c-11 0-20-9-20-20l0-128c0-11 9-20 20-20zm32 128c6.6 0 12-5.4 12-12l0-64c0-6.6-5.4-12-12-12l-12 0 0 88 12 0zm76-108c0-11 9-20 20-20l48 0c11 0 20 9 20 20s-9 20-20 20l-28 0 0 24 28 0c11 0 20 9 20 20s-9 20-20 20l-28 0 0 44c0 11-9 20-20 20s-20-9-20-20l0-128z" />
+      </svg>
+      <span class="desktop-only">Download PDF</span></a>
+    <!-- navigational table of contents toggle -->
+    <a class="header-button toggle-icon" href="javascript:toggleNavTOC();" title="Toggle navigation"
+      aria-label="Toggle navigation">
+      <svg height="1.25rem" role="presentation" viewBox="0 0 512 512">
+        <path
+          d="M40 48C26.7 48 16 58.7 16 72v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V72c0-13.3-10.7-24-24-24H40zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zM16 232v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V232c0-13.3-10.7-24-24-24H40c-13.3 0-24 10.7-24 24zM40 368c-13.3 0-24 10.7-24 24v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V392c0-13.3-10.7-24-24-24H40z">
+        </path>
+      </svg>
+    </a>
+    <!--- collapsable header / reading mode toggle -->
+    <a class="header-button toggle-icon" href="javascript:toggleReadingMode();"
+      title="Disable reading mode, show header and footer">
+      <svg role="presentation" height="1.25rem"
+        viewBox="0 0 448 512"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+        <path
+          d="M32 32C14.3 32 0 46.3 0 64l0 96c0 17.7 14.3 32 32 32s32-14.3 32-32l0-64 64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 32zM64 352c0-17.7-14.3-32-32-32S0 334.3 0 352l0 96c0 17.7 14.3 32 32 32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0 0-64zM320 32c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0 0 64c0 17.7 14.3 32 32 32s32-14.3 32-32l0-96c0-17.7-14.3-32-32-32l-96 0zM448 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 64-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l96 0c17.7 0 32-14.3 32-32l0-96z" />
+      </svg>
+    </a>
+    <!--- colored theme toggle -->
+    <a class="header-button color-tog" href="javascript:toggleColorScheme();" title="Toggle dark/light mode">
+      <label class="toggle-icon automatic-tog" title="Switch to light mode">
+        <svg role="presentation" height="1.25rem" viewBox="0 0 24 24">
+          <path
+            d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9h-1.9M20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69m-9.15 3.96h2.3L12 9l-1.15 3.65Z">
+          </path>
+        </svg>
+      </label>
+      <label class="toggle-icon light-tog" title="Switch to dark mode">
+        <svg role="presentation" height="1.25rem" viewBox="0 0 24 24">
+          <path
+            d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z">
+          </path>
+        </svg>
+      </label>
+      <label class="toggle-icon dark-tog" title="Switch to system preference">
+        <svg role="presentation" height="1.25rem" viewBox="0 0 24 24">
+          <path
+            d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z">
+          </path>
+        </svg>
+      </label>
+    </a>
+  </nav>
+</header><nav class="ltx_page_navbar">
+<nav class="ltx_TOC">
+<ol class="ltx_toclist">
+<li class="ltx_tocentry ltx_tocentry_abstract"><a href="#abstract1" title="In More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title">Abstract</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_section"><a href="#S1" title="In More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">1 </span>Introduction</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_section">
+<a href="#S2" title="In More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">2 </span>Related Work</span></a>
+<ol class="ltx_toclist ltx_toclist_section">
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S2.SS1" title="In 2 Related Work ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">2.1 </span>Multi-Round LLM Verification</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S2.SS2" title="In 2 Related Work ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">2.2 </span>Self-Correction Limitations</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S2.SS3" title="In 2 Related Work ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">2.3 </span>Multi-Agent Debate</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S2.SS4" title="In 2 Related Work ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">2.4 </span>CCR Foundation</span></a></li>
+</ol>
+</li>
+<li class="ltx_tocentry ltx_tocentry_section">
+<a href="#S3" title="In More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3 </span>Method: Dynamic Cross-Context Review</span></a>
+<ol class="ltx_toclist ltx_toclist_section">
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S3.SS1" title="In 3 Method: Dynamic Cross-Context Review ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.1 </span>D-CCR Protocol</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S3.SS2" title="In 3 Method: Dynamic Cross-Context Review ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.2 </span>Experimental Conditions</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S3.SS3" title="In 3 Method: Dynamic Cross-Context Review ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.3 </span>Research Questions</span></a></li>
+</ol>
+</li>
+<li class="ltx_tocentry ltx_tocentry_section">
+<a href="#S4" title="In More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">4 </span>Experimental Setup</span></a>
+<ol class="ltx_toclist ltx_toclist_section">
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S4.SS1" title="In 4 Experimental Setup ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">4.1 </span>Artifacts and Ground Truth</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S4.SS2" title="In 4 Experimental Setup ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">4.2 </span>Execution</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S4.SS3" title="In 4 Experimental Setup ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">4.3 </span>Prompt Design and Review Target Drift</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S4.SS4" title="In 4 Experimental Setup ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">4.4 </span>Matching Algorithm</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S4.SS5" title="In 4 Experimental Setup ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">4.5 </span>Statistical Methods</span></a></li>
+</ol>
+</li>
+<li class="ltx_tocentry ltx_tocentry_section">
+<a href="#S5" title="In More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">5 </span>Results</span></a>
+<ol class="ltx_toclist ltx_toclist_section">
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S5.SS1" title="In 5 Results ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">5.1 </span>Overall Performance</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S5.SS2" title="In 5 Results ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">5.2 </span>Hypothesis Tests</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S5.SS3" title="In 5 Results ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">5.3 </span>The Recall–Precision Tradeoff</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S5.SS4" title="In 5 Results ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">5.4 </span>Marginal Discovery Rate</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S5.SS5" title="In 5 Results ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">5.5 </span>Performance by Artifact Type</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S5.SS6" title="In 5 Results ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">5.6 </span>Per-Artifact Analysis</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S5.SS7" title="In 5 Results ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">5.7 </span>Reproducibility</span></a></li>
+</ol>
+</li>
+<li class="ltx_tocentry ltx_tocentry_section">
+<a href="#S6" title="In More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">6 </span>Discussion</span></a>
+<ol class="ltx_toclist ltx_toclist_section">
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S6.SS1" title="In 6 Discussion ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">6.1 </span>Why More Rounds Fail: False Positive Pressure</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S6.SS2" title="In 6 Discussion ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">6.2 </span>Review Target Drift</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S6.SS3" title="In 6 Discussion ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">6.3 </span>The Round Optimization Principle</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S6.SS4" title="In 6 Discussion ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">6.4 </span>Practical Implication: Ensemble Over Iteration</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#S6.SS5" title="In 6 Discussion ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">6.5 </span>Implications for the CCR Research Program</span></a></li>
+</ol>
+</li>
+<li class="ltx_tocentry ltx_tocentry_section"><a href="#S7" title="In More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">7 </span>Limitations</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_section"><a href="#S8" title="In More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">8 </span>Ethics and Broader Impact</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_section"><a href="#S9" title="In More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">9 </span>Conclusion</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_bibliography"><a href="#bib" title="In More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title">References</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_appendix">
+<a href="#A1" title="In More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">A </span>Pilot Experiment and Prompt Evolution</span></a>
+<ol class="ltx_toclist ltx_toclist_appendix">
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#A1.SS1" title="In Appendix A Pilot Experiment and Prompt Evolution ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">A.1 </span>Pilot Design and H2 Drop Decision</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#A1.SS2" title="In Appendix A Pilot Experiment and Prompt Evolution ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">A.2 </span>Prompt v1 <math class="ltx_Math" alttext="\to" display="inline" intent=":literal"><semantics><mo stretchy="false">→</mo><annotation encoding="application/x-tex">\to</annotation></semantics></math> v2</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="#A1.SS3" title="In Appendix A Pilot Experiment and Prompt Evolution ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">A.3 </span>Matching Algorithm Evolution</span></a></li>
+</ol>
+</li>
+<li class="ltx_tocentry ltx_tocentry_appendix"><a href="#A2" title="In More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">B </span>Threshold Robustness Analysis</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_appendix"><a href="#A3" title="In More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">C </span>Ensemble Analysis</span></a></li>
+</ol></nav>
+</nav>
+<div class="ltx_page_main">
+<div id="infobox" class="infobox">
+  <a id="license-tr" href="https://info.arxiv.org/help/license/index.html#licenses-available">
+    License: CC BY 4.0
+  </a>
+  <div id="watermark-tr">
+arXiv:2603.16244v1 [cs.CL] 17 Mar 2026</div>
+</div><div class="ltx_page_content">
+<article class="ltx_document">
+<h1 class="ltx_title ltx_title_document">More Rounds, More Noise: Why Multi-Turn Review Fails
+<br class="ltx_break">to Improve Cross-Context Verification</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Song Tae-Eun 
+<br class="ltx_break">Daejeon Jungang Cheonggua Co., Ltd. 
+<br class="ltx_break"><span id="id1.1.id1" class="ltx_text ltx_font_typewriter">higheun@gmail.com</span>
+</span></span>
+</div>
+
+<div id="abstract1" class="ltx_abstract">
+<h6 class="ltx_title ltx_title_abstract">Abstract</h6>
+<p class="ltx_p">Cross-Context Review (CCR) improves LLM verification by separating production and review into independent sessions.
+A natural extension is multi-turn review: letting the reviewer ask follow-up questions, receive author responses, and review again.
+We call this Dynamic Cross-Context Review (D-CCR).
+In a controlled experiment with 30 artifacts and 150 injected errors, we tested four D-CCR variants against the single-pass CCR baseline.
+Single-pass CCR (F1 = 0.376) significantly outperformed all multi-turn variants, including D-CCR-2b with question-and-answer exchange (F1 = 0.303, <math class="ltx_Math" alttext="p&lt;0.001" display="inline" intent=":literal"><semantics><mrow><mi>p</mi><mo>&lt;</mo><mn>0.001</mn></mrow><annotation encoding="application/x-tex">p&lt;0.001</annotation></semantics></math>, <math class="ltx_Math" alttext="d=-0.59" display="inline" intent=":literal"><semantics><mrow><mi>d</mi><mo>=</mo><mrow><mo>−</mo><mn>0.59</mn></mrow></mrow><annotation encoding="application/x-tex">d=-0.59</annotation></semantics></math>).
+Multi-turn review increased recall (+0.08) but generated 62% more false positives (8.5 vs. 5.2), collapsing precision from 0.30 to 0.20.
+Two mechanisms drive this degradation: (1) <em class="ltx_emph ltx_font_italic">false positive pressure</em>—reviewers in later rounds fabricate findings when the artifact’s real errors have been exhausted, and (2) <em class="ltx_emph ltx_font_italic">Review Target Drift</em>—reviewers provided with prior Q&amp;A exchanges shift from reviewing the artifact to critiquing the conversation itself.
+Independent re-review without prior context (D-CCR-2c) performed worst (F1 = 0.263), confirming that mere repetition degrades rather than helps.
+The degradation stems from false positive pressure in additional rounds, not from information amount—within multi-turn conditions, more information actually helps (D-CCR-2b <math class="ltx_Math" alttext="&gt;" display="inline" intent=":literal"><semantics><mo>&gt;</mo><annotation encoding="application/x-tex">&gt;</annotation></semantics></math> D-CCR-2a).
+The problem is not what the reviewer sees, but that reviewing again invites noise.</p>
+</div>
+<div id="p1" class="ltx_para ltx_noindent">
+<div id="p1.1" class="ltx_block ltx_align_bottom">
+<p id="p1.1.1" class="ltx_p ltx_align_center"><span id="p1.1.1.1" class="ltx_text ltx_font_bold">More Rounds, More Noise: Why Multi-Turn Review Fails
+<br class="ltx_break">to Improve Cross-Context Verification</span></p>
+<p id="p1.1.2" class="ltx_p ltx_align_center" style="width:345.0pt;"><span id="p1.1.2.1" class="ltx_text ltx_inline-block" style="width:0.0pt;">
+<span id="p1.1.2.1.1" class="ltx_tabular ltx_align_top">
+<span class="ltx_tbody">
+<span id="p1.1.2.1.1.1.1" class="ltx_tr">
+<span id="p1.1.2.1.1.1.1.1" class="ltx_td ltx_align_center"><span id="p1.1.2.1.1.1.1.1.1" class="ltx_text ltx_font_bold">Song Tae-Eun</span></span></span>
+<span id="p1.1.2.1.1.2.2" class="ltx_tr">
+<span id="p1.1.2.1.1.2.2.1" class="ltx_td ltx_align_center">Daejeon Jungang Cheonggua Co., Ltd.</span></span>
+<span id="p1.1.2.1.1.3.3" class="ltx_tr">
+<span id="p1.1.2.1.1.3.3.1" class="ltx_td ltx_align_center"><span id="p1.1.2.1.1.3.3.1.1" class="ltx_text ltx_font_typewriter">higheun@gmail.com</span></span></span>
+</span>
+</span></span></p>
+</div>
+</div>
+<section id="S1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">1 </span>Introduction</h2>
+
+<div id="S1.p1" class="ltx_para">
+<p id="S1.p1.2" class="ltx_p">Cross-Context Review <cite class="ltx_cite ltx_citemacro_citep">(CCR; Song, <a href="#bib.bib11" title="Cross-context review: improving LLM output quality by separating production and review sessions" class="ltx_ref">2026</a>)</cite> demonstrated that LLM verification improves when production and review happen in separate sessions.
+By removing the production context, the reviewer avoids anchoring, sycophancy, and context degradation—biases that plague same-session self-review.
+CCR achieved an F1 of 28.6%, significantly outperforming same-session review (24.6%, <math id="S1.p1.1.m1" class="ltx_Math" alttext="p=0.008" display="inline" intent=":literal"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.008</mn></mrow><annotation encoding="application/x-tex">p=0.008</annotation></semantics></math>) and repeated same-session review (21.7%, <math id="S1.p1.2.m2" class="ltx_Math" alttext="p&lt;0.001" display="inline" intent=":literal"><semantics><mrow><mi>p</mi><mo>&lt;</mo><mn>0.001</mn></mrow><annotation encoding="application/x-tex">p&lt;0.001</annotation></semantics></math>).</p>
+</div>
+<div id="S1.p2" class="ltx_para">
+<p id="S1.p2.1" class="ltx_p">Can we do better with multiple rounds? Human review processes routinely involve follow-up questions—a code reviewer asks why a particular approach was chosen; a peer reviewer requests clarification on methodology.
+These exchanges often surface issues that a single read misses.
+<cite class="ltx_cite ltx_citemacro_citet">Kim<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="#bib.bib7" title="LLM-as-an-interviewer: beyond static testing through dynamic LLM evaluation" class="ltx_ref">2025</a>)</cite> showed that multi-turn interviewer-style LLM evaluation reduces bias and improves robustness compared to single-pass assessment, though without context separation.</p>
+</div>
+<div id="S1.p3" class="ltx_para">
+<p id="S1.p3.1" class="ltx_p">We tested whether combining CCR’s context separation with multi-turn interaction yields further gains.
+In Dynamic Cross-Context Review (D-CCR), the reviewer conducts an initial review, generates follow-up questions, receives the author’s answers in a separate session preserving context separation, and reviews again with this additional information.</p>
+</div>
+<div id="S1.p4" class="ltx_para">
+<p id="S1.p4.1" class="ltx_p">The results are negative.
+Every multi-turn variant produced lower F1 than the single-pass baseline, with three of four comparisons highly significant (<math id="S1.p4.1.m1" class="ltx_Math" alttext="p&lt;0.001" display="inline" intent=":literal"><semantics><mrow><mi>p</mi><mo>&lt;</mo><mn>0.001</mn></mrow><annotation encoding="application/x-tex">p&lt;0.001</annotation></semantics></math>).
+Additional rounds generate false positives faster than they discover true errors.</p>
+</div>
+<div id="S1.p5" class="ltx_para">
+<p id="S1.p5.1" class="ltx_p">This paper makes four contributions:</p>
+</div>
+<div id="S1.p6" class="ltx_para">
+<ol id="S1.I1" class="ltx_enumerate">
+<li id="S1.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">1.</span> 
+<div id="S1.I1.i1.p1" class="ltx_para">
+<p id="S1.I1.i1.p1.3" class="ltx_p">We demonstrate empirically that the optimal number of CCR review rounds is one.
+Multi-turn review significantly degrades F1 (<math id="S1.I1.i1.p1.1.m1" class="ltx_Math" alttext="-0.073" display="inline" intent=":literal"><semantics><mrow><mo>−</mo><mn>0.073</mn></mrow><annotation encoding="application/x-tex">-0.073</annotation></semantics></math>, <math id="S1.I1.i1.p1.2.m2" class="ltx_Math" alttext="p&lt;0.001" display="inline" intent=":literal"><semantics><mrow><mi>p</mi><mo>&lt;</mo><mn>0.001</mn></mrow><annotation encoding="application/x-tex">p&lt;0.001</annotation></semantics></math>, <math id="S1.I1.i1.p1.3.m3" class="ltx_Math" alttext="d=-0.59" display="inline" intent=":literal"><semantics><mrow><mi>d</mi><mo>=</mo><mrow><mo>−</mo><mn>0.59</mn></mrow></mrow><annotation encoding="application/x-tex">d=-0.59</annotation></semantics></math>) despite modestly improving recall (+0.08).</p>
+</div>
+</li>
+<li id="S1.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">2.</span> 
+<div id="S1.I1.i2.p1" class="ltx_para">
+<p id="S1.I1.i2.p1.1" class="ltx_p">We identify <em id="S1.I1.i2.p1.1.1" class="ltx_emph ltx_font_italic">false positive pressure</em>—a systematic tendency for reviewers to fabricate findings in later rounds when the artifact’s real errors have been largely exhausted in round one.</p>
+</div>
+</li>
+<li id="S1.I1.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">3.</span> 
+<div id="S1.I1.i3.p1" class="ltx_para">
+<p id="S1.I1.i3.p1.1" class="ltx_p">We document <em id="S1.I1.i3.p1.1.1" class="ltx_emph ltx_font_italic">Review Target Drift</em>—a failure mode where reviewers provided with Q&amp;A exchanges shift their attention from the artifact to the conversation, generating findings about the author’s answers rather than the artifact itself.</p>
+</div>
+</li>
+<li id="S1.I1.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">4.</span> 
+<div id="S1.I1.i4.p1" class="ltx_para">
+<p id="S1.I1.i4.p1.1" class="ltx_p">We establish a <em id="S1.I1.i4.p1.1.1" class="ltx_emph ltx_font_italic">round optimization principle</em>: within multi-turn conditions, more information helps (D-CCR-2b <math id="S1.I1.i4.p1.1.m1" class="ltx_Math" alttext="&gt;" display="inline" intent=":literal"><semantics><mo>&gt;</mo><annotation encoding="application/x-tex">&gt;</annotation></semantics></math> D-CCR-2a), but any second round degrades performance relative to a single pass.
+The problem is not what the reviewer sees, but that reviewing again invites noise.</p>
+</div>
+</li>
+</ol>
+</div>
+</section>
+<section id="S2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">2 </span>Related Work</h2>
+
+<section id="S2.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.1 </span>Multi-Round LLM Verification</h3>
+
+<div id="S2.SS1.p1" class="ltx_para">
+<p id="S2.SS1.p1.1" class="ltx_p">Several lines of work have explored iterative LLM verification.
+<cite class="ltx_cite ltx_citemacro_citet">Guo<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="#bib.bib4" title="Temporal consistency for LLM reasoning process error identification" class="ltx_ref">2025</a>)</cite> showed that temporal consistency checking improves error identification in mathematical reasoning, but within a single context.
+<cite class="ltx_cite ltx_citemacro_citet">Chen<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="#bib.bib1" title="MAgICoRe: multi-agent, iterative, coarse-to-fine refinement for reasoning" class="ltx_ref">2025</a>)</cite> proposed MAgICoRe, a multi-agent iterative refinement framework where Solver, Reviewer, and Refiner agents collaborate in repeated loops, achieving gains over self-consistency and self-refinement baselines.
+The critical difference: MAgICoRe’s agents share context, while D-CCR maintains strict context separation.</p>
+</div>
+<div id="S2.SS1.p2" class="ltx_para">
+<p id="S2.SS1.p2.1" class="ltx_p"><cite class="ltx_cite ltx_citemacro_citet">Shi and others (<a href="#bib.bib9" title="SSR: socratic self-refine for large language model reasoning" class="ltx_ref">2025</a>)</cite> developed Socratic Self-Refine (SSR), decomposing reasoning into verifiable sub-question/sub-answer pairs and iteratively re-solving unstable steps.
+The Socratic probing approach parallels D-CCR’s follow-up question mechanism, but SSR operates within a single session.
+<cite class="ltx_cite ltx_citemacro_citet">Du<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="#bib.bib2" title="Think thrice before you act: progressive thought refinement in large language models" class="ltx_ref">2025</a>)</cite> showed that progressive thought refinement across multiple passes improves reasoning, though via fine-tuning rather than inference-time intervention.</p>
+</div>
+<div id="S2.SS1.p3" class="ltx_para">
+<p id="S2.SS1.p3.1" class="ltx_p">These works establish that multi-round verification <em id="S2.SS1.p3.1.1" class="ltx_emph ltx_font_italic">can</em> help within shared or continuous contexts. We show that when context separation is maintained, the dynamics change fundamentally.</p>
+</div>
+</section>
+<section id="S2.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.2 </span>Self-Correction Limitations</h3>
+
+<div id="S2.SS2.p1" class="ltx_para">
+<p id="S2.SS2.p1.1" class="ltx_p">The self-correction literature explains why additional rounds might fail.
+<cite class="ltx_cite ltx_citemacro_citet">Kumar<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="#bib.bib8" title="Training language models to self-correct via reinforcement learning" class="ltx_ref">2025</a>)</cite> demonstrated that prompting-based self-correction is fundamentally limited—reinforcement learning is needed for genuine improvement.
+Giving a CCR reviewer another chance, even with additional information, does not overcome these limitations.</p>
+</div>
+<div id="S2.SS2.p2" class="ltx_para">
+<p id="S2.SS2.p2.1" class="ltx_p"><cite class="ltx_cite ltx_citemacro_citet">Huang<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="#bib.bib5" title="Large language models cannot self-correct reasoning yet" class="ltx_ref">2024</a>)</cite> and <cite class="ltx_cite ltx_citemacro_citet">Kamoi<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="#bib.bib6" title="When can LLMs actually correct their own mistakes? A critical survey of self-correction of LLMs" class="ltx_ref">2024</a>)</cite> established that LLMs cannot reliably correct their own reasoning without external feedback.
+<cite class="ltx_cite ltx_citemacro_citet">Zhang<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="#bib.bib14" title="Understanding the dark side of LLMs’ intrinsic self-correction" class="ltx_ref">2025b</a>)</cite> found that self-correction can flip correct answers to incorrect ones.
+<cite class="ltx_cite ltx_citemacro_citet">Tsui (<a href="#bib.bib12" title="Self-correction bench: uncovering and addressing the self-correction blind spot in large language models" class="ltx_ref">2025</a>)</cite> identified the self-correction blind spot: LLMs fail to correct errors in their own outputs while succeeding on identical errors presented as external input.
+CCR exploits this asymmetry; our results suggest that additional rounds erode the advantage.</p>
+</div>
+</section>
+<section id="S2.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.3 </span>Multi-Agent Debate</h3>
+
+<div id="S2.SS3.p1" class="ltx_para">
+<p id="S2.SS3.p1.1" class="ltx_p">Multi-agent debate (MAD) research illuminates why more interaction does not always help.
+<cite class="ltx_cite ltx_citemacro_citet">Zhang<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="#bib.bib15" title="If multi-agent debate is the answer, what is the question?" class="ltx_ref">2025a</a>)</cite> evaluated five MAD methods across nine benchmarks and found that MAD does not reliably outperform single-agent baselines.
+The only consistent improvement factor was <em id="S2.SS3.p1.1.1" class="ltx_emph ltx_font_italic">model heterogeneity</em>—using different models, not different prompts.
+D-CCR uses a single model, which may explain why additional rounds fail to introduce genuine diversity.</p>
+</div>
+<div id="S2.SS3.p2" class="ltx_para">
+<p id="S2.SS3.p2.1" class="ltx_p"><cite class="ltx_cite ltx_citemacro_citet">Wu<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="#bib.bib13" title="Can LLM agents really debate? A controlled study of multi-agent debate in logical reasoning" class="ltx_ref">2025</a>)</cite> identified <em id="S2.SS3.p2.1.1" class="ltx_emph ltx_font_italic">majority pressure</em> as a key failure mode: when agents interact, the majority view suppresses independent correction.
+This parallels our Review Target Drift—D-CCR reviewers who see prior Q&amp;A exchanges shift toward evaluating the discussion rather than independently examining the artifact.</p>
+</div>
+<div id="S2.SS3.p3" class="ltx_para">
+<p id="S2.SS3.p3.1" class="ltx_p"><cite class="ltx_cite ltx_citemacro_citet">Smit and others (<a href="#bib.bib10" title="Should we be going MAD? A look at multi-agent debate strategies for LLMs" class="ltx_ref">2024</a>)</cite> confirmed that MAD does not reliably beat simpler methods like self-consistency or ensembling.
+<cite class="ltx_cite ltx_citemacro_citet">Gou<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="#bib.bib3" title="CRITIC: large language models can self-correct with tool-interactive critiquing" class="ltx_ref">2024</a>)</cite> showed that external tools (calculators, code execution) enable genuine self-correction in ways that purely verbal feedback cannot—suggesting that D-CCR’s verbal Q&amp;A exchange is insufficient as “external feedback.”</p>
+</div>
+</section>
+<section id="S2.SS4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.4 </span>CCR Foundation</h3>
+
+<div id="S2.SS4.p1" class="ltx_para">
+<p id="S2.SS4.p1.3" class="ltx_p"><cite class="ltx_cite ltx_citemacro_citet">Song (<a href="#bib.bib11" title="Cross-context review: improving LLM output quality by separating production and review sessions" class="ltx_ref">2026</a>)</cite> established that context separation is the operative mechanism in CCR: reviewing in a fresh session (F1 = 28.6%) outperforms same-session review (24.6%, <math id="S2.SS4.p1.1.m1" class="ltx_Math" alttext="p=0.008" display="inline" intent=":literal"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.008</mn></mrow><annotation encoding="application/x-tex">p=0.008</annotation></semantics></math>), and repeated same-session review provides no benefit (SR2 <math id="S2.SS4.p1.2.m2" class="ltx_Math" alttext="\approx" display="inline" intent=":literal"><semantics><mo>≈</mo><annotation encoding="application/x-tex">\approx</annotation></semantics></math> SR, <math id="S2.SS4.p1.3.m3" class="ltx_Math" alttext="p=0.11" display="inline" intent=":literal"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.11</mn></mrow><annotation encoding="application/x-tex">p=0.11</annotation></semantics></math>).
+We extend this by testing whether the <em id="S2.SS4.p1.3.1" class="ltx_emph ltx_font_italic">number</em> of separated review rounds matters.
+That one round is optimal strengthens the original claim: it is the separation itself, not the amount of review, that drives improvement.</p>
+</div>
+</section>
+</section>
+<section id="S3" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">3 </span>Method: Dynamic Cross-Context Review</h2>
+
+<section id="S3.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.1 </span>D-CCR Protocol</h3>
+
+<div id="S3.SS1.p1" class="ltx_para">
+<p id="S3.SS1.p1.1" class="ltx_p">D-CCR extends CCR by adding structured interaction between reviewer and author across separated sessions:</p>
+</div>
+<div id="S3.SS1.p2" class="ltx_para">
+<pre id="S3.SS1.p2.1" class="ltx_verbatim ltx_font_typewriter">
+CCR (single-pass):
+  A -&gt; Artifact -&gt; B -&gt; Report
+
+D-CCR (multi-turn):
+  A -&gt; Artifact -&gt; B1 -&gt; Review + Questions
+                              |
+                   A’ -&gt; Answers
+                              |
+                   B2 -&gt; Final Report
+</pre>
+</div>
+<div id="S3.SS1.p3" class="ltx_para">
+<p id="S3.SS1.p3.3" class="ltx_p">Each arrow represents a separate session with no shared context.
+B<sub id="S3.SS1.p3.3.1" class="ltx_sub">1</sub> and B<sub id="S3.SS1.p3.3.2" class="ltx_sub">2</sub> are independent reviewer sessions.
+A<sup id="S3.SS1.p3.3.3" class="ltx_sup"><span id="S3.SS1.p3.3.3.1" class="ltx_text ltx_font_italic">′</span></sup> is a new author session that sees only the artifact and the questions—not the original production context.</p>
+</div>
+</section>
+<section id="S3.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.2 </span>Experimental Conditions</h3>
+
+<div id="S3.SS2.p1" class="ltx_para">
+<p id="S3.SS2.p1.1" class="ltx_p">We tested four conditions, varying what information the reviewer receives in round two:</p>
+</div>
+<figure id="S3.SS2.tab1" class="ltx_table">
+<div id="S3.SS2.tab1.1" class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:433.6pt;height:87.1pt;vertical-align:-40.0pt;"><span class="ltx_transformed_inner" style="transform:translate(64.6pt,-13.0pt) scale(1.42429833394847,1.42429833394847) ;">
+<table id="S3.SS2.tab1.1.1" class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S3.SS2.tab1.1.1.1.1" class="ltx_tr">
+<th id="S3.SS2.tab1.1.1.1.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_border_tt"><span id="S3.SS2.tab1.1.1.1.1.1.1" class="ltx_text ltx_font_bold">Condition</span></th>
+<th id="S3.SS2.tab1.1.1.1.1.2" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_border_tt"><span id="S3.SS2.tab1.1.1.1.1.2.1" class="ltx_text ltx_font_bold">Round 1</span></th>
+<th id="S3.SS2.tab1.1.1.1.1.3" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_border_tt"><span id="S3.SS2.tab1.1.1.1.1.3.1" class="ltx_text ltx_font_bold">Round 2</span></th>
+<th id="S3.SS2.tab1.1.1.1.1.4" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_border_tt"><span id="S3.SS2.tab1.1.1.1.1.4.1" class="ltx_text ltx_font_bold">Purpose</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S3.SS2.tab1.1.1.2.1" class="ltx_tr">
+<td id="S3.SS2.tab1.1.1.2.1.1" class="ltx_td ltx_align_left ltx_border_t">CCR-1</td>
+<td id="S3.SS2.tab1.1.1.2.1.2" class="ltx_td ltx_align_left ltx_border_t">Artifact only</td>
+<td id="S3.SS2.tab1.1.1.2.1.3" class="ltx_td ltx_align_left ltx_border_t">—</td>
+<td id="S3.SS2.tab1.1.1.2.1.4" class="ltx_td ltx_align_left ltx_border_t">Baseline</td>
+</tr>
+<tr id="S3.SS2.tab1.1.1.3.2" class="ltx_tr">
+<td id="S3.SS2.tab1.1.1.3.2.1" class="ltx_td ltx_align_left">D-CCR-2a</td>
+<td id="S3.SS2.tab1.1.1.3.2.2" class="ltx_td ltx_align_left">Artifact only</td>
+<td id="S3.SS2.tab1.1.1.3.2.3" class="ltx_td ltx_align_left">Artifact + questions</td>
+<td id="S3.SS2.tab1.1.1.3.2.4" class="ltx_td ltx_align_left">Question-only</td>
+</tr>
+<tr id="S3.SS2.tab1.1.1.4.3" class="ltx_tr">
+<td id="S3.SS2.tab1.1.1.4.3.1" class="ltx_td ltx_align_left">D-CCR-2b</td>
+<td id="S3.SS2.tab1.1.1.4.3.2" class="ltx_td ltx_align_left">Artifact only</td>
+<td id="S3.SS2.tab1.1.1.4.3.3" class="ltx_td ltx_align_left">Artifact + Q&amp;A</td>
+<td id="S3.SS2.tab1.1.1.4.3.4" class="ltx_td ltx_align_left">Full D-CCR</td>
+</tr>
+<tr id="S3.SS2.tab1.1.1.5.4" class="ltx_tr">
+<td id="S3.SS2.tab1.1.1.5.4.1" class="ltx_td ltx_align_left ltx_border_bb">D-CCR-2c</td>
+<td id="S3.SS2.tab1.1.1.5.4.2" class="ltx_td ltx_align_left ltx_border_bb">Artifact only</td>
+<td id="S3.SS2.tab1.1.1.5.4.3" class="ltx_td ltx_align_left ltx_border_bb">Artifact only (fresh)</td>
+<td id="S3.SS2.tab1.1.1.5.4.4" class="ltx_td ltx_align_left ltx_border_bb">Independence</td>
+</tr>
+</tbody>
+</table>
+</span></div>
+</figure>
+<div id="S3.SS2.p2" class="ltx_para">
+<p id="S3.SS2.p2.1" class="ltx_p">D-CCR-2a isolates the effect of the reviewer seeing their own prior questions.
+D-CCR-2b is the full D-CCR protocol with author answers.
+D-CCR-2c controls for the “two looks” effect by providing a completely fresh second review with no information from round one.</p>
+</div>
+</section>
+<section id="S3.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.3 </span>Research Questions</h3>
+
+<div id="S3.SS3.p1" class="ltx_para">
+<p id="S3.SS3.p1.1" class="ltx_p"><span id="S3.SS3.p1.1.1" class="ltx_text ltx_font_bold">RQ1.</span> Does multi-turn D-CCR outperform single-pass CCR? (H1: D-CCR-2b <math id="S3.SS3.p1.1.m1" class="ltx_Math" alttext="&gt;" display="inline" intent=":literal"><semantics><mo>&gt;</mo><annotation encoding="application/x-tex">&gt;</annotation></semantics></math> CCR-1)</p>
+</div>
+<div id="S3.SS3.p2" class="ltx_para">
+<p id="S3.SS3.p2.1" class="ltx_p"><span id="S3.SS3.p2.1.1" class="ltx_text ltx_font_bold">RQ2.</span> Does the author’s answer help or anchor the reviewer? (H3: D-CCR-2b vs. D-CCR-2a)<span id="footnote1" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">1</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">1</sup><span class="ltx_tag ltx_tag_note">1</span>H2 (D-CCR-3b vs. D-CCR-2b) was dropped after pilot—see Appendix <a href="#A1" title="Appendix A Pilot Experiment and Prompt Evolution ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">A</span></a>.</span></span></span></p>
+</div>
+<div id="S3.SS3.p3" class="ltx_para">
+<p id="S3.SS3.p3.1" class="ltx_p"><span id="S3.SS3.p3.1.1" class="ltx_text ltx_font_bold">RQ3.</span> Is continuity better than independence in multi-round review? (H4: D-CCR-2b vs. D-CCR-2c)</p>
+</div>
+<div id="S3.SS3.p4" class="ltx_para">
+<p id="S3.SS3.p4.1" class="ltx_p"><span id="S3.SS3.p4.1.1" class="ltx_text ltx_font_bold">RQ4.</span> Does independent repetition improve over single-pass? (H5: D-CCR-2c vs. CCR-1)</p>
+</div>
+</section>
+</section>
+<section id="S4" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">4 </span>Experimental Setup</h2>
+
+<section id="S4.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.1 </span>Artifacts and Ground Truth</h3>
+
+<div id="S4.SS1.p1" class="ltx_para">
+<p id="S4.SS1.p1.1" class="ltx_p">We reused the 30 artifacts and 150 ground-truth errors from the CCR experiment <cite class="ltx_cite ltx_citemacro_citep">(Song, <a href="#bib.bib11" title="Cross-context review: improving LLM output quality by separating production and review sessions" class="ltx_ref">2026</a>)</cite>: 10 code artifacts (C1–C10), 10 technical documents (D1–D10), and 10 presentation scripts (S1–S10), each containing exactly 5 injected errors across five types (FACT, CONS, CTXT, RCVR, MISS) at three severity levels.</p>
+</div>
+</section>
+<section id="S4.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.2 </span>Execution</h3>
+
+<div id="S4.SS2.p1" class="ltx_para">
+<p id="S4.SS2.p1.1" class="ltx_p">All sessions used Claude Opus 4.6 via the <span id="S4.SS2.p1.1.1" class="ltx_text ltx_font_typewriter">claude</span> CLI with the <span id="S4.SS2.p1.1.2" class="ltx_text ltx_font_typewriter">-p</span> flag, which launches each invocation as an independent session with no context carryover.
+This provides natural context separation: each CLI call is functionally equivalent to a fresh API session.
+The CLI uses default API parameters: temperature = 1.0 (Claude API default), no top-<math id="S4.SS2.p1.1.m1" class="ltx_Math" alttext="p" display="inline" intent=":literal"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math> override, no max token limit override (model default applies).
+No custom sampling parameters were set.</p>
+</div>
+<div id="S4.SS2.p2" class="ltx_para">
+<p id="S4.SS2.p2.3" class="ltx_p">For the main experiment, we ran CCR-1, D-CCR-2a, and D-CCR-2b with 3 independent runs per artifact (<math id="S4.SS2.p2.1.m1" class="ltx_Math" alttext="30\times 3=90" display="inline" intent=":literal"><semantics><mrow><mrow><mn>30</mn><mo lspace="0.222em" rspace="0.222em">×</mo><mn>3</mn></mrow><mo>=</mo><mn>90</mn></mrow><annotation encoding="application/x-tex">30\times 3=90</annotation></semantics></math> sessions each), and D-CCR-2c with 1 run (30 sessions).
+This totaled 300 experimental units (artifact <math id="S4.SS2.p2.2.m2" class="ltx_Math" alttext="\times" display="inline" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math> condition <math id="S4.SS2.p2.3.m3" class="ltx_Math" alttext="\times" display="inline" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math> run).
+Each multi-turn unit required multiple CLI invocations (R1 review, question generation, author answer, R2 review), so the total number of CLI calls exceeded 300.
+D-CCR-2c received only 1 run because pilot data showed its pattern was already clear, and D-CCR-3b (a three-round variant) was dropped after pilot results confirmed diminishing returns beyond round two.</p>
+</div>
+<div id="S4.SS2.p3" class="ltx_para">
+<p id="S4.SS2.p3.1" class="ltx_p">The review prompt was in Korean, matching the artifact language.
+This addresses the language confound noted in the original CCR experiment <cite class="ltx_cite ltx_citemacro_citep">(Song, <a href="#bib.bib11" title="Cross-context review: improving LLM output quality by separating production and review sessions" class="ltx_ref">2026</a>)</cite>, where fresh-session reviews defaulted to English.
+In D-CCR, all conditions produced 94–96% Korean-language output, effectively controlling for language effects.</p>
+</div>
+</section>
+<section id="S4.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.3 </span>Prompt Design and Review Target Drift</h3>
+
+<div id="S4.SS3.p1" class="ltx_para">
+<p id="S4.SS3.p1.1" class="ltx_p">During pilot testing (10 artifacts <math id="S4.SS3.p1.1.m1" class="ltx_Math" alttext="\times" display="inline" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math> 5 conditions), we discovered a systematic failure mode in the D-CCR-2b prompt.
+The initial prompt included “also verify whether the author’s answers are correct,” which caused reviewers to shift from reviewing the artifact to critiquing the Q&amp;A conversation—generating findings about answer accuracy rather than artifact errors.
+We call this <em id="S4.SS3.p1.1.1" class="ltx_emph ltx_font_italic">Review Target Drift</em>.</p>
+</div>
+<div id="S4.SS3.p2" class="ltx_para">
+<p id="S4.SS3.p2.1" class="ltx_p">In one representative pilot case, 3 of 4 new D-CCR-2b Round 2 findings were critiques of the author’s answers (e.g., “Q3’s suggested fix has a type mismatch”), not artifact errors.
+Since these critiques have no corresponding ground truth entry, they all count as false positives.</p>
+</div>
+<div id="S4.SS3.p3" class="ltx_para">
+<p id="S4.SS3.p3.1" class="ltx_p">We revised the prompt (v2) to constrain the review target: “The author’s answers are for reference only.
+Focus on finding new errors <em id="S4.SS3.p3.1.1" class="ltx_emph ltx_font_italic">in the artifact itself</em>.
+Do not critique the Q&amp;A exchange.” This reduced the most egregious cases but did not eliminate the FP increase, suggesting a structural component beyond prompt wording.</p>
+</div>
+<div id="S4.SS3.p4" class="ltx_para">
+<p id="S4.SS3.p4.1" class="ltx_p">The v1<math id="S4.SS3.p4.1.m1" class="ltx_Math" alttext="\to" display="inline" intent=":literal"><semantics><mo stretchy="false">→</mo><annotation encoding="application/x-tex">\to</annotation></semantics></math>v2 prompt change constitutes an ablation on review target specification; we discuss its implications in Section <a href="#S6" title="6 Discussion ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a>.</p>
+</div>
+</section>
+<section id="S4.SS4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.4 </span>Matching Algorithm</h3>
+
+<div id="S4.SS4.p1" class="ltx_para">
+<p id="S4.SS4.p1.1" class="ltx_p">We match reviewer findings to ground-truth errors using a scoring function that combines: (1) line number proximity (<math id="S4.SS4.p1.1.m1" class="ltx_Math" alttext="\pm" display="inline" intent=":literal"><semantics><mo>±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math>5 lines), (2) keyword overlap with Korean morphological normalization (suffix stripping for agglutinative particles), and (3) fuzzy substring matching.
+A finding counts as a true positive if its score exceeds 2.0.</p>
+</div>
+<div id="S4.SS4.p2" class="ltx_para">
+<p id="S4.SS4.p2.1" class="ltx_p">Korean suffix stripping was added after independent verification identified that keyword matching underperformed on Korean text due to agglutinative morphology.
+The relative ordering of conditions was consistent across all thresholds tested (1.0–3.0).</p>
+</div>
+<div id="S4.SS4.p3" class="ltx_para">
+<p id="S4.SS4.p3.1" class="ltx_p">The D-CCR CCR-1 baseline (F1 = 0.376) exceeds the original CCR experiment’s fresh-session result (F1 = 0.286; <cite class="ltx_cite ltx_citemacro_citep">Song, <a href="#bib.bib11" title="Cross-context review: improving LLM output quality by separating production and review sessions" class="ltx_ref">2026</a></cite>).
+This reflects the v2 matching algorithm (Korean suffix stripping + fuzzy substring matching), not a change in review quality—re-analyzing the original CCR data with v2 yields comparable values.
+All conditions use the same matching algorithm, so relative comparisons are valid.</p>
+</div>
+</section>
+<section id="S4.SS5" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.5 </span>Statistical Methods</h3>
+
+<div id="S4.SS5.p1" class="ltx_para">
+<p id="S4.SS5.p1.1" class="ltx_p">Precision is defined as TP / Findings, where Findings = TP + FP + Dup (see Section <a href="#S5" title="5 Results ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a>).
+This means duplicate findings—those matching a ground-truth error already identified by another finding—count against precision.
+This is conservative: it penalizes verbose reviewers who describe the same error multiple times with different wording.</p>
+</div>
+<div id="S4.SS5.p2" class="ltx_para">
+<p id="S4.SS5.p2.4" class="ltx_p">We compute per-artifact F1 scores averaged across 3 runs (1 run for D-CCR-2c), yielding 30 paired observations per comparison.
+We report paired <math id="S4.SS5.p2.1.m1" class="ltx_Math" alttext="t" display="inline" intent=":literal"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>-tests with Cohen’s <math id="S4.SS5.p2.2.m2" class="ltx_Math" alttext="d" display="inline" intent=":literal"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math> for effect size, supplemented by Wilcoxon signed-rank tests for non-parametric confirmation.
+We conduct four planned comparisons (H1, H3, H4, H5); applying Bonferroni correction (<math id="S4.SS5.p2.3.m3" class="ltx_Math" alttext="\alpha=0.05/4=0.0125" display="inline" intent=":literal"><semantics><mrow><mi>α</mi><mo>=</mo><mrow><mn>0.05</mn><mo>/</mo><mn>4</mn></mrow><mo>=</mo><mn>0.0125</mn></mrow><annotation encoding="application/x-tex">\alpha=0.05/4=0.0125</annotation></semantics></math>), all significant results remain significant (all <math id="S4.SS5.p2.4.m4" class="ltx_Math" alttext="p&lt;0.001" display="inline" intent=":literal"><semantics><mrow><mi>p</mi><mo>&lt;</mo><mn>0.001</mn></mrow><annotation encoding="application/x-tex">p&lt;0.001</annotation></semantics></math> except H3, which is non-significant regardless of correction).</p>
+</div>
+</section>
+</section>
+<section id="S5" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">5 </span>Results</h2>
+
+<section id="S5.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.1 </span>Overall Performance</h3>
+
+<div id="S5.SS1.p1" class="ltx_para">
+<p id="S5.SS1.p1.1" class="ltx_p">Table <a href="#S5.T1" title="Table 1 ‣ 5.1 Overall Performance ‣ 5 Results ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a> shows the main results, with per-artifact scores averaged across runs.</p>
+</div>
+<figure id="S5.T1" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 1: </span>Main experiment results (<math id="S5.T1.2.m1" class="ltx_Math" alttext="N=30" display="inline" intent=":literal"><semantics><mrow><mi>N</mi><mo>=</mo><mn>30</mn></mrow><annotation encoding="application/x-tex">N=30</annotation></semantics></math> artifacts).
+Findings = TP + FP + Dup, where Dup counts findings matching a ground-truth error already identified by another finding (redundant true positives).
+Duplicate rates increase with rounds (15% for CCR-1 vs. 30% for D-CCR-2c).</figcaption>
+<table id="S5.T1.3" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S5.T1.3.1.1" class="ltx_tr">
+<th id="S5.T1.3.1.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt"><span id="S5.T1.3.1.1.1.1" class="ltx_text ltx_font_bold">Condition</span></th>
+<th id="S5.T1.3.1.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S5.T1.3.1.1.2.1" class="ltx_text ltx_font_bold">Findings</span></th>
+<th id="S5.T1.3.1.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S5.T1.3.1.1.3.1" class="ltx_text ltx_font_bold">TP</span></th>
+<th id="S5.T1.3.1.1.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S5.T1.3.1.1.4.1" class="ltx_text ltx_font_bold">FP</span></th>
+<th id="S5.T1.3.1.1.5" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S5.T1.3.1.1.5.1" class="ltx_text ltx_font_bold">Dup</span></th>
+<th id="S5.T1.3.1.1.6" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S5.T1.3.1.1.6.1" class="ltx_text ltx_font_bold">Precision</span></th>
+<th id="S5.T1.3.1.1.7" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S5.T1.3.1.1.7.1" class="ltx_text ltx_font_bold">Recall</span></th>
+<th id="S5.T1.3.1.1.8" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S5.T1.3.1.1.8.1" class="ltx_text ltx_font_bold">F1</span></th>
+<th id="S5.T1.3.1.1.9" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S5.T1.3.1.1.9.1" class="ltx_text ltx_font_bold">F1 SD</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S5.T1.3.2.1" class="ltx_tr">
+<th id="S5.T1.3.2.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t"><span id="S5.T1.3.2.1.1.1" class="ltx_text ltx_font_bold">CCR-1</span></th>
+<td id="S5.T1.3.2.1.2" class="ltx_td ltx_align_center ltx_border_t">9.3</td>
+<td id="S5.T1.3.2.1.3" class="ltx_td ltx_align_center ltx_border_t">2.64</td>
+<td id="S5.T1.3.2.1.4" class="ltx_td ltx_align_center ltx_border_t">5.23</td>
+<td id="S5.T1.3.2.1.5" class="ltx_td ltx_align_center ltx_border_t">1.43</td>
+<td id="S5.T1.3.2.1.6" class="ltx_td ltx_align_center ltx_border_t"><span id="S5.T1.3.2.1.6.1" class="ltx_text ltx_font_bold">0.297</span></td>
+<td id="S5.T1.3.2.1.7" class="ltx_td ltx_align_center ltx_border_t">0.529</td>
+<td id="S5.T1.3.2.1.8" class="ltx_td ltx_align_center ltx_border_t"><span id="S5.T1.3.2.1.8.1" class="ltx_text ltx_font_bold">0.376</span></td>
+<td id="S5.T1.3.2.1.9" class="ltx_td ltx_align_center ltx_border_t">0.136</td>
+</tr>
+<tr id="S5.T1.3.3.2" class="ltx_tr">
+<th id="S5.T1.3.3.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">D-CCR-2a</th>
+<td id="S5.T1.3.3.2.2" class="ltx_td ltx_align_center">15.4</td>
+<td id="S5.T1.3.3.2.3" class="ltx_td ltx_align_center">2.96</td>
+<td id="S5.T1.3.3.2.4" class="ltx_td ltx_align_center">9.17</td>
+<td id="S5.T1.3.3.2.5" class="ltx_td ltx_align_center">3.27</td>
+<td id="S5.T1.3.3.2.6" class="ltx_td ltx_align_center">0.197</td>
+<td id="S5.T1.3.3.2.7" class="ltx_td ltx_align_center">0.591</td>
+<td id="S5.T1.3.3.2.8" class="ltx_td ltx_align_center">0.293</td>
+<td id="S5.T1.3.3.2.9" class="ltx_td ltx_align_center">0.102</td>
+</tr>
+<tr id="S5.T1.3.4.3" class="ltx_tr">
+<th id="S5.T1.3.4.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">D-CCR-2b</th>
+<td id="S5.T1.3.4.3.2" class="ltx_td ltx_align_center">15.2</td>
+<td id="S5.T1.3.4.3.3" class="ltx_td ltx_align_center">3.03</td>
+<td id="S5.T1.3.4.3.4" class="ltx_td ltx_align_center">8.47</td>
+<td id="S5.T1.3.4.3.5" class="ltx_td ltx_align_center">3.70</td>
+<td id="S5.T1.3.4.3.6" class="ltx_td ltx_align_center">0.204</td>
+<td id="S5.T1.3.4.3.7" class="ltx_td ltx_align_center">0.607</td>
+<td id="S5.T1.3.4.3.8" class="ltx_td ltx_align_center">0.303</td>
+<td id="S5.T1.3.4.3.9" class="ltx_td ltx_align_center">0.110</td>
+</tr>
+<tr id="S5.T1.3.5.4" class="ltx_tr">
+<th id="S5.T1.3.5.4.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb">D-CCR-2c</th>
+<td id="S5.T1.3.5.4.2" class="ltx_td ltx_align_center ltx_border_bb">18.4</td>
+<td id="S5.T1.3.5.4.3" class="ltx_td ltx_align_center ltx_border_bb">3.10</td>
+<td id="S5.T1.3.5.4.4" class="ltx_td ltx_align_center ltx_border_bb">9.70</td>
+<td id="S5.T1.3.5.4.5" class="ltx_td ltx_align_center ltx_border_bb">5.60</td>
+<td id="S5.T1.3.5.4.6" class="ltx_td ltx_align_center ltx_border_bb">0.168</td>
+<td id="S5.T1.3.5.4.7" class="ltx_td ltx_align_center ltx_border_bb"><span id="S5.T1.3.5.4.7.1" class="ltx_text ltx_font_bold">0.620</span></td>
+<td id="S5.T1.3.5.4.8" class="ltx_td ltx_align_center ltx_border_bb">0.263</td>
+<td id="S5.T1.3.5.4.9" class="ltx_td ltx_align_center ltx_border_bb">0.091</td>
+</tr>
+</tbody>
+</table>
+</figure>
+<div id="S5.SS1.p2" class="ltx_para">
+<p id="S5.SS1.p2.1" class="ltx_p">CCR-1 leads on F1 and precision.
+Multi-turn conditions produce 63–97% more findings but with substantially lower precision.
+D-CCR-2b finds slightly more true positives (3.03 vs. 2.64) but generates 62% more false positives (8.47 vs. 5.23), yielding a significant net F1 decrease.
+Figure <a href="#S5.F1" title="Figure 1 ‣ 5.1 Overall Performance ‣ 5 Results ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a> visualizes the tradeoff: multi-turn conditions gain recall at devastating cost to precision and F1.</p>
+</div>
+<figure id="S5.F1" class="ltx_figure"><img src="2603.16244v1/x1.png" id="S5.F1.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="830" height="490" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 1: </span>F1, Precision, and Recall by condition. CCR-1 achieves the highest F1 and Precision. Multi-turn conditions increase Recall but collapse Precision, resulting in lower F1.</figcaption>
+</figure>
+</section>
+<section id="S5.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.2 </span>Hypothesis Tests</h3>
+
+<div id="S5.SS2.p1" class="ltx_para">
+<p id="S5.SS2.p1.1" class="ltx_p">Table <a href="#S5.T2" title="Table 2 ‣ 5.2 Hypothesis Tests ‣ 5 Results ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> reports statistical comparisons.</p>
+</div>
+<figure id="S5.T2" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 2: </span>Paired tests (<math id="S5.T2.3.m1" class="ltx_Math" alttext="N=30" display="inline" intent=":literal"><semantics><mrow><mi>N</mi><mo>=</mo><mn>30</mn></mrow><annotation encoding="application/x-tex">N=30</annotation></semantics></math>). All significant results survive Bonferroni correction (<math id="S5.T2.4.m2" class="ltx_Math" alttext="\alpha=0.0125" display="inline" intent=":literal"><semantics><mrow><mi>α</mi><mo>=</mo><mn>0.0125</mn></mrow><annotation encoding="application/x-tex">\alpha=0.0125</annotation></semantics></math>).</figcaption>
+<div id="S5.T2.42" class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:345.0pt;height:40.7pt;vertical-align:-18.7pt;"><span class="ltx_transformed_inner" style="transform:translate(-87.3pt,10.3pt) scale(0.664076377806225,0.664076377806225) ;">
+<table id="S5.T2.42.38" class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S5.T2.10.6.6" class="ltx_tr">
+<th id="S5.T2.10.6.6.7" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_border_tt"><span id="S5.T2.10.6.6.7.1" class="ltx_text ltx_font_bold">Comparison</span></th>
+<th id="S5.T2.5.1.1.1" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt">
+<math id="S5.T2.5.1.1.1.m1" class="ltx_Math" alttext="\Delta" display="inline" intent=":literal"><semantics><mi mathvariant="normal">Δ</mi><annotation encoding="application/x-tex">\Delta</annotation></semantics></math><span id="S5.T2.5.1.1.1.1" class="ltx_text ltx_font_bold">F1</span>
+</th>
+<th id="S5.T2.10.6.6.8" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S5.T2.10.6.6.8.1" class="ltx_text ltx_font_bold">95% CI</span></th>
+<th id="S5.T2.6.2.2.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt">
+<span id="S5.T2.6.2.2.2.1" class="ltx_text ltx_font_bold">Cohen’s</span> <math id="S5.T2.6.2.2.2.m1" class="ltx_Math" alttext="d" display="inline" intent=":literal"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math>
+</th>
+<th id="S5.T2.7.3.3.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><math id="S5.T2.7.3.3.3.m1" class="ltx_Math" alttext="t" display="inline" intent=":literal"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math></th>
+<th id="S5.T2.8.4.4.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><math id="S5.T2.8.4.4.4.m1" class="ltx_Math" alttext="p" display="inline" intent=":literal"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math></th>
+<th id="S5.T2.9.5.5.5" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt">
+<span id="S5.T2.9.5.5.5.1" class="ltx_text ltx_font_bold">Wilcoxon</span> <math id="S5.T2.9.5.5.5.m1" class="ltx_Math" alttext="z" display="inline" intent=":literal"><semantics><mi>z</mi><annotation encoding="application/x-tex">z</annotation></semantics></math>
+</th>
+<th id="S5.T2.10.6.6.6" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><math id="S5.T2.10.6.6.6.m1" class="ltx_Math" alttext="p" display="inline" intent=":literal"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math></th>
+<th id="S5.T2.10.6.6.9" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_border_tt"><span id="S5.T2.10.6.6.9.1" class="ltx_text ltx_font_bold">Dir.</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S5.T2.18.14.14" class="ltx_tr">
+<td id="S5.T2.18.14.14.9" class="ltx_td ltx_align_left ltx_border_t">H1: 2b vs. CCR-1</td>
+<td id="S5.T2.11.7.7.1" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T2.11.7.7.1.m1" class="ltx_Math" alttext="-0.073" display="inline" intent=":literal"><semantics><mrow><mo>−</mo><mn>0.073</mn></mrow><annotation encoding="application/x-tex">-0.073</annotation></semantics></math></td>
+<td id="S5.T2.13.9.9.3" class="ltx_td ltx_align_center ltx_border_t">[<math id="S5.T2.12.8.8.2.m1" class="ltx_Math" alttext="-0.105" display="inline" intent=":literal"><semantics><mrow><mo>−</mo><mn>0.105</mn></mrow><annotation encoding="application/x-tex">-0.105</annotation></semantics></math>, <math id="S5.T2.13.9.9.3.m2" class="ltx_Math" alttext="-0.040" display="inline" intent=":literal"><semantics><mrow><mo>−</mo><mn>0.040</mn></mrow><annotation encoding="application/x-tex">-0.040</annotation></semantics></math>]</td>
+<td id="S5.T2.14.10.10.4" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T2.14.10.10.4.m1" class="ltx_Math" alttext="-0.59" display="inline" intent=":literal"><semantics><mrow><mo>−</mo><mn>0.59</mn></mrow><annotation encoding="application/x-tex">-0.59</annotation></semantics></math></td>
+<td id="S5.T2.15.11.11.5" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T2.15.11.11.5.m1" class="ltx_Math" alttext="-4.57" display="inline" intent=":literal"><semantics><mrow><mo>−</mo><mn>4.57</mn></mrow><annotation encoding="application/x-tex">-4.57</annotation></semantics></math></td>
+<td id="S5.T2.16.12.12.6" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T2.16.12.12.6.m1" class="ltx_Math" alttext="{&lt;}0.001" display="inline" intent=":literal"><semantics><mrow><mi></mi><mo>&lt;</mo><mn>0.001</mn></mrow><annotation encoding="application/x-tex">{&lt;}0.001</annotation></semantics></math></td>
+<td id="S5.T2.17.13.13.7" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T2.17.13.13.7.m1" class="ltx_Math" alttext="-3.63" display="inline" intent=":literal"><semantics><mrow><mo>−</mo><mn>3.63</mn></mrow><annotation encoding="application/x-tex">-3.63</annotation></semantics></math></td>
+<td id="S5.T2.18.14.14.8" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T2.18.14.14.8.m1" class="ltx_Math" alttext="{&lt;}0.001" display="inline" intent=":literal"><semantics><mrow><mi></mi><mo>&lt;</mo><mn>0.001</mn></mrow><annotation encoding="application/x-tex">{&lt;}0.001</annotation></semantics></math></td>
+<td id="S5.T2.18.14.14.10" class="ltx_td ltx_align_left ltx_border_t"><span id="S5.T2.18.14.14.10.1" class="ltx_text ltx_font_bold">Rev.</span></td>
+</tr>
+<tr id="S5.T2.26.22.22" class="ltx_tr">
+<td id="S5.T2.26.22.22.9" class="ltx_td ltx_align_left">H3: 2b vs. 2a</td>
+<td id="S5.T2.19.15.15.1" class="ltx_td ltx_align_center"><math id="S5.T2.19.15.15.1.m1" class="ltx_Math" alttext="+0.010" display="inline" intent=":literal"><semantics><mrow><mo>+</mo><mn>0.010</mn></mrow><annotation encoding="application/x-tex">+0.010</annotation></semantics></math></td>
+<td id="S5.T2.21.17.17.3" class="ltx_td ltx_align_center">[<math id="S5.T2.20.16.16.2.m1" class="ltx_Math" alttext="-0.014" display="inline" intent=":literal"><semantics><mrow><mo>−</mo><mn>0.014</mn></mrow><annotation encoding="application/x-tex">-0.014</annotation></semantics></math>, <math id="S5.T2.21.17.17.3.m2" class="ltx_Math" alttext="+0.034" display="inline" intent=":literal"><semantics><mrow><mo>+</mo><mn>0.034</mn></mrow><annotation encoding="application/x-tex">+0.034</annotation></semantics></math>]</td>
+<td id="S5.T2.22.18.18.4" class="ltx_td ltx_align_center"><math id="S5.T2.22.18.18.4.m1" class="ltx_Math" alttext="+0.09" display="inline" intent=":literal"><semantics><mrow><mo>+</mo><mn>0.09</mn></mrow><annotation encoding="application/x-tex">+0.09</annotation></semantics></math></td>
+<td id="S5.T2.23.19.19.5" class="ltx_td ltx_align_center"><math id="S5.T2.23.19.19.5.m1" class="ltx_Math" alttext="0.85" display="inline" intent=":literal"><semantics><mn>0.85</mn><annotation encoding="application/x-tex">0.85</annotation></semantics></math></td>
+<td id="S5.T2.24.20.20.6" class="ltx_td ltx_align_center"><math id="S5.T2.24.20.20.6.m1" class="ltx_Math" alttext="0.20" display="inline" intent=":literal"><semantics><mn>0.20</mn><annotation encoding="application/x-tex">0.20</annotation></semantics></math></td>
+<td id="S5.T2.25.21.21.7" class="ltx_td ltx_align_center"><math id="S5.T2.25.21.21.7.m1" class="ltx_Math" alttext="-0.89" display="inline" intent=":literal"><semantics><mrow><mo>−</mo><mn>0.89</mn></mrow><annotation encoding="application/x-tex">-0.89</annotation></semantics></math></td>
+<td id="S5.T2.26.22.22.8" class="ltx_td ltx_align_center"><math id="S5.T2.26.22.22.8.m1" class="ltx_Math" alttext="0.20" display="inline" intent=":literal"><semantics><mn>0.20</mn><annotation encoding="application/x-tex">0.20</annotation></semantics></math></td>
+<td id="S5.T2.26.22.22.10" class="ltx_td ltx_align_left">ns</td>
+</tr>
+<tr id="S5.T2.34.30.30" class="ltx_tr">
+<td id="S5.T2.34.30.30.9" class="ltx_td ltx_align_left">H4: 2b vs. 2c</td>
+<td id="S5.T2.27.23.23.1" class="ltx_td ltx_align_center"><math id="S5.T2.27.23.23.1.m1" class="ltx_Math" alttext="+0.040" display="inline" intent=":literal"><semantics><mrow><mo>+</mo><mn>0.040</mn></mrow><annotation encoding="application/x-tex">+0.040</annotation></semantics></math></td>
+<td id="S5.T2.29.25.25.3" class="ltx_td ltx_align_center">[<math id="S5.T2.28.24.24.2.m1" class="ltx_Math" alttext="+0.018" display="inline" intent=":literal"><semantics><mrow><mo>+</mo><mn>0.018</mn></mrow><annotation encoding="application/x-tex">+0.018</annotation></semantics></math>, <math id="S5.T2.29.25.25.3.m2" class="ltx_Math" alttext="+0.062" display="inline" intent=":literal"><semantics><mrow><mo>+</mo><mn>0.062</mn></mrow><annotation encoding="application/x-tex">+0.062</annotation></semantics></math>]</td>
+<td id="S5.T2.30.26.26.4" class="ltx_td ltx_align_center"><math id="S5.T2.30.26.26.4.m1" class="ltx_Math" alttext="+0.39" display="inline" intent=":literal"><semantics><mrow><mo>+</mo><mn>0.39</mn></mrow><annotation encoding="application/x-tex">+0.39</annotation></semantics></math></td>
+<td id="S5.T2.31.27.27.5" class="ltx_td ltx_align_center"><math id="S5.T2.31.27.27.5.m1" class="ltx_Math" alttext="3.70" display="inline" intent=":literal"><semantics><mn>3.70</mn><annotation encoding="application/x-tex">3.70</annotation></semantics></math></td>
+<td id="S5.T2.32.28.28.6" class="ltx_td ltx_align_center"><math id="S5.T2.32.28.28.6.m1" class="ltx_Math" alttext="{&lt;}0.001" display="inline" intent=":literal"><semantics><mrow><mi></mi><mo>&lt;</mo><mn>0.001</mn></mrow><annotation encoding="application/x-tex">{&lt;}0.001</annotation></semantics></math></td>
+<td id="S5.T2.33.29.29.7" class="ltx_td ltx_align_center"><math id="S5.T2.33.29.29.7.m1" class="ltx_Math" alttext="-3.16" display="inline" intent=":literal"><semantics><mrow><mo>−</mo><mn>3.16</mn></mrow><annotation encoding="application/x-tex">-3.16</annotation></semantics></math></td>
+<td id="S5.T2.34.30.30.8" class="ltx_td ltx_align_center"><math id="S5.T2.34.30.30.8.m1" class="ltx_Math" alttext="{&lt;}0.01" display="inline" intent=":literal"><semantics><mrow><mi></mi><mo>&lt;</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">{&lt;}0.01</annotation></semantics></math></td>
+<td id="S5.T2.34.30.30.10" class="ltx_td ltx_align_left">Conf.</td>
+</tr>
+<tr id="S5.T2.42.38.38" class="ltx_tr">
+<td id="S5.T2.42.38.38.9" class="ltx_td ltx_align_left ltx_border_bb">H5: 2c vs. CCR-1</td>
+<td id="S5.T2.35.31.31.1" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T2.35.31.31.1.m1" class="ltx_Math" alttext="-0.113" display="inline" intent=":literal"><semantics><mrow><mo>−</mo><mn>0.113</mn></mrow><annotation encoding="application/x-tex">-0.113</annotation></semantics></math></td>
+<td id="S5.T2.37.33.33.3" class="ltx_td ltx_align_center ltx_border_bb">[<math id="S5.T2.36.32.32.2.m1" class="ltx_Math" alttext="-0.149" display="inline" intent=":literal"><semantics><mrow><mo>−</mo><mn>0.149</mn></mrow><annotation encoding="application/x-tex">-0.149</annotation></semantics></math>, <math id="S5.T2.37.33.33.3.m2" class="ltx_Math" alttext="-0.076" display="inline" intent=":literal"><semantics><mrow><mo>−</mo><mn>0.076</mn></mrow><annotation encoding="application/x-tex">-0.076</annotation></semantics></math>]</td>
+<td id="S5.T2.38.34.34.4" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T2.38.34.34.4.m1" class="ltx_Math" alttext="-0.97" display="inline" intent=":literal"><semantics><mrow><mo>−</mo><mn>0.97</mn></mrow><annotation encoding="application/x-tex">-0.97</annotation></semantics></math></td>
+<td id="S5.T2.39.35.35.5" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T2.39.35.35.5.m1" class="ltx_Math" alttext="-6.34" display="inline" intent=":literal"><semantics><mrow><mo>−</mo><mn>6.34</mn></mrow><annotation encoding="application/x-tex">-6.34</annotation></semantics></math></td>
+<td id="S5.T2.40.36.36.6" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T2.40.36.36.6.m1" class="ltx_Math" alttext="{&lt;}0.001" display="inline" intent=":literal"><semantics><mrow><mi></mi><mo>&lt;</mo><mn>0.001</mn></mrow><annotation encoding="application/x-tex">{&lt;}0.001</annotation></semantics></math></td>
+<td id="S5.T2.41.37.37.7" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T2.41.37.37.7.m1" class="ltx_Math" alttext="-4.23" display="inline" intent=":literal"><semantics><mrow><mo>−</mo><mn>4.23</mn></mrow><annotation encoding="application/x-tex">-4.23</annotation></semantics></math></td>
+<td id="S5.T2.42.38.38.8" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T2.42.38.38.8.m1" class="ltx_Math" alttext="{&lt;}0.001" display="inline" intent=":literal"><semantics><mrow><mi></mi><mo>&lt;</mo><mn>0.001</mn></mrow><annotation encoding="application/x-tex">{&lt;}0.001</annotation></semantics></math></td>
+<td id="S5.T2.42.38.38.10" class="ltx_td ltx_align_left ltx_border_bb"><span id="S5.T2.42.38.38.10.1" class="ltx_text ltx_font_bold">Rev.</span></td>
+</tr>
+</tbody>
+</table>
+</span></div>
+</figure>
+<div id="S5.SS2.p2" class="ltx_para">
+<p id="S5.SS2.p2.2" class="ltx_p"><span id="S5.SS2.p2.2.1" class="ltx_text ltx_font_bold">H1 is reversed.</span> D-CCR-2b significantly underperforms CCR-1 (<math id="S5.SS2.p2.1.m1" class="ltx_Math" alttext="p&lt;0.001" display="inline" intent=":literal"><semantics><mrow><mi>p</mi><mo>&lt;</mo><mn>0.001</mn></mrow><annotation encoding="application/x-tex">p&lt;0.001</annotation></semantics></math>, <math id="S5.SS2.p2.2.m2" class="ltx_Math" alttext="d=-0.59" display="inline" intent=":literal"><semantics><mrow><mi>d</mi><mo>=</mo><mrow><mo>−</mo><mn>0.59</mn></mrow></mrow><annotation encoding="application/x-tex">d=-0.59</annotation></semantics></math>). Multi-turn review is worse than single-pass.</p>
+</div>
+<div id="S5.SS2.p3" class="ltx_para">
+<p id="S5.SS2.p3.2" class="ltx_p"><span id="S5.SS2.p3.2.1" class="ltx_text ltx_font_bold">H3 is null.</span> Including author answers (2b) vs. excluding them (2a) makes no significant difference (<math id="S5.SS2.p3.1.m1" class="ltx_Math" alttext="p\approx 0.20" display="inline" intent=":literal"><semantics><mrow><mi>p</mi><mo>≈</mo><mn>0.20</mn></mrow><annotation encoding="application/x-tex">p\approx 0.20</annotation></semantics></math>, <math id="S5.SS2.p3.2.m2" class="ltx_Math" alttext="d=0.09" display="inline" intent=":literal"><semantics><mrow><mi>d</mi><mo>=</mo><mn>0.09</mn></mrow><annotation encoding="application/x-tex">d=0.09</annotation></semantics></math>). The Q&amp;A exchange provides negligible benefit.</p>
+</div>
+<div id="S5.SS2.p4" class="ltx_para">
+<p id="S5.SS2.p4.2" class="ltx_p"><span id="S5.SS2.p4.2.1" class="ltx_text ltx_font_bold">H4 is confirmed.</span> Continuity (2b) outperforms independence (2c) (<math id="S5.SS2.p4.1.m1" class="ltx_Math" alttext="p&lt;0.001" display="inline" intent=":literal"><semantics><mrow><mi>p</mi><mo>&lt;</mo><mn>0.001</mn></mrow><annotation encoding="application/x-tex">p&lt;0.001</annotation></semantics></math>, <math id="S5.SS2.p4.2.m2" class="ltx_Math" alttext="d=0.39" display="inline" intent=":literal"><semantics><mrow><mi>d</mi><mo>=</mo><mn>0.39</mn></mrow><annotation encoding="application/x-tex">d=0.39</annotation></semantics></math>).
+Seeing prior questions and answers is better than starting fresh, but both are worse than reviewing only once.</p>
+</div>
+<div id="S5.SS2.p5" class="ltx_para">
+<p id="S5.SS2.p5.2" class="ltx_p"><span id="S5.SS2.p5.2.1" class="ltx_text ltx_font_bold">H5 is reversed.</span> Independent repetition (2c) is significantly worse than single-pass (<math id="S5.SS2.p5.1.m1" class="ltx_Math" alttext="p&lt;0.001" display="inline" intent=":literal"><semantics><mrow><mi>p</mi><mo>&lt;</mo><mn>0.001</mn></mrow><annotation encoding="application/x-tex">p&lt;0.001</annotation></semantics></math>, <math id="S5.SS2.p5.2.m2" class="ltx_Math" alttext="d=-0.97" display="inline" intent=":literal"><semantics><mrow><mi>d</mi><mo>=</mo><mrow><mo>−</mo><mn>0.97</mn></mrow></mrow><annotation encoding="application/x-tex">d=-0.97</annotation></semantics></math>).
+Two independent looks are worse than one.
+This is the largest effect size in the study.</p>
+</div>
+</section>
+<section id="S5.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.3 </span>The Recall–Precision Tradeoff</h3>
+
+<div id="S5.SS3.p1" class="ltx_para">
+<p id="S5.SS3.p1.1" class="ltx_p">All multi-turn conditions achieve higher recall than CCR-1: D-CCR-2c reaches 0.620 (+17% over CCR-1’s 0.529).
+Additional rounds do find more true errors.
+But the recall gain comes at severe cost to precision: CCR-1’s 0.297 drops to 0.168 for D-CCR-2c—a 43% decrease.</p>
+</div>
+<div id="S5.SS3.p2" class="ltx_para">
+<p id="S5.SS3.p2.1" class="ltx_p">For every additional true positive discovered in round two, multi-turn review generates approximately 4–5 additional false positives. The signal-to-noise ratio worsens with each round.</p>
+</div>
+</section>
+<section id="S5.SS4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.4 </span>Marginal Discovery Rate</h3>
+
+<div id="S5.SS4.p1" class="ltx_para">
+<p id="S5.SS4.p1.3" class="ltx_p">We define the Marginal Discovery Rate (MDR) as the average across all 30 artifacts of the per-artifact ratio: <math id="S5.SS4.p1.1.m1" class="ltx_Math" alttext="\text{MDR}=\mathbb{E}[\text{R2\_new\_TP}_{i}/\text{R1\_TP}_{i}]" display="inline" intent=":literal"><semantics><mrow><mtext>MDR</mtext><mo>=</mo><mrow><mi>𝔼</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">[</mo><mrow><msub><mtext>R2_new_TP</mtext><mi>i</mi></msub><mo>/</mo><msub><mtext>R1_TP</mtext><mi>i</mi></msub></mrow><mo stretchy="false">]</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">\text{MDR}=\mathbb{E}[\text{R2\_new\_TP}_{i}/\text{R1\_TP}_{i}]</annotation></semantics></math>, where <math id="S5.SS4.p1.2.m2" class="ltx_Math" alttext="i" display="inline" intent=":literal"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> indexes artifacts.
+For artifacts where R1 found zero true positives (<math id="S5.SS4.p1.3.m3" class="ltx_Math" alttext="\text{R1\_TP}=0" display="inline" intent=":literal"><semantics><mrow><mtext>R1_TP</mtext><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\text{R1\_TP}=0</annotation></semantics></math>), the ratio is defined as 0.
+This convention is conservative: excluding zero-discovery artifacts would inflate MDR.</p>
+</div>
+<figure id="S5.T3" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 3: </span>Round 2 discovery metrics.
+R1 TP values vary slightly across conditions (2.61–2.67) due to probabilistic model behavior.
+N(R2 new<math id="S5.T3.2.m1" class="ltx_Math" alttext="{&gt;}" display="inline" intent=":literal"><semantics><mo>&gt;</mo><annotation encoding="application/x-tex">{&gt;}</annotation></semantics></math>0) shows how many artifacts had any new true positive in round 2.</figcaption>
+<table id="S5.T3.4" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S5.T3.4.2" class="ltx_tr">
+<th id="S5.T3.4.2.3" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt"><span id="S5.T3.4.2.3.1" class="ltx_text ltx_font_bold">Cond.</span></th>
+<th id="S5.T3.4.2.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S5.T3.4.2.4.1" class="ltx_text ltx_font_bold">R1 TP</span></th>
+<th id="S5.T3.4.2.5" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S5.T3.4.2.5.1" class="ltx_text ltx_font_bold">R2 New</span></th>
+<th id="S5.T3.4.2.6" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S5.T3.4.2.6.1" class="ltx_text ltx_font_bold">MDR</span></th>
+<th id="S5.T3.3.1.1" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S5.T3.3.1.1.1" class="ltx_text ltx_font_bold">N(<math id="S5.T3.3.1.1.1.m1" class="ltx_Math" alttext="{&gt;}" display="inline" intent=":literal"><semantics><mo>&gt;</mo><annotation encoding="application/x-tex">{&gt;}</annotation></semantics></math>0)</span></th>
+<th id="S5.T3.4.2.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S5.T3.4.2.2.1" class="ltx_text ltx_font_bold">R2 FP<math id="S5.T3.4.2.2.1.m1" class="ltx_Math" alttext="\uparrow" display="inline" intent=":literal"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math></span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S5.T3.4.3.1" class="ltx_tr">
+<th id="S5.T3.4.3.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">2a</th>
+<td id="S5.T3.4.3.1.2" class="ltx_td ltx_align_center ltx_border_t">2.61</td>
+<td id="S5.T3.4.3.1.3" class="ltx_td ltx_align_center ltx_border_t">0.34</td>
+<td id="S5.T3.4.3.1.4" class="ltx_td ltx_align_center ltx_border_t">0.153</td>
+<td id="S5.T3.4.3.1.5" class="ltx_td ltx_align_center ltx_border_t">20/30</td>
+<td id="S5.T3.4.3.1.6" class="ltx_td ltx_align_center ltx_border_t">+3.94</td>
+</tr>
+<tr id="S5.T3.4.4.2" class="ltx_tr">
+<th id="S5.T3.4.4.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">2b</th>
+<td id="S5.T3.4.4.2.2" class="ltx_td ltx_align_center">2.67</td>
+<td id="S5.T3.4.4.2.3" class="ltx_td ltx_align_center">0.37</td>
+<td id="S5.T3.4.4.2.4" class="ltx_td ltx_align_center">0.188</td>
+<td id="S5.T3.4.4.2.5" class="ltx_td ltx_align_center">15/30</td>
+<td id="S5.T3.4.4.2.6" class="ltx_td ltx_align_center">+3.24</td>
+</tr>
+<tr id="S5.T3.4.5.3" class="ltx_tr">
+<th id="S5.T3.4.5.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb">2c</th>
+<td id="S5.T3.4.5.3.2" class="ltx_td ltx_align_center ltx_border_bb">2.67</td>
+<td id="S5.T3.4.5.3.3" class="ltx_td ltx_align_center ltx_border_bb">0.43</td>
+<td id="S5.T3.4.5.3.4" class="ltx_td ltx_align_center ltx_border_bb">0.286</td>
+<td id="S5.T3.4.5.3.5" class="ltx_td ltx_align_center ltx_border_bb">9/30</td>
+<td id="S5.T3.4.5.3.6" class="ltx_td ltx_align_center ltx_border_bb">+4.47</td>
+</tr>
+</tbody>
+</table>
+</figure>
+<div id="S5.SS4.p2" class="ltx_para">
+<p id="S5.SS4.p2.1" class="ltx_p">D-CCR-2b discovers 0.37 new TPs in round 2 (MDR = 0.188) but adds 3.24 new FPs.
+The “exchange rate” is roughly 1 new TP for every 9 new FPs.
+Round 2 contributed at least one new TP in only 15 of 30 artifacts—meaning half the time, the additional round produced nothing but noise.</p>
+</div>
+<div id="S5.SS4.p3" class="ltx_para">
+<p id="S5.SS4.p3.1" class="ltx_p">D-CCR-2c has the highest MDR (0.286) because its completely independent round 2 rediscovers many round-1 errors plus some new ones.
+But it also generates the most new FPs (4.47), making it the worst performer overall despite the highest MDR.</p>
+</div>
+</section>
+<section id="S5.SS5" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.5 </span>Performance by Artifact Type</h3>
+
+<figure id="S5.T4" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 4: </span>F1 by artifact category.</figcaption>
+<table id="S5.T4.1" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S5.T4.1.1.1" class="ltx_tr">
+<th id="S5.T4.1.1.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt"><span id="S5.T4.1.1.1.1.1" class="ltx_text ltx_font_bold">Category</span></th>
+<th id="S5.T4.1.1.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S5.T4.1.1.1.2.1" class="ltx_text ltx_font_bold">CCR-1</span></th>
+<th id="S5.T4.1.1.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S5.T4.1.1.1.3.1" class="ltx_text ltx_font_bold">2a</span></th>
+<th id="S5.T4.1.1.1.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S5.T4.1.1.1.4.1" class="ltx_text ltx_font_bold">2b</span></th>
+<th id="S5.T4.1.1.1.5" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S5.T4.1.1.1.5.1" class="ltx_text ltx_font_bold">2c</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S5.T4.1.2.1" class="ltx_tr">
+<th id="S5.T4.1.2.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">Code</th>
+<td id="S5.T4.1.2.1.2" class="ltx_td ltx_align_center ltx_border_t">0.354</td>
+<td id="S5.T4.1.2.1.3" class="ltx_td ltx_align_center ltx_border_t">0.308</td>
+<td id="S5.T4.1.2.1.4" class="ltx_td ltx_align_center ltx_border_t">0.284</td>
+<td id="S5.T4.1.2.1.5" class="ltx_td ltx_align_center ltx_border_t">0.255</td>
+</tr>
+<tr id="S5.T4.1.3.2" class="ltx_tr">
+<th id="S5.T4.1.3.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">Document</th>
+<td id="S5.T4.1.3.2.2" class="ltx_td ltx_align_center">0.446</td>
+<td id="S5.T4.1.3.2.3" class="ltx_td ltx_align_center">0.334</td>
+<td id="S5.T4.1.3.2.4" class="ltx_td ltx_align_center">0.361</td>
+<td id="S5.T4.1.3.2.5" class="ltx_td ltx_align_center">0.318</td>
+</tr>
+<tr id="S5.T4.1.4.3" class="ltx_tr">
+<th id="S5.T4.1.4.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb">Script</th>
+<td id="S5.T4.1.4.3.2" class="ltx_td ltx_align_center ltx_border_bb">0.328</td>
+<td id="S5.T4.1.4.3.3" class="ltx_td ltx_align_center ltx_border_bb">0.238</td>
+<td id="S5.T4.1.4.3.4" class="ltx_td ltx_align_center ltx_border_bb">0.265</td>
+<td id="S5.T4.1.4.3.5" class="ltx_td ltx_align_center ltx_border_bb">0.217</td>
+</tr>
+</tbody>
+</table>
+</figure>
+<div id="S5.SS5.p1" class="ltx_para">
+<p id="S5.SS5.p1.1" class="ltx_p">CCR-1 leads across all three categories.
+The gap is smallest for documents and largest for scripts.
+Document artifacts show the highest absolute F1 values, consistent with the original CCR finding that documents contain more discoverable errors.</p>
+</div>
+</section>
+<section id="S5.SS6" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.6 </span>Per-Artifact Analysis</h3>
+
+<div id="S5.SS6.p1" class="ltx_para">
+<p id="S5.SS6.p1.1" class="ltx_p">CCR-1 achieved the best F1 in 25 of 30 artifacts.
+The five exceptions (C1, C4, D1, S4, S10) involved artifacts where CCR-1’s round-1 recall was unusually low, giving multi-turn conditions room for marginal TP gains.
+No artifact showed multi-turn review consistently outperforming across multiple conditions.</p>
+</div>
+</section>
+<section id="S5.SS7" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.7 </span>Reproducibility</h3>
+
+<div id="S5.SS7.p1" class="ltx_para">
+<p id="S5.SS7.p1.1" class="ltx_p">Intra-artifact F1 standard deviation across 3 runs was 0.094 for CCR-1, 0.065 for D-CCR-2a, and 0.064 for D-CCR-2b (D-CCR-2c had 1 run).
+The lower variance in multi-turn conditions reflects a floor effect compressing the distribution.
+All 300 sessions used the same model snapshot (Claude Opus 4.6), prompts, and matching algorithm (v2).
+Session-level outputs and analysis scripts are available for replication.</p>
+</div>
+</section>
+</section>
+<section id="S6" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">6 </span>Discussion</h2>
+
+<section id="S6.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">6.1 </span>Why More Rounds Fail: False Positive Pressure</h3>
+
+<div id="S6.SS1.p1" class="ltx_para">
+<p id="S6.SS1.p1.1" class="ltx_p">The primary mechanism is <em id="S6.SS1.p1.1.1" class="ltx_emph ltx_font_italic">false positive pressure</em>.
+After round one, the “easy” errors have been found.
+Round two asks the reviewer to find <em id="S6.SS1.p1.1.2" class="ltx_emph ltx_font_italic">new</em> errors, but the artifact may have few or no remaining discoverable errors.
+Under pressure to produce findings, the reviewer generates speculative, low-confidence findings that do not correspond to real errors.</p>
+</div>
+<div id="S6.SS1.p2" class="ltx_para">
+<p id="S6.SS1.p2.1" class="ltx_p">The numbers are clear: CCR-1 produces 9.3 findings per artifact; D-CCR-2b produces 15.2—a 63% increase.
+True positives increase only from 2.64 to 3.03 (15%).
+The rest is false positives: 5.23 to 8.47.
+Figure <a href="#S6.F2" title="Figure 2 ‣ 6.1 Why More Rounds Fail: False Positive Pressure ‣ 6 Discussion ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> shows the FP accumulation pattern: Round 2 adds 3–4.5 new false positives per artifact across all multi-turn conditions.</p>
+</div>
+<figure id="S6.F2" class="ltx_figure"><img src="2603.16244v1/x2.png" id="S6.F2.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="830" height="490" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 2: </span>False positive accumulation across conditions. The dashed line marks CCR-1’s FP level. All multi-turn conditions add substantial Round 2 FPs (red), with D-CCR-2c generating the most noise.</figcaption>
+</figure>
+<div id="S6.SS1.p3" class="ltx_para">
+<p id="S6.SS1.p3.1" class="ltx_p">For artifact C3 in D-CCR-2b Run 1, the reviewer found 3 true errors in round 1 but generated 7 new findings in round 2, of which only 1 was genuine.
+The remaining 6 included speculative performance concerns, style suggestions, and hypothetical edge cases.</p>
+</div>
+<div id="S6.SS1.p4" class="ltx_para">
+<p id="S6.SS1.p4.1" class="ltx_p">This mirrors <cite class="ltx_cite ltx_citemacro_citeauthor"><a href="#bib.bib11" title="Cross-context review: improving LLM output quality by separating production and review sessions" class="ltx_ref">Song</a></cite>’s (<cite class="ltx_cite ltx_citemacro_citeyear"><a href="#bib.bib11" title="Cross-context review: improving LLM output quality by separating production and review sessions" class="ltx_ref">2026</a></cite>) SR2 finding: a second review pass increased findings but decreased precision.
+The mechanism is the same whether the second pass happens in the same session or a separated one.
+Reviewing again creates pressure to find something new, and when nothing new exists, the model invents it.</p>
+</div>
+</section>
+<section id="S6.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">6.2 </span>Review Target Drift</h3>
+
+<div id="S6.SS2.p1" class="ltx_para">
+<p id="S6.SS2.p1.1" class="ltx_p">The pilot revealed a more specific failure mode in D-CCR-2b.
+When the reviewer receives the Q&amp;A exchange, it sometimes shifts from reviewing the artifact to reviewing the conversation—flagging, for example, “the author’s answer to Q3 contains a type mismatch in the suggested fix.” This is a valid observation about the answer, but not an error in the original artifact.</p>
+</div>
+<div id="S6.SS2.p2" class="ltx_para">
+<p id="S6.SS2.p2.1" class="ltx_p">Our v2 prompt explicitly constrained the review target.
+The improvement was modest (pilot v1 FP = 11.4, v2 FP = 10.5 for D-CCR-2b), suggesting a structural component: when conversation content is present, the model’s attention distributes across it regardless of instructions.</p>
+</div>
+<div id="S6.SS2.p3" class="ltx_para">
+<p id="S6.SS2.p3.1" class="ltx_p">For practitioners implementing multi-turn LLM review: either carefully distinguish artifact findings from conversation findings in the output, or restrict the reviewer to the artifact plus a structured summary of prior findings rather than the raw conversation.</p>
+</div>
+</section>
+<section id="S6.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">6.3 </span>The Round Optimization Principle</h3>
+
+<div id="S6.SS3.p1" class="ltx_para">
+<p id="S6.SS3.p1.1" class="ltx_p">The central theoretical contribution is that the optimal number of CCR review rounds is exactly one—not as a practical heuristic, but as an empirical finding with a clear mechanism.</p>
+</div>
+<div id="S6.SS3.p2" class="ltx_para">
+<p id="S6.SS3.p2.1" class="ltx_p">The data does <em id="S6.SS3.p2.1.1" class="ltx_emph ltx_font_italic">not</em> support a simple “less information is better” narrative.
+Within multi-turn conditions, more information helps: D-CCR-2b (artifact + Q&amp;A) outperforms D-CCR-2a (artifact + questions only), which outperforms D-CCR-2c (artifact only, fresh):</p>
+</div>
+<div id="S6.SS3.p3" class="ltx_para">
+<ol id="S6.I1" class="ltx_enumerate">
+<li id="S6.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">1.</span> 
+<div id="S6.I1.i1.p1" class="ltx_para">
+<p id="S6.I1.i1.p1.1" class="ltx_p"><span id="S6.I1.i1.p1.1.1" class="ltx_text ltx_font_bold">D-CCR-2b</span> (Q&amp;A exchange): F1 = 0.303</p>
+</div>
+</li>
+<li id="S6.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">2.</span> 
+<div id="S6.I1.i2.p1" class="ltx_para">
+<p id="S6.I1.i2.p1.1" class="ltx_p"><span id="S6.I1.i2.p1.1.1" class="ltx_text ltx_font_bold">D-CCR-2a</span> (questions only): F1 = 0.293</p>
+</div>
+</li>
+<li id="S6.I1.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">3.</span> 
+<div id="S6.I1.i3.p1" class="ltx_para">
+<p id="S6.I1.i3.p1.1" class="ltx_p"><span id="S6.I1.i3.p1.1.1" class="ltx_text ltx_font_bold">D-CCR-2c</span> (no prior info): F1 = 0.263</p>
+</div>
+</li>
+</ol>
+</div>
+<div id="S6.SS3.p4" class="ltx_para">
+<p id="S6.SS3.p4.1" class="ltx_p">Given that a second round happens, more context is better.
+The problem is that <em id="S6.SS3.p4.1.1" class="ltx_emph ltx_font_italic">any</em> second round—regardless of accompanying information—degrades performance compared to stopping after one.
+The mechanism is false positive pressure: reviewing again creates demand for new findings that the artifact cannot supply.</p>
+</div>
+<div id="S6.SS3.p5" class="ltx_para">
+<p id="S6.SS3.p5.1" class="ltx_p">This distinguishes D-CCR’s finding from CCR’s original insight.
+CCR showed that <em id="S6.SS3.p5.1.1" class="ltx_emph ltx_font_italic">removing production context</em> improves review (information restriction).
+D-CCR shows that <em id="S6.SS3.p5.1.2" class="ltx_emph ltx_font_italic">adding review rounds</em> degrades review (round count).
+These are complementary but distinct principles.
+The optimal strategy: separate the context, review once, and if more compute is available, run independent parallel reviews rather than sequential ones.</p>
+</div>
+<div id="S6.SS3.p6" class="ltx_para">
+<p id="S6.SS3.p6.1" class="ltx_p">This aligns with multi-agent debate findings.
+<cite class="ltx_cite ltx_citemacro_citet">Zhang<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="#bib.bib15" title="If multi-agent debate is the answer, what is the question?" class="ltx_ref">2025a</a>)</cite> found that MAD fails without model heterogeneity—the same model with different prompts is insufficient.
+<cite class="ltx_cite ltx_citemacro_citet">Wu<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="#bib.bib13" title="Can LLM agents really debate? A controlled study of multi-agent debate in logical reasoning" class="ltx_ref">2025</a>)</cite> showed that interaction creates majority pressure suppressing independent correction.
+D-CCR’s round-2 degradation likely reflects a similar dynamic: the reviewer’s own prior output constrains what the second review can contribute.</p>
+</div>
+</section>
+<section id="S6.SS4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">6.4 </span>Practical Implication: Ensemble Over Iteration</h3>
+
+<div id="S6.SS4.p1" class="ltx_para">
+<p id="S6.SS4.p1.1" class="ltx_p">If the goal is to spend more compute on verification, <em id="S6.SS4.p1.1.1" class="ltx_emph ltx_font_italic">parallel independent reviews</em> (ensemble) are preferable to <em id="S6.SS4.p1.1.2" class="ltx_emph ltx_font_italic">sequential iterative reviews</em> (D-CCR).
+A majority-vote ensemble of 3 independent CCR-1 reviews (accepting a finding only if 2 of 3 runs agree) achieved F1 = 0.393, outperforming D-CCR-2b’s F1 = 0.303 (<math id="S6.SS4.p1.1.m1" class="ltx_Math" alttext="p&lt;0.001" display="inline" intent=":literal"><semantics><mrow><mi>p</mi><mo>&lt;</mo><mn>0.001</mn></mrow><annotation encoding="application/x-tex">p&lt;0.001</annotation></semantics></math>).
+The ensemble approach avoids both false positive pressure and Review Target Drift because each reviewer works independently with no knowledge of other reviews.</p>
+</div>
+</section>
+<section id="S6.SS5" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">6.5 </span>Implications for the CCR Research Program</h3>
+
+<div id="S6.SS5.p1" class="ltx_para">
+<p id="S6.SS5.p1.1" class="ltx_p">D-CCR was the second planned study in a four-paper research program <cite class="ltx_cite ltx_citemacro_citep">(Song, <a href="#bib.bib11" title="Cross-context review: improving LLM output quality by separating production and review sessions" class="ltx_ref">2026</a>, Section 8)</cite>.
+The hypothesis that multi-turn review improves on static CCR was falsified, but the negative result establishes a boundary condition: context separation is necessary and sufficient; iterative interaction within separated contexts does not add value.</p>
+</div>
+<div id="S6.SS5.p2" class="ltx_para">
+<p id="S6.SS5.p2.1" class="ltx_p">This redirects the research program.
+Sequential rounds with a single reviewer do not help, but the next study—Hierarchical Cross-Context Aggregation (HCCA)—takes a different approach: structurally dividing the review task across specialized agents rather than repeating the same review.
+D-CCR’s failure is a failure of <em id="S6.SS5.p2.1.1" class="ltx_emph ltx_font_italic">iteration with a single role</em>, not of <em id="S6.SS5.p2.1.2" class="ltx_emph ltx_font_italic">multi-agent architectures</em> where agents contribute structurally distinct analyses.
+Improving what happens <em id="S6.SS5.p2.1.3" class="ltx_emph ltx_font_italic">within</em> the single review round—better prompting, structured checklists, or domain-specific protocols—also remains productive while maintaining the single-pass architecture.</p>
+</div>
+</section>
+</section>
+<section id="S7" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">7 </span>Limitations</h2>
+
+<div id="S7.p1" class="ltx_para">
+<p id="S7.p1.1" class="ltx_p"><span id="S7.p1.1.1" class="ltx_text ltx_font_bold">Single model.</span> All experiments used Claude Opus 4.6. Models with different calibration or verbosity tendencies may show different recall-precision tradeoffs in multi-round settings.</p>
+</div>
+<div id="S7.p2" class="ltx_para">
+<p id="S7.p2.1" class="ltx_p"><span id="S7.p2.1.1" class="ltx_text ltx_font_bold">Injected errors.</span> Errors were deliberately injected, not naturally occurring.
+Natural errors may be more varied and harder to detect, potentially creating more room for multi-round discovery, though our injected errors span five types and three severity levels.</p>
+</div>
+<div id="S7.p3" class="ltx_para">
+<p id="S7.p3.1" class="ltx_p"><span id="S7.p3.1.1" class="ltx_text ltx_font_bold">Matching algorithm.</span> Our heuristic matching (line proximity + keyword overlap with Korean suffix stripping) produces consistent relative ordering across thresholds 1.0–3.0, though absolute F1 values are threshold-dependent.
+Manual verification of 20 borderline cases confirmed all were genuine false positives, but the matching has known limitations with paraphrased error descriptions.</p>
+</div>
+<div id="S7.p4" class="ltx_para">
+<p id="S7.p4.1" class="ltx_p"><span id="S7.p4.1.1" class="ltx_text ltx_font_bold">S5 session crashes.</span> Four sessions for artifact S5 (two D-CCR-2b runs, two D-CCR-2a runs) produced incomplete outputs due to CLI crashes.
+These were excluded from run averaging.
+The <math id="S7.p4.1.m1" class="ltx_Math" alttext="N=30" display="inline" intent=":literal"><semantics><mrow><mi>N</mi><mo>=</mo><mn>30</mn></mrow><annotation encoding="application/x-tex">N=30</annotation></semantics></math> artifact-level analysis is unaffected as at least one valid run exists for each condition.</p>
+</div>
+<div id="S7.p5" class="ltx_para">
+<p id="S7.p5.1" class="ltx_p"><span id="S7.p5.1.1" class="ltx_text ltx_font_bold">D-CCR-2c single run.</span> D-CCR-2c used only 1 run (vs. 3 for other conditions), reducing precision of its estimates.
+However, the effect size (<math id="S7.p5.1.m1" class="ltx_Math" alttext="d=-0.97" display="inline" intent=":literal"><semantics><mrow><mi>d</mi><mo>=</mo><mrow><mo>−</mo><mn>0.97</mn></mrow></mrow><annotation encoding="application/x-tex">d=-0.97</annotation></semantics></math> vs. CCR-1) is large enough that the conclusion is robust.</p>
+</div>
+<div id="S7.p6" class="ltx_para">
+<p id="S7.p6.1" class="ltx_p"><span id="S7.p6.1.1" class="ltx_text ltx_font_bold">D-CCR-2c pooling.</span> D-CCR-2c pools findings from both R1 and R2, giving it twice the opportunity to generate findings compared to CCR-1’s single round.
+This structural asymmetry means D-CCR-2c’s higher finding count (18.4 vs. 9.3) partly reflects more attempts rather than better detection.
+The comparison remains valid for its intended purpose—testing whether “two independent looks” beat one—but should be interpreted with this asymmetry in mind.</p>
+</div>
+<div id="S7.p7" class="ltx_para">
+<p id="S7.p7.1" class="ltx_p"><span id="S7.p7.1.1" class="ltx_text ltx_font_bold">No human baseline.</span> We did not compare against human reviewers, which would provide an upper bound on error detection performance.</p>
+</div>
+</section>
+<section id="S8" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">8 </span>Ethics and Broader Impact</h2>
+
+<div id="S8.p1" class="ltx_para">
+<p id="S8.p1.1" class="ltx_p">This study uses only synthetic artifacts with deliberately injected errors; no human subjects or personal data were involved.
+Our results apply specifically to LLM-as-reviewer settings and should not be generalized to human review processes, where multi-round review has established benefits.
+The false positive pressure phenomenon may vary across models and domains; practitioners should validate these findings in their context before adopting single-pass review protocols.</p>
+</div>
+</section>
+<section id="S9" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">9 </span>Conclusion</h2>
+
+<div id="S9.p1" class="ltx_para">
+<p id="S9.p1.1" class="ltx_p">Multi-turn review does not improve Cross-Context Review.
+Single-pass CCR (F1 = 0.376) significantly outperformed all multi-turn variants (F1 = 0.263–0.303).
+Additional rounds increase recall modestly but generate false positives at a much higher rate, destroying precision.
+The optimal number of review rounds is one.</p>
+</div>
+<div id="S9.p2" class="ltx_para">
+<p id="S9.p2.2" class="ltx_p">False positive pressure and Review Target Drift explain why “more review should help” fails in practice.
+These findings complement CCR’s original insight: while CCR showed that <em id="S9.p2.2.1" class="ltx_emph ltx_font_italic">removing production context</em> improves review, D-CCR shows that <em id="S9.p2.2.2" class="ltx_emph ltx_font_italic">adding review rounds</em> degrades it.
+Within multi-turn conditions, more information helps (D-CCR-2b <math id="S9.p2.1.m1" class="ltx_Math" alttext="&gt;" display="inline" intent=":literal"><semantics><mo>&gt;</mo><annotation encoding="application/x-tex">&gt;</annotation></semantics></math> D-CCR-2a <math id="S9.p2.2.m2" class="ltx_Math" alttext="&gt;" display="inline" intent=":literal"><semantics><mo>&gt;</mo><annotation encoding="application/x-tex">&gt;</annotation></semantics></math> D-CCR-2c)—the problem is round count, not information amount.</p>
+</div>
+<div id="S9.p3" class="ltx_para">
+<p id="S9.p3.1" class="ltx_p">For practitioners with compute budget for additional verification: spend it on independent parallel reviews (ensemble), not sequential iterative ones.
+Separate the context, review once, and trust the first answer.</p>
+</div>
+</section>
+<section id="bib" class="ltx_bibliography">
+<h2 class="ltx_title ltx_title_bibliography">References</h2>
+
+<ul id="bib.L1" class="ltx_biblist">
+<li id="bib.bib1" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">J. C. Chen, A. Prasad, S. Saha, E. Stengel-Eskin, and M. Bansal (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">MAgICoRe: multi-agent, iterative, coarse-to-fine refinement for reasoning</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing (EMNLP 2025)</span>,
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS1.p1.1" title="2.1 Multi-Round LLM Verification ‣ 2 Related Work ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+</span>
+</li>
+<li id="bib.bib2" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">C. Du, J. Han, Y. Ying, A. Chen, Q. He, H. Zhao, S. Xia, H. Guo, J. Liang, Z. Chen, L. Li, and Y. Xiao (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Think thrice before you act: progressive thought refinement in large language models</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 13th International Conference on Learning Representations (ICLR 2025)</span>,
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS1.p2.1" title="2.1 Multi-Round LLM Verification ‣ 2 Related Work ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+</span>
+</li>
+<li id="bib.bib3" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Z. Gou, Z. Shao, Y. Gong, Y. Shen, Y. Yang, N. Duan, and W. Chen (2024)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">CRITIC: large language models can self-correct with tool-interactive critiquing</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 12th International Conference on Learning Representations (ICLR 2024)</span>,
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS3.p3.1" title="2.3 Multi-Agent Debate ‣ 2 Related Work ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.3</span></a>.
+</span>
+</li>
+<li id="bib.bib4" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">J. Guo, Y. Wu, J. Qiu, K. Huang, X. Juan, L. Yang, and M. Wang (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Temporal consistency for LLM reasoning process error identification</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Findings of the Association for Computational Linguistics: EMNLP 2025</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages"> pp. 22114–22129</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS1.p1.1" title="2.1 Multi-Round LLM Verification ‣ 2 Related Work ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+</span>
+</li>
+<li id="bib.bib5" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">J. Huang, X. Chen, S. Mishra, H. S. Zheng, A. W. Yu, X. Song, and D. Zhou (2024)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Large language models cannot self-correct reasoning yet</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 12th International Conference on Learning Representations (ICLR 2024)</span>,
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS2.p2.1" title="2.2 Self-Correction Limitations ‣ 2 Related Work ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.2</span></a>.
+</span>
+</li>
+<li id="bib.bib6" class="ltx_bibitem ltx_bib_article">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">R. Kamoi, Y. Zhang, N. Zhang, J. Han, and R. Zhang (2024)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">When can LLMs actually correct their own mistakes? A critical survey of self-correction of LLMs</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">Transactions of the Association for Computational Linguistics</span> <span class="ltx_text ltx_bib_volume">12</span>, <span class="ltx_text ltx_bib_pages"> pp. 1417–1440</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS2.p2.1" title="2.2 Self-Correction Limitations ‣ 2 Related Work ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.2</span></a>.
+</span>
+</li>
+<li id="bib.bib7" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">E. Kim, J. Suk, S. Kim, N. Muennighoff, D. Kim, and A. Oh (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">LLM-as-an-interviewer: beyond static testing through dynamic LLM evaluation</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Findings of the Association for Computational Linguistics: ACL 2025</span>,
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p2.1" title="1 Introduction ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+</span>
+</li>
+<li id="bib.bib8" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">A. Kumar, V. Zhuang, R. Agarwal, Y. Su, J. D. Co-Reyes, A. Singh, K. Baumli, S. Iqbal, C. Bishop, R. Roelofs, L. M. Zhang, K. McKinney, D. Shrivastava, C. Paduraru, G. Tucker, D. Precup, F. Behbahani, and A. Faust (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Training language models to self-correct via reinforcement learning</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 13th International Conference on Learning Representations (ICLR 2025, Oral)</span>,
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS2.p1.1" title="2.2 Self-Correction Limitations ‣ 2 Related Work ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.2</span></a>.
+</span>
+</li>
+<li id="bib.bib9" class="ltx_bibitem ltx_bib_article">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">H. Shi <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">SSR: socratic self-refine for large language model reasoning</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2511.10621</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS1.p2.1" title="2.1 Multi-Round LLM Verification ‣ 2 Related Work ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+</span>
+</li>
+<li id="bib.bib10" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">A. Smit <span class="ltx_text ltx_bib_etal">et al.</span> (2024)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Should we be going MAD? A look at multi-agent debate strategies for LLMs</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 41st International Conference on Machine Learning (ICML 2024)</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages"> pp. 45883–45905</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS3.p3.1" title="2.3 Multi-Agent Debate ‣ 2 Related Work ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.3</span></a>.
+</span>
+</li>
+<li id="bib.bib11" class="ltx_bibitem ltx_bib_article">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">T. Song (2026)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Cross-context review: improving LLM output quality by separating production and review sessions</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2603.12123</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p1.2" title="1 Introduction ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="#S2.SS4.p1.3" title="2.4 CCR Foundation ‣ 2 Related Work ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.4</span></a>,
+<a href="#S4.SS1.p1.1" title="4.1 Artifacts and Ground Truth ‣ 4 Experimental Setup ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§4.1</span></a>,
+<a href="#S4.SS2.p3.1" title="4.2 Execution ‣ 4 Experimental Setup ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§4.2</span></a>,
+<a href="#S4.SS4.p3.1" title="4.4 Matching Algorithm ‣ 4 Experimental Setup ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§4.4</span></a>,
+<a href="#S6.SS1.p4.1" title="6.1 Why More Rounds Fail: False Positive Pressure ‣ 6 Discussion ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§6.1</span></a>,
+<a href="#S6.SS5.p1.1" title="6.5 Implications for the CCR Research Program ‣ 6 Discussion ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§6.5</span></a>.
+</span>
+</li>
+<li id="bib.bib12" class="ltx_bibitem ltx_bib_article">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">K. Tsui (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Self-correction bench: uncovering and addressing the self-correction blind spot in large language models</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2507.02778</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS2.p2.1" title="2.2 Self-Correction Limitations ‣ 2 Related Work ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.2</span></a>.
+</span>
+</li>
+<li id="bib.bib13" class="ltx_bibitem ltx_bib_article">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">H. Wu, Z. Li, and L. Li (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Can LLM agents really debate? A controlled study of multi-agent debate in logical reasoning</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2511.07784</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS3.p2.1" title="2.3 Multi-Agent Debate ‣ 2 Related Work ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.3</span></a>,
+<a href="#S6.SS3.p6.1" title="6.3 The Round Optimization Principle ‣ 6 Discussion ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§6.3</span></a>.
+</span>
+</li>
+<li id="bib.bib15" class="ltx_bibitem ltx_bib_article">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">H. Zhang, Z. Cui, J. Chen, X. Wang, Q. Zhang, Z. Wang, D. Wu, and S. Hu (2025a)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">If multi-agent debate is the answer, what is the question?</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2502.08788v2</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS3.p1.1" title="2.3 Multi-Agent Debate ‣ 2 Related Work ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.3</span></a>,
+<a href="#S6.SS3.p6.1" title="6.3 The Round Optimization Principle ‣ 6 Discussion ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§6.3</span></a>.
+</span>
+</li>
+<li id="bib.bib14" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Q. Zhang, D. Wang, H. Qian, Y. Li, T. Zhang, M. Huang, K. Xu, H. Li, Y. Liu, and H. Qiu (2025b)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Understanding the dark side of LLMs’ intrinsic self-correction</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (ACL 2025)</span>,
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS2.p2.1" title="2.2 Self-Correction Limitations ‣ 2 Related Work ‣ More Rounds, More Noise: Why Multi-Turn Review Fails to Improve Cross-Context Verification" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.2</span></a>.
+</span>
+</li>
+</ul>
+</section>
+<section id="A1" class="ltx_appendix">
+<h2 class="ltx_title ltx_title_appendix">
+<span class="ltx_tag ltx_tag_appendix">Appendix A </span>Pilot Experiment and Prompt Evolution</h2>
+
+<section id="A1.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">A.1 </span>Pilot Design and H2 Drop Decision</h3>
+
+<div id="A1.SS1.p1" class="ltx_para">
+<p id="A1.SS1.p1.1" class="ltx_p">Hypothesis numbering follows the original pre-registration.
+H2 tested whether three rounds outperform two (D-CCR-3b vs. D-CCR-2b).
+Pilot results showed D-CCR-3b (F1 = 0.216) was substantially worse than D-CCR-2b (F1 = 0.270), confirming diminishing returns beyond round two.
+D-CCR-3b was dropped from the main experiment, and H2 is not reported.</p>
+</div>
+<div id="A1.SS1.p2" class="ltx_para">
+<p id="A1.SS1.p2.2" class="ltx_p">We ran a pilot experiment with 10 artifacts <math id="A1.SS1.p2.1.m1" class="ltx_Math" alttext="\times" display="inline" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math> 5 conditions (including D-CCR-3b) <math id="A1.SS1.p2.2.m2" class="ltx_Math" alttext="\times" display="inline" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math> 1 run = 50 sessions. Pilot results:</p>
+</div>
+<figure id="A1.SS1.tab1" class="ltx_table">
+<table id="A1.SS1.tab1.1" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="A1.SS1.tab1.1.1.1" class="ltx_tr">
+<th id="A1.SS1.tab1.1.1.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt"><span id="A1.SS1.tab1.1.1.1.1.1" class="ltx_text ltx_font_bold">Condition</span></th>
+<th id="A1.SS1.tab1.1.1.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="A1.SS1.tab1.1.1.1.2.1" class="ltx_text ltx_font_bold">F1</span></th>
+<th id="A1.SS1.tab1.1.1.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="A1.SS1.tab1.1.1.1.3.1" class="ltx_text ltx_font_bold">Precision</span></th>
+<th id="A1.SS1.tab1.1.1.1.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="A1.SS1.tab1.1.1.1.4.1" class="ltx_text ltx_font_bold">Recall</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="A1.SS1.tab1.1.2.1" class="ltx_tr">
+<th id="A1.SS1.tab1.1.2.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">CCR-1</th>
+<td id="A1.SS1.tab1.1.2.1.2" class="ltx_td ltx_align_center ltx_border_t">0.366</td>
+<td id="A1.SS1.tab1.1.2.1.3" class="ltx_td ltx_align_center ltx_border_t">0.307</td>
+<td id="A1.SS1.tab1.1.2.1.4" class="ltx_td ltx_align_center ltx_border_t">0.480</td>
+</tr>
+<tr id="A1.SS1.tab1.1.3.2" class="ltx_tr">
+<th id="A1.SS1.tab1.1.3.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">D-CCR-2a</th>
+<td id="A1.SS1.tab1.1.3.2.2" class="ltx_td ltx_align_center">0.258</td>
+<td id="A1.SS1.tab1.1.3.2.3" class="ltx_td ltx_align_center">0.173</td>
+<td id="A1.SS1.tab1.1.3.2.4" class="ltx_td ltx_align_center">0.520</td>
+</tr>
+<tr id="A1.SS1.tab1.1.4.3" class="ltx_tr">
+<th id="A1.SS1.tab1.1.4.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">D-CCR-2b</th>
+<td id="A1.SS1.tab1.1.4.3.2" class="ltx_td ltx_align_center">0.270</td>
+<td id="A1.SS1.tab1.1.4.3.3" class="ltx_td ltx_align_center">0.184</td>
+<td id="A1.SS1.tab1.1.4.3.4" class="ltx_td ltx_align_center">0.520</td>
+</tr>
+<tr id="A1.SS1.tab1.1.5.4" class="ltx_tr">
+<th id="A1.SS1.tab1.1.5.4.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">D-CCR-2c</th>
+<td id="A1.SS1.tab1.1.5.4.2" class="ltx_td ltx_align_center">0.241</td>
+<td id="A1.SS1.tab1.1.5.4.3" class="ltx_td ltx_align_center">0.154</td>
+<td id="A1.SS1.tab1.1.5.4.4" class="ltx_td ltx_align_center">0.560</td>
+</tr>
+<tr id="A1.SS1.tab1.1.6.5" class="ltx_tr">
+<th id="A1.SS1.tab1.1.6.5.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb">D-CCR-3b</th>
+<td id="A1.SS1.tab1.1.6.5.2" class="ltx_td ltx_align_center ltx_border_bb">0.216</td>
+<td id="A1.SS1.tab1.1.6.5.3" class="ltx_td ltx_align_center ltx_border_bb">0.137</td>
+<td id="A1.SS1.tab1.1.6.5.4" class="ltx_td ltx_align_center ltx_border_bb">0.540</td>
+</tr>
+</tbody>
+</table>
+</figure>
+<div id="A1.SS1.p3" class="ltx_para">
+<p id="A1.SS1.p3.1" class="ltx_p">D-CCR-3b confirmed diminishing returns: three rounds performed worse than two. This condition was dropped from the main experiment.</p>
+</div>
+</section>
+<section id="A1.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">A.2 </span>Prompt v1 <math id="A1.SS2.1.m1" class="ltx_Math" alttext="\to" display="inline" intent=":literal"><semantics><mo stretchy="false">→</mo><annotation encoding="application/x-tex">\to</annotation></semantics></math> v2</h3>
+
+<div id="A1.SS2.p1" class="ltx_para">
+<p id="A1.SS2.p1.1" class="ltx_p">The pilot D-CCR-2b prompt (v1) included: “also verify whether the author’s answers are correct.” This caused Review Target Drift.
+The v2 prompt replaced this with: “The author’s answers are for reference only.
+Focus on finding new errors in the artifact itself.”</p>
+</div>
+<div id="A1.SS2.p2" class="ltx_para">
+<p id="A1.SS2.p2.1" class="ltx_p">FP reduction from v1 to v2 was modest (11.4 <math id="A1.SS2.p2.1.m1" class="ltx_Math" alttext="\to" display="inline" intent=":literal"><semantics><mo stretchy="false">→</mo><annotation encoding="application/x-tex">\to</annotation></semantics></math> 10.5 for D-CCR-2b), confirming that the FP problem is structural, not merely a prompt issue.</p>
+</div>
+</section>
+<section id="A1.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">A.3 </span>Matching Algorithm Evolution</h3>
+
+<div id="A1.SS3.p1" class="ltx_para">
+<p id="A1.SS3.p1.1" class="ltx_p">The pilot initially used exact keyword matching, which underperformed on Korean text.
+Independent verification identified that agglutinative suffixes caused match failures.
+We added suffix stripping and fuzzy substring matching (v2 algorithm), then re-analyzed all data.
+The H1 reversal (CCR-1 <math id="A1.SS3.p1.1.m1" class="ltx_Math" alttext="&gt;" display="inline" intent=":literal"><semantics><mo>&gt;</mo><annotation encoding="application/x-tex">&gt;</annotation></semantics></math> D-CCR-2b) was robust across both matching versions and all thresholds tested (1.0–3.0).</p>
+</div>
+</section>
+</section>
+<section id="A2" class="ltx_appendix">
+<h2 class="ltx_title ltx_title_appendix">
+<span class="ltx_tag ltx_tag_appendix">Appendix B </span>Threshold Robustness Analysis</h2>
+
+<div id="A2.p1" class="ltx_para">
+<p id="A2.p1.1" class="ltx_p">The relative ordering CCR-1 <math id="A2.p1.1.m1" class="ltx_Math" alttext="&gt;" display="inline" intent=":literal"><semantics><mo>&gt;</mo><annotation encoding="application/x-tex">&gt;</annotation></semantics></math> D-CCR-2b holds at every matching threshold from 1.0 to 3.0, as independently verified.
+At threshold 1.0 (most permissive), CCR-1 recall exceeds D-CCR-2b recall, eliminating the possibility that our results depend on a threshold that favors CCR-1’s matching patterns.</p>
+</div>
+</section>
+<section id="A3" class="ltx_appendix">
+<h2 class="ltx_title ltx_title_appendix">
+<span class="ltx_tag ltx_tag_appendix">Appendix C </span>Ensemble Analysis</h2>
+
+<div id="A3.p1" class="ltx_para">
+<p id="A3.p1.1" class="ltx_p">A majority-vote ensemble (count a finding as TP if <math id="A3.p1.1.m1" class="ltx_Math" alttext="\geq" display="inline" intent=":literal"><semantics><mo>≥</mo><annotation encoding="application/x-tex">\geq</annotation></semantics></math>2 of 3 runs agree) yields:</p>
+</div>
+<figure id="A3.tab1" class="ltx_table">
+<table id="A3.tab1.1" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="A3.tab1.1.1.1" class="ltx_tr">
+<th id="A3.tab1.1.1.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt"><span id="A3.tab1.1.1.1.1.1" class="ltx_text ltx_font_bold">Condition</span></th>
+<th id="A3.tab1.1.1.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="A3.tab1.1.1.1.2.1" class="ltx_text ltx_font_bold">Ensemble F1</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="A3.tab1.1.2.1" class="ltx_tr">
+<th id="A3.tab1.1.2.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">CCR-1 (Majority 2/3)</th>
+<td id="A3.tab1.1.2.1.2" class="ltx_td ltx_align_center ltx_border_t">0.393</td>
+</tr>
+<tr id="A3.tab1.1.3.2" class="ltx_tr">
+<th id="A3.tab1.1.3.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb">D-CCR-2b (Majority 2/3)</th>
+<td id="A3.tab1.1.3.2.2" class="ltx_td ltx_align_center ltx_border_bb">0.311</td>
+</tr>
+</tbody>
+</table>
+</figure>
+<div id="A3.p2" class="ltx_para">
+<p id="A3.p2.1" class="ltx_p">The ensemble CCR-1 result (0.393) is the highest F1 achieved in this study, confirming that parallel independent reviews outperform sequential iterative ones.</p>
+</div>
+</section>
+</article>
+</div>
+</div>
+<footer class="arxiv-html-footer">
+  <div class="ltx_page_logo">
+    Experimental support, please
+    <a href="./2603.16244v1/__stdout.txt" class="ltx_ref"
+    target="_blank" rel="nofollow">view the build logs</a>
+    for errors. Generated by
+    <a href="https://math.nist.gov/~BMiller/LaTeXML/" target="_blank" class="ltx_ref ltx_LaTeXML_logo">
+      <span style="letter-spacing: -0.2em; margin-right: 0.1em;">
+        L
+        <span style="font-size: 70%; position: relative; bottom: 2.2pt;">A</span>
+        T
+        <span style="position: relative; bottom: -0.4ex;">E</span>
+      </span>
+      <span class="ltx_font_smallcaps">xml</span>
+      <img alt="[LOGO]"
+        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg==">
+    </a>.
+  </div>
+  <div class="keyboard-glossary">
+    <h2>Instructions for reporting errors</h2>
+    <p>We are continuing to improve HTML versions of papers, and your feedback helps enhance accessibility and mobile
+      support. To report errors in the HTML that will help us improve conversion and rendering, choose any of the
+      methods listed below:</p>
+    <ul>
+      <li>Click the "Report Issue" <span class="mobile-only">(<svg role="presentation"
+            style="display: inline-block; vertical-align: middle; fill: var(--text-color);" aria-hidden="true"
+            height="1em" viewBox="0 0 640 640">
+            <path
+              d="M224 160C224 107 267 64 320 64C373 64 416 107 416 160L416 163.6C416 179.3 403.3 192 387.6 192L252.5 192C236.8 192 224.1 179.3 224.1 163.6L224.1 160zM569.6 172.8C580.2 186.9 577.3 207 563.2 217.6L465.4 290.9C470.7 299.8 474.7 309.6 477.2 320L576 320C593.7 320 608 334.3 608 352C608 369.7 593.7 384 576 384L480 384L480 416C480 418.6 479.9 421.3 479.8 423.9L563.2 486.4C577.3 497 580.2 517.1 569.6 531.2C559 545.3 538.9 548.2 524.8 537.6L461.7 490.3C438.5 534.5 395.2 566.5 344 574.2L344 344C344 330.7 333.3 320 320 320C306.7 320 296 330.7 296 344L296 574.2C244.8 566.5 201.5 534.5 178.3 490.3L115.2 537.6C101.1 548.2 81 545.3 70.4 531.2C59.8 517.1 62.7 497 76.8 486.4L160.2 423.9C160.1 421.3 160 418.7 160 416L160 384L64 384C46.3 384 32 369.7 32 352C32 334.3 46.3 320 64 320L162.8 320C165.3 309.6 169.3 299.8 174.6 290.9L76.8 217.6C62.7 207 59.8 186.9 70.4 172.8C81 158.7 101.1 155.8 115.2 166.4L224 248C236.3 242.9 249.8 240 264 240L376 240C390.2 240 403.7 242.8 416 248L524.8 166.4C538.9 155.8 559 158.7 569.6 172.8z" />
+          </svg>)</span> button, located in the page header.</li>
+    </ul>
+    <p><strong>Tip:</strong> You can select the relevant text first, to include it in your report.</p>
+    <p>Our team has already identified <a class="ltx_ref" href="https://github.com/arXiv/html_feedback/issues"
+        target="_blank">the following issues</a>. We appreciate your time reviewing and reporting rendering errors we
+      may not have found yet. Your efforts will help us improve the HTML versions for all readers, because disability
+      should not be a barrier to accessing research. Thank you for your continued support in championing open access for
+      all.</p>
+    <p>Have a free development cycle? Help support accessibility at arXiv! Our collaborators at LaTeXML maintain a <a
+        class="ltx_ref" href="https://github.com/brucemiller/LaTeXML/wiki/Porting-LaTeX-packages-for-LaTeXML"
+        target="_blank">list of packages that need conversion</a>, and welcome <a class="ltx_ref"
+        href="https://github.com/brucemiller/LaTeXML/issues" target="_blank">developer contributions</a>.</p>
+  </div>
+</footer>
+<div id="fixed-buttons-container">
+  <div id="beta-badge">BETA</div>
+  <a id="disable-reading-mode-btn" class="header-button" href="javascript:toggleReadingMode();"
+    title="Disable reading mode, show header and footer">
+    <svg role="presentation" height="1.25rem"
+      viewBox="0 0 448 512"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+      <path
+        d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z" />
+    </svg>
+  </a>
+</div></body>
+</html>

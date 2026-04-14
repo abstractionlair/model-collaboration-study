@@ -513,6 +513,36 @@ state-machine treatment:
   probably outside the practical API-based scope of Phase 1.
 
 
+## Future directions for the notation
+
+- **Abstract recursion.** The notation can express any specific
+  recursive pipeline by unrolling it (e.g., collaborative decomposition
+  applied to the decomposition task itself). But it cannot express the
+  general recursive principle as a single rule — "apply protocol X to
+  its own sub-tasks." Doing so would require something like a
+  fixed-point combinator or a depth parameter:
+  `recursive_apply(protocol, depth=n)`. This is closer to a DSL or
+  programming language than a description language. Not needed for
+  Phase 1, where task complexity is low enough that recursion is
+  unlikely to help, but worth revisiting if the project scales to
+  tasks where the decomposition problem is itself hard.
+
+- **Cost as a first-class quantity.** Several papers (Scaling Test-Time
+  Compute, Unified Routing/Cascading, FrugalGPT) formalize cost or
+  compute budget in their optimization. The notation currently has no
+  way to express "minimize cost subject to quality" or "allocate N
+  calls optimally." For Phase 1, compute matching is handled by
+  experimental design (fixed budget tiers), but a richer notation
+  might embed cost constraints directly.
+
+- **Probabilistic dynamics.** Papers like Demystifying MAD and ColMAD
+  model how beliefs evolve across rounds (martingale convergence,
+  Bayesian updates). The notation describes pipeline shape but not the
+  statistics of what happens inside it. If the study later needs to
+  explain *why* certain protocols outperform, these formalisms would
+  complement the structural notation.
+
+
 ## Working takeaway
 
 The inventory now spans:

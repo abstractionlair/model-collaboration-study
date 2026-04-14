@@ -387,6 +387,22 @@ Supplementary findings to be merged into the final synthesis.
   most of the value of dense interaction at a fraction of the token cost.
 
 
+## Additional Reference (Blog Post)
+
+- [The Mismanaged Geniuses Hypothesis](https://alexzhang13.github.io/blog/2026/mgh/)
+  Alex L. Zhang, Zhening (Zed) Li, Omar Khattab, April 2026.
+  Argues that frontier models are severely underutilized due to
+  sub-optimal orchestration, not insufficient capability. The next
+  capability leap comes from decomposition and self-management, not
+  scaling. Key evidence: a 4B RLM achieves 100% on 1M-context task
+  after RL training on 32K version. Directly relevant to the project's
+  framing: if the bottleneck is management/orchestration, then protocol
+  design variables are the lever. Connected to DSPy (same author,
+  Khattab). Does not test multi-model collaboration specifically, but
+  the decomposition-space concept maps to our pre-response protocol
+  family (collaborative decomposition of Q into P before generation).
+
+
 ## Additional Findings (Claude - April 2026)
 
 Supplementary findings from four parallel literature searches targeting

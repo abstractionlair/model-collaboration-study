@@ -178,6 +178,56 @@ def fetch_arxiv_html(arxiv_id: str) -> str | None:
         return None
 
 
+def fetch_pdf(arxiv_id: str, use_cache: bool = True) -> Path | None:
+    """Download PDF from arXiv. Returns path to saved file or None."""
+    pdf_dir = CACHE_DIR / "pdf"
+    pdf_dir.mkdir(parents=True, exist_ok=True)
+    safe_id = arxiv_id.replace("/", "_")
+    pdf_path = pdf_dir / f"{safe_id}.pdf"
+
+    if use_cache and pdf_path.exists() and pdf_path.stat().st_size > 0:
+        logger.info("  PDF cached (%d KB)", pdf_path.stat().st_size // 1024)
+        return pdf_path
+
+    url = f"https://arxiv.org/pdf/{arxiv_id}"
+    try:
+        data = _fetch_url(url, timeout=60)
+        if len(data) > 1000:
+            pdf_path.write_bytes(data)
+            logger.info("  PDF downloaded (%d KB)", len(data) // 1024)
+            return pdf_path
+        return None
+    except Exception as e:
+        logger.warning("  PDF download failed: %s", e)
+        return None
+
+
+def fetch_html(arxiv_id: str, use_cache: bool = True) -> Path | None:
+    """Download HTML version from arXiv (newer papers only). Returns path or None."""
+    html_dir = CACHE_DIR / "html"
+    html_dir.mkdir(parents=True, exist_ok=True)
+    safe_id = arxiv_id.replace("/", "_")
+    html_path = html_dir / f"{safe_id}.html"
+
+    if use_cache and html_path.exists() and html_path.stat().st_size > 0:
+        logger.info("  HTML cached (%d KB)", html_path.stat().st_size // 1024)
+        return html_path
+
+    url = f"https://arxiv.org/html/{arxiv_id}"
+    try:
+        data = _fetch_url(url, timeout=30)
+        html = data.decode("utf-8", errors="replace")
+        # arXiv returns a short error page if HTML isn't available
+        if len(html) > 5000 and "<article" in html:
+            html_path.write_text(html)
+            logger.info("  HTML downloaded (%d KB)", len(html) // 1024)
+            return html_path
+        return None
+    except Exception as e:
+        logger.debug("  HTML not available: %s", e)
+        return None
+
+
 def fetch_pdf_llamaparse(arxiv_id: str) -> str | None:
     """Fetch PDF and parse with LlamaParse (premium mode)."""
     api_key = os.environ.get("LLAMAPARSE_API_KEY", "")
@@ -311,6 +361,10 @@ def main():
                         help="Re-fetch even if cached")
     parser.add_argument("--dry-run", action="store_true",
                         help="List papers that would be fetched without fetching")
+    parser.add_argument("--pdfs", action="store_true",
+                        help="Download PDFs for all papers")
+    parser.add_argument("--html", action="store_true",
+                        help="Download HTML versions where available")
     args = parser.parse_args()
 
     if args.paper:
@@ -332,11 +386,37 @@ def main():
             print(f"  [{p['vote_count']} votes] {p['arxiv_id']}  {p['title']}")
         return
 
+    use_cache = not args.no_cache
+
+    # Download PDFs and/or HTML if requested
+    if args.pdfs or args.html:
+        pdf_ok, pdf_fail, html_ok, html_na = 0, 0, 0, 0
+        for i, p in enumerate(papers, 1):
+            aid = p["arxiv_id"]
+            logger.info("[%d/%d] %s — %s", i, len(papers), aid, p["title"])
+            if args.pdfs:
+                if fetch_pdf(aid, use_cache=use_cache):
+                    pdf_ok += 1
+                else:
+                    pdf_fail += 1
+            if args.html:
+                if fetch_html(aid, use_cache=use_cache):
+                    html_ok += 1
+                else:
+                    html_na += 1
+        print(f"\nDone. {len(papers)} papers:")
+        if args.pdfs:
+            print(f"  PDFs: {pdf_ok} downloaded, {pdf_fail} failed")
+        if args.html:
+            print(f"  HTML: {html_ok} available, {html_na} not available")
+        return
+
+    # Default: fetch text (LaTeX/HTML/LlamaParse)
     results = {"latex": [], "html": [], "pdf-parsed": [], "failed": []}
 
     for i, p in enumerate(papers, 1):
         logger.info("[%d/%d] %s — %s", i, len(papers), p["arxiv_id"], p["title"])
-        result = fetch_paper(p["arxiv_id"], use_cache=not args.no_cache)
+        result = fetch_paper(p["arxiv_id"], use_cache=use_cache)
         if result:
             content, fmt = result
             results[fmt].append(p["arxiv_id"])

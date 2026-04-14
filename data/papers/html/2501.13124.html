@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="content-type"/>
+<title>Debate Helps Weak-to-Strong Generalization</title>
+<!--Generated on Tue Jan 21 05:23:46 2025 by LaTeXML (version 0.8.8) http://dlmf.nist.gov/LaTeXML/.-->
+<meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+<link href="/static/browse/0.3.4/css/ar5iv.0.7.9.min.css" rel="stylesheet" type="text/css"/>
+<link href="/static/browse/0.3.4/css/ar5iv-fonts.0.7.9.min.css" rel="stylesheet" type="text/css"/>
+<link href="/static/browse/0.3.4/css/latexml_styles.css" rel="stylesheet" type="text/css"/>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.3/html2canvas.min.js"></script>
+<script src="/static/browse/0.3.4/js/addons_new.js"></script>
+<script src="/static/browse/0.3.4/js/feedbackOverlay.js"></script>
+<base href="/html/2501.13124v1/"/></head>
+<body>
+<nav class="ltx_page_navbar">
+<nav class="ltx_TOC">
+<ol class="ltx_toclist">
+<li class="ltx_tocentry ltx_tocentry_section"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx1" title="In Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Introduction</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_section">
+<a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx2" title="In Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Related Work</span></a>
+<ol class="ltx_toclist ltx_toclist_section">
+<li class="ltx_tocentry ltx_tocentry_paragraph"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx2.SS0.SSS0.Px1" title="In Related Work ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Scalable oversight.</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_paragraph"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx2.SS0.SSS0.Px2" title="In Related Work ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Weak-to-strong generalization.</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_paragraph"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx2.SS0.SSS0.Px3" title="In Related Work ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Ensemble methods.</span></a></li>
+</ol>
+</li>
+<li class="ltx_tocentry ltx_tocentry_section">
+<a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx3" title="In Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Preliminaries</span></a>
+<ol class="ltx_toclist ltx_toclist_section">
+<li class="ltx_tocentry ltx_tocentry_paragraph"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx3.SS0.SSS0.Px1" title="In Preliminaries ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">1. Create the weak supervisor.</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_paragraph"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx3.SS0.SSS0.Px2" title="In Preliminaries ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">2. Train a strong student model.</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_paragraph"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx3.SS0.SSS0.Px3" title="In Preliminaries ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">3. Train a strong ceiling model.</span></a></li>
+</ol>
+</li>
+<li class="ltx_tocentry ltx_tocentry_section">
+<a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx4" title="In Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Methods</span></a>
+<ol class="ltx_toclist ltx_toclist_section">
+<li class="ltx_tocentry ltx_tocentry_subsection"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx4.SSx1" title="In Methods ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Overview</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx4.SSx2" title="In Methods ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Argument Generation through Debate</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx4.SSx3" title="In Methods ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Weak Model Ensemble Training</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx4.SSx4" title="In Methods ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Training Strong Models using Ensembles</span></a></li>
+</ol>
+</li>
+<li class="ltx_tocentry ltx_tocentry_section">
+<a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx5" title="In Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Experiments</span></a>
+<ol class="ltx_toclist ltx_toclist_section">
+<li class="ltx_tocentry ltx_tocentry_subsection"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx5.SSx1" title="In Experiments ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Tasks</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx5.SSx2" title="In Experiments ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Experimental Setups and Metrics</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx5.SSx3" title="In Experiments ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Implementation Details</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx5.SSx4" title="In Experiments ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Baselines</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx5.SSx5" title="In Experiments ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Main Results</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection">
+<a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx5.SSx6" title="In Experiments ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Ablation Studies</span></a>
+<ol class="ltx_toclist ltx_toclist_subsection">
+<li class="ltx_tocentry ltx_tocentry_paragraph"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx5.SSx6.SSS0.Px1" title="In Ablation Studies ‣ Experiments ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Ablation on different scalable oversight approaches.</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_paragraph"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx5.SSx6.SSS0.Px2" title="In Ablation Studies ‣ Experiments ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Ablation on weak model ensemble.</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_paragraph"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx5.SSx6.SSS0.Px3" title="In Ablation Studies ‣ Experiments ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Ablation on the cardinality of the ensemble.</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_paragraph"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx5.SSx6.SSS0.Px4" title="In Ablation Studies ‣ Experiments ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Ablation on the number of turns of debate.</span></a></li>
+</ol>
+</li>
+</ol>
+</li>
+<li class="ltx_tocentry ltx_tocentry_section">
+<a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx6" title="In Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Limitations and Conclusion</span></a>
+<ol class="ltx_toclist ltx_toclist_section">
+<li class="ltx_tocentry ltx_tocentry_paragraph"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx6.SSx6.SSS0.Px1" title="In Limitations and Conclusion ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Limitations.</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_paragraph"><a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx6.SSx6.SSS0.Px2" title="In Limitations and Conclusion ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_title">Conclusion.</span></a></li>
+</ol>
+</li>
+</ol></nav>
+</nav>
+<div class="ltx_page_main">
+<div class="ltx_page_content">
+<article class="ltx_document ltx_authors_1line">
+<h1 class="ltx_title ltx_title_document">Debate Helps Weak-to-Strong Generalization</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">
+Hao Lang,
+Fei Huang,
+Yongbin Li 
+
+</span><span class="ltx_author_notes">Corresponding author.</span></span>
+</div>
+<div class="ltx_abstract">
+<h6 class="ltx_title ltx_title_abstract">Abstract</h6>
+<p class="ltx_p" id="id1.id1">Common methods for aligning already-capable models with desired behavior rely on the ability of humans to provide supervision.
+However, future superhuman models will surpass the capability of humans.
+Therefore, humans will only be able to weakly supervise superhuman models.
+This expected deficiency of human evaluation would weaken the safety of future AI systems.
+Scalable oversight and weak-to-strong generalization are two complementary approaches to tackle this issue.
+In this paper, we attempt to combine the strengths of these two approaches to further improve alignment.
+Specifically, we investigate ways of improving human supervision with a strong pretrained model and then supervise the strong model with enhanced weak human supervision.
+To make iterative empirical progress, we consider an analogy: can we use a strong model to improve weak model supervision and then use it to supervise the strong model?
+We empirically test it by finetuning a small weak model on ground truth labels with the additional help from a large strong model, and then finetuning the strong model on labels generated by the weak model.
+We find that debate can assist a weak model in extracting trustworthy information from an untrustworthy strong model, which provides leverage as context on samples when training a weak model.
+We also show that an ensemble of weak models helps exploit long arguments generated by strong model debaters and obtain a more robust supervision estimate.
+Extensive experiments on the OpenAI weak-to-strong NLP benchmarks show that the combination approach leads to better alignment, which indicates that debate has the potential to help weak-to-strong generalization.</p>
+</div>
+<section class="ltx_section" id="Sx1">
+<h2 class="ltx_title ltx_title_section">Introduction</h2>
+<div class="ltx_para" id="Sx1.p1">
+<p class="ltx_p" id="Sx1.p1.1">Current AI alignment techniques heavily rely on the availability of human labelled data, such as human demonstrations for supervised finetuning (SFT) <cite class="ltx_cite ltx_citemacro_citep">(Wei et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib51" title="">2021</a>; Chung et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib16" title="">2024</a>)</cite> and human preferences for reinforcement learning from human feedback (RLHF) <cite class="ltx_cite ltx_citemacro_citep">(Christiano et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib15" title="">2017</a>; Ouyang et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib42" title="">2022</a>; Bai et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib5" title="">2022</a>)</cite>.
+These techniques can be leveraged to build the most capable AI systems currently deployed <cite class="ltx_cite ltx_citemacro_citep">(OpenAI <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib41" title="">2023</a>; Anthropic <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib2" title="">2023</a>)</cite>.</p>
+</div>
+<div class="ltx_para" id="Sx1.p2">
+<p class="ltx_p" id="Sx1.p2.1">However, as models grow increasingly more capable, they will surpass the ability of humans <cite class="ltx_cite ltx_citemacro_citep">(CAIS <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib10" title="">2023</a>)</cite>.
+In that case, even human experts can not reliably verify the quality or correctness of model outputs, and the role of human evaluation will evolve into non-experts overseeing experts <cite class="ltx_cite ltx_citemacro_citep">(Amodei et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib1" title="">2016</a>; Bowman et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib7" title="">2022</a>; Burns et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib9" title="">2023</a>; Khan et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib32" title="">2024</a>)</cite>.
+The expected deficiency of human evaluation will limit the effectiveness of most existing alignment approaches <cite class="ltx_cite ltx_citemacro_citep">(Casper et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib11" title="">2023</a>; McAleese et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib39" title="">2024</a>)</cite>.
+Moreover, these predicted inaccurate training signals could lead to reward overoptimization and reward tampering during policy training that seriously weakens its safety <cite class="ltx_cite ltx_citemacro_citep">(Gao, Schulman, and Hilton <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib23" title="">2023</a>; Denison et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib19" title="">2024</a>)</cite>.</p>
+</div>
+<div class="ltx_para" id="Sx1.p3">
+<p class="ltx_p" id="Sx1.p3.1">There are two complementary approaches to tackle the above issue: scalable oversight (SO) and weak-to-strong generalization (W2SG) <cite class="ltx_cite ltx_citemacro_citep">(Leike <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib34" title="">2023</a>)</cite>.
+SO approaches aim to improve the ability of humans to supervise more capable models, such that accurately labelled data can be used for alignment <cite class="ltx_cite ltx_citemacro_citep">(Bowman et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib7" title="">2022</a>)</cite>.
+Instead of improving human supervision, W2SG approaches finetune a strong pretrained model to generalize accurately from weak human supervision <cite class="ltx_cite ltx_citemacro_citep">(Burns et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib9" title="">2023</a>)</cite>.</p>
+</div>
+<div class="ltx_para" id="Sx1.p4">
+<p class="ltx_p" id="Sx1.p4.1">We note that most prior SO and W2SG techniques are studied separately.
+In contrast, we attempt to combine the strength of SO and W2SG to further improve AI alignment.
+We investigate ways of improving human supervision with a strong pretrained model and then supervise the strong model with enhanced weak human supervision.
+To make iterative empirical progress, we consider an analogy <cite class="ltx_cite ltx_citemacro_citep">(Burns et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib9" title="">2023</a>; Kenton et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib31" title="">2024</a>)</cite>: can we use a strong model to improve weak model supervision and then use it to supervise the strong model?</p>
+</div>
+<div class="ltx_para" id="Sx1.p5">
+<p class="ltx_p" id="Sx1.p5.1">In this paper, we empirically test it by finetuning a small weak model on ground truth labels with the additional help of knowledge from a large strong model, and then finetuning the strong model on labels generated by the weak model.
+We assume a strong model pretrained on internet-scale data can provide contextual information on samples when training a weak model <cite class="ltx_cite ltx_citemacro_citep">(Brown et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib8" title="">2020</a>)</cite>.
+This gives us hope that a weak-strong model team could create a better weak supervisor to elicit the capabilities of the strong model.</p>
+</div>
+<div class="ltx_para" id="Sx1.p6">
+<p class="ltx_p" id="Sx1.p6.1">A major challenge in building a weak-strong model team involves finding ways of extracting trustworthy information from untrustworthy models <cite class="ltx_cite ltx_citemacro_citep">(Bowman et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib7" title="">2022</a>)</cite>.
+More specifically, strong pretrained models have huge capabilities but are not well aligned with human values and intentions <cite class="ltx_cite ltx_citemacro_citep">(Leike et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib35" title="">2018</a>; Ji et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib29" title="">2023</a>)</cite>.
+Thus, a strong model may intentionally mislead us by generating unfaithful facts or making false claims, which could cause damage when applied for creating a weak supervisor <cite class="ltx_cite ltx_citemacro_citep">(Michael et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib40" title="">2023</a>)</cite>.</p>
+</div>
+<div class="ltx_para" id="Sx1.p7">
+<p class="ltx_p" id="Sx1.p7.1">Another challenge is that a weak model (with a small model size) may lack the capacity to fully process long contexts generated by the strong model, which are filled with irrelevant noises for tasks at hand.
+Meanwhile, recent studies also show that the performance of large language models (LLMs) is closely related to the model size and the complexity of hard problems may exceed the capacity of a single weak model <cite class="ltx_cite ltx_citemacro_citep">(Xu et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib53" title="">2023</a>; Chung et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib16" title="">2024</a>)</cite>.</p>
+</div>
+<div class="ltx_para" id="Sx1.p8">
+<p class="ltx_p" id="Sx1.p8.1">In this study, we demonstrate that debate can help weak models more reliably extract information from strong models.
+Concretely, given a question, two instances of a strong pretrained model are randomly assigned two opposing answers, and then the two instances (debaters) argue with each other over the answer <cite class="ltx_cite ltx_citemacro_citep">(Michael et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib40" title="">2023</a>; Khan et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib32" title="">2024</a>; Kenton et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib31" title="">2024</a>)</cite>.
+In a debate, it is harder to lie than to refute a lie, i.e., if a debater makes false claims, its opponent can convincingly point out flaws in its arguments <cite class="ltx_cite ltx_citemacro_citep">(Irving, Christiano, and Amodei <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib28" title="">2018</a>)</cite>.
+Hence, these arguments from the debate can inform a weak model about the merits and flaws of each side and provide leverage as contextual information in weak model training.</p>
+</div>
+<div class="ltx_para" id="Sx1.p9">
+<p class="ltx_p" id="Sx1.p9.1">To fully exploit long arguments generated by strong model debaters, we train an ensemble of weak models.
+We aggregate predictions of multiple weak models to obtain a more robust supervision estimate over any single one <cite class="ltx_cite ltx_citemacro_citep">(Ganaie et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib22" title="">2022</a>)</cite>.
+In particular, we explore two types of ensembles: <span class="ltx_text ltx_font_italic" id="Sx1.p9.1.1">debate ensembles</span>, where different members of the ensemble differ in the random seed used during debate sampling, and <span class="ltx_text ltx_font_italic" id="Sx1.p9.1.2">finetune ensembles</span>, where members differ only in the random seed used during weak model finetuning.
+We find that debate ensembles consistently outperform a single weak model and finetune ensembles.
+The main contributions of this study are summarized as follows:</p>
+</div>
+<div class="ltx_para" id="Sx1.p10">
+<ul class="ltx_itemize" id="Sx1.I1">
+<li class="ltx_item" id="Sx1.I1.i1" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span>
+<div class="ltx_para" id="Sx1.I1.i1.p1">
+<p class="ltx_p" id="Sx1.I1.i1.p1.1">We show the first demonstration of a simple combination of scalable oversight and weak-to-strong generalization approaches, which leads to better alignment on the OpenAI weak-to-strong NLP benchmarks.</p>
+</div>
+</li>
+<li class="ltx_item" id="Sx1.I1.i2" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span>
+<div class="ltx_para" id="Sx1.I1.i2.p1">
+<p class="ltx_p" id="Sx1.I1.i2.p1.1">We find that debate can assist a weak model in extracting trustworthy information from a capable but untrustworthy strong model, which provides leverage as contextual information on samples when training a weak model. We also show that debate outperforms alternative scalable oversight techniques in our settings.</p>
+</div>
+</li>
+<li class="ltx_item" id="Sx1.I1.i3" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span>
+<div class="ltx_para" id="Sx1.I1.i3.p1">
+<p class="ltx_p" id="Sx1.I1.i3.p1.1">We show that an ensemble of weak models helps obtain a more robust supervision estimate. We find that diversity of the ensemble is vital, and that a debate ensemble that contains members that do not share a debate sampling seed leads to better performances.</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="ltx_para" id="Sx1.p11">
+<p class="ltx_p" id="Sx1.p11.1">Although with the help of knowledge from a strong model, creating a better weak supervisor to elicit the capabilities of the strong model is only one way in which scalable oversight and weak-to-strong generalization techniques can be combined, our results pave the way for further research on hybrid superhuman alignment methods <cite class="ltx_cite ltx_citemacro_citep">(Leike <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib34" title="">2023</a>)</cite>.
+We provide empirical evidences in NLP domains indicating that debate helps weak-to-strong generalization.</p>
+</div>
+<figure class="ltx_figure" id="Sx1.F1"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_square" height="560" id="Sx1.F1.g1" src="x1.png" width="689"/>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 1: </span><span class="ltx_text ltx_font_bold" id="Sx1.F1.2.1">Illustration of debate</span>. Illustration of the debate procedure between debater A and debater B.</figcaption>
+</figure>
+</section>
+<section class="ltx_section" id="Sx2">
+<h2 class="ltx_title ltx_title_section">Related Work</h2>
+<div class="ltx_para" id="Sx2.p1">
+<p class="ltx_p" id="Sx2.p1.1"><span class="ltx_text ltx_font_bold" id="Sx2.p1.1.1">AI alignment.</span> The goal of AI alignment is to steer already-capable models to behave in line with human values and intentions <cite class="ltx_cite ltx_citemacro_citep">(Leike et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib35" title="">2018</a>; Ji et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib29" title="">2023</a>)</cite>.
+Current alignment methods finetune pretrained LLMs using imitation learning on human demonstrations <cite class="ltx_cite ltx_citemacro_citep">(Bain and Sammut <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib6" title="">1995</a>; Atkeson and Schaal <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib3" title="">1997</a>; Wei et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib51" title="">2021</a>; Chung et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib16" title="">2024</a>)</cite>, reinforcement learning from human feedback (RLHF) <cite class="ltx_cite ltx_citemacro_citep">(Christiano et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib15" title="">2017</a>; Stiennon et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib49" title="">2020</a>; Ouyang et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib42" title="">2022</a>; Bai et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib5" title="">2022</a>)</cite>, or direct alignment algorithms like direct preference optimization (DPO) <cite class="ltx_cite ltx_citemacro_citep">(Rafailov et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib47" title="">2024b</a>, <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib46" title="">a</a>)</cite>.
+Both imitation learning and preference learning rely on high-quality human supervision, a demand that becomes increasingly challenging as models become more capable than humans <cite class="ltx_cite ltx_citemacro_citep">(Amodei et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib1" title="">2016</a>)</cite>.</p>
+</div>
+<section class="ltx_paragraph" id="Sx2.SS0.SSS0.Px1">
+<h4 class="ltx_title ltx_title_paragraph">Scalable oversight.</h4>
+<div class="ltx_para" id="Sx2.SS0.SSS0.Px1.p1">
+<p class="ltx_p" id="Sx2.SS0.SSS0.Px1.p1.1">Scalable oversight techniques seek to improve the ability of humans to supervise more capable models <cite class="ltx_cite ltx_citemacro_citep">(Bowman et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib7" title="">2022</a>)</cite>.
+This is typically pursued through taking advantage of special problem structure, such as the assumption that evaluation is easier than generation <cite class="ltx_cite ltx_citemacro_citep">(Karp <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib30" title="">1975</a>; Goodfellow et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib24" title="">2014</a>)</cite> or decomposability <cite class="ltx_cite ltx_citemacro_citep">(Christiano, Shlegeris, and Amodei <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib14" title="">2018</a>)</cite>.
+There have been many promising scalable oversight proposals in theory, including Recursive Reward Modeling <cite class="ltx_cite ltx_citemacro_citep">(Leike et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib35" title="">2018</a>)</cite>, Debate <cite class="ltx_cite ltx_citemacro_citep">(Irving, Christiano, and Amodei <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib28" title="">2018</a>)</cite>, Market-Making <cite class="ltx_cite ltx_citemacro_citep">(Hubinger <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib27" title="">2020</a>)</cite>, Self-Critique <cite class="ltx_cite ltx_citemacro_citep">(Saunders et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib48" title="">2022</a>)</cite>, and many more <cite class="ltx_cite ltx_citemacro_citep">(Lightman et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib37" title="">2023</a>; McAleese et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib39" title="">2024</a>; Sun et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib50" title="">2024</a>)</cite>.
+Recent empirical studies in this direction demonstrate that human-machine teams can improve evaluation accuracy on question answering tasks over the human-only baseline <cite class="ltx_cite ltx_citemacro_citep">(Bowman et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib7" title="">2022</a>)</cite>.</p>
+</div>
+<div class="ltx_para" id="Sx2.SS0.SSS0.Px1.p2">
+<p class="ltx_p" id="Sx2.SS0.SSS0.Px1.p2.1">Debate was originally proposed for AI safety <cite class="ltx_cite ltx_citemacro_citep">(Irving, Christiano, and Amodei <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib28" title="">2018</a>)</cite>.
+From then on, a body of work has explored the usability of debate for scalable oversight, with human or LLM debaters <cite class="ltx_cite ltx_citemacro_citep">(Parrish et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib44" title="">2022b</a>, <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib43" title="">a</a>; Michael et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib40" title="">2023</a>; Khan et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib32" title="">2024</a>; Kenton et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib31" title="">2024</a>)</cite>.
+These studies are all conducted to improve inference-time judge accuracy, while in our work debate is leveraged to train a better weak supervisor.
+We could in turn use the weak supervisor to align strong models.
+LLM-based debate has also been investigated in several other applications, like translation <cite class="ltx_cite ltx_citemacro_citep">(Liang et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib36" title="">2023</a>)</cite>, text assessment <cite class="ltx_cite ltx_citemacro_citep">(Chan et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib12" title="">2023</a>)</cite>, reasoning and content generation <cite class="ltx_cite ltx_citemacro_citep">(Du et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib20" title="">2023</a>)</cite>.</p>
+</div>
+</section>
+<section class="ltx_paragraph" id="Sx2.SS0.SSS0.Px2">
+<h4 class="ltx_title ltx_title_paragraph">Weak-to-strong generalization.</h4>
+<div class="ltx_para" id="Sx2.SS0.SSS0.Px2.p1">
+<p class="ltx_p" id="Sx2.SS0.SSS0.Px2.p1.1">In contrast to improving human supervision, weak-to-strong generalization techniques finetune a strong pretrained model to generalize well from weak human supervision <cite class="ltx_cite ltx_citemacro_citep">(Burns et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib9" title="">2023</a>)</cite>.
+The hope for these techniques is that strong pretrained models should already have good representations of the alignment-relevant tasks.
+Therefore, we simply need a weak supervisor to elicit what the strong model already knows.
+Recently, a theoretical framework is introduced to understand weak-to-strong generalization with misfit error <cite class="ltx_cite ltx_citemacro_citep">(Charikar, Pabbaraju, and Shiragur <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib13" title="">2024</a>)</cite>.
+Prior work has mainly explored how to supervise a strong model with a fixed weak supervisor, while in this work we also attempt to train a better weak supervisor with the help of the strong model.</p>
+</div>
+</section>
+<section class="ltx_paragraph" id="Sx2.SS0.SSS0.Px3">
+<h4 class="ltx_title ltx_title_paragraph">Ensemble methods.</h4>
+<div class="ltx_para" id="Sx2.SS0.SSS0.Px3.p1">
+<p class="ltx_p" id="Sx2.SS0.SSS0.Px3.p1.1">Our work is also related to existing works that use ensembles by combining predictions of several models <cite class="ltx_cite ltx_citemacro_citep">(Ganaie et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib22" title="">2022</a>)</cite>.
+In the context of AI alignment, reward model ensembles are investigated to mitigate reward overoptimization when finetuning models with RLHF <cite class="ltx_cite ltx_citemacro_citep">(Coste et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib18" title="">2023</a>; Eisenstein et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib21" title="">2023</a>)</cite>.
+Most similar to our work, <cite class="ltx_cite ltx_citemacro_citet">Liu and Alahi (<a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib38" title="">2024</a>)</cite> propose to assemble a diverse set of specialized weak supervisors for weak-to-strong generalization.
+In contrast, in our work, we aim to use an ensemble of weak models with different seeds to fully exploit long arguments generated by strong model debaters.</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="Sx3">
+<h2 class="ltx_title ltx_title_section">Preliminaries</h2>
+<div class="ltx_para" id="Sx3.p1">
+<p class="ltx_p" id="Sx3.p1.1">We review the weak-to-strong generalization pipeline in <cite class="ltx_cite ltx_citemacro_citep">(Burns et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib9" title="">2023</a>)</cite>, which has also been adopted in subsequent work <cite class="ltx_cite ltx_citemacro_citep">(Liu and Alahi <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib38" title="">2024</a>; Charikar, Pabbaraju, and Shiragur <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib13" title="">2024</a>)</cite>.
+It usually consists of three phases:</p>
+</div>
+<section class="ltx_paragraph" id="Sx3.SS0.SSS0.Px1">
+<h4 class="ltx_title ltx_title_paragraph">1. Create the weak supervisor.</h4>
+<div class="ltx_para" id="Sx3.SS0.SSS0.Px1.p1">
+<p class="ltx_p" id="Sx3.SS0.SSS0.Px1.p1.1">We create the weak supervisor by finetuning a small pretrained model on ground truth labels.
+We call the performance of the weak supervisor the <span class="ltx_text ltx_font_italic" id="Sx3.SS0.SSS0.Px1.p1.1.1">weak performance</span>.</p>
+</div>
+</section>
+<section class="ltx_paragraph" id="Sx3.SS0.SSS0.Px2">
+<h4 class="ltx_title ltx_title_paragraph">2. Train a strong student model.</h4>
+<div class="ltx_para" id="Sx3.SS0.SSS0.Px2.p1">
+<p class="ltx_p" id="Sx3.SS0.SSS0.Px2.p1.1">We train a strong student model by finetuning a large pretrained model on weak labels generated by the weak supervisor.
+We call its performance the <span class="ltx_text ltx_font_italic" id="Sx3.SS0.SSS0.Px2.p1.1.1">weak-to-strong performance</span>.</p>
+</div>
+</section>
+<section class="ltx_paragraph" id="Sx3.SS0.SSS0.Px3">
+<h4 class="ltx_title ltx_title_paragraph">3. Train a strong ceiling model.</h4>
+<div class="ltx_para" id="Sx3.SS0.SSS0.Px3.p1">
+<p class="ltx_p" id="Sx3.SS0.SSS0.Px3.p1.1">We train a strong ceiling model by finetuning a large pretrained model on ground truth labels.
+We call this model’s resulting performance the <span class="ltx_text ltx_font_italic" id="Sx3.SS0.SSS0.Px3.p1.1.1">strong ceiling performance</span>.</p>
+</div>
+<div class="ltx_para" id="Sx3.SS0.SSS0.Px3.p2">
+<p class="ltx_p" id="Sx3.SS0.SSS0.Px3.p2.1">To measure the fraction of the performance gap that the strong student model can recover with weak supervision, we define the performance gap recovered (PGR) using the above three performances:</p>
+</div>
+<div class="ltx_para" id="Sx3.SS0.SSS0.Px3.p3">
+<table class="ltx_equation ltx_eqn_table" id="Sx3.Ex1">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="\mathrm{PGR}=\frac{\text{weak-to-strong}-\text{weak}}{\text{strong ceiling}-%
+\text{weak}}." class="ltx_Math" display="block" id="Sx3.Ex1.m1.1"><semantics id="Sx3.Ex1.m1.1a"><mrow id="Sx3.Ex1.m1.1.1.1" xref="Sx3.Ex1.m1.1.1.1.1.cmml"><mrow id="Sx3.Ex1.m1.1.1.1.1" xref="Sx3.Ex1.m1.1.1.1.1.cmml"><mi id="Sx3.Ex1.m1.1.1.1.1.2" xref="Sx3.Ex1.m1.1.1.1.1.2.cmml">PGR</mi><mo id="Sx3.Ex1.m1.1.1.1.1.1" xref="Sx3.Ex1.m1.1.1.1.1.1.cmml">=</mo><mfrac id="Sx3.Ex1.m1.1.1.1.1.3" xref="Sx3.Ex1.m1.1.1.1.1.3.cmml"><mrow id="Sx3.Ex1.m1.1.1.1.1.3.2" xref="Sx3.Ex1.m1.1.1.1.1.3.2.cmml"><mtext id="Sx3.Ex1.m1.1.1.1.1.3.2.2" xref="Sx3.Ex1.m1.1.1.1.1.3.2.2a.cmml">weak-to-strong</mtext><mo id="Sx3.Ex1.m1.1.1.1.1.3.2.1" xref="Sx3.Ex1.m1.1.1.1.1.3.2.1.cmml">−</mo><mtext id="Sx3.Ex1.m1.1.1.1.1.3.2.3" xref="Sx3.Ex1.m1.1.1.1.1.3.2.3a.cmml">weak</mtext></mrow><mrow id="Sx3.Ex1.m1.1.1.1.1.3.3" xref="Sx3.Ex1.m1.1.1.1.1.3.3.cmml"><mtext id="Sx3.Ex1.m1.1.1.1.1.3.3.2" xref="Sx3.Ex1.m1.1.1.1.1.3.3.2a.cmml">strong ceiling</mtext><mo id="Sx3.Ex1.m1.1.1.1.1.3.3.1" xref="Sx3.Ex1.m1.1.1.1.1.3.3.1.cmml">−</mo><mtext id="Sx3.Ex1.m1.1.1.1.1.3.3.3" xref="Sx3.Ex1.m1.1.1.1.1.3.3.3a.cmml">weak</mtext></mrow></mfrac></mrow><mo id="Sx3.Ex1.m1.1.1.1.2" lspace="0em" xref="Sx3.Ex1.m1.1.1.1.1.cmml">.</mo></mrow><annotation-xml encoding="MathML-Content" id="Sx3.Ex1.m1.1b"><apply id="Sx3.Ex1.m1.1.1.1.1.cmml" xref="Sx3.Ex1.m1.1.1.1"><eq id="Sx3.Ex1.m1.1.1.1.1.1.cmml" xref="Sx3.Ex1.m1.1.1.1.1.1"></eq><ci id="Sx3.Ex1.m1.1.1.1.1.2.cmml" xref="Sx3.Ex1.m1.1.1.1.1.2">PGR</ci><apply id="Sx3.Ex1.m1.1.1.1.1.3.cmml" xref="Sx3.Ex1.m1.1.1.1.1.3"><divide id="Sx3.Ex1.m1.1.1.1.1.3.1.cmml" xref="Sx3.Ex1.m1.1.1.1.1.3"></divide><apply id="Sx3.Ex1.m1.1.1.1.1.3.2.cmml" xref="Sx3.Ex1.m1.1.1.1.1.3.2"><minus id="Sx3.Ex1.m1.1.1.1.1.3.2.1.cmml" xref="Sx3.Ex1.m1.1.1.1.1.3.2.1"></minus><ci id="Sx3.Ex1.m1.1.1.1.1.3.2.2a.cmml" xref="Sx3.Ex1.m1.1.1.1.1.3.2.2"><mtext id="Sx3.Ex1.m1.1.1.1.1.3.2.2.cmml" xref="Sx3.Ex1.m1.1.1.1.1.3.2.2">weak-to-strong</mtext></ci><ci id="Sx3.Ex1.m1.1.1.1.1.3.2.3a.cmml" xref="Sx3.Ex1.m1.1.1.1.1.3.2.3"><mtext id="Sx3.Ex1.m1.1.1.1.1.3.2.3.cmml" xref="Sx3.Ex1.m1.1.1.1.1.3.2.3">weak</mtext></ci></apply><apply id="Sx3.Ex1.m1.1.1.1.1.3.3.cmml" xref="Sx3.Ex1.m1.1.1.1.1.3.3"><minus id="Sx3.Ex1.m1.1.1.1.1.3.3.1.cmml" xref="Sx3.Ex1.m1.1.1.1.1.3.3.1"></minus><ci id="Sx3.Ex1.m1.1.1.1.1.3.3.2a.cmml" xref="Sx3.Ex1.m1.1.1.1.1.3.3.2"><mtext id="Sx3.Ex1.m1.1.1.1.1.3.3.2.cmml" xref="Sx3.Ex1.m1.1.1.1.1.3.3.2">strong ceiling</mtext></ci><ci id="Sx3.Ex1.m1.1.1.1.1.3.3.3a.cmml" xref="Sx3.Ex1.m1.1.1.1.1.3.3.3"><mtext id="Sx3.Ex1.m1.1.1.1.1.3.3.3.cmml" xref="Sx3.Ex1.m1.1.1.1.1.3.3.3">weak</mtext></ci></apply></apply></apply></annotation-xml><annotation encoding="application/x-tex" id="Sx3.Ex1.m1.1c">\mathrm{PGR}=\frac{\text{weak-to-strong}-\text{weak}}{\text{strong ceiling}-%
+\text{weak}}.</annotation><annotation encoding="application/x-llamapun" id="Sx3.Ex1.m1.1d">roman_PGR = divide start_ARG weak-to-strong - weak end_ARG start_ARG strong ceiling - weak end_ARG .</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+</tr></tbody>
+</table>
+</div>
+<figure class="ltx_table" id="Sx3.T1">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle" id="Sx3.T1.1">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="Sx3.T1.1.1.1">
+<th class="ltx_td ltx_align_justify ltx_align_middle ltx_th ltx_th_column ltx_border_r ltx_border_tt" id="Sx3.T1.1.1.1.1" style="width:50.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="Sx3.T1.1.1.1.1.1">
+<span class="ltx_p" id="Sx3.T1.1.1.1.1.1.1"><span class="ltx_text ltx_font_bold" id="Sx3.T1.1.1.1.1.1.1.1">Debate Turn</span></span>
+</span>
+</th>
+<th class="ltx_td ltx_align_justify ltx_align_middle ltx_th ltx_th_column ltx_border_r ltx_border_tt" id="Sx3.T1.1.1.1.2" style="width:35.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="Sx3.T1.1.1.1.2.1">
+<span class="ltx_p" id="Sx3.T1.1.1.1.2.1.1"><span class="ltx_text ltx_font_bold" id="Sx3.T1.1.1.1.2.1.1.1">Debater</span></span>
+</span>
+</th>
+<th class="ltx_td ltx_align_justify ltx_align_middle ltx_th ltx_th_column ltx_border_tt" id="Sx3.T1.1.1.1.3" style="width:360.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="Sx3.T1.1.1.1.3.1">
+<span class="ltx_p" id="Sx3.T1.1.1.1.3.1.1"><span class="ltx_text ltx_font_bold" id="Sx3.T1.1.1.1.3.1.1.1">Prompt</span></span>
+</span>
+</th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="Sx3.T1.1.2.1">
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_r ltx_border_t" id="Sx3.T1.1.2.1.1" style="width:50.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="Sx3.T1.1.2.1.1.1">
+<span class="ltx_p" id="Sx3.T1.1.2.1.1.1.1">First</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_r ltx_border_t" id="Sx3.T1.1.2.1.2" style="width:35.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="Sx3.T1.1.2.1.2.1">
+<span class="ltx_p" id="Sx3.T1.1.2.1.2.1.1">A</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_t" id="Sx3.T1.1.2.1.3" style="width:360.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="Sx3.T1.1.2.1.3.1">
+<span class="ltx_p" id="Sx3.T1.1.2.1.3.1.1"><span class="ltx_text ltx_font_italic" id="Sx3.T1.1.2.1.3.1.1.1">There is a science knowledge question, followed by an answer</span>. Debate with another opponent for whether the answer is <span class="ltx_text ltx_font_italic" id="Sx3.T1.1.2.1.3.1.1.2">correct</span> or <span class="ltx_text ltx_font_italic" id="Sx3.T1.1.2.1.3.1.1.3">incorrect</span>. Construct your argument for why the answer is <span class="ltx_text ltx_font_italic" id="Sx3.T1.1.2.1.3.1.1.4">correct</span>.</span>
+</span>
+</td>
+</tr>
+<tr class="ltx_tr" id="Sx3.T1.1.3.2">
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_r ltx_border_t" id="Sx3.T1.1.3.2.1" style="width:50.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="Sx3.T1.1.3.2.1.1">
+<span class="ltx_p" id="Sx3.T1.1.3.2.1.1.1">Second</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_r ltx_border_t" id="Sx3.T1.1.3.2.2" style="width:35.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="Sx3.T1.1.3.2.2.1">
+<span class="ltx_p" id="Sx3.T1.1.3.2.2.1.1">B</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_t" id="Sx3.T1.1.3.2.3" style="width:360.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="Sx3.T1.1.3.2.3.1">
+<span class="ltx_p" id="Sx3.T1.1.3.2.3.1.1"><span class="ltx_text ltx_font_italic" id="Sx3.T1.1.3.2.3.1.1.1">There is a science knowledge question, followed by an answer</span>. Debate with another opponent for whether the answer is <span class="ltx_text ltx_font_italic" id="Sx3.T1.1.3.2.3.1.1.2">correct</span> or <span class="ltx_text ltx_font_italic" id="Sx3.T1.1.3.2.3.1.1.3">incorrect</span>. Construct your argument for why the answer is <span class="ltx_text ltx_font_italic" id="Sx3.T1.1.3.2.3.1.1.4">incorrect</span> and list out flaws in your opponent’s argument.</span>
+</span>
+</td>
+</tr>
+<tr class="ltx_tr" id="Sx3.T1.1.4.3">
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_bb ltx_border_r ltx_border_t" id="Sx3.T1.1.4.3.1" style="width:50.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="Sx3.T1.1.4.3.1.1">
+<span class="ltx_p" id="Sx3.T1.1.4.3.1.1.1">Third</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_bb ltx_border_r ltx_border_t" id="Sx3.T1.1.4.3.2" style="width:35.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="Sx3.T1.1.4.3.2.1">
+<span class="ltx_p" id="Sx3.T1.1.4.3.2.1.1">A</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_bb ltx_border_t" id="Sx3.T1.1.4.3.3" style="width:360.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="Sx3.T1.1.4.3.3.1">
+<span class="ltx_p" id="Sx3.T1.1.4.3.3.1.1"><span class="ltx_text ltx_font_italic" id="Sx3.T1.1.4.3.3.1.1.1">There is a science knowledge question, followed by an answer</span>. Debate with another opponent for whether the answer is <span class="ltx_text ltx_font_italic" id="Sx3.T1.1.4.3.3.1.1.2">correct</span> or <span class="ltx_text ltx_font_italic" id="Sx3.T1.1.4.3.3.1.1.3">incorrect</span>. Construct the counterargument to opponent’s argument.</span>
+</span>
+</td>
+</tr>
+</tbody>
+</table>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_table">Table 1: </span><span class="ltx_text ltx_font_bold" id="Sx3.T1.5.1">Prompts to induce debate on a binary classification problem</span>. The binary classification problem is converted from the SciQ dataset. Two answer choices <span class="ltx_text ltx_font_italic" id="Sx3.T1.6.2">correct</span> and <span class="ltx_text ltx_font_italic" id="Sx3.T1.7.3">incorrect</span> are randomly assigned to debater A and B. Debate runs for three turns. We also append the current debate transcript to the prompt.</figcaption>
+</figure>
+</section>
+</section>
+<section class="ltx_section" id="Sx4">
+<h2 class="ltx_title ltx_title_section">Methods</h2>
+<section class="ltx_subsection" id="Sx4.SSx1">
+<h3 class="ltx_title ltx_title_subsection">Overview</h3>
+<div class="ltx_para" id="Sx4.SSx1.p1">
+<p class="ltx_p" id="Sx4.SSx1.p1.1">In this study, we build the strong student model following three steps:
+<span class="ltx_text ltx_font_bold" id="Sx4.SSx1.p1.1.1">1.</span> Generate arguments from the debate between two instances of a large pretrained model;
+<span class="ltx_text ltx_font_bold" id="Sx4.SSx1.p1.1.2">2.</span> Train an ensemble of weak models using these debate arguments;
+<span class="ltx_text ltx_font_bold" id="Sx4.SSx1.p1.1.3">3.</span> Train a strong student model using labels that are constructed by the weak model ensemble.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="Sx4.SSx2">
+<h3 class="ltx_title ltx_title_subsection">Argument Generation through Debate</h3>
+<div class="ltx_para" id="Sx4.SSx2.p1">
+<p class="ltx_p" id="Sx4.SSx2.p1.1">We assume large pretrained models embed broad-coverage knowledge that can help a variety of tasks <cite class="ltx_cite ltx_citemacro_citep">(Brown et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib8" title="">2020</a>)</cite>.
+Our goal is to extract trustworthy information from a capable but untrustworthy strong model via debate <cite class="ltx_cite ltx_citemacro_citep">(Bowman et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib7" title="">2022</a>)</cite>.
+So we could in turn use the trustworthy information to help train a better weak model.</p>
+</div>
+<div class="ltx_para" id="Sx4.SSx2.p2">
+<p class="ltx_p" id="Sx4.SSx2.p2.1">We first describe the debate protocol we investigated to elicit truth from strong models, following <cite class="ltx_cite ltx_citemacro_citep">(Michael et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib40" title="">2023</a>; Khan et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib32" title="">2024</a>; Kenton et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib31" title="">2024</a>)</cite>.
+Given a question and its two answer choices (one correct, one incorrect), two instances of a large pretrained model (debaters) are randomly assigned to argue for these two opposing answers.
+Debate is turn-based textual exchanges between the two debaters, which take turns to review arguments from previous turns and generate their arguments for the next turn.
+After a pre-determined number of turns, the debate is ended and the transcript of arguments from the debate is kept.
+During the debate, each debater presents the most compelling evidences for its assigned answer and arguments to explain why its opponent’s claims are false.</p>
+</div>
+<div class="ltx_para" id="Sx4.SSx2.p3">
+<p class="ltx_p" id="Sx4.SSx2.p3.1">Concretely, debate runs for three turns in this work.
+At the start of a turn, debaters are prompted with instructions outlining the problem, their assigned answer, and the current debate transcript.
+The prompts to induce debate are illustrated in Table <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx3.T1" title="Table 1 ‣ 3. Train a strong ceiling model. ‣ Preliminaries ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_tag">1</span></a>.</p>
+</div>
+<div class="ltx_para" id="Sx4.SSx2.p4">
+<p class="ltx_p" id="Sx4.SSx2.p4.1">We illustrate an overview of this debate procedure in Figure <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx1.F1" title="Figure 1 ‣ Introduction ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_tag">1</span></a>.
+We can observe that Debater B is on the side of an incorrect answer and incentivized to present misleading arguments.
+However, in the next turn, Debater A convincingly points out these false claims and thus Debater B can not easily get away.
+This observation conforms to the claim, i.e., it is harder to lie than to refute a lie. <cite class="ltx_cite ltx_citemacro_citep">(Irving, Christiano, and Amodei <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib28" title="">2018</a>)</cite>.
+These arguments from the debate can provide valuable information about the merits and flaws of each side, which have the potential to significantly advance the capabilities of weak models.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="Sx4.SSx3">
+<h3 class="ltx_title ltx_title_subsection">Weak Model Ensemble Training</h3>
+<div class="ltx_para" id="Sx4.SSx3.p1">
+<p class="ltx_p" id="Sx4.SSx3.p1.1">For each input sample of weak models, we append it with the kept debate transcript.
+We train a weak model by finetuning a small pretrained model on these augmented samples with ground truth labels.
+We note that the debate transcripts generated in a multi-turn debate are long, which may be difficult for a weak model to fully process.
+Therefore, we train an ensemble of weak models <math alttext="\{W_{1},...,W_{k}\}" class="ltx_Math" display="inline" id="Sx4.SSx3.p1.1.m1.3"><semantics id="Sx4.SSx3.p1.1.m1.3a"><mrow id="Sx4.SSx3.p1.1.m1.3.3.2" xref="Sx4.SSx3.p1.1.m1.3.3.3.cmml"><mo id="Sx4.SSx3.p1.1.m1.3.3.2.3" stretchy="false" xref="Sx4.SSx3.p1.1.m1.3.3.3.cmml">{</mo><msub id="Sx4.SSx3.p1.1.m1.2.2.1.1" xref="Sx4.SSx3.p1.1.m1.2.2.1.1.cmml"><mi id="Sx4.SSx3.p1.1.m1.2.2.1.1.2" xref="Sx4.SSx3.p1.1.m1.2.2.1.1.2.cmml">W</mi><mn id="Sx4.SSx3.p1.1.m1.2.2.1.1.3" xref="Sx4.SSx3.p1.1.m1.2.2.1.1.3.cmml">1</mn></msub><mo id="Sx4.SSx3.p1.1.m1.3.3.2.4" xref="Sx4.SSx3.p1.1.m1.3.3.3.cmml">,</mo><mi id="Sx4.SSx3.p1.1.m1.1.1" mathvariant="normal" xref="Sx4.SSx3.p1.1.m1.1.1.cmml">…</mi><mo id="Sx4.SSx3.p1.1.m1.3.3.2.5" xref="Sx4.SSx3.p1.1.m1.3.3.3.cmml">,</mo><msub id="Sx4.SSx3.p1.1.m1.3.3.2.2" xref="Sx4.SSx3.p1.1.m1.3.3.2.2.cmml"><mi id="Sx4.SSx3.p1.1.m1.3.3.2.2.2" xref="Sx4.SSx3.p1.1.m1.3.3.2.2.2.cmml">W</mi><mi id="Sx4.SSx3.p1.1.m1.3.3.2.2.3" xref="Sx4.SSx3.p1.1.m1.3.3.2.2.3.cmml">k</mi></msub><mo id="Sx4.SSx3.p1.1.m1.3.3.2.6" stretchy="false" xref="Sx4.SSx3.p1.1.m1.3.3.3.cmml">}</mo></mrow><annotation-xml encoding="MathML-Content" id="Sx4.SSx3.p1.1.m1.3b"><set id="Sx4.SSx3.p1.1.m1.3.3.3.cmml" xref="Sx4.SSx3.p1.1.m1.3.3.2"><apply id="Sx4.SSx3.p1.1.m1.2.2.1.1.cmml" xref="Sx4.SSx3.p1.1.m1.2.2.1.1"><csymbol cd="ambiguous" id="Sx4.SSx3.p1.1.m1.2.2.1.1.1.cmml" xref="Sx4.SSx3.p1.1.m1.2.2.1.1">subscript</csymbol><ci id="Sx4.SSx3.p1.1.m1.2.2.1.1.2.cmml" xref="Sx4.SSx3.p1.1.m1.2.2.1.1.2">𝑊</ci><cn id="Sx4.SSx3.p1.1.m1.2.2.1.1.3.cmml" type="integer" xref="Sx4.SSx3.p1.1.m1.2.2.1.1.3">1</cn></apply><ci id="Sx4.SSx3.p1.1.m1.1.1.cmml" xref="Sx4.SSx3.p1.1.m1.1.1">…</ci><apply id="Sx4.SSx3.p1.1.m1.3.3.2.2.cmml" xref="Sx4.SSx3.p1.1.m1.3.3.2.2"><csymbol cd="ambiguous" id="Sx4.SSx3.p1.1.m1.3.3.2.2.1.cmml" xref="Sx4.SSx3.p1.1.m1.3.3.2.2">subscript</csymbol><ci id="Sx4.SSx3.p1.1.m1.3.3.2.2.2.cmml" xref="Sx4.SSx3.p1.1.m1.3.3.2.2.2">𝑊</ci><ci id="Sx4.SSx3.p1.1.m1.3.3.2.2.3.cmml" xref="Sx4.SSx3.p1.1.m1.3.3.2.2.3">𝑘</ci></apply></set></annotation-xml><annotation encoding="application/x-tex" id="Sx4.SSx3.p1.1.m1.3c">\{W_{1},...,W_{k}\}</annotation><annotation encoding="application/x-llamapun" id="Sx4.SSx3.p1.1.m1.3d">{ italic_W start_POSTSUBSCRIPT 1 end_POSTSUBSCRIPT , … , italic_W start_POSTSUBSCRIPT italic_k end_POSTSUBSCRIPT }</annotation></semantics></math> to help improve robustness <cite class="ltx_cite ltx_citemacro_citep">(Lakshminarayanan, Pritzel, and Blundell <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib33" title="">2017</a>)</cite>.</p>
+</div>
+<div class="ltx_para" id="Sx4.SSx3.p2">
+<p class="ltx_p" id="Sx4.SSx3.p2.1">We explore two types of ensembles: <span class="ltx_text ltx_font_italic" id="Sx4.SSx3.p2.1.1">debate ensembles</span>, where the debate transcript used by each member is generated with a different random seed, and <span class="ltx_text ltx_font_italic" id="Sx4.SSx3.p2.1.2">finetune ensembles</span>, where all members share the same debate transcript, but use a different seed when finetuned on the augmented samples.
+Debate ensembles are much more expensive to train, but are more diverse and thus likely to lead to a more robust prediction.
+Unless stated otherwise, we train an ensemble consisting of four individual weak models.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="Sx4.SSx4">
+<h3 class="ltx_title ltx_title_subsection">Training Strong Models using Ensembles</h3>
+<div class="ltx_para" id="Sx4.SSx4.p1">
+<p class="ltx_p" id="Sx4.SSx4.p1.1">We finally train a strong student model by finetuning a large pretrained model on weak labels constructed by the weak model ensemble.
+We simply take the mean of the predictions from different weak models within the ensemble as the weak label for each training sample <cite class="ltx_cite ltx_citemacro_citep">(Ganaie et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib22" title="">2022</a>)</cite>.</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="Sx5">
+<h2 class="ltx_title ltx_title_section">Experiments</h2>
+<section class="ltx_subsection" id="Sx5.SSx1">
+<h3 class="ltx_title ltx_title_subsection">Tasks</h3>
+<div class="ltx_para" id="Sx5.SSx1.p1">
+<p class="ltx_p" id="Sx5.SSx1.p1.7">We adopt the evaluation protocol of prior work <cite class="ltx_cite ltx_citemacro_citep">(Burns et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib9" title="">2023</a>)</cite>, and conduct experiments in NLP tasks on four classification datasets: SciQ <cite class="ltx_cite ltx_citemacro_citep">(Welbl, Liu, and Gardner <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib52" title="">2017</a>)</cite>, BoolQ <cite class="ltx_cite ltx_citemacro_citep">(Clark et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib17" title="">2019</a>)</cite>, CosmosQA <cite class="ltx_cite ltx_citemacro_citep">(Huang et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib26" title="">2019</a>)</cite>, and AnthropicHH <cite class="ltx_cite ltx_citemacro_citep">(Bai et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib5" title="">2022</a>)</cite>.
+We convert each dataset to a binary classification problem.
+For multiple-choice datasets, given a data point with a question <math alttext="Q" class="ltx_Math" display="inline" id="Sx5.SSx1.p1.1.m1.1"><semantics id="Sx5.SSx1.p1.1.m1.1a"><mi id="Sx5.SSx1.p1.1.m1.1.1" xref="Sx5.SSx1.p1.1.m1.1.1.cmml">Q</mi><annotation-xml encoding="MathML-Content" id="Sx5.SSx1.p1.1.m1.1b"><ci id="Sx5.SSx1.p1.1.m1.1.1.cmml" xref="Sx5.SSx1.p1.1.m1.1.1">𝑄</ci></annotation-xml><annotation encoding="application/x-tex" id="Sx5.SSx1.p1.1.m1.1c">Q</annotation><annotation encoding="application/x-llamapun" id="Sx5.SSx1.p1.1.m1.1d">italic_Q</annotation></semantics></math> and <math alttext="k" class="ltx_Math" display="inline" id="Sx5.SSx1.p1.2.m2.1"><semantics id="Sx5.SSx1.p1.2.m2.1a"><mi id="Sx5.SSx1.p1.2.m2.1.1" xref="Sx5.SSx1.p1.2.m2.1.1.cmml">k</mi><annotation-xml encoding="MathML-Content" id="Sx5.SSx1.p1.2.m2.1b"><ci id="Sx5.SSx1.p1.2.m2.1.1.cmml" xref="Sx5.SSx1.p1.2.m2.1.1">𝑘</ci></annotation-xml><annotation encoding="application/x-tex" id="Sx5.SSx1.p1.2.m2.1c">k</annotation><annotation encoding="application/x-llamapun" id="Sx5.SSx1.p1.2.m2.1d">italic_k</annotation></semantics></math> candidate answers <math alttext="A" class="ltx_Math" display="inline" id="Sx5.SSx1.p1.3.m3.1"><semantics id="Sx5.SSx1.p1.3.m3.1a"><mi id="Sx5.SSx1.p1.3.m3.1.1" xref="Sx5.SSx1.p1.3.m3.1.1.cmml">A</mi><annotation-xml encoding="MathML-Content" id="Sx5.SSx1.p1.3.m3.1b"><ci id="Sx5.SSx1.p1.3.m3.1.1.cmml" xref="Sx5.SSx1.p1.3.m3.1.1">𝐴</ci></annotation-xml><annotation encoding="application/x-tex" id="Sx5.SSx1.p1.3.m3.1c">A</annotation><annotation encoding="application/x-llamapun" id="Sx5.SSx1.p1.3.m3.1d">italic_A</annotation></semantics></math>, we construct <math alttext="k" class="ltx_Math" display="inline" id="Sx5.SSx1.p1.4.m4.1"><semantics id="Sx5.SSx1.p1.4.m4.1a"><mi id="Sx5.SSx1.p1.4.m4.1.1" xref="Sx5.SSx1.p1.4.m4.1.1.cmml">k</mi><annotation-xml encoding="MathML-Content" id="Sx5.SSx1.p1.4.m4.1b"><ci id="Sx5.SSx1.p1.4.m4.1.1.cmml" xref="Sx5.SSx1.p1.4.m4.1.1">𝑘</ci></annotation-xml><annotation encoding="application/x-tex" id="Sx5.SSx1.p1.4.m4.1c">k</annotation><annotation encoding="application/x-llamapun" id="Sx5.SSx1.p1.4.m4.1d">italic_k</annotation></semantics></math> new data points of the form <math alttext="(Q,A_{i})" class="ltx_Math" display="inline" id="Sx5.SSx1.p1.5.m5.2"><semantics id="Sx5.SSx1.p1.5.m5.2a"><mrow id="Sx5.SSx1.p1.5.m5.2.2.1" xref="Sx5.SSx1.p1.5.m5.2.2.2.cmml"><mo id="Sx5.SSx1.p1.5.m5.2.2.1.2" stretchy="false" xref="Sx5.SSx1.p1.5.m5.2.2.2.cmml">(</mo><mi id="Sx5.SSx1.p1.5.m5.1.1" xref="Sx5.SSx1.p1.5.m5.1.1.cmml">Q</mi><mo id="Sx5.SSx1.p1.5.m5.2.2.1.3" xref="Sx5.SSx1.p1.5.m5.2.2.2.cmml">,</mo><msub id="Sx5.SSx1.p1.5.m5.2.2.1.1" xref="Sx5.SSx1.p1.5.m5.2.2.1.1.cmml"><mi id="Sx5.SSx1.p1.5.m5.2.2.1.1.2" xref="Sx5.SSx1.p1.5.m5.2.2.1.1.2.cmml">A</mi><mi id="Sx5.SSx1.p1.5.m5.2.2.1.1.3" xref="Sx5.SSx1.p1.5.m5.2.2.1.1.3.cmml">i</mi></msub><mo id="Sx5.SSx1.p1.5.m5.2.2.1.4" stretchy="false" xref="Sx5.SSx1.p1.5.m5.2.2.2.cmml">)</mo></mrow><annotation-xml encoding="MathML-Content" id="Sx5.SSx1.p1.5.m5.2b"><interval closure="open" id="Sx5.SSx1.p1.5.m5.2.2.2.cmml" xref="Sx5.SSx1.p1.5.m5.2.2.1"><ci id="Sx5.SSx1.p1.5.m5.1.1.cmml" xref="Sx5.SSx1.p1.5.m5.1.1">𝑄</ci><apply id="Sx5.SSx1.p1.5.m5.2.2.1.1.cmml" xref="Sx5.SSx1.p1.5.m5.2.2.1.1"><csymbol cd="ambiguous" id="Sx5.SSx1.p1.5.m5.2.2.1.1.1.cmml" xref="Sx5.SSx1.p1.5.m5.2.2.1.1">subscript</csymbol><ci id="Sx5.SSx1.p1.5.m5.2.2.1.1.2.cmml" xref="Sx5.SSx1.p1.5.m5.2.2.1.1.2">𝐴</ci><ci id="Sx5.SSx1.p1.5.m5.2.2.1.1.3.cmml" xref="Sx5.SSx1.p1.5.m5.2.2.1.1.3">𝑖</ci></apply></interval></annotation-xml><annotation encoding="application/x-tex" id="Sx5.SSx1.p1.5.m5.2c">(Q,A_{i})</annotation><annotation encoding="application/x-llamapun" id="Sx5.SSx1.p1.5.m5.2d">( italic_Q , italic_A start_POSTSUBSCRIPT italic_i end_POSTSUBSCRIPT )</annotation></semantics></math>, where the label is <math alttext="1" class="ltx_Math" display="inline" id="Sx5.SSx1.p1.6.m6.1"><semantics id="Sx5.SSx1.p1.6.m6.1a"><mn id="Sx5.SSx1.p1.6.m6.1.1" xref="Sx5.SSx1.p1.6.m6.1.1.cmml">1</mn><annotation-xml encoding="MathML-Content" id="Sx5.SSx1.p1.6.m6.1b"><cn id="Sx5.SSx1.p1.6.m6.1.1.cmml" type="integer" xref="Sx5.SSx1.p1.6.m6.1.1">1</cn></annotation-xml><annotation encoding="application/x-tex" id="Sx5.SSx1.p1.6.m6.1c">1</annotation><annotation encoding="application/x-llamapun" id="Sx5.SSx1.p1.6.m6.1d">1</annotation></semantics></math> for the correct
+answers and <math alttext="0" class="ltx_Math" display="inline" id="Sx5.SSx1.p1.7.m7.1"><semantics id="Sx5.SSx1.p1.7.m7.1a"><mn id="Sx5.SSx1.p1.7.m7.1.1" xref="Sx5.SSx1.p1.7.m7.1.1.cmml">0</mn><annotation-xml encoding="MathML-Content" id="Sx5.SSx1.p1.7.m7.1b"><cn id="Sx5.SSx1.p1.7.m7.1.1.cmml" type="integer" xref="Sx5.SSx1.p1.7.m7.1.1">0</cn></annotation-xml></semantics></math> for all the incorrect answers.
+We also keep the same number of correct and incorrect answers per question to maintain class balance.</p>
+</div>
+<figure class="ltx_table" id="Sx5.T2">
+<table class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle" id="Sx5.T2.1">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="Sx5.T2.1.1.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_border_r ltx_border_tt" id="Sx5.T2.1.1.1.1" rowspan="2"><span class="ltx_text ltx_font_bold" id="Sx5.T2.1.1.1.1.1">Performance</span></th>
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_border_r ltx_border_tt" id="Sx5.T2.1.1.1.2" rowspan="2"><span class="ltx_text ltx_font_bold" id="Sx5.T2.1.1.1.2.1">Method</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r ltx_border_tt" colspan="2" id="Sx5.T2.1.1.1.3"><span class="ltx_text ltx_font_bold" id="Sx5.T2.1.1.1.3.1">SciQ</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r ltx_border_tt" colspan="2" id="Sx5.T2.1.1.1.4"><span class="ltx_text ltx_font_bold" id="Sx5.T2.1.1.1.4.1">BoolQ</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r ltx_border_tt" colspan="2" id="Sx5.T2.1.1.1.5"><span class="ltx_text ltx_font_bold" id="Sx5.T2.1.1.1.5.1">CosmosQA</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="2" id="Sx5.T2.1.1.1.6"><span class="ltx_text ltx_font_bold" id="Sx5.T2.1.1.1.6.1">AnthropicHH</span></th>
+</tr>
+<tr class="ltx_tr" id="Sx5.T2.1.2.2">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="Sx5.T2.1.2.2.1">Acc.</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r" id="Sx5.T2.1.2.2.2">PGR</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="Sx5.T2.1.2.2.3">Acc.</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r" id="Sx5.T2.1.2.2.4">PGR</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="Sx5.T2.1.2.2.5">Acc.</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r" id="Sx5.T2.1.2.2.6">PGR</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="Sx5.T2.1.2.2.7">Acc.</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="Sx5.T2.1.2.2.8">PGR</th>
+</tr>
+<tr class="ltx_tr" id="Sx5.T2.1.3.3">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_border_r ltx_border_t" id="Sx5.T2.1.3.3.1">Weak performance</th>
+<th class="ltx_td ltx_th ltx_th_column ltx_border_r ltx_border_t" id="Sx5.T2.1.3.3.2"></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="Sx5.T2.1.3.3.3">90.0</th>
+<th class="ltx_td ltx_th ltx_th_column ltx_border_r ltx_border_t" id="Sx5.T2.1.3.3.4"></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="Sx5.T2.1.3.3.5">86.0</th>
+<th class="ltx_td ltx_th ltx_th_column ltx_border_r ltx_border_t" id="Sx5.T2.1.3.3.6"></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="Sx5.T2.1.3.3.7">87.5</th>
+<th class="ltx_td ltx_th ltx_th_column ltx_border_r ltx_border_t" id="Sx5.T2.1.3.3.8"></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="Sx5.T2.1.3.3.9">48.8</th>
+<th class="ltx_td ltx_th ltx_th_column ltx_border_t" id="Sx5.T2.1.3.3.10"></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="Sx5.T2.1.4.1">
+<td class="ltx_td ltx_align_left ltx_border_r ltx_border_t" id="Sx5.T2.1.4.1.1" rowspan="4"><span class="ltx_text" id="Sx5.T2.1.4.1.1.1">Weak-to-strong performance</span></td>
+<td class="ltx_td ltx_align_left ltx_border_r ltx_border_t" id="Sx5.T2.1.4.1.2">Finetune</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="Sx5.T2.1.4.1.3">91.5</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" id="Sx5.T2.1.4.1.4">44.1</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="Sx5.T2.1.4.1.5">88.0</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" id="Sx5.T2.1.4.1.6">51.3</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="Sx5.T2.1.4.1.7">88.2</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" id="Sx5.T2.1.4.1.8">30.4</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="Sx5.T2.1.4.1.9">49.5</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="Sx5.T2.1.4.1.10">35.0</td>
+</tr>
+<tr class="ltx_tr" id="Sx5.T2.1.5.2">
+<td class="ltx_td ltx_align_left ltx_border_r" id="Sx5.T2.1.5.2.1">Finetune w/ aux. loss</td>
+<td class="ltx_td ltx_align_center" id="Sx5.T2.1.5.2.2">91.4</td>
+<td class="ltx_td ltx_align_center ltx_border_r" id="Sx5.T2.1.5.2.3">41.2</td>
+<td class="ltx_td ltx_align_center" id="Sx5.T2.1.5.2.4">88.2</td>
+<td class="ltx_td ltx_align_center ltx_border_r" id="Sx5.T2.1.5.2.5">56.4</td>
+<td class="ltx_td ltx_align_center" id="Sx5.T2.1.5.2.6">87.9</td>
+<td class="ltx_td ltx_align_center ltx_border_r" id="Sx5.T2.1.5.2.7">17.4</td>
+<td class="ltx_td ltx_align_center" id="Sx5.T2.1.5.2.8">49.5</td>
+<td class="ltx_td ltx_align_center" id="Sx5.T2.1.5.2.9">35.0</td>
+</tr>
+<tr class="ltx_tr" id="Sx5.T2.1.6.3">
+<td class="ltx_td ltx_align_left ltx_border_r" id="Sx5.T2.1.6.3.1">Finetune w/ pro. loss</td>
+<td class="ltx_td ltx_align_center" id="Sx5.T2.1.6.3.2">91.6</td>
+<td class="ltx_td ltx_align_center ltx_border_r" id="Sx5.T2.1.6.3.3">47.1</td>
+<td class="ltx_td ltx_align_center" id="Sx5.T2.1.6.3.4">88.1</td>
+<td class="ltx_td ltx_align_center ltx_border_r" id="Sx5.T2.1.6.3.5">53.8</td>
+<td class="ltx_td ltx_align_center" id="Sx5.T2.1.6.3.6">88.1</td>
+<td class="ltx_td ltx_align_center ltx_border_r" id="Sx5.T2.1.6.3.7">26.1</td>
+<td class="ltx_td ltx_align_center" id="Sx5.T2.1.6.3.8">49.2</td>
+<td class="ltx_td ltx_align_center" id="Sx5.T2.1.6.3.9">20.0</td>
+</tr>
+<tr class="ltx_tr" id="Sx5.T2.1.7.4">
+<td class="ltx_td ltx_align_left ltx_border_r" id="Sx5.T2.1.7.4.1"><span class="ltx_text ltx_font_bold" id="Sx5.T2.1.7.4.1.1">Ours</span></td>
+<td class="ltx_td ltx_align_center" id="Sx5.T2.1.7.4.2"><span class="ltx_text ltx_font_bold" id="Sx5.T2.1.7.4.2.1">92.6</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r" id="Sx5.T2.1.7.4.3"><span class="ltx_text ltx_font_bold" id="Sx5.T2.1.7.4.3.1">76.5</span></td>
+<td class="ltx_td ltx_align_center" id="Sx5.T2.1.7.4.4"><span class="ltx_text ltx_font_bold" id="Sx5.T2.1.7.4.4.1">88.7</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r" id="Sx5.T2.1.7.4.5"><span class="ltx_text ltx_font_bold" id="Sx5.T2.1.7.4.5.1">69.2</span></td>
+<td class="ltx_td ltx_align_center" id="Sx5.T2.1.7.4.6"><span class="ltx_text ltx_font_bold" id="Sx5.T2.1.7.4.6.1">88.8</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r" id="Sx5.T2.1.7.4.7"><span class="ltx_text ltx_font_bold" id="Sx5.T2.1.7.4.7.1">56.5</span></td>
+<td class="ltx_td ltx_align_center" id="Sx5.T2.1.7.4.8"><span class="ltx_text ltx_font_bold" id="Sx5.T2.1.7.4.8.1">50.2</span></td>
+<td class="ltx_td ltx_align_center" id="Sx5.T2.1.7.4.9"><span class="ltx_text ltx_font_bold" id="Sx5.T2.1.7.4.9.1">70.0</span></td>
+</tr>
+<tr class="ltx_tr" id="Sx5.T2.1.8.5">
+<td class="ltx_td ltx_align_left ltx_border_bb ltx_border_r ltx_border_t" id="Sx5.T2.1.8.5.1">Strong ceiling performance</td>
+<td class="ltx_td ltx_border_bb ltx_border_r ltx_border_t" id="Sx5.T2.1.8.5.2"></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="Sx5.T2.1.8.5.3">93.4</td>
+<td class="ltx_td ltx_border_bb ltx_border_r ltx_border_t" id="Sx5.T2.1.8.5.4"></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="Sx5.T2.1.8.5.5">89.9</td>
+<td class="ltx_td ltx_border_bb ltx_border_r ltx_border_t" id="Sx5.T2.1.8.5.6"></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="Sx5.T2.1.8.5.7">89.8</td>
+<td class="ltx_td ltx_border_bb ltx_border_r ltx_border_t" id="Sx5.T2.1.8.5.8"></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="Sx5.T2.1.8.5.9">50.8</td>
+<td class="ltx_td ltx_border_bb ltx_border_t" id="Sx5.T2.1.8.5.10"></td>
+</tr>
+</tbody>
+</table>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 2: </span><span class="ltx_text ltx_font_bold" id="Sx5.T2.3.1">Debate improves weak-to-strong generalization</span>. Test accuarcy (%) and performance gap recovered (PGR) (%) of our approach and baselines on the binary classification tasks converted from NLP classification datasets. Here, our approach uses debate ensembles. Accuracy of weak and strong models trained with ground truth are reported as weak performance and strong ceiling performance, respectively. </figcaption>
+</figure>
+</section>
+<section class="ltx_subsection" id="Sx5.SSx2">
+<h3 class="ltx_title ltx_title_subsection">Experimental Setups and Metrics</h3>
+<div class="ltx_para" id="Sx5.SSx2.p1">
+<p class="ltx_p" id="Sx5.SSx2.p1.1">We randomly sample at most 20k data points from each task and split them in half.
+We train a weak model on the first half of the data points and use its prediction on the other half as the weak labels.
+The weak labels are soft labels <cite class="ltx_cite ltx_citemacro_citep">(Hinton, Vinyals, and Dean <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib25" title="">2015</a>)</cite>.
+We report the accuracy and performance gap recovered (PGR) of the strong student model on the test set in all tasks.
+The weak performance for PGR is the performance of the naively finetuned small model.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="Sx5.SSx3">
+<h3 class="ltx_title ltx_title_subsection">Implementation Details</h3>
+<div class="ltx_para" id="Sx5.SSx3.p1">
+<p class="ltx_p" id="Sx5.SSx3.p1.1">Our implementations of data preprocessing, weak and strong model training are based on the OpenAI weak-to-strong codebase and its default hyper-parameters <cite class="ltx_cite ltx_citemacro_citep">(Burns et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib9" title="">2023</a>)</cite>.
+Specifically, we use Qwen/Qwen-7B as the small pretrained model for training weak models.
+Meanwhile, we use Qwen/Qwen-14B as the large pretrained model for generating debate arguments and training strong models.
+Both Qwen/Qwen-7B and Qwen/Qwen-14B are open-sources, which can aid reproducibility <cite class="ltx_cite ltx_citemacro_citep">(Bai et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib4" title="">2023</a>)</cite>.
+We do not use pretrained models from the GPT-2 family for training weak models <cite class="ltx_cite ltx_citemacro_citep">(Radford et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib45" title="">2019</a>)</cite>, because they lack the capability required for scalable oversight techniques like working closely with strong models <cite class="ltx_cite ltx_citemacro_citep">(Bowman et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib7" title="">2022</a>)</cite>.</p>
+</div>
+<div class="ltx_para" id="Sx5.SSx3.p2">
+<p class="ltx_p" id="Sx5.SSx3.p2.1">For each converted binary classification problem, we use the two candidate answers per question as the two opposing answers, which are randomly assigned to the two strong model debaters in a debate.
+In order to adapt weak and strong models to the binary classification setting, we equip each model with a linear classification head with two outputs on top of the encoder.
+We train all models for two epochs with a batch size of 32.
+We conduct all experiments on a single 8×A100 machine.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="Sx5.SSx4">
+<h3 class="ltx_title ltx_title_subsection">Baselines</h3>
+<div class="ltx_para" id="Sx5.SSx4.p1">
+<p class="ltx_p" id="Sx5.SSx4.p1.1">We compare our approach with competitive baseline approaches:
+1. <span class="ltx_text ltx_font_bold" id="Sx5.SSx4.p1.1.1">Finetune</span> <cite class="ltx_cite ltx_citemacro_citep">(Burns et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib9" title="">2023</a>)</cite> naively finetunes strong pretrained models on labels generated by a weak model;
+2. <span class="ltx_text ltx_font_bold" id="Sx5.SSx4.p1.1.2">Finetune w/ aux. loss</span> <cite class="ltx_cite ltx_citemacro_citep">(Burns et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib9" title="">2023</a>)</cite> finetunes strong models with an auxiliary confidence loss, which reinforces the strong model’s confidence in its own predictions when they disagree with the weak labels;
+3. <span class="ltx_text ltx_font_bold" id="Sx5.SSx4.p1.1.3">Finetune w/ pro. loss</span> <cite class="ltx_cite ltx_citemacro_citep">(Burns et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib9" title="">2023</a>)</cite> finetunes strong models with a confidence-like loss which sets the cross entropy targets to the product of weak labels and strong model predictions.
+We also report the <span class="ltx_text ltx_font_bold" id="Sx5.SSx4.p1.1.4">weak performance</span> and the <span class="ltx_text ltx_font_bold" id="Sx5.SSx4.p1.1.5">strong ceiling performance</span> defined in the preliminaries section.
+Note that the strong ceiling performance is generally regarded as the upper bound of the <span class="ltx_text ltx_font_bold" id="Sx5.SSx4.p1.1.6">weak-to-strong performance</span> when only weak labels are considered.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="Sx5.SSx5">
+<h3 class="ltx_title ltx_title_subsection">Main Results</h3>
+<div class="ltx_para" id="Sx5.SSx5.p1">
+<p class="ltx_p" id="Sx5.SSx5.p1.1">In Table <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx5.T2" title="Table 2 ‣ Tasks ‣ Experiments ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_tag">2</span></a>, we report the results of each approach on the binary classification tasks converted from SciQ, BoolQ, CosmosQA, and AnthropicHH datasets.
+Here, our approach uses debate ensembles.
+In each task, we observe that PGRs of strong student models finetuned on weak labels are all positive.
+This indicates that student models consistently outperform their weak supervisors across all weak-to-strong generation approaches and tasks that we studied.
+Simultaneously, this promising weak-to-strong generalization also suggests that our experimental settings can help make iterative empirical progress in tackling the weak supervision issue for aligning future superhuman models.</p>
+</div>
+<div class="ltx_para" id="Sx5.SSx5.p2">
+<p class="ltx_p" id="Sx5.SSx5.p2.8">At the same time, we find that our approach significantly outperforms each strong student baseline, including the naive baseline finetuned on weak labels or more sophisticated baselines equipped with a confidence loss term on all four tasks.
+Compared with the promising baseline Finetune w/ aux. loss, our approach brings up from a PGR of <math alttext="41.2\%" class="ltx_Math" display="inline" id="Sx5.SSx5.p2.1.m1.1"><semantics id="Sx5.SSx5.p2.1.m1.1a"><mrow id="Sx5.SSx5.p2.1.m1.1.1" xref="Sx5.SSx5.p2.1.m1.1.1.cmml"><mn id="Sx5.SSx5.p2.1.m1.1.1.2" xref="Sx5.SSx5.p2.1.m1.1.1.2.cmml">41.2</mn><mo id="Sx5.SSx5.p2.1.m1.1.1.1" xref="Sx5.SSx5.p2.1.m1.1.1.1.cmml">%</mo></mrow><annotation-xml encoding="MathML-Content" id="Sx5.SSx5.p2.1.m1.1b"><apply id="Sx5.SSx5.p2.1.m1.1.1.cmml" xref="Sx5.SSx5.p2.1.m1.1.1"><csymbol cd="latexml" id="Sx5.SSx5.p2.1.m1.1.1.1.cmml" xref="Sx5.SSx5.p2.1.m1.1.1.1">percent</csymbol><cn id="Sx5.SSx5.p2.1.m1.1.1.2.cmml" type="float" xref="Sx5.SSx5.p2.1.m1.1.1.2">41.2</cn></apply></annotation-xml><annotation encoding="application/x-tex" id="Sx5.SSx5.p2.1.m1.1c">41.2\%</annotation><annotation encoding="application/x-llamapun" id="Sx5.SSx5.p2.1.m1.1d">41.2 %</annotation></semantics></math> to <math alttext="76.5\%" class="ltx_Math" display="inline" id="Sx5.SSx5.p2.2.m2.1"><semantics id="Sx5.SSx5.p2.2.m2.1a"><mrow id="Sx5.SSx5.p2.2.m2.1.1" xref="Sx5.SSx5.p2.2.m2.1.1.cmml"><mn id="Sx5.SSx5.p2.2.m2.1.1.2" xref="Sx5.SSx5.p2.2.m2.1.1.2.cmml">76.5</mn><mo id="Sx5.SSx5.p2.2.m2.1.1.1" xref="Sx5.SSx5.p2.2.m2.1.1.1.cmml">%</mo></mrow><annotation-xml encoding="MathML-Content" id="Sx5.SSx5.p2.2.m2.1b"><apply id="Sx5.SSx5.p2.2.m2.1.1.cmml" xref="Sx5.SSx5.p2.2.m2.1.1"><csymbol cd="latexml" id="Sx5.SSx5.p2.2.m2.1.1.1.cmml" xref="Sx5.SSx5.p2.2.m2.1.1.1">percent</csymbol><cn id="Sx5.SSx5.p2.2.m2.1.1.2.cmml" type="float" xref="Sx5.SSx5.p2.2.m2.1.1.2">76.5</cn></apply></annotation-xml><annotation encoding="application/x-tex" id="Sx5.SSx5.p2.2.m2.1c">76.5\%</annotation><annotation encoding="application/x-llamapun" id="Sx5.SSx5.p2.2.m2.1d">76.5 %</annotation></semantics></math> in SciQ, <math alttext="56.4\%" class="ltx_Math" display="inline" id="Sx5.SSx5.p2.3.m3.1"><semantics id="Sx5.SSx5.p2.3.m3.1a"><mrow id="Sx5.SSx5.p2.3.m3.1.1" xref="Sx5.SSx5.p2.3.m3.1.1.cmml"><mn id="Sx5.SSx5.p2.3.m3.1.1.2" xref="Sx5.SSx5.p2.3.m3.1.1.2.cmml">56.4</mn><mo id="Sx5.SSx5.p2.3.m3.1.1.1" xref="Sx5.SSx5.p2.3.m3.1.1.1.cmml">%</mo></mrow><annotation-xml encoding="MathML-Content" id="Sx5.SSx5.p2.3.m3.1b"><apply id="Sx5.SSx5.p2.3.m3.1.1.cmml" xref="Sx5.SSx5.p2.3.m3.1.1"><csymbol cd="latexml" id="Sx5.SSx5.p2.3.m3.1.1.1.cmml" xref="Sx5.SSx5.p2.3.m3.1.1.1">percent</csymbol><cn id="Sx5.SSx5.p2.3.m3.1.1.2.cmml" type="float" xref="Sx5.SSx5.p2.3.m3.1.1.2">56.4</cn></apply></annotation-xml><annotation encoding="application/x-tex" id="Sx5.SSx5.p2.3.m3.1c">56.4\%</annotation><annotation encoding="application/x-llamapun" id="Sx5.SSx5.p2.3.m3.1d">56.4 %</annotation></semantics></math> to <math alttext="69.2\%" class="ltx_Math" display="inline" id="Sx5.SSx5.p2.4.m4.1"><semantics id="Sx5.SSx5.p2.4.m4.1a"><mrow id="Sx5.SSx5.p2.4.m4.1.1" xref="Sx5.SSx5.p2.4.m4.1.1.cmml"><mn id="Sx5.SSx5.p2.4.m4.1.1.2" xref="Sx5.SSx5.p2.4.m4.1.1.2.cmml">69.2</mn><mo id="Sx5.SSx5.p2.4.m4.1.1.1" xref="Sx5.SSx5.p2.4.m4.1.1.1.cmml">%</mo></mrow><annotation-xml encoding="MathML-Content" id="Sx5.SSx5.p2.4.m4.1b"><apply id="Sx5.SSx5.p2.4.m4.1.1.cmml" xref="Sx5.SSx5.p2.4.m4.1.1"><csymbol cd="latexml" id="Sx5.SSx5.p2.4.m4.1.1.1.cmml" xref="Sx5.SSx5.p2.4.m4.1.1.1">percent</csymbol><cn id="Sx5.SSx5.p2.4.m4.1.1.2.cmml" type="float" xref="Sx5.SSx5.p2.4.m4.1.1.2">69.2</cn></apply></annotation-xml><annotation encoding="application/x-tex" id="Sx5.SSx5.p2.4.m4.1c">69.2\%</annotation><annotation encoding="application/x-llamapun" id="Sx5.SSx5.p2.4.m4.1d">69.2 %</annotation></semantics></math> in BoolQ, <math alttext="17.4\%" class="ltx_Math" display="inline" id="Sx5.SSx5.p2.5.m5.1"><semantics id="Sx5.SSx5.p2.5.m5.1a"><mrow id="Sx5.SSx5.p2.5.m5.1.1" xref="Sx5.SSx5.p2.5.m5.1.1.cmml"><mn id="Sx5.SSx5.p2.5.m5.1.1.2" xref="Sx5.SSx5.p2.5.m5.1.1.2.cmml">17.4</mn><mo id="Sx5.SSx5.p2.5.m5.1.1.1" xref="Sx5.SSx5.p2.5.m5.1.1.1.cmml">%</mo></mrow><annotation-xml encoding="MathML-Content" id="Sx5.SSx5.p2.5.m5.1b"><apply id="Sx5.SSx5.p2.5.m5.1.1.cmml" xref="Sx5.SSx5.p2.5.m5.1.1"><csymbol cd="latexml" id="Sx5.SSx5.p2.5.m5.1.1.1.cmml" xref="Sx5.SSx5.p2.5.m5.1.1.1">percent</csymbol><cn id="Sx5.SSx5.p2.5.m5.1.1.2.cmml" type="float" xref="Sx5.SSx5.p2.5.m5.1.1.2">17.4</cn></apply></annotation-xml><annotation encoding="application/x-tex" id="Sx5.SSx5.p2.5.m5.1c">17.4\%</annotation><annotation encoding="application/x-llamapun" id="Sx5.SSx5.p2.5.m5.1d">17.4 %</annotation></semantics></math> to <math alttext="56.5\%" class="ltx_Math" display="inline" id="Sx5.SSx5.p2.6.m6.1"><semantics id="Sx5.SSx5.p2.6.m6.1a"><mrow id="Sx5.SSx5.p2.6.m6.1.1" xref="Sx5.SSx5.p2.6.m6.1.1.cmml"><mn id="Sx5.SSx5.p2.6.m6.1.1.2" xref="Sx5.SSx5.p2.6.m6.1.1.2.cmml">56.5</mn><mo id="Sx5.SSx5.p2.6.m6.1.1.1" xref="Sx5.SSx5.p2.6.m6.1.1.1.cmml">%</mo></mrow><annotation-xml encoding="MathML-Content" id="Sx5.SSx5.p2.6.m6.1b"><apply id="Sx5.SSx5.p2.6.m6.1.1.cmml" xref="Sx5.SSx5.p2.6.m6.1.1"><csymbol cd="latexml" id="Sx5.SSx5.p2.6.m6.1.1.1.cmml" xref="Sx5.SSx5.p2.6.m6.1.1.1">percent</csymbol><cn id="Sx5.SSx5.p2.6.m6.1.1.2.cmml" type="float" xref="Sx5.SSx5.p2.6.m6.1.1.2">56.5</cn></apply></annotation-xml><annotation encoding="application/x-tex" id="Sx5.SSx5.p2.6.m6.1c">56.5\%</annotation><annotation encoding="application/x-llamapun" id="Sx5.SSx5.p2.6.m6.1d">56.5 %</annotation></semantics></math> in CosmosQA, and <math alttext="35.0\%" class="ltx_Math" display="inline" id="Sx5.SSx5.p2.7.m7.1"><semantics id="Sx5.SSx5.p2.7.m7.1a"><mrow id="Sx5.SSx5.p2.7.m7.1.1" xref="Sx5.SSx5.p2.7.m7.1.1.cmml"><mn id="Sx5.SSx5.p2.7.m7.1.1.2" xref="Sx5.SSx5.p2.7.m7.1.1.2.cmml">35.0</mn><mo id="Sx5.SSx5.p2.7.m7.1.1.1" xref="Sx5.SSx5.p2.7.m7.1.1.1.cmml">%</mo></mrow><annotation-xml encoding="MathML-Content" id="Sx5.SSx5.p2.7.m7.1b"><apply id="Sx5.SSx5.p2.7.m7.1.1.cmml" xref="Sx5.SSx5.p2.7.m7.1.1"><csymbol cd="latexml" id="Sx5.SSx5.p2.7.m7.1.1.1.cmml" xref="Sx5.SSx5.p2.7.m7.1.1.1">percent</csymbol><cn id="Sx5.SSx5.p2.7.m7.1.1.2.cmml" type="float" xref="Sx5.SSx5.p2.7.m7.1.1.2">35.0</cn></apply></annotation-xml><annotation encoding="application/x-tex" id="Sx5.SSx5.p2.7.m7.1c">35.0\%</annotation><annotation encoding="application/x-llamapun" id="Sx5.SSx5.p2.7.m7.1d">35.0 %</annotation></semantics></math> to <math alttext="70.0\%" class="ltx_Math" display="inline" id="Sx5.SSx5.p2.8.m8.1"><semantics id="Sx5.SSx5.p2.8.m8.1a"><mrow id="Sx5.SSx5.p2.8.m8.1.1" xref="Sx5.SSx5.p2.8.m8.1.1.cmml"><mn id="Sx5.SSx5.p2.8.m8.1.1.2" xref="Sx5.SSx5.p2.8.m8.1.1.2.cmml">70.0</mn><mo id="Sx5.SSx5.p2.8.m8.1.1.1" xref="Sx5.SSx5.p2.8.m8.1.1.1.cmml">%</mo></mrow><annotation-xml encoding="MathML-Content" id="Sx5.SSx5.p2.8.m8.1b"><apply id="Sx5.SSx5.p2.8.m8.1.1.cmml" xref="Sx5.SSx5.p2.8.m8.1.1"><csymbol cd="latexml" id="Sx5.SSx5.p2.8.m8.1.1.1.cmml" xref="Sx5.SSx5.p2.8.m8.1.1.1">percent</csymbol><cn id="Sx5.SSx5.p2.8.m8.1.1.2.cmml" type="float" xref="Sx5.SSx5.p2.8.m8.1.1.2">70.0</cn></apply></annotation-xml><annotation encoding="application/x-tex" id="Sx5.SSx5.p2.8.m8.1c">70.0\%</annotation><annotation encoding="application/x-llamapun" id="Sx5.SSx5.p2.8.m8.1d">70.0 %</annotation></semantics></math> in AnthropicHH.
+Our approach also obtains the best test accuracy among all compared strong students.
+The performance gain demonstrates the advantage of extracting trustworthy information from the strong model via debate, which helps create a better weak supervisor to elicit the capabilities of the strong model.</p>
+</div>
+<div class="ltx_para" id="Sx5.SSx5.p3">
+<p class="ltx_p" id="Sx5.SSx5.p3.1">In addition, we also see that adding a confidence loss to the standard cross entropy objective (Finetune w/ aux. loss and Finetune w/ pro. loss) generally gives a modest boost in generalization performance.
+In our experimental settings, the gaps in compute between weak and strong models are not significantly large, which may limit their performances.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="Sx5.SSx6">
+<h3 class="ltx_title ltx_title_subsection">Ablation Studies</h3>
+<figure class="ltx_table" id="Sx5.T3">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle" id="Sx5.T3.1">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="Sx5.T3.1.1.1">
+<th class="ltx_td ltx_align_justify ltx_align_middle ltx_th ltx_th_column ltx_border_r ltx_border_tt" id="Sx5.T3.1.1.1.1" style="width:60.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="Sx5.T3.1.1.1.1.1">
+<span class="ltx_p" id="Sx5.T3.1.1.1.1.1.1"><span class="ltx_text ltx_font_bold" id="Sx5.T3.1.1.1.1.1.1.1">Protocol</span></span>
+</span>
+</th>
+<th class="ltx_td ltx_align_justify ltx_align_middle ltx_th ltx_th_column ltx_border_tt" id="Sx5.T3.1.1.1.2" style="width:360.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="Sx5.T3.1.1.1.2.1">
+<span class="ltx_p" id="Sx5.T3.1.1.1.2.1.1"><span class="ltx_text ltx_font_bold" id="Sx5.T3.1.1.1.2.1.1.1">Prompt</span></span>
+</span>
+</th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="Sx5.T3.1.2.1">
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_r ltx_border_t" id="Sx5.T3.1.2.1.1" style="width:60.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="Sx5.T3.1.2.1.1.1">
+<span class="ltx_p" id="Sx5.T3.1.2.1.1.1.1">Consultancy</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_t" id="Sx5.T3.1.2.1.2" style="width:360.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="Sx5.T3.1.2.1.2.1">
+<span class="ltx_p" id="Sx5.T3.1.2.1.2.1.1"><span class="ltx_text ltx_font_italic" id="Sx5.T3.1.2.1.2.1.1.1">There is a science knowledge question, followed by an answer</span>. Construct your argument for why the answer is <span class="ltx_text ltx_font_italic" id="Sx5.T3.1.2.1.2.1.1.2">[random answer]</span>.</span>
+</span>
+</td>
+</tr>
+<tr class="ltx_tr" id="Sx5.T3.1.3.2">
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_bb ltx_border_r ltx_border_t" id="Sx5.T3.1.3.2.1" style="width:60.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="Sx5.T3.1.3.2.1.1">
+<span class="ltx_p" id="Sx5.T3.1.3.2.1.1.1">Market-Making</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_bb ltx_border_t" id="Sx5.T3.1.3.2.2" style="width:360.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="Sx5.T3.1.3.2.2.1">
+<span class="ltx_p" id="Sx5.T3.1.3.2.2.1.1"><span class="ltx_text ltx_font_italic" id="Sx5.T3.1.3.2.2.1.1.1">There is a science knowledge question, followed by an answer</span>. Construct your argument for why the answer is <span class="ltx_text ltx_font_italic" id="Sx5.T3.1.3.2.2.1.1.2">[unselected answer]</span>.</span>
+</span>
+</td>
+</tr>
+</tbody>
+</table>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_table">Table 3: </span><span class="ltx_text ltx_font_bold" id="Sx5.T3.5.1">Prompts to induce consultancy and market-making</span>. The binary classification problem is converted from the SciQ dataset. The two answer choices are correct and incorrect. <span class="ltx_text ltx_font_italic" id="Sx5.T3.6.2">[random answer]</span> is the answer randomly sampled from the two candidate answers. <span class="ltx_text ltx_font_italic" id="Sx5.T3.7.3">[unselected answer]</span> is the answer that is not selected by the weak supervisor (the naively finetuned small model) based on its prediction. We also append the current transcript to the prompt.</figcaption>
+</figure>
+<figure class="ltx_table" id="Sx5.T4">
+<table class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle" id="Sx5.T4.1">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="Sx5.T4.1.1.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_r ltx_border_tt" id="Sx5.T4.1.1.1.1" rowspan="2"><span class="ltx_text ltx_font_bold" id="Sx5.T4.1.1.1.1.1">Method</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r ltx_border_tt" colspan="2" id="Sx5.T4.1.1.1.2"><span class="ltx_text ltx_font_bold" id="Sx5.T4.1.1.1.2.1">SciQ</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r ltx_border_tt" colspan="2" id="Sx5.T4.1.1.1.3"><span class="ltx_text ltx_font_bold" id="Sx5.T4.1.1.1.3.1">BoolQ</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r ltx_border_tt" colspan="2" id="Sx5.T4.1.1.1.4"><span class="ltx_text ltx_font_bold" id="Sx5.T4.1.1.1.4.1">CosmosQA</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="2" id="Sx5.T4.1.1.1.5"><span class="ltx_text ltx_font_bold" id="Sx5.T4.1.1.1.5.1">AnthropicHH</span></th>
+</tr>
+<tr class="ltx_tr" id="Sx5.T4.1.2.2">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="Sx5.T4.1.2.2.1">Acc.</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r" id="Sx5.T4.1.2.2.2">PGR</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="Sx5.T4.1.2.2.3">Acc.</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r" id="Sx5.T4.1.2.2.4">PGR</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="Sx5.T4.1.2.2.5">Acc.</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r" id="Sx5.T4.1.2.2.6">PGR</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="Sx5.T4.1.2.2.7">Acc.</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="Sx5.T4.1.2.2.8">PGR</th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="Sx5.T4.1.3.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_r ltx_border_t" id="Sx5.T4.1.3.1.1">Consultancy</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="Sx5.T4.1.3.1.2">91.5</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" id="Sx5.T4.1.3.1.3">44.1</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="Sx5.T4.1.3.1.4">87.8</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" id="Sx5.T4.1.3.1.5">46.2</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="Sx5.T4.1.3.1.6">88.3</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" id="Sx5.T4.1.3.1.7">34.8</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="Sx5.T4.1.3.1.8">49.3</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="Sx5.T4.1.3.1.9">25.0</td>
+</tr>
+<tr class="ltx_tr" id="Sx5.T4.1.4.2">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_r" id="Sx5.T4.1.4.2.1">Market-Making</th>
+<td class="ltx_td ltx_align_center" id="Sx5.T4.1.4.2.2">91.6</td>
+<td class="ltx_td ltx_align_center ltx_border_r" id="Sx5.T4.1.4.2.3">47.1</td>
+<td class="ltx_td ltx_align_center" id="Sx5.T4.1.4.2.4">87.6</td>
+<td class="ltx_td ltx_align_center ltx_border_r" id="Sx5.T4.1.4.2.5">41.0</td>
+<td class="ltx_td ltx_align_center" id="Sx5.T4.1.4.2.6">88.2</td>
+<td class="ltx_td ltx_align_center ltx_border_r" id="Sx5.T4.1.4.2.7">30.4</td>
+<td class="ltx_td ltx_align_center" id="Sx5.T4.1.4.2.8">49.5</td>
+<td class="ltx_td ltx_align_center" id="Sx5.T4.1.4.2.9">35.0</td>
+</tr>
+<tr class="ltx_tr" id="Sx5.T4.1.5.3">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb ltx_border_r ltx_border_t" id="Sx5.T4.1.5.3.1"><span class="ltx_text ltx_font_bold" id="Sx5.T4.1.5.3.1.1">Ours</span></th>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="Sx5.T4.1.5.3.2"><span class="ltx_text ltx_font_bold" id="Sx5.T4.1.5.3.2.1">92.6</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r ltx_border_t" id="Sx5.T4.1.5.3.3"><span class="ltx_text ltx_font_bold" id="Sx5.T4.1.5.3.3.1">76.5</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="Sx5.T4.1.5.3.4"><span class="ltx_text ltx_font_bold" id="Sx5.T4.1.5.3.4.1">88.7</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r ltx_border_t" id="Sx5.T4.1.5.3.5"><span class="ltx_text ltx_font_bold" id="Sx5.T4.1.5.3.5.1">69.2</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="Sx5.T4.1.5.3.6"><span class="ltx_text ltx_font_bold" id="Sx5.T4.1.5.3.6.1">88.8</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r ltx_border_t" id="Sx5.T4.1.5.3.7"><span class="ltx_text ltx_font_bold" id="Sx5.T4.1.5.3.7.1">56.5</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="Sx5.T4.1.5.3.8"><span class="ltx_text ltx_font_bold" id="Sx5.T4.1.5.3.8.1">50.2</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="Sx5.T4.1.5.3.9"><span class="ltx_text ltx_font_bold" id="Sx5.T4.1.5.3.9.1">70.0</span></td>
+</tr>
+</tbody>
+</table>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 4: </span><span class="ltx_text ltx_font_bold" id="Sx5.T4.3.1">Ablation on different scalable oversight approaches</span>. Here, our approach uses debate ensembles.</figcaption>
+</figure>
+<div class="ltx_para" id="Sx5.SSx6.p1">
+<p class="ltx_p" id="Sx5.SSx6.p1.1">Finally, we provide comprehensive ablation studies to understand the efficacy of debate for weak-to-strong generation.</p>
+</div>
+<section class="ltx_paragraph" id="Sx5.SSx6.SSS0.Px1">
+<h4 class="ltx_title ltx_title_paragraph">Ablation on different scalable oversight approaches.</h4>
+<div class="ltx_para" id="Sx5.SSx6.SSS0.Px1.p1">
+<p class="ltx_p" id="Sx5.SSx6.SSS0.Px1.p1.1">We demonstrate the effectiveness of debate as a mechanism to extract trustworthy information from a capable but untrustworthy strong model by replacing it with other alternative scalable oversight approaches: Consultancy <cite class="ltx_cite ltx_citemacro_citep">(Michael et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib40" title="">2023</a>)</cite> and Market-Making <cite class="ltx_cite ltx_citemacro_citep">(Hubinger <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib27" title="">2020</a>)</cite>.</p>
+<ul class="ltx_itemize" id="Sx5.I2">
+<li class="ltx_item" id="Sx5.I2.i1" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span>
+<div class="ltx_para" id="Sx5.I2.i1.p1">
+<p class="ltx_p" id="Sx5.I2.i1.p1.1"><span class="ltx_text ltx_font_bold" id="Sx5.I2.i1.p1.1.1">Consultancy.</span> In consultancy, there is only one consultant instead of two debaters. The consultant is an instance of a large pretrained model. Given a question and its two answer choices (one correct, one incorrect), the consultant is assigned to argue for one of these answers, with a 50% chance of each. During the consultancy, the consultant provides evidences for its assigned answer. The transcript is kept at the end of the consultancy.</p>
+</div>
+</li>
+<li class="ltx_item" id="Sx5.I2.i2" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span>
+<div class="ltx_para" id="Sx5.I2.i2.p1">
+<p class="ltx_p" id="Sx5.I2.i2.p1.1"><span class="ltx_text ltx_font_bold" id="Sx5.I2.i2.p1.1.1">Market-Making</span>. In market-making, there is a single debater. The debater is an instance of a large pretrained model and aims to generate arguments that change some model’s beliefs on the answer to a question. Given a question and its two candidate answers, we let the weak supervisor (the naively finetuned small model) select an answer based on its prediction. Accordingly, the debater is assigned to argue for the unselected answer. The transcript is kept at the end.</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="ltx_para" id="Sx5.SSx6.SSS0.Px1.p2">
+<p class="ltx_p" id="Sx5.SSx6.SSS0.Px1.p2.1">Specifically, consultancy and market-making run for a single turn. At the start of each turn, the consultant and the debater are provided with a prompt describing the task, the assigned answer, and the transcript.
+The prompts to induce consultancy and market-making are illustrated in Table <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx5.T3" title="Table 3 ‣ Ablation Studies ‣ Experiments ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_tag">3</span></a>.</p>
+</div>
+<div class="ltx_para" id="Sx5.SSx6.SSS0.Px1.p3">
+<p class="ltx_p" id="Sx5.SSx6.SSS0.Px1.p3.1">Results in Table <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx5.T4" title="Table 4 ‣ Ablation Studies ‣ Experiments ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_tag">4</span></a> show that debate used in our approach performs better than all other variants in terms of test accuracy and PGR across all four tasks.
+These results validate our claim that debate can help elicit truth from a strong model, at least better than consultancy and market-making in our settings.
+Meanwhile, we should note that consultancy is a relatively weak baseline to beat, because there is a 50-50 chance of the consultant arguing for the incorrect answer.</p>
+</div>
+<figure class="ltx_table" id="Sx5.T5">
+<table class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle" id="Sx5.T5.1">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="Sx5.T5.1.1.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_r ltx_border_tt" id="Sx5.T5.1.1.1.1" rowspan="2"><span class="ltx_text ltx_font_bold" id="Sx5.T5.1.1.1.1.1">Method</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r ltx_border_tt" colspan="2" id="Sx5.T5.1.1.1.2"><span class="ltx_text ltx_font_bold" id="Sx5.T5.1.1.1.2.1">SciQ</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r ltx_border_tt" colspan="2" id="Sx5.T5.1.1.1.3"><span class="ltx_text ltx_font_bold" id="Sx5.T5.1.1.1.3.1">BoolQ</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r ltx_border_tt" colspan="2" id="Sx5.T5.1.1.1.4"><span class="ltx_text ltx_font_bold" id="Sx5.T5.1.1.1.4.1">CosmosQA</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="2" id="Sx5.T5.1.1.1.5"><span class="ltx_text ltx_font_bold" id="Sx5.T5.1.1.1.5.1">AnthropicHH</span></th>
+</tr>
+<tr class="ltx_tr" id="Sx5.T5.1.2.2">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="Sx5.T5.1.2.2.1">Acc.</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r" id="Sx5.T5.1.2.2.2">PGR</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="Sx5.T5.1.2.2.3">Acc.</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r" id="Sx5.T5.1.2.2.4">PGR</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="Sx5.T5.1.2.2.5">Acc.</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r" id="Sx5.T5.1.2.2.6">PGR</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="Sx5.T5.1.2.2.7">Acc.</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="Sx5.T5.1.2.2.8">PGR</th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="Sx5.T5.1.3.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_r ltx_border_t" id="Sx5.T5.1.3.1.1">Single weak model</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="Sx5.T5.1.3.1.2">91.7</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" id="Sx5.T5.1.3.1.3">50.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="Sx5.T5.1.3.1.4">88.2</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" id="Sx5.T5.1.3.1.5">56.4</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="Sx5.T5.1.3.1.6">88.4</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" id="Sx5.T5.1.3.1.7">39.1</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="Sx5.T5.1.3.1.8">49.5</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="Sx5.T5.1.3.1.9">35.0</td>
+</tr>
+<tr class="ltx_tr" id="Sx5.T5.1.4.2">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_r" id="Sx5.T5.1.4.2.1">Finetune ensembles</th>
+<td class="ltx_td ltx_align_center" id="Sx5.T5.1.4.2.2">91.8</td>
+<td class="ltx_td ltx_align_center ltx_border_r" id="Sx5.T5.1.4.2.3">52.9</td>
+<td class="ltx_td ltx_align_center" id="Sx5.T5.1.4.2.4">88.3</td>
+<td class="ltx_td ltx_align_center ltx_border_r" id="Sx5.T5.1.4.2.5">59.0</td>
+<td class="ltx_td ltx_align_center" id="Sx5.T5.1.4.2.6">88.4</td>
+<td class="ltx_td ltx_align_center ltx_border_r" id="Sx5.T5.1.4.2.7">39.1</td>
+<td class="ltx_td ltx_align_center" id="Sx5.T5.1.4.2.8">49.7</td>
+<td class="ltx_td ltx_align_center" id="Sx5.T5.1.4.2.9">45.0</td>
+</tr>
+<tr class="ltx_tr" id="Sx5.T5.1.5.3">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb ltx_border_r ltx_border_t" id="Sx5.T5.1.5.3.1"><span class="ltx_text ltx_font_bold" id="Sx5.T5.1.5.3.1.1">debate ensembles</span></th>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="Sx5.T5.1.5.3.2"><span class="ltx_text ltx_font_bold" id="Sx5.T5.1.5.3.2.1">92.6</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r ltx_border_t" id="Sx5.T5.1.5.3.3"><span class="ltx_text ltx_font_bold" id="Sx5.T5.1.5.3.3.1">76.5</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="Sx5.T5.1.5.3.4"><span class="ltx_text ltx_font_bold" id="Sx5.T5.1.5.3.4.1">88.7</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r ltx_border_t" id="Sx5.T5.1.5.3.5"><span class="ltx_text ltx_font_bold" id="Sx5.T5.1.5.3.5.1">69.2</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="Sx5.T5.1.5.3.6"><span class="ltx_text ltx_font_bold" id="Sx5.T5.1.5.3.6.1">88.8</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r ltx_border_t" id="Sx5.T5.1.5.3.7"><span class="ltx_text ltx_font_bold" id="Sx5.T5.1.5.3.7.1">56.5</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="Sx5.T5.1.5.3.8"><span class="ltx_text ltx_font_bold" id="Sx5.T5.1.5.3.8.1">50.2</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="Sx5.T5.1.5.3.9"><span class="ltx_text ltx_font_bold" id="Sx5.T5.1.5.3.9.1">70.0</span></td>
+</tr>
+</tbody>
+</table>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 5: </span>Ablation on weak model ensemble. </figcaption>
+</figure>
+<figure class="ltx_figure" id="Sx5.F2"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="215" id="Sx5.F2.g1" src="x2.png" width="456"/>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 2: </span><span class="ltx_text ltx_font_bold" id="Sx5.F2.2.1">Ablation study on the cardinality of the ensemble</span>. Here, our approach uses debate ensembles.</figcaption>
+</figure>
+<figure class="ltx_figure" id="Sx5.F3"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="215" id="Sx5.F3.g1" src="x3.png" width="456"/>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 3: </span><span class="ltx_text ltx_font_bold" id="Sx5.F3.2.1">Ablation on the number of turns of debate</span>. Here, our approach uses debate ensembles.</figcaption>
+</figure>
+</section>
+<section class="ltx_paragraph" id="Sx5.SSx6.SSS0.Px2">
+<h4 class="ltx_title ltx_title_paragraph">Ablation on weak model ensemble.</h4>
+<div class="ltx_para" id="Sx5.SSx6.SSS0.Px2.p1">
+<p class="ltx_p" id="Sx5.SSx6.SSS0.Px2.p1.1">We analyze the impact of weak model ensemble on obtaining a robust weak supervision estimate for weak-to-strong generalization.
+In Table <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx5.T5" title="Table 5 ‣ Ablation on different scalable oversight approaches. ‣ Ablation Studies ‣ Experiments ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_tag">5</span></a>, we compare three weak model ensemble methods of increasing computational cost: single weak model, finetune ensembles, and debate ensembles.
+Single weak model is an individual small model finetuned on the samples augmented with debate transcripts.
+Finetune ensembles and debate ensembles are described in the methods section.</p>
+</div>
+<div class="ltx_para" id="Sx5.SSx6.SSS0.Px2.p2">
+<p class="ltx_p" id="Sx5.SSx6.SSS0.Px2.p2.1">We find that debate ensembles consistently improve performance over individual weak models and finetune ensembles across all the tasks.
+On the contrary, finetune ensembles relatively improve performance over individual weak models in 3 out of 4 tasks and are comparable in the other.
+These results suggest that the diversity of generated debate arguments is the key to the success of weak model ensemble, which helps create a better weak supervisor.
+At the same time, an individual small weak model may lack the capability to fully exploit long arguments from the debate, as a result, leading to limited performances.</p>
+</div>
+</section>
+<section class="ltx_paragraph" id="Sx5.SSx6.SSS0.Px3">
+<h4 class="ltx_title ltx_title_paragraph">Ablation on the cardinality of the ensemble.</h4>
+<div class="ltx_para" id="Sx5.SSx6.SSS0.Px3.p1">
+<p class="ltx_p" id="Sx5.SSx6.SSS0.Px3.p1.1">Recall that our weak model ensemble method introduces an additional hyperparameter cardinality.
+The cardinality is the size of the ensemble.
+We analyze the impact of the cardinality of the ensemble on the final performance.
+In Figure <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx5.F2" title="Figure 2 ‣ Ablation on different scalable oversight approaches. ‣ Ablation Studies ‣ Experiments ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_tag">2</span></a>, we increase weak model members used in the ensemble on SciQ and AnthropicHH tasks.
+We can observe that there is a significant gap between 3-member and 4-member ensembles.
+On the other hand, the performance of 4-member, 5-member, and 6-member ensembles is quite similar.
+It suggests that 4-member ensemble is likely to work best and diminishing returns will occur after this point.</p>
+</div>
+</section>
+<section class="ltx_paragraph" id="Sx5.SSx6.SSS0.Px4">
+<h4 class="ltx_title ltx_title_paragraph">Ablation on the number of turns of debate.</h4>
+<div class="ltx_para" id="Sx5.SSx6.SSS0.Px4.p1">
+<p class="ltx_p" id="Sx5.SSx6.SSS0.Px4.p1.1">Next, we analyze the impact of the number of turns of debate on the final performance.
+In Figure <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#Sx5.F3" title="Figure 3 ‣ Ablation on different scalable oversight approaches. ‣ Ablation Studies ‣ Experiments ‣ Debate Helps Weak-to-Strong Generalization"><span class="ltx_text ltx_ref_tag">3</span></a>, we increase the debate length for up to 6 turns on SciQ and AnthropicHH tasks.
+We find that more turns of debate do not increase the final performance.
+We observe that strong model debaters like Qwen/Qwen-14B suffer from the inability to effectively process long debate transcripts and follow instructions, as turns continue, as shown by a consistent decrease in test accuracy after 3 turns.
+We used 3 turns of debate in this work because it is the minimum interaction between debaters to extract the truth from the strong model.
+For instance, the two debaters can critique their opponent in turn 2 and turn 3, respectively.</p>
+</div>
+</section>
+</section>
+</section>
+<section class="ltx_section" id="Sx6">
+<h2 class="ltx_title ltx_title_section">Limitations and Conclusion</h2>
+<section class="ltx_paragraph" id="Sx6.SSx6.SSS0.Px1">
+<h4 class="ltx_title ltx_title_paragraph">Limitations.</h4>
+<div class="ltx_para" id="Sx6.SSx6.SSS0.Px1.p1">
+<p class="ltx_p" id="Sx6.SSx6.SSS0.Px1.p1.1">In this work, we attempt to combine the strength of two complementary approaches, i.e., scalable oversight and weak-to-strong generalization, to tackle the issue of weak supervision for aligning future superhuman models.
+For this purpose, we explore a simple combination method, i.e., extracting trustworthy information via debate from strong models and using it to create a better weak supervisor to elicit the capabilities of strong models.
+Although our proposed method is found to be effective in all our experiments and ablation studies, there are many more ways to combine scalable oversight and weak-to-strong generalization, such as Task decomposition + W2SG <cite class="ltx_cite ltx_citemacro_citep">(Leike <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib34" title="">2023</a>)</cite>.
+More empirical work is needed in this area.</p>
+</div>
+<div class="ltx_para" id="Sx6.SSx6.SSS0.Px1.p2">
+<p class="ltx_p" id="Sx6.SSx6.SSS0.Px1.p2.1">In our setup, the difference between strong and weak models is only in the size of pretrained models. In the future, stronger models may also differ in reasoning and planning abilities.
+Furthermore, the gaps in compute between weak and strong models are not significantly large in this work (7B vs. 14B).
+It would be interesting to verify our conclusions on more large and advanced models, such as Qwen/Qwen2-72B <cite class="ltx_cite ltx_citemacro_citep">(Yang et al. <a class="ltx_ref" href="https://arxiv.org/html/2501.13124v1#bib.bib54" title="">2024</a>)</cite>.
+Finally, our approach is expensive as it requires both two instances of debaters and a multi-turn debate procedure.</p>
+</div>
+</section>
+<section class="ltx_paragraph" id="Sx6.SSx6.SSS0.Px2">
+<h4 class="ltx_title ltx_title_paragraph">Conclusion.</h4>
+<div class="ltx_para" id="Sx6.SSx6.SSS0.Px2.p1">
+<p class="ltx_p" id="Sx6.SSx6.SSS0.Px2.p1.1">In this paper, we present an approach to improve the performance of weak-to-strong generalization via debate.
+We believe the perspective of having scalable oversight and weak-to-strong generalization methods working in combination to tackle the weak supervision issue will prove to be a fruitful area of research in superhuman alignment.</p>
+</div>
+</section>
+</section>
+<section class="ltx_bibliography" id="bib">
+<h2 class="ltx_title ltx_title_bibliography">References</h2>
+<ul class="ltx_biblist">
+<li class="ltx_bibitem" id="bib.bib1">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Amodei et al. (2016)</span>
+<span class="ltx_bibblock">
+Amodei, D.; Olah, C.; Steinhardt, J.; Christiano, P.; Schulman, J.; and Mané, D. 2016.
+
+</span>
+<span class="ltx_bibblock">Concrete problems in AI safety.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib1.1.1">arXiv preprint arXiv:1606.06565</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib2">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Anthropic (2023)</span>
+<span class="ltx_bibblock">
+Anthropic. 2023.
+
+</span>
+<span class="ltx_bibblock">Introducing claude.
+
+</span>
+<span class="ltx_bibblock"><span class="ltx_ref ltx_nolink ltx_url ltx_ref_self">https://www.anthropic.com/index/introducing-claude</span>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib3">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Atkeson and Schaal (1997)</span>
+<span class="ltx_bibblock">
+Atkeson, C. G.; and Schaal, S. 1997.
+
+</span>
+<span class="ltx_bibblock">Robot learning from demonstration.
+
+</span>
+<span class="ltx_bibblock">In <em class="ltx_emph ltx_font_italic" id="bib.bib3.1.1">ICML</em>, volume 97, 12–20.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib4">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Bai et al. (2023)</span>
+<span class="ltx_bibblock">
+Bai, J.; Bai, S.; Chu, Y.; Cui, Z.; Dang, K.; Deng, X.; Fan, Y.; Ge, W.; Han, Y.; Huang, F.; et al. 2023.
+
+</span>
+<span class="ltx_bibblock">Qwen technical report.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib4.1.1">arXiv preprint arXiv:2309.16609</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib5">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Bai et al. (2022)</span>
+<span class="ltx_bibblock">
+Bai, Y.; Jones, A.; Ndousse, K.; Askell, A.; Chen, A.; DasSarma, N.; Drain, D.; Fort, S.; Ganguli, D.; Henighan, T.; et al. 2022.
+
+</span>
+<span class="ltx_bibblock">Training a helpful and harmless assistant with reinforcement learning from human feedback.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib5.1.1">arXiv preprint arXiv:2204.05862</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib6">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Bain and Sammut (1995)</span>
+<span class="ltx_bibblock">
+Bain, M.; and Sammut, C. 1995.
+
+</span>
+<span class="ltx_bibblock">A Framework for Behavioural Cloning.
+
+</span>
+<span class="ltx_bibblock">In <em class="ltx_emph ltx_font_italic" id="bib.bib6.1.1">Machine Intelligence 15</em>, 103–129.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib7">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Bowman et al. (2022)</span>
+<span class="ltx_bibblock">
+Bowman, S. R.; Hyun, J.; Perez, E.; Chen, E.; Pettit, C.; Heiner, S.; Lukošiūtė, K.; Askell, A.; Jones, A.; Chen, A.; et al. 2022.
+
+</span>
+<span class="ltx_bibblock">Measuring progress on scalable oversight for large language models.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib7.1.1">arXiv preprint arXiv:2211.03540</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib8">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Brown et al. (2020)</span>
+<span class="ltx_bibblock">
+Brown, T.; Mann, B.; Ryder, N.; Subbiah, M.; Kaplan, J. D.; Dhariwal, P.; Neelakantan, A.; Shyam, P.; Sastry, G.; Askell, A.; et al. 2020.
+
+</span>
+<span class="ltx_bibblock">Language models are few-shot learners.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib8.1.1">Advances in neural information processing systems</em>, 33: 1877–1901.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib9">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Burns et al. (2023)</span>
+<span class="ltx_bibblock">
+Burns, C.; Izmailov, P.; Kirchner, J. H.; Baker, B.; Gao, L.; Aschenbrenner, L.; Chen, Y.; Ecoffet, A.; Joglekar, M.; Leike, J.; et al. 2023.
+
+</span>
+<span class="ltx_bibblock">Weak-to-strong generalization: Eliciting strong capabilities with weak supervision.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib9.1.1">arXiv preprint arXiv:2312.09390</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib10">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">CAIS (2023)</span>
+<span class="ltx_bibblock">
+CAIS. 2023.
+
+</span>
+<span class="ltx_bibblock">Statement on AI Risk.
+
+</span>
+<span class="ltx_bibblock"><span class="ltx_ref ltx_nolink ltx_url ltx_ref_self">https://www.safe.ai/work/statement-on-ai-risk</span>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib11">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Casper et al. (2023)</span>
+<span class="ltx_bibblock">
+Casper, S.; Davies, X.; Shi, C.; Gilbert, T. K.; Scheurer, J.; Rando, J.; Freedman, R.; Korbak, T.; Lindner, D.; Freire, P.; et al. 2023.
+
+</span>
+<span class="ltx_bibblock">Open problems and fundamental limitations of reinforcement learning from human feedback.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib11.1.1">arXiv preprint arXiv:2307.15217</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib12">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Chan et al. (2023)</span>
+<span class="ltx_bibblock">
+Chan, C.-M.; Chen, W.; Su, Y.; Yu, J.; Xue, W.; Zhang, S.; Fu, J.; and Liu, Z. 2023.
+
+</span>
+<span class="ltx_bibblock">Chateval: Towards better llm-based evaluators through multi-agent debate.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib12.1.1">arXiv preprint arXiv:2308.07201</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib13">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Charikar, Pabbaraju, and Shiragur (2024)</span>
+<span class="ltx_bibblock">
+Charikar, M.; Pabbaraju, C.; and Shiragur, K. 2024.
+
+</span>
+<span class="ltx_bibblock">Quantifying the Gain in Weak-to-Strong Generalization.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib13.1.1">arXiv preprint arXiv:2405.15116</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib14">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Christiano, Shlegeris, and Amodei (2018)</span>
+<span class="ltx_bibblock">
+Christiano, P.; Shlegeris, B.; and Amodei, D. 2018.
+
+</span>
+<span class="ltx_bibblock">Supervising strong learners by amplifying weak experts.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib14.1.1">arXiv preprint arXiv:1810.08575</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib15">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Christiano et al. (2017)</span>
+<span class="ltx_bibblock">
+Christiano, P. F.; Leike, J.; Brown, T.; Martic, M.; Legg, S.; and Amodei, D. 2017.
+
+</span>
+<span class="ltx_bibblock">Deep reinforcement learning from human preferences.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib15.1.1">Advances in neural information processing systems</em>, 30.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib16">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Chung et al. (2024)</span>
+<span class="ltx_bibblock">
+Chung, H. W.; Hou, L.; Longpre, S.; Zoph, B.; Tay, Y.; Fedus, W.; Li, Y.; Wang, X.; Dehghani, M.; Brahma, S.; et al. 2024.
+
+</span>
+<span class="ltx_bibblock">Scaling instruction-finetuned language models.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib16.1.1">Journal of Machine Learning Research</em>, 25(70): 1–53.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib17">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Clark et al. (2019)</span>
+<span class="ltx_bibblock">
+Clark, C.; Lee, K.; Chang, M.-W.; Kwiatkowski, T.; Collins, M.; and Toutanova, K. 2019.
+
+</span>
+<span class="ltx_bibblock">BoolQ: Exploring the surprising difficulty of natural yes/no questions.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib17.1.1">arXiv preprint arXiv:1905.10044</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib18">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Coste et al. (2023)</span>
+<span class="ltx_bibblock">
+Coste, T.; Anwar, U.; Kirk, R.; and Krueger, D. 2023.
+
+</span>
+<span class="ltx_bibblock">Reward model ensembles help mitigate overoptimization.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib18.1.1">arXiv preprint arXiv:2310.02743</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib19">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Denison et al. (2024)</span>
+<span class="ltx_bibblock">
+Denison, C.; MacDiarmid, M.; Barez, F.; Duvenaud, D.; Kravec, S.; Marks, S.; Schiefer, N.; Soklaski, R.; Tamkin, A.; Kaplan, J.; et al. 2024.
+
+</span>
+<span class="ltx_bibblock">Sycophancy to Subterfuge: Investigating Reward-Tampering in Large Language Models.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib19.1.1">arXiv preprint arXiv:2406.10162</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib20">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Du et al. (2023)</span>
+<span class="ltx_bibblock">
+Du, Y.; Li, S.; Torralba, A.; Tenenbaum, J. B.; and Mordatch, I. 2023.
+
+</span>
+<span class="ltx_bibblock">Improving factuality and reasoning in language models through multiagent debate.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib20.1.1">arXiv preprint arXiv:2305.14325</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib21">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Eisenstein et al. (2023)</span>
+<span class="ltx_bibblock">
+Eisenstein, J.; Nagpal, C.; Agarwal, A.; Beirami, A.; D’Amour, A.; Dvijotham, D.; Fisch, A.; Heller, K.; Pfohl, S.; Ramachandran, D.; et al. 2023.
+
+</span>
+<span class="ltx_bibblock">Helping or herding? reward model ensembles mitigate but do not eliminate reward hacking.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib21.1.1">arXiv preprint arXiv:2312.09244</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib22">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Ganaie et al. (2022)</span>
+<span class="ltx_bibblock">
+Ganaie, M. A.; Hu, M.; Malik, A. K.; Tanveer, M.; and Suganthan, P. N. 2022.
+
+</span>
+<span class="ltx_bibblock">Ensemble deep learning: A review.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib22.1.1">Engineering Applications of Artificial Intelligence</em>, 115: 105151.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib23">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Gao, Schulman, and Hilton (2023)</span>
+<span class="ltx_bibblock">
+Gao, L.; Schulman, J.; and Hilton, J. 2023.
+
+</span>
+<span class="ltx_bibblock">Scaling laws for reward model overoptimization.
+
+</span>
+<span class="ltx_bibblock">In <em class="ltx_emph ltx_font_italic" id="bib.bib23.1.1">International Conference on Machine Learning</em>, 10835–10866. PMLR.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib24">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Goodfellow et al. (2014)</span>
+<span class="ltx_bibblock">
+Goodfellow, I.; Pouget-Abadie, J.; Mirza, M.; Xu, B.; Warde-Farley, D.; Ozair, S.; Courville, A.; and Bengio, Y. 2014.
+
+</span>
+<span class="ltx_bibblock">Generative adversarial nets.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib24.1.1">Advances in neural information processing systems</em>, 27.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib25">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Hinton, Vinyals, and Dean (2015)</span>
+<span class="ltx_bibblock">
+Hinton, G.; Vinyals, O.; and Dean, J. 2015.
+
+</span>
+<span class="ltx_bibblock">Distilling the knowledge in a neural network.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib25.1.1">arXiv preprint arXiv:1503.02531</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib26">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Huang et al. (2019)</span>
+<span class="ltx_bibblock">
+Huang, L.; Bras, R. L.; Bhagavatula, C.; and Choi, Y. 2019.
+
+</span>
+<span class="ltx_bibblock">Cosmos QA: Machine reading comprehension with contextual commonsense reasoning.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib26.1.1">arXiv preprint arXiv:1909.00277</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib27">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Hubinger (2020)</span>
+<span class="ltx_bibblock">
+Hubinger, E. 2020.
+
+</span>
+<span class="ltx_bibblock">AI safety via market making.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib27.1.1">AI Alignment Forum</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib28">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Irving, Christiano, and Amodei (2018)</span>
+<span class="ltx_bibblock">
+Irving, G.; Christiano, P.; and Amodei, D. 2018.
+
+</span>
+<span class="ltx_bibblock">AI safety via debate.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib28.1.1">arXiv preprint arXiv:1805.00899</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib29">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Ji et al. (2023)</span>
+<span class="ltx_bibblock">
+Ji, J.; Qiu, T.; Chen, B.; Zhang, B.; Lou, H.; Wang, K.; Duan, Y.; He, Z.; Zhou, J.; Zhang, Z.; et al. 2023.
+
+</span>
+<span class="ltx_bibblock">Ai alignment: A comprehensive survey.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib29.1.1">arXiv preprint arXiv:2310.19852</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib30">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Karp (1975)</span>
+<span class="ltx_bibblock">
+Karp, R. M. 1975.
+
+</span>
+<span class="ltx_bibblock">On the computational complexity of combinatorial problems.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib30.1.1">Networks</em>, 5(1): 45–68.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib31">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Kenton et al. (2024)</span>
+<span class="ltx_bibblock">
+Kenton, Z.; Siegel, N. Y.; Kramár, J.; Brown-Cohen, J.; Albanie, S.; Bulian, J.; Agarwal, R.; Lindner, D.; Tang, Y.; Goodman, N. D.; et al. 2024.
+
+</span>
+<span class="ltx_bibblock">On scalable oversight with weak LLMs judging strong LLMs.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib31.1.1">arXiv preprint arXiv:2407.04622</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib32">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Khan et al. (2024)</span>
+<span class="ltx_bibblock">
+Khan, A.; Hughes, J.; Valentine, D.; Ruis, L.; Sachan, K.; Radhakrishnan, A.; Grefenstette, E.; Bowman, S. R.; Rocktäschel, T.; and Perez, E. 2024.
+
+</span>
+<span class="ltx_bibblock">Debating with more persuasive llms leads to more truthful answers.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib32.1.1">arXiv preprint arXiv:2402.06782</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib33">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Lakshminarayanan, Pritzel, and Blundell (2017)</span>
+<span class="ltx_bibblock">
+Lakshminarayanan, B.; Pritzel, A.; and Blundell, C. 2017.
+
+</span>
+<span class="ltx_bibblock">Simple and scalable predictive uncertainty estimation using deep ensembles.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib33.1.1">Advances in neural information processing systems</em>, 30.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib34">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Leike (2023)</span>
+<span class="ltx_bibblock">
+Leike, J. 2023.
+
+</span>
+<span class="ltx_bibblock">Combining weak-to-strong generalization with scalable oversight.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib35">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Leike et al. (2018)</span>
+<span class="ltx_bibblock">
+Leike, J.; Krueger, D.; Everitt, T.; Martic, M.; Maini, V.; and Legg, S. 2018.
+
+</span>
+<span class="ltx_bibblock">Scalable agent alignment via reward modeling: a research direction.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib35.1.1">arXiv preprint arXiv:1811.07871</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib36">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Liang et al. (2023)</span>
+<span class="ltx_bibblock">
+Liang, T.; He, Z.; Jiao, W.; Wang, X.; Wang, Y.; Wang, R.; Yang, Y.; Tu, Z.; and Shi, S. 2023.
+
+</span>
+<span class="ltx_bibblock">Encouraging divergent thinking in large language models through multi-agent debate.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib36.1.1">arXiv preprint arXiv:2305.19118</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib37">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Lightman et al. (2023)</span>
+<span class="ltx_bibblock">
+Lightman, H.; Kosaraju, V.; Burda, Y.; Edwards, H.; Baker, B.; Lee, T.; Leike, J.; Schulman, J.; Sutskever, I.; and Cobbe, K. 2023.
+
+</span>
+<span class="ltx_bibblock">Let’s verify step by step.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib37.1.1">arXiv preprint arXiv:2305.20050</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib38">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Liu and Alahi (2024)</span>
+<span class="ltx_bibblock">
+Liu, Y.; and Alahi, A. 2024.
+
+</span>
+<span class="ltx_bibblock">Co-supervised learning: Improving weak-to-strong generalization with hierarchical mixture of experts.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib38.1.1">arXiv preprint arXiv:2402.15505</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib39">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">McAleese et al. (2024)</span>
+<span class="ltx_bibblock">
+McAleese, N.; Pokorny, R. M.; Uribe, J. F. C.; Nitishinskaya, E.; Trebacz, M.; and Leike, J. 2024.
+
+</span>
+<span class="ltx_bibblock">LLM Critics Help Catch LLM Bugs.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib39.1.1">arXiv preprint arXiv:2407.00215</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib40">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Michael et al. (2023)</span>
+<span class="ltx_bibblock">
+Michael, J.; Mahdi, S.; Rein, D.; Petty, J.; Dirani, J.; Padmakumar, V.; and Bowman, S. R. 2023.
+
+</span>
+<span class="ltx_bibblock">Debate helps supervise unreliable experts.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib40.1.1">arXiv preprint arXiv:2311.08702</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib41">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">OpenAI (2023)</span>
+<span class="ltx_bibblock">
+OpenAI. 2023.
+
+</span>
+<span class="ltx_bibblock">Gpt-4 technical report.
+
+</span>
+<span class="ltx_bibblock"><span class="ltx_ref ltx_nolink ltx_url ltx_ref_self">https://openai.com/index/gpt-4-research/</span>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib42">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Ouyang et al. (2022)</span>
+<span class="ltx_bibblock">
+Ouyang, L.; Wu, J.; Jiang, X.; Almeida, D.; Wainwright, C.; Mishkin, P.; Zhang, C.; Agarwal, S.; Slama, K.; Ray, A.; et al. 2022.
+
+</span>
+<span class="ltx_bibblock">Training language models to follow instructions with human feedback.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib42.1.1">Advances in neural information processing systems</em>, 35: 27730–27744.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib43">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Parrish et al. (2022a)</span>
+<span class="ltx_bibblock">
+Parrish, A.; Trivedi, H.; Nangia, N.; Padmakumar, V.; Phang, J.; Saimbhi, A. S.; and Bowman, S. R. 2022a.
+
+</span>
+<span class="ltx_bibblock">Two-Turn Debate Doesn’t Help Humans Answer Hard Reading Comprehension Questions.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib43.1.1">arXiv preprint arXiv:2210.10860</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib44">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Parrish et al. (2022b)</span>
+<span class="ltx_bibblock">
+Parrish, A.; Trivedi, H.; Perez, E.; Chen, A.; Nangia, N.; Phang, J.; and Bowman, S. R. 2022b.
+
+</span>
+<span class="ltx_bibblock">Single-turn debate does not help humans answer hard reading-comprehension questions.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib44.1.1">arXiv preprint arXiv:2204.05212</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib45">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Radford et al. (2019)</span>
+<span class="ltx_bibblock">
+Radford, A.; Wu, J.; Child, R.; Luan, D.; Amodei, D.; Sutskever, I.; et al. 2019.
+
+</span>
+<span class="ltx_bibblock">Language models are unsupervised multitask learners.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib45.1.1">OpenAI blog</em>, 1(8): 9.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib46">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Rafailov et al. (2024a)</span>
+<span class="ltx_bibblock">
+Rafailov, R.; Chittepu, Y.; Park, R.; Sikchi, H.; Hejna, J.; Knox, B.; Finn, C.; and Niekum, S. 2024a.
+
+</span>
+<span class="ltx_bibblock">Scaling laws for reward model overoptimization in direct alignment algorithms.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib46.1.1">arXiv preprint arXiv:2406.02900</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib47">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Rafailov et al. (2024b)</span>
+<span class="ltx_bibblock">
+Rafailov, R.; Sharma, A.; Mitchell, E.; Manning, C. D.; Ermon, S.; and Finn, C. 2024b.
+
+</span>
+<span class="ltx_bibblock">Direct preference optimization: Your language model is secretly a reward model.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib47.1.1">Advances in Neural Information Processing Systems</em>, 36.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib48">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Saunders et al. (2022)</span>
+<span class="ltx_bibblock">
+Saunders, W.; Yeh, C.; Wu, J.; Bills, S.; Ouyang, L.; Ward, J.; and Leike, J. 2022.
+
+</span>
+<span class="ltx_bibblock">Self-critiquing models for assisting human evaluators.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib48.1.1">arXiv preprint arXiv:2206.05802</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib49">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Stiennon et al. (2020)</span>
+<span class="ltx_bibblock">
+Stiennon, N.; Ouyang, L.; Wu, J.; Ziegler, D.; Lowe, R.; Voss, C.; Radford, A.; Amodei, D.; and Christiano, P. F. 2020.
+
+</span>
+<span class="ltx_bibblock">Learning to summarize with human feedback.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib49.1.1">Advances in Neural Information Processing Systems</em>, 33: 3008–3021.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib50">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Sun et al. (2024)</span>
+<span class="ltx_bibblock">
+Sun, Z.; Yu, L.; Shen, Y.; Liu, W.; Yang, Y.; Welleck, S.; and Gan, C. 2024.
+
+</span>
+<span class="ltx_bibblock">Easy-to-hard generalization: Scalable alignment beyond human supervision.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib50.1.1">arXiv preprint arXiv:2403.09472</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib51">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Wei et al. (2021)</span>
+<span class="ltx_bibblock">
+Wei, J.; Bosma, M.; Zhao, V. Y.; Guu, K.; Yu, A. W.; Lester, B.; Du, N.; Dai, A. M.; and Le, Q. V. 2021.
+
+</span>
+<span class="ltx_bibblock">Finetuned language models are zero-shot learners.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib51.1.1">arXiv preprint arXiv:2109.01652</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib52">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Welbl, Liu, and Gardner (2017)</span>
+<span class="ltx_bibblock">
+Welbl, J.; Liu, N. F.; and Gardner, M. 2017.
+
+</span>
+<span class="ltx_bibblock">Crowdsourcing multiple choice science questions.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib52.1.1">arXiv preprint arXiv:1707.06209</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib53">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Xu et al. (2023)</span>
+<span class="ltx_bibblock">
+Xu, P.; Ping, W.; Wu, X.; McAfee, L.; Zhu, C.; Liu, Z.; Subramanian, S.; Bakhturina, E.; Shoeybi, M.; and Catanzaro, B. 2023.
+
+</span>
+<span class="ltx_bibblock">Retrieval meets long context large language models.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib53.1.1">arXiv preprint arXiv:2310.03025</em>.
+
+</span>
+</li>
+<li class="ltx_bibitem" id="bib.bib54">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Yang et al. (2024)</span>
+<span class="ltx_bibblock">
+Yang, A.; Yang, B.; Hui, B.; Zheng, B.; Yu, B.; Zhou, C.; Li, C.; Li, C.; Liu, D.; Huang, F.; Dong, G.; Wei, H.; Lin, H.; Tang, J.; Wang, J.; Yang, J.; Tu, J.; Zhang, J.; Ma, J.; Xu, J.; Zhou, J.; Bai, J.; He, J.; Lin, J.; Dang, K.; Lu, K.; Chen, K.; Yang, K.; Li, M.; Xue, M.; Ni, N.; Zhang, P.; Wang, P.; Peng, R.; Men, R.; Gao, R.; Lin, R.; Wang, S.; Bai, S.; Tan, S.; Zhu, T.; Li, T.; Liu, T.; Ge, W.; Deng, X.; Zhou, X.; Ren, X.; Zhang, X.; Wei, X.; Ren, X.; Fan, Y.; Yao, Y.; Zhang, Y.; Wan, Y.; Chu, Y.; Liu, Y.; Cui, Z.; Zhang, Z.; and Fan, Z. 2024.
+
+</span>
+<span class="ltx_bibblock">Qwen2 Technical Report.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic" id="bib.bib54.1.1">arXiv preprint arXiv:2407.10671</em>.
+
+</span>
+</li>
+</ul>
+</section>
+</article>
+</div>
+<footer class="ltx_page_footer">
+<div class="ltx_page_logo">Generated  on Tue Jan 21 05:23:46 2025 by <a class="ltx_LaTeXML_logo" href="http://dlmf.nist.gov/LaTeXML/"><span style="letter-spacing:-0.2em; margin-right:0.1em;">L<span class="ltx_font_smallcaps" style="position:relative; bottom:2.2pt;">a</span>T<span class="ltx_font_smallcaps" style="font-size:120%;position:relative; bottom:-0.2ex;">e</span></span><span style="font-size:90%; position:relative; bottom:-0.2ex;">XML</span><img alt="Mascot Sammy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg=="/></a>
+</div></footer>
+</div>
+</body>
+</html>
