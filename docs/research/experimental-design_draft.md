@@ -23,8 +23,20 @@
 > claims are rewritten to be modest per Codex, with D' → D no
 > longer claimed to fully separate lineage diversity from price
 > arbitrage; tie-breaking, partial-credit, and hard-failure
-> policies are specified for executable scoring. This version
-> still has not been through the formal Design-phase review.
+> policies are specified for executable scoring.
+>
+> **Fourth-pass revision 2026-04-14** (same day) to adopt the
+> macro-model framing explicitly: a collaborative pipeline *is*
+> a model — a macro-model composed from smaller input models —
+> and the experimental question is whether macro-models can be
+> more capable than their input models at matched cost. Under
+> that framing, selectors stop being a special design category
+> and become one kind of typed IR building block (an aggregation
+> step) that some macro-models contain and others don't. Each
+> condition is pinned to one concrete macro-model with no `or`
+> branches. Infrastructure failures are separated from capability
+> failures. Budget tiers clarified as caps. This version still
+> has not been through the formal Design-phase review.
 
 ---
 
@@ -49,6 +61,71 @@ result that fails to beat a compute-matched single-model baseline
 is not a real win, only a more expensive way of spending inference.
 This is what the Compute Budget Structure section below
 operationalizes.
+
+
+## Framing: macro-models
+
+A model, abstractly, is a function from context to response. A
+collaborative pipeline — multiple models passing information,
+critiquing, revising, aggregating — is *also* a function from
+context to response. So a collaborative pipeline is itself a
+model, built out of smaller models. We call these **macro-models**
+to distinguish them from their input models without suggesting
+they are fundamentally different in kind.
+
+The experimental question becomes: **can we build macro-models
+that are more capable than any of their input models at matched
+dollar cost?** That is exactly the research question above,
+restated in the language this framing makes natural.
+
+### Two levels of abstraction
+
+- **Macro-models** are the unit of experimental comparison. Each
+  one is a fully-specified concrete pipeline with a defined
+  context → response mapping, tested end-to-end on the task
+  suite. Two pipelines that differ in *any* way — topology,
+  model pool, round count, aggregation step, anything — are
+  different macro-models.
+- **Building blocks** are the typed IR primitives from
+  `src/ir/` (Gen, Review, Revise, ParGen, ReviseRound, Rounds,
+  ParScore, WeightedVote, Let, and so on). Each macro-model is
+  a composition of these blocks. The same blocks get reused
+  across many macro-models.
+
+The building-block layer is load-bearing for two downstream
+goals beyond Phase 1:
+
+1. **Replicating published protocols** (CCR, ReConcile, PoLL,
+   RouteLLM, Debate, ColMAD — see `backlog.md`). Each paper
+   becomes a typed IR term composed from the shared blocks.
+2. **Automated search over macro-model space** later, where
+   the type system is what makes structural mutation reliable.
+   The runtime `result_type` reification already in the IR was
+   done with this in mind; see `docs/design/system-architecture.md`
+   § "Looking ahead."
+
+### Aggregation is a building block, not a separate concept
+
+Some macro-models produce a single response by construction —
+one model writes the final answer, possibly after consuming
+critiques or discussion from other models. Others produce
+multiple candidates internally and need an aggregation step to
+commit to one. That aggregation step is just another typed
+building block (ReConcile-style confidence-weighted voting,
+peer-LLM selection, majority vote, etc.) — part of the
+macro-model's specification, not a free-floating "selector
+choice" layered on top.
+
+One hard rule on aggregation: **the final evaluator (executable
+scoring) must never function as the macro-model's aggregation
+step.** If it did, macro-models that produce a single response
+by construction would be fine, but macro-models that produce
+multiple candidates would collapse into Pass@N on the task
+suite — measuring search-space coverage rather than macro-model
+capability. Any macro-model with multiple internal candidates
+must commit to one *inside the pipeline*, before the evaluator
+sees the result. This is what Gemini caught in the second-pass
+review of this design.
 
 
 ## Scope of Phase 1
@@ -160,115 +237,125 @@ condition won or lost. Token-level granularity (M) is not feasible
 against API models in Phase 1 and is excluded.
 
 
-## Protocol Conditions
+## Macro-Model Conditions
 
-These are the conditions to compare in the Phase 1 matrix. Listed
-in order of complexity. Conditions A and B are the single-model
-baselines that the compute-matched constraint requires — they are
-not heterogeneous protocols, but the research question is unanswerable
-without them. Condition D' is a homogeneous-protocol counterpart
-to D, added to give a cleaner heterogeneity comparison inside a
-fixed protocol family.
+These are the concrete macro-models to compare in the Phase 1
+matrix. Each one is pinned to a single specification — no `or`
+branches. Listed in roughly increasing structural complexity.
+Conditions A and B are single-model baselines (the compute-matched
+constraint makes them load-bearing even though they are not
+"collaborations"). Condition D' is a homogeneous counterpart to D
+added for the cleanest heterogeneity comparison the matrix can
+support.
 
-### Selectors are part of the protocol
-
-Every protocol with more than one candidate answer must commit to
-**exactly one final submission** before that submission is
-scored. The mechanism that collapses multiple candidates into one
-submission is the protocol's **internal selector**, and each
-protocol defines its own. Two otherwise-identical pipelines that
-differ in their selector are different pipelines.
-
-**Internal selectors must be non-oracle.** They must not have
-access to the final executable scoring mechanism at selection
-time. If a protocol could run the tests on each candidate and
-submit whichever passes, the entire experiment collapses into
-Pass@N on the task suite — consensus-building protocols would
-lose mechanically to independent-sampling protocols because
-consensus suppresses output variance. Pass@N rewards variance,
-so any protocol that reduces variance (which collaborative ones
-typically do) is structurally disadvantaged. That comparison
-would be measuring search-space coverage, not collaboration
-effectiveness. Gemini flagged this in the second-pass review.
-
-Legal internal selectors include:
-
-- **Self-consistency / majority vote** on the final submission
-  (feasible when answers are comparable token-for-token or via a
-  canonicalization step).
-- **Peer-LLM judgment** — a model from the subject pool (or
-  another peer-level instance), blinded to identities, choosing
-  among candidates without access to the executable ground
-  truth.
-- **Protocol-native aggregation** — e.g., ReConcile's
-  confidence-weighted voting on revised answers.
-
-Isolating comparisons (most importantly D → D') hold the
-internal selector constant across the two conditions as part of
-holding "protocol family" constant. Comparisons across different
-protocol families (e.g., B vs. D, or D vs. E) will typically
-involve different selectors, and that is fine: the selector is
-part of what defines the protocol, and varying it is part of
-what we are studying.
-
-**Internal protocol calls count toward the dollar budget.**
-Critiques, meta-reviews, revisions, and the internal selector's
-own calls all spend budget. The final executable scoring step
-does not count toward the protocol's budget (it is the
-evaluator, not part of the pipeline).
+Each condition's description below names the IR building blocks
+it is composed of. **All internal calls count toward the
+macro-model's dollar budget** — generations, critiques,
+meta-reviews, revisions, and any aggregation step. Only the final
+executable evaluator sits outside the budget, because it is not
+part of the macro-model itself.
 
 ### The matrix
 
-Each condition specifies its internal selector alongside its
-structural shape. Selectors are non-oracle and count toward the
-dollar budget.
+- **A. Single-model, one pass.** A single `Gen` block against
+  the best single subject model. One response by construction;
+  no aggregation needed. Reference point for "what does one
+  model alone get you at $X."
 
-- **A. Single-model, one pass.** Best single subject model, one
-  generation, submitted as-is. No internal selector needed —
-  there is only one candidate. Reference point for "what does
-  one model alone get you at $X."
+- **B. Single-model repeat-and-aggregate.** `ParGen` producing
+  N samples from the best single subject model, followed by a
+  **same-model peer-judge aggregation block**: another instance
+  of the same best subject model, blinded to identities and
+  with no access to the executable ground truth, chooses among
+  the N candidates. (Majority vote / self-consistency was the
+  alternative; rejected because canonicalization is impractical
+  for free-form code outputs.) B is still a "single-model
+  baseline" because every block — generator, judge — is an
+  instance of the same subject model. Tests whether
+  inference-time compute alone, within a single model, explains
+  any apparent multi-model gain.
 
-- **B. Single-model, repeat-and-select.** Same best subject
-  model, N independent samples at the tier's dollar budget.
-  Internal selector: **self-consistency / majority vote** where
-  the task permits canonicalization, else a **peer-LLM judge**
-  from the subject pool (blinded, no test access). The key
-  discipline is that this selector is not the executable scorer.
-  Without this condition, multi-model "wins" could be confounded
-  with inference-time compute spent by a single model.
+- **C. Heterogeneous parallel generation + peer-LLM
+  aggregation.** `ParGen` producing one sample from each of the
+  N different subject models, followed by a **peer-LLM
+  aggregation block** drawn from the subject pool (blinded, no
+  test access). No critique, no revision. Tests whether lineage
+  diversity alone produces a real gain at matched dollars.
 
-- **C. Heterogeneous parallel generation + peer-LLM selection.**
-  N different subject models answer independently; a peer-LLM
-  from the subject pool (blinded, no test access) selects the
-  submission. No critique or revision. Tests whether lineage
-  diversity alone produces a real gain at matched dollars when
-  combined with peer-LLM selection.
+- **D. Heterogeneous ReConcile-style.** `ParGen` producing one
+  sample from each of the N subject models, then one
+  `ReviseRound` where each draft is reviewed by 1–2 peers
+  (identities blinded), then writers revise once from the
+  structured feedback, then a **ReConcile-native
+  confidence-weighted aggregation** block commits to a final
+  answer. Roughly the ReConcile shape in
+  `src/protocols/reconcile.py`, with caveats — ReConcile's
+  convincing-samples mechanism and the exact aggregation rule
+  are not yet reflected in the IR version; the mapping is
+  loose.
 
-- **D. Heterogeneous ReConcile-style.** N different subject
-  models answer independently; each draft reviewed by 1–2 other
-  models (identities blinded — see Variable K); writers revise
-  once from structured feedback; **protocol-native aggregation**
-  (ReConcile-style confidence-weighted voting on the revised
-  answers) selects the submission. Roughly the ReConcile shape
-  in `src/protocols/reconcile.py`, though the mapping is loose
-  — ReConcile's convincing-samples mechanism and exact
-  aggregation details are not yet reflected in the IR version.
+- **D'. Homogeneous ReConcile-style.** Structurally identical
+  to D — same blocks, same topology, same aggregation — except
+  the subject pool is N instances of the *same* best single
+  subject model (identities still blinded; each presented as "a
+  peer AI"). This is the control that supports the cleanest
+  heterogeneity comparison the matrix can make. D → D' varies
+  pool composition while holding everything else constant.
+  Gemini's proposed control.
 
-- **D'. Homogeneous ReConcile-style.** Same topology and same
-  internal selector as D, but N instances of the *same* best
-  single subject model play the writer and reviewer roles
-  (identities still blinded; each instance presented as "a peer
-  AI"). Gemini's proposed control. Holding selector constant
-  with D is part of what makes the D → D' comparison clean.
+- **E. Hierarchical synthesis.** `ParGen` produces N drafts from
+  the subject pool; reviewers critique the drafts; a separate
+  **meta-reviewer** synthesizes the critiques and writes the
+  final response directly. Note that E has **no separate
+  aggregation step** — the meta-reviewer's synthesis *is* the
+  final response. One candidate by construction. This is the
+  choice between "meta-reviewer writes the final" and
+  "meta-reviewer synthesizes critiques, writers revise, then
+  aggregate"; the draft commits to the former because it
+  produces a cleaner macro-model (fewer moving parts, no
+  implicit aggregation rule). The latter is a different
+  macro-model that could be tested in follow-on work if there
+  is reason to.
 
-- **E. Hierarchical variant.** Writers produce drafts; reviewers
-  critique; a separate meta-reviewer synthesizes critiques;
-  writers revise once. Internal selector: the meta-reviewer's
-  aggregation logic itself, or a peer-LLM judge on the final
-  revised submissions — defined as part of the protocol.
-  Typically cheaper than all-to-all cross-talk. Usually run as
-  heterogeneous; a homogeneous E' could be added as a follow-on
-  if D → D' gives an interesting signal.
+### What the matrix tests
+
+The comparisons the design supports, stated modestly:
+
+- **A → B:** protocol-free compute scaling within a single
+  model. The cleanest isolating comparison in the matrix:
+  controls for "is inference-time compute doing the work by
+  itself, regardless of pool composition?"
+- **B → D':** inside a fixed single-model pool, does the
+  D-family macro-model beat the B-family macro-model at matched
+  dollars? Not a pure isolation of "review/revise machinery" —
+  B and D' differ in multiple building blocks, not only the
+  revise step. A rough test of whether the D-family
+  specification is worth anything at all inside a homogeneous
+  pool.
+- **D' → D:** heterogeneous pool vs. homogeneous, with every
+  other building block held constant, *under market prices*.
+  This is the cleanest heterogeneity comparison the matrix
+  supports. It does not, by itself, separate lineage diversity
+  from price arbitrage — the heterogeneous pool includes
+  cheaper models and therefore buys more tokens at matched
+  dollars. See Compute Budget Structure for the arbitrage
+  discussion and the pinned-price follow-on.
+- **C vs. D vs. E:** family-level comparisons of three
+  heterogeneous macro-models at matched dollars. These are
+  *not* isolating comparisons — each differs in topology, in
+  internal block composition, and in whether there is an
+  aggregation step at all. They are screen-level comparisons:
+  "which macro-model family is most worth isolating in
+  follow-on work?"
+
+This is an intentionally screened matrix, not an exhaustive
+factorial. Phase 1 is a **screen of macro-model families** (A,
+B, C, D, E) **plus one surgical heterogeneity control** (D'
+within the D family). Finer-grain axis isolation (critique
+format, round count, selection-vs-fusion) is reserved for
+follow-on ablations on whichever family Phase 1 surfaces as most
+promising. Codex flagged the earlier draft's ambiguity between
+"screen" and "isolating experiment"; this is the resolution.
 
 ### What the matrix tests
 
@@ -522,19 +609,31 @@ a run's results become non-comparable across weeks.
 ### Budget tiers
 
 Three dollar-denominated budget tiers, anchored to the
-single-model baseline:
+single-model baseline. **Each tier is a cap**, not an exact
+matched-spend target — macro-models are allowed to spend less
+than the cap (and their reported dollars-per-solved-task metric
+will reward them for doing so) but not more. This matters for
+tie-breaking: under cap semantics, if two macro-models tie on
+success rate, the cheaper one wins on the secondary cost
+metric. Under exact-spend semantics the tie would simply stand.
+We use caps.
 
-- **$X** — the dollar cost of Condition A (one pass from the
-  best single subject model on one task instance), averaged
-  over the task suite.
-- **$2X** — twice that amount, distributed however the protocol
-  chooses.
-- **$4X** — four times that amount.
+- **$X** — the average dollar cost of Condition A on one task
+  instance, computed over the task suite. This is the "cost of
+  one honest single-model attempt."
+- **$2X** — cap set to twice $X.
+- **$4X** — cap set to four times $X.
 
-All non-A conditions run at $2X and $4X. Condition A only makes
-sense at $X (one pass is one pass). Condition B runs at all
-three tiers; the $X run is useful as a sanity check but doesn't
-test the compute hypothesis.
+Condition A only makes sense at $X (one pass is one pass).
+Condition B runs at all three tiers; the $X run is a sanity
+check. All other conditions run at $2X and $4X.
+
+Macro-models with bounded internal structure (fixed number of
+generations, fixed rounds) may spend less than the cap. That is
+fine — they are being rewarded for efficiency. Macro-models
+that would naturally want to spend more than the cap must be
+truncated (e.g. fewer revision rounds) or excluded from that
+tier.
 
 ### The Best-of-N Discipline
 
@@ -666,13 +765,32 @@ tie-breaker is **dollars per solved task** — i.e. the cheaper
 condition wins. If neither solves anything, the tie stands and
 is reported as such.
 
-**Handling of hard failures** (Docker environment refuses to
-build, API returns a malformed response, network errors): the
-task instance is retried up to three times on transient errors;
-after that the instance is scored as a failure for that
-condition. All retries are counted toward the dollar budget.
-The number of hard failures per condition is recorded as a
-diagnostic.
+**Handling of hard failures.** Two kinds to separate carefully:
+
+1. **Infrastructure failures** — Docker environment refuses to
+   build, API returns malformed responses, network errors,
+   provider-side rate-limit exhaustion, evaluation container
+   timeouts. These are **not** scored as task failures. The
+   item-condition pair is retried, including from a later run
+   window if necessary, until it completes cleanly on both
+   sides (subject model(s) and evaluator). Counting these as
+   task failures would bias against multi-call macro-models for
+   reasons unrelated to capability (more calls = more chances
+   to hit transient failures). Retry counts and infrastructure
+   failure rates are recorded separately as diagnostics;
+   infrastructure-failure budget spend is **not** counted
+   against the macro-model's dollar budget.
+2. **Capability failures** — the macro-model produces a response,
+   the evaluator runs to completion, and the response does not
+   pass (patch rejected, test fails, BFCL call malformed).
+   These are scored normally as a failure on that item.
+
+If a macro-model is consistently unable to produce *any*
+response on a specific item across repeated retries (e.g. the
+model refuses, times out its own generation, or produces
+zero-length output), that is treated as a capability failure,
+not an infrastructure failure: the macro-model's function-from-
+context-to-response is broken on that context.
 
 Blinded model identities still matter for the *internal* work
 of protocols that include critique steps (Variable K) — see
@@ -792,15 +910,58 @@ executable scoring only (walk-before-run).
 - **Internal calls count toward the budget (Codex):** now
   explicitly stated.
 
+**From the third round** (Codex's remaining structural point,
+plus project-originated reframing):
+
+- **Macro-model framing adopted.** A collaborative pipeline
+  *is* a model — a macro-model composed from input models —
+  and the experimental question is whether macro-models can be
+  more capable than any of their input models at matched
+  dollar cost. Under this framing, selectors are not a
+  separate design category; they are one kind of typed IR
+  building block (an aggregation step) that some macro-models
+  contain and others do not. Macro-model conditions are
+  pinned to one concrete specification each — no `or`
+  branches. E in particular is pinned to the
+  "meta-reviewer writes the final synthesis" variant,
+  producing one response by construction with no separate
+  aggregation step.
+- **Selector commitments pinned.** B uses a same-model
+  peer-judge aggregation block. C uses peer-LLM aggregation
+  from the subject pool. D uses ReConcile-native
+  confidence-weighted aggregation. D' uses the same as D. E
+  has no aggregation step — the meta-reviewer's synthesis is
+  the final response. Codex's remaining structural flag
+  resolved.
+- **Infrastructure failures separated from capability
+  failures** (Codex). Infra failures are retried, not scored
+  as task failures, and do not count against the dollar
+  budget. Capability failures are scored normally.
+- **Budget tiers clarified as caps** (Codex), not exact
+  matched-spend targets. Macro-models that spend less than
+  the cap are rewarded in the dollars-per-solved-task metric;
+  tie-breaking falls cleanly out of this.
+
+**Outstanding from the third round** (operational, not design):
+
+- **Power analysis for the interaction test** (Gemini, also
+  flagged by Codex): run a quick calculation before kickoff.
+  If the interaction test is underpowered at plausible effect
+  sizes given the available task-instance count, trigger the
+  fallback to the middle band (45–55%) alone. This is an
+  operational gate, not a design change.
+
 Before promotion to `experimental-design.md`, this revision
 still needs:
 
-- Third-pass review from Codex and Gemini against the latest
-  matrix — confirmation that the substantive fixes from round
-  two actually resolve the issues they flagged.
+- Fourth-pass review from Codex and Gemini against the
+  macro-model framing and the pinned condition specifications.
 - Cross-check against `protocol-inventory.md` that no
   load-bearing axis was dropped.
 - Dollar cost estimate for the full Phase 1 matrix at the
   pinned pricing anchors.
 - Sign-off that the IR is expressive enough to encode A, B,
-  C, D, D', and E.
+  C, D, D', and E as typed compositions of existing building
+  blocks (no new primitives needed).
+- Power analysis to decide whether the interaction test is
+  feasible or the middle-band fallback applies.

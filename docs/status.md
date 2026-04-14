@@ -28,32 +28,33 @@ Second-pass multi-model review will follow the edit.
 
 ## Next up
 
-1. Third editing pass on `experimental-design_draft.md` to fold in
-   second-pass feedback from Codex and Gemini: (a) selector is
-   part of each protocol's definition (non-oracle, per-protocol);
-   (b) pre-register Protocol × Stratum interaction as primary
-   statistical test; (c) modest-claim rewrite of "What the matrix
-   isolates"; (d) tie-breaking and partial-credit policy for
-   executable scoring; (e) explicit statement that protocol-internal
-   calls count toward the dollar budget. Send revised draft for a
-   third review.
+1. Fourth editing pass on `experimental-design_draft.md` to adopt
+   the macro-model framing: each condition is a fully-specified
+   macro-model (context → response mapping) composed from typed
+   IR building blocks. Selectors drop to "an aggregation building
+   block that some macro-models contain." Also fold in Codex's
+   remaining round-three points: pin each condition to a single
+   concrete specification (no `or` branches), separate
+   infrastructure failures from capability failures, clarify
+   budget tiers as caps.
 2. Build the experiment-spec layer — the piece between the IR and a
    real run. Prompts, model assignments, task slices, dollar budgets,
    metrics.
 3. Express conditions A, B, C, D', E from the experimental design in
-   `src/protocols/`. ReConcile already covers D; none of A/B/C/D'/E
-   need new IR primitives.
+   `src/protocols/` as typed IR terms. ReConcile already covers D;
+   none of A/B/C/D'/E need new IR primitives.
 4. Wire a real `ModelClient` (Anthropic + OpenAI adapters) with
    retry/backoff/rate-limit handling.
 
 
 ## Currently routed to
 
-`docs/research/experimental-design_draft.md` — third pass in
-progress 2026-04-14. Fixing the selector-as-oracle flaw Gemini
-flagged, switching to pre-registered Protocol × Stratum
-interaction as primary test, tightening the "what the matrix
-isolates" claims per Codex.
+`docs/research/experimental-design_draft.md` — fourth pass in
+progress 2026-04-14. Adopting the macro-model framing: each
+condition is a function from context to response, built from
+typed IR building blocks. The building-block layer is shared
+infrastructure for replicating papers and for future automated
+search; individual macro-models are the experimental units.
 
 
 ## Blockers
