@@ -291,13 +291,37 @@ placeholders — they belong in the experiment-spec layer. When that
 layer exists, the interpreter will accept prompt templates as
 configuration instead of inlining them.
 
+### ApiClient (`src/executor/api_client.py`)
+
+A real `ModelClient` that routes to Anthropic, OpenAI, and Google
+APIs by model-ID prefix (`claude-*`, `gpt-*`, `gemini-*`). SDK
+clients are created lazily on first use, so missing keys for
+unused providers don't cause errors.
+
+Key design choices:
+
+- **Infrastructure vs capability failures.** Infrastructure
+  errors (network, rate limits, server errors) are caught per
+  provider, wrapped in `InfrastructureError`, and retried with
+  exponential backoff. Capability failures (the model responds,
+  even if wrong or empty) pass through — they are not retried.
+  This matches the experimental design's requirement that infra
+  failures don't count against the dollar budget.
+- **Token usage tracking.** Every successful call appends a
+  `CallRecord` with input/output token counts and latency. The
+  experiment runner uses these plus `PricingTable` to compute
+  dollar costs. The client itself is pricing-unaware.
+- **Common interface constraints.** Temperature, max tokens, and
+  text-in/text-out are enforced uniformly across providers, per
+  the experimental design's fair-comparison requirements.
+
 ### What ContextMode does in the executor today
 
 `FRESH` vs `ACCUMULATED` only matters for clients that maintain
 session history. The current executor passes a different system
 string but otherwise treats both modes identically. Implementing
-real session continuation requires a stateful client and is
-deferred until a real client is wired in.
+real session continuation requires a stateful client; sufficient
+for Phase 1 which uses `FRESH` everywhere.
 
 
 ## Layer 3: Experiment spec (`src/experiment/`)
@@ -408,9 +432,11 @@ still inlines its own placeholder strings. When the real
 `PromptTemplates` instance and use it instead of the hardcoded
 strings.
 
-**Real model clients.** Anthropic and OpenAI adapters satisfying
-the `ModelClient` Protocol. Trivial mechanically; the design
-question is how session/`ACCUMULATED` mode maps onto the real APIs.
+**Session continuation for real clients.** The `ApiClient` handles
+`FRESH` context only (sufficient for Phase 1). Implementing real
+session continuation (`ACCUMULATED` mode) requires a stateful
+client and mapping `ContextMode` onto each vendor's session model
+— deferred until a protocol needs it.
 
 **Replication ladder.** CCR → PoLL → ReConcile → RouteLLM /
 FrugalGPT → Debate or Vote → ColMAD. CCR and ReConcile already

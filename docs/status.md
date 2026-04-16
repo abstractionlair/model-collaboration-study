@@ -33,9 +33,9 @@ from the parallel track. Next: experiment-spec layer and real
 2. ~~Express macro-models A–E.~~ Done. All 12 condition-tier pairs
    build, type-check, and run through the executor. `Fuse` node
    added to the IR for Condition E.
-3. Wire a real `ModelClient` (Anthropic + OpenAI adapters) with
-   retry/backoff/rate-limit handling. Infrastructure failures must
-   be separated from capability failures per the design doc.
+3. ~~Wire a real `ModelClient`.~~ Done — `src/executor/api_client.py`.
+   Anthropic, OpenAI, and Google adapters with retry/backoff and
+   token-usage tracking.
 4. Integrate `PromptTemplates` from the spec layer into the
    executor (replace hardcoded placeholder strings).
 5. Pre-kickoff: run the power analysis gate that the experimental
@@ -46,9 +46,10 @@ from the parallel track. Next: experiment-spec layer and real
 
 ## Currently routed to
 
-`src/experiment/spec.py` — building the experiment-spec layer
-(Layer 3). Expressing Phase 1 macro-model conditions A–E in the
-IR and wiring them into a concrete experiment spec.
+`src/executor/api_client.py` — wiring a real `ModelClient` with
+Anthropic, OpenAI, and Google API adapters, retry/backoff for
+infrastructure failures, and token-usage tracking for cost
+accounting.
 
 
 ## Blockers
