@@ -52,15 +52,45 @@ needed work was targeted reconciliation, not rethink.
   `FuseWithCritiques`; new `condition_e` is design-faithful;
   previous variant kept as `condition_e_writers_revise_then_fuse`.
 
-**Still open** (from the reviews, tracked under "Currently
-routed to"): implementation bugs (Google retry classification,
-score/pick parsers, WeightedVote tie-breaking, empty-response
-handling, `ApiClient.calls` infra-failure telemetry); Phase 1
-readiness gating (`_best_model`, `_n_samples_for_b`,
-`PHASE1_PRICING`); generation stochasticity (`temperature > 0`
-to avoid Gemini's homogeneous-pool collapse); FakeClient unit
-tests; real within-step parallelism. Next round of cross-lineage
-review should land before any of these fixes get bundled.
+**Round 2 cross-lineage reviews landed 2026-04-16:**
+- `docs/reviews/system-review-codex-2026-04-16-round2.md`
+- `docs/reviews/system-review-gemini-2026-04-16-round2.md`
+
+Both reviewers confirm the three faithfulness gaps are
+resolved and the reconciliation work is structurally sound;
+both remain at *Revise and re-review* strictly for operational
+readiness reasons (no structural/faithfulness work remaining).
+The unified blocker list for the next round of work:
+
+1. **Parser silent fallbacks** (Codex #5, Gemini #4). Fix
+   `_parse_score`, `_parse_pick`, and `WeightedVote` tie-
+   breaking. The pick-parser fallback to candidate 1 is now
+   directly affecting B and C, so silent parse failure =
+   silent first-candidate bias. Add telemetry.
+2. **Generation stochasticity** (Gemini #2, Codex #9). Gemini
+   emphasizes this is urgent: at `temperature=0`, B and D'
+   still mechanically collapse to Condition A. Gemini's new
+   observation — with `PickOne`, B at temp=0 presents N
+   indistinguishable candidates to the judge; either the judge
+   fails to parse (→ candidate 1 by default) or outputs
+   arbitrarily. Either way the compute-scaling baseline is
+   destroyed. Must be fixed before any smoke test claims to
+   measure anything.
+3. **Google retry classification** (Codex #6). Narrow to
+   status-based (408/429/5xx).
+4. **Empty-response handling and failed-call telemetry**
+   (Codex #7). Distinguish capability-failure from infra-
+   failure; record exhausted retries in `ApiClient.calls`.
+5. **Pre-calibration gates** (Codex #8). Make `_best_model`,
+   `_n_samples_for_b`, and `PHASE1_PRICING` fail loudly if
+   invoked before real calibration.
+6. **TracingClient step_type staleness** (Codex #4, new
+   finding this round). `pick_one` falls through to `gen`;
+   `fuse_with_critiques` gets classified as `fuse` by accident
+   (shared "write your own response" phrasing).
+7. **FakeClient unit tests** (Codex #10, unchanged from round
+   1). Codex flags: not blocking this round, but shouldn't
+   slide further given the IR now has more branching families.
 
 
 ## Next up
@@ -114,8 +144,19 @@ review should land before any of these fixes get bundled.
 
 ## Currently routed to
 
-**Reconciliation work based on the three review files.** Suggested
-order (per all three reviewers' converged recommendations):
+**Operational-readiness work** from the round-2 reviews. The
+seven-item blocker list above is the source of truth for this
+batch; items are independent enough to pick off in any order,
+though the two parser fixes + generation stochasticity should
+probably land together since they interact. After the batch, a
+round-3 cross-lineage review should be able to recommend
+`Proceed` per both round-2 reviewers' forecasts.
+
+### Historical: the faithfulness reconciliations (completed)
+
+Below is the plan that drove the 2026-04-16 reconciliation work.
+Kept here as the trail for future reviewers; all three items are
+now done.
 
 1. **Faithfulness reconciliations** — decide and record in
    `decisions.md`. Each is a code-or-design choice. The chosen
