@@ -212,6 +212,34 @@ operational gate, not a design gate.
 
 ---
 
+## 2026-04-16 Fuse node and the "many → one" naming family
+
+**Decision:** Name the node for "model reads multiple drafts and
+writes a fresh response" as `Fuse`. Reserve `ReviseFromMany` for
+the future "one draft + multiple critiques → fresh draft" variant,
+and leave the pre-draft advisory synthesis unnamed until the type
+for advisory inputs is designed.
+
+**Alternatives considered:** `Synthesize` (rejected — too broad,
+would foreclose namespace for the siblings). `DraftFromDrafts`
+(rejected — ugly). `Resynthesize` (considered acceptable but less
+clean than `Fuse`).
+
+**Rationale:** Three patterns share the shape "model reads multiple
+artifacts and writes fresh" but differ in what flows in:
+(A) multiple drafts → fresh draft, (B) one draft + multiple
+critiques → fresh draft, (C) query + advisory inputs → fresh draft.
+The type differences are load-bearing for the mutation engine.
+Naming each specifically avoids the trap of a single overloaded
+node with optional fields that the mutation engine can't reason
+about.
+
+**Status:** Active. `Fuse` is implemented. `ReviseFromMany` and
+the advisory-synthesis node are named but not implemented — add
+them when a concrete protocol requires them.
+
+---
+
 ## 2026-04-08 Small models as subjects, frontier models as judges
 
 **Decision:** Use small/mid-tier models (e.g. Haiku, GPT mini, Gemini

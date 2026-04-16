@@ -13,6 +13,7 @@ from typing import Any
 from .ast import (
     Expr,
     Finalize,
+    Fuse,
     Gen,
     Let,
     ParGen,
@@ -83,6 +84,14 @@ def describe(expr: Expr[Any], indent: int = 0) -> str:
             return (
                 f"{pad}ParScore({models}) "
                 f": [Answer[Draft]] -> [Score[Answer[Draft]]]\n{d}"
+            )
+
+        case Fuse(model=model, drafts=drafts, query=query):
+            d = describe(drafts, indent + 1)
+            q = describe(query, indent + 1)
+            return (
+                f"{pad}Fuse({model}) : [Answer[Draft]] x Query -> Answer[Draft]\n"
+                f"{d}\n{q}"
             )
 
         case WeightedVote(drafts=drafts, scores=scores):

@@ -26,8 +26,8 @@ responsibility and a different audience:
                   │
                   ▼
 ┌─────────────────────────────────────────┐
-│ 3. Experiment spec layer                │  not yet built
-│    (TBD location)                       │  prompts, models, tasks, budgets
+│ 3. Experiment spec layer                │  concrete instantiation
+│    src/experiment/                      │  prompts, models, tasks, budgets
 └─────────────────────────────────────────┘
 ```
 
@@ -144,6 +144,7 @@ The current node set, all frozen dataclasses inheriting from
 | `ReviseRound`   | `[Model] -> [Answer[Draft]] -> [Answer[Draft]]`                           |
 | `Rounds`        | `Int -> [Model] -> [Answer[Draft]] -> [Answer[Draft]]`                    |
 | `ParScore`      | `[Model] -> [Answer[Draft]] -> [Score[Answer[Draft]]]`                    |
+| `Fuse`          | `Model -> [Answer[Draft]] -> Query -> Answer[Draft]`                      |
 | `WeightedVote`  | `[Answer[Draft]] -> [Score[Answer[Draft]]] -> Answer[Draft]`              |
 | `Var`           | reference to a Let-bound variable                                         |
 | `Let`           | `Expr[T1] -> (Expr[T1] -> Expr[T2]) -> Expr[T2]`                          |
@@ -163,6 +164,21 @@ nodes because:
 
 Add a primitive only when a protocol forces a per-step variation
 that the bundle can't express.
+
+**Fuse and the "many → one" family.** `Fuse` is a model that
+reads multiple peer drafts and writes a fresh response — needed
+for Condition E's meta-reviewer. It's one member of a family of
+operations that share the shape "model reads multiple artifacts
+and writes fresh" but differ in what those artifacts are:
+
+- `Fuse`: `[Answer[Draft]] → Answer[Draft]` — this node
+- `ReviseFromMany`: `Answer[Draft] + [Critique] → Answer[Draft]`
+  — future, for multi-critic revision
+- Pre-draft advisory synthesis: `Query + [Advisory] → Answer[Draft]`
+  — future, needs a new type for advisory inputs
+
+Named specifically to leave namespace room for the siblings.
+Add them when a concrete protocol requires them.
 
 **Runtime type reification.** Every node has a `result_type`
 attribute readable at runtime — a `ClassVar` for fixed-type nodes,
@@ -284,42 +300,84 @@ real session continuation requires a stateful client and is
 deferred until a real client is wired in.
 
 
-## Layer 3, planned: Experiment spec
+## Layer 3: Experiment spec (`src/experiment/`)
 
-Not yet built. The intended responsibility is to map an IR plus a
-set of concrete inputs into a runnable experiment:
+Maps an IR protocol expression plus concrete inputs into a
+runnable experiment. The spec layer fully determines a run:
+which macro-model conditions to compare, on which tasks, at
+what dollar budgets, with which prompt templates.
 
-- Model assignments (which concrete API model fills each `Model`
-  slot in the IR)
-- Prompt templates (for `Gen`, `Review`, `Revise`, `Score`)
-- Task slice (which inputs to run)
-- Judge configuration (for evaluating outputs)
-- Budgets (token, dollar, wall-clock)
-- Metrics to record
-- Seed / determinism policy
-- Repetition / aggregation rules
+### Core types (`src/experiment/spec.py`)
 
-The reason to keep these out of the IR: a single IR definition of
-ReConcile should be runnable against many model pools, prompt
-variants, and task slices without copy-pasting the protocol
-structure.
+| Type              | Purpose                                                        |
+|-------------------|----------------------------------------------------------------|
+| `BudgetTier`      | Dollar tiers (X, 2X, 4X) anchored to Condition A cost         |
+| `PricingEntry`    | Per-model pricing anchor (in/out per 1M tokens)                |
+| `PricingTable`    | Pinned pricing for all models; computes call costs and caps    |
+| `Stratum`         | Difficulty band defined by one-shot success rate range          |
+| `TaskBucket`      | Benchmark + instance IDs                                       |
+| `PromptTemplates` | Templates for gen, review, revise, score (replaces interpreter placeholders) |
+| `RetryPolicy`     | Infrastructure-failure retry (separate from capability failures)|
+| `ConditionSpec`   | One cell of the matrix: name + label + IR tree + tier + models |
+| `ExperimentSpec`  | Complete spec: conditions, tasks, strata, pricing, prompts     |
 
-The experiment-spec layer is where the inline prompt placeholders
-in the executor will move once the layer exists.
+### Prompt templates (`src/experiment/prompts.py`)
+
+Default structured-critique templates for Phase 1. The critique
+rubric dimensions (correctness, completeness, unnecessary
+assumptions, tool-use correctness, code safety, confidence) match
+`docs/research/experimental-design.md`. The interpreter still
+uses its own hardcoded placeholders until the integration is wired;
+the spec-layer templates are the canonical source and will replace
+the interpreter's strings when the real `ModelClient` lands.
+
+### Phase 1 builder (`src/experiment/phase1.py`)
+
+Constructs the concrete Phase 1 `ExperimentSpec`: 12
+condition-tier pairs (A at $X; B at $X/$2X/$4X; C, D, D', E each
+at $2X/$4X), three task buckets (SWE-bench Verified,
+LiveCodeBench, BFCL), three difficulty strata, pinned pricing.
+
+### Condition factories (`src/protocols/conditions.py`)
+
+Phase 1 macro-model factories, each returning a typed IR
+expression:
+
+- `condition_a(model)` — single Gen
+- `condition_b(model, n_samples)` — ParGen + ParScore + WeightedVote
+- `condition_c(subject_models, judge_model)` — heterogeneous ParGen + peer scoring
+- `condition_d` — re-exported `reconcile()` from `reconcile.py`
+- `condition_d_prime(model, pool_size, n_rounds)` — homogeneous ReConcile
+- `condition_e(subject_models, meta_reviewer)` — ParGen + ReviseRound + Fuse
+
+All six build cleanly, pass `mypy --strict`, and run end-to-end
+through the executor with `FakeClient`.
+
+### Why the spec layer is separate from the IR
+
+A single IR definition of ReConcile should be runnable against
+many model pools, prompt variants, and task slices without
+copy-pasting the protocol structure. The spec layer handles the
+concrete instantiation: which models, which prompts, which tasks,
+what budget. The IR handles the abstract protocol structure: who
+reviews what, with what visibility, in how many rounds.
 
 
 ## Validation discipline
 
-- `mypy --strict` passes on `src/ir/`, `src/protocols/`, and
-  `src/executor/`. Treat strict-mode failures as bugs.
+- `mypy --strict` passes on `src/ir/`, `src/protocols/`,
+  `src/executor/`, and `src/experiment/`. Treat strict-mode
+  failures as bugs.
 - Deliberately-broken protocols produce the expected type errors
   at check time. This is the bedrock of mutation safety: if a
   mutated protocol type-checks, it has a fighting chance of running.
 - The executor has been smoke-tested end-to-end with a
   deterministic `FakeClient` against CCR (3 calls), SA (3 calls,
-  production query visible to reviewer), and ReConcile (12 calls
+  production query visible to reviewer), ReConcile (12 calls
   for 2 models × 2 rounds + 2 par_score, 4 for the 0-round
-  ablation).
+  ablation), and all six Phase 1 condition factories (A: 1 call,
+  B(N=3): 6 calls, C: 6 calls, D: 12 calls, D': 12 calls,
+  E: 10 calls).
 
 
 ## Looking ahead
@@ -343,11 +401,19 @@ feels painful.
 text syntax that produces the Python AST. Defer until the surface
 layer feels inadequate.
 
+**Prompt template integration.** The experiment-spec layer defines
+`PromptTemplates` with structured-critique defaults. The executor
+still inlines its own placeholder strings. When the real
+`ModelClient` lands, the interpreter should accept a
+`PromptTemplates` instance and use it instead of the hardcoded
+strings.
+
 **Real model clients.** Anthropic and OpenAI adapters satisfying
 the `ModelClient` Protocol. Trivial mechanically; the design
 question is how session/`ACCUMULATED` mode maps onto the real APIs.
 
 **Replication ladder.** CCR → PoLL → ReConcile → RouteLLM /
 FrugalGPT → Debate or Vote → ColMAD. CCR and ReConcile already
-exist in `src/protocols/`. The gap is the experiment-spec layer
-plus a real client.
+exist in `src/protocols/`. Phase 1 conditions A–E are expressed
+as factories in `src/protocols/conditions.py`. The remaining gap
+is the real `ModelClient`.

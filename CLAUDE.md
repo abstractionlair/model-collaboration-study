@@ -163,9 +163,13 @@ Update when a file is added or repurposed.
 ### Code
 
 - `src/ir/` — typed protocol IR (core + surface authoring layer).
-- `src/protocols/` — protocols expressed in the IR (CCR, ReConcile).
+- `src/protocols/` — protocols expressed in the IR (CCR, ReConcile,
+  Phase 1 condition factories A–D' in `conditions.py`).
 - `src/executor/` — minimal tree-walking interpreter over an
   injected `ModelClient`.
+- `src/experiment/` — experiment-spec layer (Layer 3). Core types
+  in `spec.py`, default prompts in `prompts.py`, Phase 1 builder
+  in `phase1.py`.
 - `src/ir_haskell/` — reference Haskell implementation (aesthetic
   documentation, not a source language).
 

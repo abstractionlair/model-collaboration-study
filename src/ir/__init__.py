@@ -11,6 +11,7 @@ protocols are added.
 from .ast import (
     Expr,
     Finalize,
+    Fuse,
     Gen,
     Let,
     ParGen,
@@ -56,6 +57,7 @@ __all__ = [
     "Review",
     "Revise",
     "Finalize",
+    "Fuse",
     "ParGen",
     "ReviseRound",
     "Rounds",

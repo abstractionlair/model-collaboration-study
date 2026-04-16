@@ -24,6 +24,7 @@ from typing import Any
 from src.ir.ast import (
     Expr,
     Finalize,
+    Fuse,
     Gen,
     Let,
     ParGen,
@@ -68,6 +69,13 @@ REVIEW_ALL = (
 REVISE_USER = (
     "Given this critique:\n{critique}\n\nRevise the draft below and "
     "return only the revised answer.\n\nDraft:\n{draft}"
+)
+
+FUSE_USER = (
+    "Task:\n{query}\n\nThe following peer drafts were produced by "
+    "different models working on this task:\n\n{drafts}\n\n"
+    "Write your own response to the task, informed by but not "
+    "constrained to the peer drafts above."
 )
 
 SCORE_USER = (
@@ -217,6 +225,21 @@ class Interpreter:
                     text=ans.text,
                     stage=Final,
                     production_query=ans.production_query,
+                )
+
+            case Fuse(model=model, drafts=ds, query=q):
+                rq = self.evaluate(q, env)
+                answers = self.evaluate(ds, env)
+                drafts_text = "\n---\n".join(
+                    f"Draft {i+1}:\n{a.text}" for i, a in enumerate(answers)
+                )
+                text = self.client.complete(
+                    model,
+                    SYSTEM_FRESH,
+                    FUSE_USER.format(query=rq.text, drafts=drafts_text),
+                )
+                return RAnswer(
+                    text=text, stage=Draft, production_query=rq.text
                 )
 
             case ParGen(models=models, query=q):

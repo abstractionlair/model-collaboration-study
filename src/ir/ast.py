@@ -238,6 +238,35 @@ class ParScore(Expr[list[Score[Answer[Draft]]]]):
 
 
 # ============================================================================
+# Fusion
+# ============================================================================
+
+@dataclass(frozen=True)
+class Fuse(Expr[Answer[Draft]]):
+    """A model reads multiple peer drafts and writes a fresh response.
+
+    Type: Model -> [Answer[Draft]] -> Query -> Answer[Draft]
+
+    Unlike WeightedVote (mechanical selection) or Revise (one draft +
+    one critique), Fuse asks a model to read multiple candidates and
+    write its own response from scratch, informed by but not
+    constrained to the input drafts.
+
+    This is one member of a family of "many → one" operations:
+
+    - Fuse: [Answer[Draft]] → Answer[Draft]  (this node)
+    - ReviseFromMany: Answer[Draft] + [Critique] → Answer[Draft]  (future)
+    - Pre-draft advisory synthesis: Query + [Advisory] → Answer[Draft]  (future, needs a new type)
+
+    Named specifically to leave namespace room for the siblings.
+    """
+    result_type: ClassVar[Any] = Answer[Draft]
+    model: str
+    drafts: Expr[list[Answer[Draft]]]
+    query: Expr[Query]
+
+
+# ============================================================================
 # Aggregation / selection
 # ============================================================================
 

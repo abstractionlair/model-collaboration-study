@@ -1,6 +1,6 @@
 # Project Status
 
-**Last updated:** 2026-04-14
+**Last updated:** 2026-04-16
 
 The volatile top of the stack. Read at session start to know what's
 happening and what to do next. Write at *task start*, not task end:
@@ -29,17 +29,16 @@ from the parallel track. Next: experiment-spec layer and real
 
 ## Next up
 
-1. Build the experiment-spec layer — the piece between the IR and a
-   real run. Prompts, model assignments, task slices, dollar budget
-   caps, metrics.
-2. Express macro-models A, B, C, D', E from the experimental design
-   in `src/protocols/` as typed IR compositions. ReConcile already
-   covers D; none of A/B/C/D'/E need new IR primitives. D' is just
-   D instantiated with a homogeneous pool.
+1. ~~Build the experiment-spec layer.~~ Done — `src/experiment/`.
+2. ~~Express macro-models A–E.~~ Done. All 12 condition-tier pairs
+   build, type-check, and run through the executor. `Fuse` node
+   added to the IR for Condition E.
 3. Wire a real `ModelClient` (Anthropic + OpenAI adapters) with
    retry/backoff/rate-limit handling. Infrastructure failures must
    be separated from capability failures per the design doc.
-4. Pre-kickoff: run the power analysis gate that the experimental
+4. Integrate `PromptTemplates` from the spec layer into the
+   executor (replace hardcoded placeholder strings).
+5. Pre-kickoff: run the power analysis gate that the experimental
    design specifies, to decide whether the full three-stratum
    interaction test is feasible or the middle-band-only fallback
    applies.
@@ -47,8 +46,9 @@ from the parallel track. Next: experiment-spec layer and real
 
 ## Currently routed to
 
-None. Design phase complete; next active artifact will be the
-experiment-spec layer once it has a file.
+`src/experiment/spec.py` — building the experiment-spec layer
+(Layer 3). Expressing Phase 1 macro-model conditions A–E in the
+IR and wiring them into a concrete experiment spec.
 
 
 ## Blockers

@@ -18,6 +18,7 @@ from typing import Callable, Optional, TypeVar
 from .ast import (
     Expr,
     Finalize,
+    Fuse,
     Gen,
     Let,
     ParGen,
@@ -137,6 +138,15 @@ def par_score(
 ) -> Expr[list[Score[Answer[Draft]]]]:
     """Each model produces a confidence score for its own draft."""
     return ParScore(models=models, drafts=drafts)
+
+
+def fuse(
+    model: str,
+    drafts: Expr[list[Answer[Draft]]],
+    q: Expr[Query],
+) -> Expr[Answer[Draft]]:
+    """A model reads multiple peer drafts and writes a fresh response."""
+    return Fuse(model=model, drafts=drafts, query=q)
 
 
 def weighted_vote(
