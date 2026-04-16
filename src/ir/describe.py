@@ -20,6 +20,7 @@ from .ast import (
     ParScore,
     PeerReviseRound,
     PeerRounds,
+    PickOne,
     QueryVar,
     Review,
     Revise,
@@ -116,6 +117,12 @@ def describe(expr: Expr[Any], indent: int = 0) -> str:
             return (
                 f"{pad}WeightedVote : [Answer[Draft]] x [Score] -> Answer[Draft]\n"
                 f"{d}\n{s}"
+            )
+
+        case PickOne(judge=judge, drafts=drafts):
+            d = describe(drafts, indent + 1)
+            return (
+                f"{pad}PickOne({judge}) : [Answer[Draft]] -> Answer[Draft]\n{d}"
             )
 
         case Var(name=name):

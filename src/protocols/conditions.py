@@ -36,10 +36,9 @@ from src.ir.surface import (
     fuse,
     gen,
     par_gen,
-    par_score,
     peer_revise_round,
+    pick_one,
     query,
-    weighted_vote,
 )
 from src.ir.types import Answer, Final
 
@@ -65,30 +64,27 @@ def condition_a(model: str) -> Expr[Answer[Final]]:
 # ============================================================================
 
 def condition_b(model: str, n_samples: int) -> Expr[Answer[Final]]:
-    """ParGen producing N samples from one model, aggregated by self-scoring.
+    """ParGen producing N samples from one model, aggregated by `PickOne`.
 
-    The same model independently scores each candidate (pointwise,
-    no access to executable ground truth), and the highest-scored
-    candidate is selected via WeightedVote.
+    Another instance of the same model — the peer judge, blinded
+    to identities — sees all N candidates side-by-side and picks
+    the single best one. This is the design's "same-model
+    peer-judge aggregation block that chooses among the N
+    candidates" specification.
 
-    N is determined by the budget tier: at $X it's a sanity check
-    (N=1 or 2), at $2X and $4X it scales up.
+    Migrated from ParScore + WeightedVote (pointwise scoring +
+    argmax) to PickOne on 2026-04-16; pointwise was a silent
+    reinterpretation of "chooses among." See `decisions.md`
+    2026-04-16 for the rationale and the principle of keeping
+    both aggregation rules as separate building blocks.
 
-    The design doc specified "same-model peer-judge aggregation
-    block" — ParScore + WeightedVote implements this as independent
-    pointwise scoring followed by max-selection. The model scores
-    each candidate in isolation; it does not see all candidates at
-    once. This is a reasonable non-oracle internal aggregation
-    mechanism for Phase 1. Comparative (all-at-once) selection is
-    a follow-on ablation on the aggregation axis.
+    N is determined by the budget tier: at $X it's a sanity
+    check (N=1 or 2), at $2X and $4X it scales up.
     """
     q = query()
     models = [model] * n_samples
     drafts = par_gen(models, q)
-    return bind(
-        drafts,
-        lambda ds: finalize(weighted_vote(ds, par_score(models, ds))),
-    )
+    return finalize(pick_one(model, drafts))
 
 
 # ============================================================================
@@ -99,25 +95,23 @@ def condition_c(
     subject_models: list[str],
     judge_model: str,
 ) -> Expr[Answer[Final]]:
-    """ParGen one sample per subject model, judged by a peer from the pool.
+    """ParGen one sample per subject model, judged by a peer-LLM via `PickOne`.
 
-    One judge model from the subject pool independently scores each
-    candidate, and the highest-scored is selected. No critique, no
-    revision — tests whether lineage diversity alone produces a real
-    gain at matched dollars.
+    One judge model from the subject pool sees all N candidates
+    side-by-side (identities blinded) and picks the single best
+    one. No critique, no revision — tests whether lineage
+    diversity alone produces a real gain at matched dollars.
 
     The judge_model should be drawn from subject_models (it's a
-    peer-LLM, not an external judge). The judge scores each draft
-    independently via ParScore.
+    peer-LLM, not an external judge), but this is not enforced.
+
+    Migrated from ParScore + WeightedVote to PickOne on
+    2026-04-16; same rationale as condition_b. See `decisions.md`
+    2026-04-16.
     """
     q = query()
-    n = len(subject_models)
-    judges = [judge_model] * n
     drafts = par_gen(subject_models, q)
-    return bind(
-        drafts,
-        lambda ds: finalize(weighted_vote(ds, par_score(judges, ds))),
-    )
+    return finalize(pick_one(judge_model, drafts))
 
 
 # ============================================================================

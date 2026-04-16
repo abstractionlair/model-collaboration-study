@@ -18,6 +18,7 @@ from .ast import (
     ParScore,
     PeerReviseRound,
     PeerRounds,
+    PickOne,
     QueryVar,
     Review,
     Revise,
@@ -67,6 +68,7 @@ __all__ = [
     "PeerRounds",
     "ParScore",
     "WeightedVote",
+    "PickOne",
     "Var",
     "Let",
     # Interpreters

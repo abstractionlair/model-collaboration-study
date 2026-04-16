@@ -146,6 +146,7 @@ The current node set, all frozen dataclasses inheriting from
 | `PeerReviseRound`   | `[Model] -> [Answer[Draft]] -> [Answer[Draft]]` (cyclic 1-peer review)    |
 | `PeerRounds`        | `Int -> [Model] -> [Answer[Draft]] -> [Answer[Draft]]` (N peer-rounds)    |
 | `ParScore`          | `[Model] -> [Answer[Draft]] -> [Score[Answer[Draft]]]`                    |
+| `PickOne`           | `Model -> [Answer[Draft]] -> Answer[Draft]` (single judge picks one)      |
 | `Fuse`          | `Model -> [Answer[Draft]] -> Query -> Answer[Draft]`                      |
 | `WeightedVote`  | `[Answer[Draft]] -> [Score[Answer[Draft]]] -> Answer[Draft]`              |
 | `Var`           | reference to a Let-bound variable                                         |
@@ -402,9 +403,9 @@ Phase 1 macro-model factories, each returning a typed IR
 expression:
 
 - `condition_a(model)` — single Gen
-- `condition_b(model, n_samples)` — ParGen + ParScore + WeightedVote
-- `condition_c(subject_models, judge_model)` — heterogeneous ParGen + peer scoring
-- `condition_d` — re-exported `reconcile()` from `reconcile.py`
+- `condition_b(model, n_samples)` — ParGen + PickOne (judge picks among N)
+- `condition_c(subject_models, judge_model)` — heterogeneous ParGen + PickOne (peer-LLM picks)
+- `condition_d` — re-exported `reconcile()` from `reconcile.py` (peer-review aggregation)
 - `condition_d_prime(model, pool_size, n_rounds)` — homogeneous ReConcile
 - `condition_e(subject_models, meta_reviewer)` — ParGen + PeerReviseRound + Fuse (E composition gap remaining: meta fuses revised drafts, design specifies fuse over raw critiques)
 
@@ -429,18 +430,25 @@ reviews what, with what visibility, in how many rounds.
 - Deliberately-broken protocols produce the expected type errors
   at check time. This is the bedrock of mutation safety: if a
   mutated protocol type-checks, it has a fighting chance of running.
-- The executor has been smoke-tested end-to-end with a
-  deterministic `FakeClient` against CCR (3 calls), SA (3 calls,
-  production query visible to reviewer), ReConcile (12 calls
-  for 2 models × 2 rounds + 2 par_score, 4 for the 0-round
-  ablation), and all six Phase 1 condition factories (A: 1 call,
-  B(N=3): 6 calls, C: 6 calls, D: 12 calls, D': 12 calls,
-  E: 10 calls).
+- The executor has been hand-verified with a deterministic
+  `FakeClient` against CCR (3 calls), SA (3 calls, production
+  query visible to reviewer), ReConcile (D-family peer-review
+  shape; counts depend on N and rounds), and all six Phase 1
+  condition factories. Current-shape call counts at the
+  configurations used by `phase1.py`: A=1, B(N=3)=4, C=4,
+  D(3 models, 1 round)=12, D'(3 models, 1 round)=12, E(3
+  models, 1 round, 1 meta) = 10 (will drop to 7 after the E
+  composition migration). FakeClient unit tests are not yet
+  committed (review #13 of `system-review-opus47-2026-04-16.md`).
 - End-to-end smoke tests with real APIs passed on 2026-04-16:
   all conditions A–E across four providers (Anthropic, OpenAI,
-  Google, xAI), 49 calls, 0 retries. Intermediate steps
-  (review, revise, fuse) verified to attempt intended behavior.
-  See `scripts/smoke_test.py`.
+  Google, xAI), 49 calls, 0 retries. Smoke test verifies that
+  the machinery runs end-to-end on real APIs without exceptions
+  and that review responses contain evaluative language; it
+  does NOT verify that revise actually changed the draft, that
+  Fuse synthesized vs. picked verbatim, or that the score
+  parser extracted the intended number. See `scripts/smoke_test.py`
+  and the scope correction in `docs/status.md`.
 
 
 ## Looking ahead

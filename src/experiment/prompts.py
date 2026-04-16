@@ -151,6 +151,14 @@ _SCORE_USER = (
     "correct. Return only the number.\n\nAnswer:\n{draft}"
 )
 
+# Comparative selection — judge sees all candidates and picks one
+_PICK_ONE_USER = (
+    "The following are candidate answers to a task, produced by "
+    "different peer AIs. Read each carefully, compare them, then "
+    "pick the single best one. Respond with ONLY the candidate "
+    "number (1-indexed), nothing else.\n\n{candidates}"
+)
+
 
 DEFAULT_PROMPTS = PromptTemplates(
     gen_system=_GEN_SYSTEM,
@@ -167,4 +175,5 @@ DEFAULT_PROMPTS = PromptTemplates(
     revise_user=_REVISE_USER,
     fuse_user=_FUSE_USER,
     score_user=_SCORE_USER,
+    pick_one_user=_PICK_ONE_USER,
 )

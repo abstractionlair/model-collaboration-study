@@ -129,18 +129,20 @@ order (per all three reviewers' converged recommendations):
      `decisions.md` updated. The E composition gap (meta fuses
      revised drafts, design specifies raw critiques) remains —
      see the E item below.
-   - **B/C aggregation** (Opus #1, Codex #2, Gemini #3): rename
-     the current `ParScore + WeightedVote` pattern as the
-     pointwise-scoring building block; add a `PickOne` (or
-     similar) comparative-selection node; migrate B/C to it.
-     Same shape.
-   - **E composition** (Opus #2, Codex #3, Gemini #4): keep the
-     current "writers revise, then meta fuses revised drafts"
-     macro-model under a name that says so; add
-     `FuseWithCritiques` (and probably a separable peer-review-
-     producing-critiques node) to express the design's E
-     specification. Migrate the named-as-E condition to the
-     design version.
+   - ~~**B/C aggregation** (Opus #1, Codex #2, Gemini #3):~~
+     **Done 2026-04-16.** Added `PickOne(judge, drafts)`
+     comparative-selection node; B and C migrated. ParScore +
+     WeightedVote unchanged (still used by D/D' for
+     confidence-weighted aggregation). Call counts: B(N=3) and
+     C now N+1 calls instead of 2N. `decisions.md` 2026-04-16
+     entry recorded.
+   - **E composition** (Opus #2, Codex #3, Gemini #4): **Next.**
+     Add `ParPeerReview` (peer review producing critiques only,
+     no revision; cyclic 1-peer assignment) and
+     `FuseWithCritiques` (meta reads drafts + aligned critiques,
+     writes fresh). Rename existing `condition_e` to
+     `condition_e_writers_revise_then_fuse`; new `condition_e`
+     uses the new nodes per the design.
 2. ~~**Design-doc scrub** (Codex #4, Gemini #6): remove the
    stale "selection rule is fixed to pick the candidate that
    passes the executable check" language from the IV section of

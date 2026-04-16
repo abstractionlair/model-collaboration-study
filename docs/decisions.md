@@ -301,6 +301,67 @@ assignment rules (2-peer cyclic, all-N-1) deferred — see
 
 ---
 
+## 2026-04-16 Add PickOne for comparative selection; B/C migrate
+
+**Decision:** Add `PickOne(judge, drafts) -> Answer[Draft]` as
+a new IR node for comparative selection — a single judge sees
+all candidates side-by-side and picks one. Migrate Conditions
+B and C from `ParScore + WeightedVote` (independent pointwise
+scoring + argmax) to `PickOne`. Keep `ParScore + WeightedVote`
+unchanged as the per-draft confidence-aggregation building
+block; D and D' continue using it for ReConcile-native
+confidence-weighted aggregation.
+
+**Alternatives considered:**
+
+- **Reinterpret `ParScore + WeightedVote` to be the design's
+  "chooses among the N candidates" mechanism.** Rejected:
+  pointwise scoring is genuinely different from comparative
+  selection (different failure modes, different prompt shapes,
+  different telemetry). Conflating them under one name would
+  obscure the distinction the experimental design depends on.
+- **Parameterize a single selection node with a mode field
+  (`PointWise | Comparative`).** Rejected for the same reason
+  the Self/Peer review nodes were kept distinct: structural
+  variations are cleaner as named nodes than as enum-tagged
+  modes (mutation engine reasons over node classes; no
+  field-validity rules to track).
+- **Update the design to specify pointwise scoring as the B/C
+  aggregation mechanism.** Rejected: all three independent
+  reviewers read "chooses among the N candidates" as
+  comparative selection; aligning code to the natural reading
+  is preferable to rewriting the design to fit the
+  implementation.
+
+**Rationale:** Same pattern as the SelfReviseRound /
+PeerReviseRound rename: the IR is a substrate for the broader
+protocol-inventory space, not just for the locked Phase 1
+conditions. Pointwise scoring (used by D, D' for ReConcile-
+native confidence aggregation) and comparative selection
+(used by B, C per the design) are both real macro-model
+shapes. Keep both as typed building blocks.
+
+**Implementation notes:**
+
+- `PickOne` parses a 1-indexed candidate selection from the
+  judge response (`_parse_pick`). Silent fallback to candidate
+  1 on parse failure, mirroring the `_parse_score` pattern;
+  this fallback shares the silent-failure / position-bias
+  issue tracked under "Implementation bugs" in `docs/status.md`
+  and will be fixed alongside the other parser fixes.
+- Identity blinding preserved: candidates are presented as
+  numbered options ("Candidate 1, Candidate 2, …"), never with
+  vendor labels. Per the K=blinded lock.
+- Call counts changed: B(N=3) and C now have N+1 calls (was
+  2N). The architecture doc's smoke-test reference numbers were
+  updated.
+
+**Status:** Active. PickOne implemented; conditions B and C
+migrated. ParScore + WeightedVote unchanged (still used by D,
+D' via reconcile.py).
+
+---
+
 ## 2026-04-08 Small models as subjects, frontier models as judges
 
 **Decision:** Use small/mid-tier models (e.g. Haiku, GPT mini, Gemini

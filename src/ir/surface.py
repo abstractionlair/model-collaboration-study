@@ -25,6 +25,7 @@ from .ast import (
     ParScore,
     PeerReviseRound,
     PeerRounds,
+    PickOne,
     QueryVar,
     Review,
     Revise,
@@ -198,6 +199,19 @@ def weighted_vote(
 ) -> Expr[Answer[Draft]]:
     """Confidence-weighted selection from a list of drafts."""
     return WeightedVote(drafts=drafts, scores=scores)
+
+
+def pick_one(
+    judge: str,
+    drafts: Expr[list[Answer[Draft]]],
+) -> Expr[Answer[Draft]]:
+    """A single judge model picks one draft from a list of candidates.
+
+    The judge sees all candidates side-by-side and returns a
+    selection. Comparative selection — distinct from
+    `par_score + weighted_vote`, which scores in isolation.
+    """
+    return PickOne(judge=judge, drafts=drafts)
 
 
 # ============================================================================

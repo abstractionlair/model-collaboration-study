@@ -347,6 +347,13 @@ class WeightedVote(Expr[Answer[Draft]]):
 
     Type: [Answer[Draft]] -> [Score[Answer[Draft]]] -> Answer[Draft]
 
+    Pairs naturally with `ParScore` to express per-draft
+    confidence aggregation (each draft scored independently, max
+    score wins). This is the right shape for ReConcile-style
+    confidence-weighted aggregation (D, D'); for a single judge
+    choosing among candidates with comparative context, use
+    `PickOne` instead.
+
     Note: this produces Answer[Draft], not Answer[Final]. A protocol
     wanting the selected draft to be treated as final should wrap
     this in Finalize. This separates the structural operation
@@ -355,6 +362,35 @@ class WeightedVote(Expr[Answer[Draft]]):
     result_type: ClassVar[Any] = Answer[Draft]
     drafts: Expr[list[Answer[Draft]]]
     scores: Expr[list[Score[Answer[Draft]]]]
+
+
+@dataclass(frozen=True)
+class PickOne(Expr[Answer[Draft]]):
+    """A single judge model reads all candidates and picks one.
+
+    Type: Model -> [Answer[Draft]] -> Answer[Draft]
+
+    The judge sees every candidate side-by-side and returns a
+    single selection (1-indexed candidate number, parsed from
+    the response). This is comparative selection — distinct from
+    `ParScore + WeightedVote`, which scores each candidate in
+    isolation and takes the argmax.
+
+    Used for the design's "peer-judge chooses among the N
+    candidates" mechanism in conditions B and C. For ReConcile-
+    style per-draft confidence aggregation, use ParScore +
+    WeightedVote instead. Both are valid building blocks; pick
+    the one that matches the macro-model being expressed.
+
+    Identity blinding: the judge sees candidates as numbered
+    options, never with vendor labels. Per the K=blinded lock.
+
+    Note: produces Answer[Draft]; wrap in Finalize for committed
+    final answers.
+    """
+    result_type: ClassVar[Any] = Answer[Draft]
+    judge: str
+    drafts: Expr[list[Answer[Draft]]]
 
 
 # ============================================================================

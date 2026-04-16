@@ -26,6 +26,7 @@ from src.ir.ast import (
     ParScore,
     PeerReviseRound,
     PeerRounds,
+    PickOne,
     QueryVar,
     Review,
     Revise,
@@ -401,6 +402,22 @@ class Interpreter:
                 )
                 return answers[best_idx]
 
+            case PickOne(judge=judge, drafts=ds):
+                answers = self.evaluate(ds, env)
+                candidates_text = "\n---\n".join(
+                    f"Candidate {i+1}:\n{a.text}"
+                    for i, a in enumerate(answers)
+                )
+                text = self.client.complete(
+                    judge,
+                    self.prompts.gen_system,
+                    self.prompts.pick_one_user.format(
+                        candidates=candidates_text
+                    ),
+                )
+                idx = _parse_pick(text, n=len(answers))
+                return answers[idx]
+
             case Var(name=name):
                 return env.lookup(name)
 
@@ -419,6 +436,26 @@ def _parse_score(text: str) -> float:
             continue
         return max(0.0, min(1.0, v))
     return 0.5
+
+
+def _parse_pick(text: str, n: int) -> int:
+    """Parse a 1-indexed candidate selection from a judge's response.
+
+    Returns a 0-indexed candidate position in [0, n). Falls back
+    to 0 (first candidate) if no valid integer in [1, n] is
+    found, mirroring the position-bias behavior of WeightedVote
+    on ties; the silent fallback is a known issue tracked
+    alongside _parse_score in the broader implementation-bugs
+    item (see status.md).
+    """
+    for tok in text.replace(",", " ").replace(".", " ").split():
+        try:
+            v = int(tok)
+        except ValueError:
+            continue
+        if 1 <= v <= n:
+            return v - 1
+    return 0
 
 
 def run(

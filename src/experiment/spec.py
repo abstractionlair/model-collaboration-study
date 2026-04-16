@@ -148,6 +148,7 @@ class PromptTemplates:
     revise_user: str                   # expects {draft}, {critique}
     fuse_user: str                     # expects {query}, {drafts}
     score_user: str                    # expects {draft}
+    pick_one_user: str                 # expects {candidates}
 
 
 # ============================================================================

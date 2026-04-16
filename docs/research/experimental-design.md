@@ -296,7 +296,8 @@ part of the macro-model itself.
   baseline" because every block — generator, judge — is an
   instance of the same subject model. Tests whether
   inference-time compute alone, within a single model, explains
-  any apparent multi-model gain.
+  any apparent multi-model gain. Implemented as `ParGen +
+  PickOne` in `src/protocols/conditions.py`.
 
 - **C. Heterogeneous parallel generation + peer-LLM
   aggregation.** `ParGen` producing one sample from each of the
@@ -304,6 +305,8 @@ part of the macro-model itself.
   aggregation block** drawn from the subject pool (blinded, no
   test access). No critique, no revision. Tests whether lineage
   diversity alone produces a real gain at matched dollars.
+  Implemented as `ParGen + PickOne` (judge drawn from the
+  subject pool).
 
 - **D. Heterogeneous ReConcile-style.** `ParGen` producing one
   sample from each of the N subject models, then one peer-review
