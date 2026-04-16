@@ -24,8 +24,38 @@ yet adapts SWE-bench / LiveCodeBench / BFCL to the executor), a
 run manifest schema, budget-cap enforcement, and the pre-kickoff
 power analysis.
 
-Before investing in any of those, a **fresh-context independent
-review** is the next active task — see "Currently routed to."
+**Three independent system reviews complete on 2026-04-16:**
+- `docs/reviews/system-review-opus47-2026-04-16.md` (Opus 4.7,
+  fresh-context)
+- `docs/reviews/system-review-codex-2026-04-16.md` (Codex /
+  GPT-5.4, `mcs-coord`)
+- `docs/reviews/system-review-gemini-2026-04-16.md` (Gemini 3.1
+  Pro, `mcs-coord-gemini`)
+
+**All three converge on *Revise and re-review*.** Cross-lineage
+triangulation surfaced two findings the same-family Opus review
+missed:
+
+- **Codex's D-family catch.** `ReviseRound` in the executor is
+  self-review-informed-by-peers, not peer review of each draft by
+  1–2 peers as the design specifies. Larger faithfulness gap than
+  Opus 4.7's B/C and E findings; reframes those alongside it.
+- **Gemini's temperature-collapse catch.** At `temperature=0`,
+  `ParGen` on a homogeneous pool produces N identical drafts.
+  Conditions B and D' mechanically collapse to single-pass
+  baselines. Invalidates the matched-budget controls those
+  conditions are supposed to provide.
+
+Plus Codex's design-doc internal-inconsistency catch: the
+Independent Variables section of the locked
+`experimental-design.md` still has stale "executable scoring is
+the selection rule" language contradicting the macro-model
+framing. Needs a scrub before further faithfulness review can
+work cleanly.
+
+Architectural foundation (IR / executor / spec layer split,
+selector-as-oracle discipline in code) is sound across all three
+reviewers. Next round is targeted reconciliation, not rethink.
 
 
 ## Next up
@@ -41,103 +71,106 @@ review** is the next active task — see "Currently routed to."
    Interpreter accepts `PromptTemplates`; defaults to
    structured-critique format from `src/experiment/prompts.py`.
 5. ~~End-to-end smoke tests with real APIs.~~ Done 2026-04-16.
-   All conditions A–E pass across 4 providers (Anthropic, OpenAI,
-   Google, xAI). 49 API calls, 0 retries. Intermediate steps
-   (review, revise, fuse) verified to attempt what was asked.
-   TracingClient captures full request/response traces.
-6. **Fresh-context independent review of the full system** (see
-   "Currently routed to"). Gates everything below.
-7. Address review findings. Then, in some order: benchmark
-   adapters, experiment runner with budget-cap enforcement, run
-   manifest schema, pre-kickoff power analysis.
+   All conditions A–E ran across 4 providers (Anthropic, OpenAI,
+   Google, xAI) without exceptions. 49 API calls, 0 retries.
+   Review responses contain evaluative language; score responses
+   contain a parseable float in [0,1]. TracingClient captures
+   full request/response traces. **Scope correction (Opus 4.7
+   review #12):** the smoke test does NOT verify that revise
+   actually changed the draft, that Fuse actually synthesized
+   versus picked one verbatim, or that the score parser
+   extracted the intended number. The earlier "verified to
+   attempt what was asked" claim was too strong.
+6. ~~Fresh-context independent review of the full system.~~ Done
+   2026-04-16 by Opus 4.7. Recommendation: *Revise and re-review*.
+   See `docs/reviews/system-review-opus47-2026-04-16.md`.
+7. **Cross-lineage review of the system AND of the Opus 4.7
+   review document** by Codex (`mcs-coord`) and Gemini
+   (`mcs-coord-gemini`). Different training lineages will surface
+   what same-family review missed; they are also well-positioned
+   to weigh in on the design-vs-implementation faithfulness
+   findings (#1, #2 in the review) since they signed off on the
+   design wording in the fourth round.
+8. Address review findings. Suggested order:
+   - Decide and document the faithfulness gaps (#1, #2) with
+     `decisions.md` entries.
+   - Fix the implementation bugs (#3 Google error classification,
+     #4 score parser, #5 WeightedVote tie-breaking, #6 empty-
+     response handling).
+   - Gate the placeholders (#7 `_best_model`, #8
+     `_n_samples_for_b`, #9 `PHASE1_PRICING`) against
+     pre-calibration use.
+   - Address the variance issue (#11 temperature/seeds).
+9. Then, in some order: benchmark adapters, experiment runner
+   with budget-cap enforcement, run manifest schema, pre-kickoff
+   power analysis, FakeClient unit tests (review #13), real
+   within-step parallelism (review #10).
 
 
 ## Currently routed to
 
-**Independent system review.** The incoming fresh-context agent
-should treat the entire system (as of commit `16e1f78`) as an
-artifact under review. Almost all of `src/experiment/`,
-`src/executor/api_client.py`, `src/executor/tracing.py`,
-`src/protocols/conditions.py`, and the `Fuse` node in the IR were
-written in one extended session by the prior Opus. That instance
-can no longer review its own work independently; fresh eyes are
-the point.
+**Reconciliation work based on the three review files.** Suggested
+order (per all three reviewers' converged recommendations):
 
-### How to run the review
+1. **Faithfulness reconciliations** — decide and record in
+   `decisions.md`. Each is a code-or-design choice:
+   - **D-family review semantics** (Codex #1, Gemini #2): make
+     `ReviseRound` actually peer-review (different model
+     critiques each draft) OR update the design to adopt the
+     self-review-with-peer-context variant. Currently the largest
+     gap.
+   - **B/C aggregation** (Opus #1, Codex #2, Gemini #3): add a
+     comparative-selection IR node and use it OR formally adopt
+     pointwise scoring in the design.
+   - **E composition** (Opus #2, Codex #3, Gemini #4): add a
+     `FuseWithCritiques` node and make E match the design OR
+     update the design to adopt the implemented "writers revise
+     then meta integrates" variant.
+2. **Design-doc scrub** (Codex #4, Gemini #6): remove the stale
+   "selection rule is fixed to pick the candidate that passes the
+   executable check" language from the IV section of
+   `experimental-design.md`; it contradicts the macro-model
+   framing. Also remove the duplicated "What the matrix tests"
+   section. Without this, faithfulness reviewers compare against
+   contradictory design text.
+3. **Implementation bugs** (small, local fixes):
+   - Google retry classification — narrow to status-based
+     (408/429/5xx), not exception-class-wide.
+   - Score parser — extract last float in `[0,1]`, raise/log on
+     parse failure rather than silently defaulting to 0.5.
+   - `WeightedVote` tie-breaking — random with recorded seed, or
+     pre-declared model preference order; emit telemetry on ties.
+   - Empty-response handling — distinguish capability failure at
+     the executor boundary; explicit telemetry.
+   - `ApiClient.calls` (Codex #11) — record exhausted retries
+     and per-provider failure rates, not only successful calls.
+4. **Pre-calibration gates** for `_best_model()`,
+   `_n_samples_for_b()`, `PHASE1_PRICING` — fail loudly until
+   calibrated.
+5. **Generation stochasticity** (Gemini #1, Opus #11): set
+   `temperature > 0` for generation calls so homogeneous-pool
+   conditions actually produce N distinct samples. This is
+   pre-Phase-1-blocking, not just a "variance metric" issue.
 
-Follow `WORKFLOW.md` → "Review Procedure" and use the review
-template there. Deliverable: a file in `docs/reviews/` named
-`system-review-<reviewer>-2026-04-16.md`. Recommendation field
-should be actionable ("Proceed / Revise / Rethink") scoped to the
-review's findings.
+Then re-review (a single round, against the updated artifacts),
+then proceed to the originally-planned next-up items: benchmark
+adapters, run manifest, budget-cap enforcement, power analysis,
+FakeClient unit tests, real within-step parallelism.
 
-### What to review, against what
+### Source-of-truth pointers for the reconciliation work
 
-Check the code against the committed design artifacts — the
-design is locked, the code is on trial, not the reverse.
-
-Primary design references the code should be consistent with:
-
-- `docs/research/experimental-design.md` — the committed Phase 1
-  design. Condition definitions, compute-matching semantics,
-  statistical plan, scoping, failure-handling policy.
-- `docs/decisions.md` — locked decisions. Particularly the
-  macro-model framing (2026-04-14) and the `Fuse` naming decision
-  (2026-04-16).
-- `docs/design/system-architecture.md` — the layer structure and
-  IR invariants.
-
-Surfaces worth scrutinizing (non-exhaustive — fresh eyes may find
-things this list misses):
-
-- **Conditions A–E** (`src/protocols/conditions.py`) — do they
-  faithfully express the macro-models in the experimental design,
-  or did the implementation quietly reinterpret them?
-  - Conditions B and C aggregate via `ParScore + WeightedVote`
-    (each candidate scored independently by a model, highest
-    wins). The design calls this a "peer-judge aggregation block"
-    that "chooses among the N candidates." Is independent
-    pointwise scoring a faithful implementation of that intent,
-    or does it silently change what is being tested?
-  - Condition E is `ParGen → ReviseRound → Fuse(meta)`. The
-    design text says the meta-reviewer "synthesizes the critiques
-    and writes the final response directly." The implementation
-    has the meta-reviewer see the *revised drafts*, not the raw
-    critiques. Faithful?
-- **The selector-as-oracle discipline.** The design is emphatic
-  that the final executable evaluator must never be the internal
-  aggregator. Do the conditions respect this in code? Anything
-  that could leak oracle information into selection?
-- **`PromptTemplates` + executor integration.** Every prompt
-  site replaced, no stragglers? Does the `Fuse` prompt actually
-  elicit synthesis, or does it read as selection?
-- **`ApiClient`.** Retry classification (infra vs capability) —
-  correct per provider? Token accounting sensible? Any provider
-  where errors escape the `InfrastructureError` wrapper? Any
-  `Any` that should be tighter?
-- **Phase 1 builder** (`src/experiment/phase1.py`). Two specific
-  placeholders worth calling out:
-  - `_best_model()` returns Haiku as a "conservative default"
-    for the A/B/D' baselines. Real value comes from calibration,
-    not yet run. Is having this placeholder live in code a
-    footgun?
-  - `_n_samples_for_b()` picks N=1/3/6 at $X/$2X/$4X by hand.
-    No cost calibration behind it. Is this reasonable placeholder
-    or dangerous?
-  - `PHASE1_PRICING` is hardcoded from pre-kickoff notes; design
-    says "verify before kickoff."
-- **Smoke tests** (`scripts/smoke_test.py`). The "PASS" verdict
-  is based on keyword checks (does the review contain evaluative
-  language? does a score parse as a float in [0,1]?). This
-  verifies the machinery runs and steps attempt what was asked;
-  it does not verify that outputs are correct. Is the claim
-  scoped honestly in the commit message and status update, or is
-  it overclaiming?
-- **Typed IR**. `mypy --strict` passes on all 19 source files —
-  but passing strict mode is not the same as being well-typed.
-  Are there `Any` escape hatches, loose generics, or places
-  where the type system fails to catch a meaningful class of
-  errors?
+- The three reviews:
+  - `docs/reviews/system-review-opus47-2026-04-16.md`
+  - `docs/reviews/system-review-codex-2026-04-16.md`
+  - `docs/reviews/system-review-gemini-2026-04-16.md`
+- The system being reviewed: as of commit `16e1f78`. Subsequent
+  fixes will be obvious from `git log`.
+- Design references:
+  - `docs/research/experimental-design.md` (locked Phase 1
+    design — needs scrub per item 2 above)
+  - `docs/decisions.md` (macro-model framing, `Fuse` naming)
+  - `docs/design/system-architecture.md` (layer structure, IR
+    invariants)
 
 ### Explicitly NOT built (don't flag as missing)
 
@@ -148,14 +181,6 @@ things this list misses):
 - `ContextMode.ACCUMULATED` real-client support.
 - `ReviseFromMany` or advisory-synthesis IR nodes (names
   reserved in `docs/decisions.md`; no concrete use case yet).
-
-### After this review
-
-Parallel reviews from Codex (`mcs-coord`) and Gemini
-(`mcs-coord-gemini`) would give stronger triangulation —
-different training lineages, not just different context. Worth
-running after the Opus review so the second-lineage reviewers
-can be pointed at the review findings, not just the artifacts.
 
 
 ## Blockers
