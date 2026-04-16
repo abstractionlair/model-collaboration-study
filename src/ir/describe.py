@@ -14,9 +14,11 @@ from .ast import (
     Expr,
     Finalize,
     Fuse,
+    FuseWithCritiques,
     Gen,
     Let,
     ParGen,
+    ParPeerReview,
     ParScore,
     PeerReviseRound,
     PeerRounds,
@@ -109,6 +111,23 @@ def describe(expr: Expr[Any], indent: int = 0) -> str:
             return (
                 f"{pad}Fuse({model}) : [Answer[Draft]] x Query -> Answer[Draft]\n"
                 f"{d}\n{q}"
+            )
+
+        case ParPeerReview(models=models, drafts=drafts, context=ctx, visibility=vis):
+            d = describe(drafts, indent + 1)
+            return (
+                f"{pad}ParPeerReview({models}, ctx={ctx.value}, vis={vis.value}) "
+                f": [Answer[Draft]] -> [Critique[Answer[Draft]]]\n{d}"
+            )
+
+        case FuseWithCritiques(model=model, drafts=drafts, critiques=critiques, query=query):
+            d = describe(drafts, indent + 1)
+            c = describe(critiques, indent + 1)
+            q = describe(query, indent + 1)
+            return (
+                f"{pad}FuseWithCritiques({model}) "
+                f": [Answer[Draft]] x [Critique] x Query -> Answer[Draft]\n"
+                f"{d}\n{c}\n{q}"
             )
 
         case WeightedVote(drafts=drafts, scores=scores):

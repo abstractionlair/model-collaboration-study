@@ -135,7 +135,6 @@ _REVISE_USER = (
     "Draft:\n{draft}"
 )
 
-# Confidence scoring
 # Fusion (meta-reviewer reads peer drafts and writes fresh)
 _FUSE_USER = (
     "Task:\n{query}\n\n"
@@ -143,6 +142,17 @@ _FUSE_USER = (
     "working on this task:\n\n{drafts}\n\n"
     "Write your own response to the task, informed by but not "
     "constrained to the peer drafts above."
+)
+
+# Fusion with critiques (meta-reviewer reads drafts paired with critiques)
+_FUSE_WITH_CRITIQUES_USER = (
+    "Task:\n{query}\n\n"
+    "The following peer drafts were produced by different AIs, "
+    "each accompanied by a critique from another peer:\n\n"
+    "{drafts_with_critiques}\n\n"
+    "Synthesize a final response to the task. You may draw on "
+    "the drafts and the critiques, but write your own response "
+    "— do not just pick one or paraphrase a single draft."
 )
 
 # Confidence scoring
@@ -174,6 +184,7 @@ DEFAULT_PROMPTS = PromptTemplates(
     peer_review_all=_PEER_REVIEW_ALL,
     revise_user=_REVISE_USER,
     fuse_user=_FUSE_USER,
+    fuse_with_critiques_user=_FUSE_WITH_CRITIQUES_USER,
     score_user=_SCORE_USER,
     pick_one_user=_PICK_ONE_USER,
 )

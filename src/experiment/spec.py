@@ -147,6 +147,7 @@ class PromptTemplates:
     peer_review_all: str               # peer review: expects {query}, {draft}, {peers}
     revise_user: str                   # expects {draft}, {critique}
     fuse_user: str                     # expects {query}, {drafts}
+    fuse_with_critiques_user: str      # expects {query}, {drafts_with_critiques}
     score_user: str                    # expects {draft}
     pick_one_user: str                 # expects {candidates}
 

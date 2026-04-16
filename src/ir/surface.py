@@ -19,9 +19,11 @@ from .ast import (
     Expr,
     Finalize,
     Fuse,
+    FuseWithCritiques,
     Gen,
     Let,
     ParGen,
+    ParPeerReview,
     ParScore,
     PeerReviseRound,
     PeerRounds,
@@ -191,6 +193,39 @@ def fuse(
 ) -> Expr[Answer[Draft]]:
     """A model reads multiple peer drafts and writes a fresh response."""
     return Fuse(model=model, drafts=drafts, query=q)
+
+
+def par_peer_review(
+    models: list[str],
+    drafts: Expr[list[Answer[Draft]]],
+    context: ContextMode = FRESH,
+    visibility: Visibility = PEERS_GROUPED,
+) -> Expr[list[Critique[Answer[Draft]]]]:
+    """Peer review across drafts producing critiques only.
+
+    Cyclic 1-peer assignment same as `peer_revise_round`;
+    requires N >= 2. Returns critiques aligned with input
+    drafts (critiques[i] is on drafts[i]).
+    """
+    return ParPeerReview(
+        models=models, drafts=drafts, context=context, visibility=visibility
+    )
+
+
+def fuse_with_critiques(
+    model: str,
+    drafts: Expr[list[Answer[Draft]]],
+    critiques: Expr[list[Critique[Answer[Draft]]]],
+    q: Expr[Query],
+) -> Expr[Answer[Draft]]:
+    """A model reads drafts plus aligned critiques and writes fresh.
+
+    `drafts` and `critiques` must be aligned by index;
+    critiques[i] is a critique of drafts[i].
+    """
+    return FuseWithCritiques(
+        model=model, drafts=drafts, critiques=critiques, query=q
+    )
 
 
 def weighted_vote(

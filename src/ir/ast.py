@@ -295,6 +295,63 @@ class PeerRounds(Expr[list[Answer[Draft]]]):
 
 
 @dataclass(frozen=True)
+class ParPeerReview(Expr[list[Critique[Answer[Draft]]]]):
+    """Peer review across drafts producing critiques only (no revision).
+
+    For each draft d_i (writer m_i = models[i]), the peer
+    reviewer at models[(i+1) % N] produces a critique. Returns
+    the list of critiques aligned with the input drafts:
+    critiques[i] is the critique on drafts[i].
+
+    Type: [Model] -> [Answer[Draft]] -> [Critique[Answer[Draft]]]
+
+    This is the "review-only" sibling of `PeerReviseRound`. Use
+    when the critiques need to flow somewhere other than back
+    to the original writer's revise step — e.g. to a meta-
+    reviewer via `FuseWithCritiques` (the design-faithful
+    Condition E shape).
+
+    Cyclic 1-peer assignment same as PeerReviseRound. Requires
+    N >= 2. Uses the same `peer_review_*` prompts (the review
+    step is identical between PeerReviseRound and ParPeerReview;
+    only the downstream differs).
+    """
+    result_type: ClassVar[Any] = list[Critique[Answer[Draft]]]
+    models: list[str]
+    drafts: Expr[list[Answer[Draft]]]
+    context: ContextMode
+    visibility: Visibility
+
+
+@dataclass(frozen=True)
+class FuseWithCritiques(Expr[Answer[Draft]]):
+    """A model reads drafts plus aligned critiques and writes fresh.
+
+    Type: Model -> [Answer[Draft]] -> [Critique[Answer[Draft]]] -> Query -> Answer[Draft]
+
+    `drafts` and `critiques` must be aligned by index:
+    critiques[i] is a critique of drafts[i]. The model sees
+    each draft paired with its critique and writes its own
+    fresh response — informed by both signals.
+
+    Sibling of `Fuse` (which reads only drafts). Together they
+    cover the two natural "many → one" shapes for synthesis:
+    Fuse for drafts-alone, FuseWithCritiques for drafts +
+    aligned critiques.
+
+    Used for the design-faithful Condition E:
+    `ParGen → ParPeerReview → FuseWithCritiques(meta)`. The
+    meta-reviewer's synthesis IS the final response — no
+    separate aggregation step.
+    """
+    result_type: ClassVar[Any] = Answer[Draft]
+    model: str
+    drafts: Expr[list[Answer[Draft]]]
+    critiques: Expr[list[Critique[Answer[Draft]]]]
+    query: Expr[Query]
+
+
+@dataclass(frozen=True)
 class ParScore(Expr[list[Score[Answer[Draft]]]]):
     """Each model scores its own draft's confidence.
 

@@ -334,14 +334,15 @@ part of the macro-model itself.
   **meta-reviewer** synthesizes the critiques and writes the
   final response directly. Note that E has **no separate
   aggregation step** — the meta-reviewer's synthesis *is* the
-  final response. One candidate by construction. This is the
-  choice between "meta-reviewer writes the final" and
-  "meta-reviewer synthesizes critiques, writers revise, then
-  aggregate"; the draft commits to the former because it
-  produces a cleaner macro-model (fewer moving parts, no
-  implicit aggregation rule). The latter is a different
-  macro-model that could be tested in follow-on work if there
-  is reason to.
+  final response. One candidate by construction. Implemented as
+  `ParGen + ParPeerReview + FuseWithCritiques` in
+  `src/protocols/conditions.py`. The "writers revise, then
+  meta fuses revised drafts" alternative is also expressible
+  (`condition_e_writers_revise_then_fuse`); the design commits
+  to the meta-does-all-work version because it produces a
+  cleaner macro-model (fewer moving parts, no implicit
+  aggregation rule). The other variant remains available for
+  follow-on work if there is reason to test it.
 
 ### What the matrix tests
 

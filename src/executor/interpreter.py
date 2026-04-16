@@ -20,9 +20,11 @@ from src.ir.ast import (
     Expr,
     Finalize,
     Fuse,
+    FuseWithCritiques,
     Gen,
     Let,
     ParGen,
+    ParPeerReview,
     ParScore,
     PeerReviseRound,
     PeerRounds,
@@ -268,6 +270,40 @@ class Interpreter:
             )
         return out
 
+    def _par_peer_review(
+        self,
+        models: list[str],
+        drafts: list[RAnswer],
+        context: ContextMode,
+        visibility: Visibility,
+    ) -> list[RCritique]:
+        """Peer review across drafts producing critiques only.
+
+        Reviewer assignment: cyclic shift by one (same as
+        PeerReviseRound). For each draft d_i, the reviewer
+        models[(i+1) % N] produces a critique. Returns critiques
+        aligned with the input drafts. Requires N >= 2.
+        """
+        n = len(models)
+        if n < 2:
+            raise ValueError(
+                "ParPeerReview requires at least 2 models; "
+                f"got {n}. Use Review nodes directly for single-model setups."
+            )
+        system = self._system_for(context)
+        out: list[RCritique] = []
+        for i in range(n):
+            reviewer = models[(i + 1) % n]
+            target = drafts[i]
+            other_drafts = [d for j, d in enumerate(drafts) if j != i]
+            crit_text = self.client.complete(
+                reviewer,
+                system,
+                self._peer_review_prompt(target, other_drafts, visibility),
+            )
+            out.append(RCritique(text=crit_text))
+        return out
+
     def evaluate(self, expr: Expr[Any], env: Env) -> Any:
         key = id(expr)
         if key in self._cache:
@@ -340,6 +376,28 @@ class Interpreter:
                     text=text, stage=Draft, production_query=rq.text
                 )
 
+            case FuseWithCritiques(
+                model=model, drafts=ds, critiques=cs, query=q
+            ):
+                rq = self.evaluate(q, env)
+                answers = self.evaluate(ds, env)
+                crits = self.evaluate(cs, env)
+                drafts_with_critiques = "\n---\n".join(
+                    f"Draft {i+1}:\n{a.text}\n\nCritique of Draft {i+1}:\n{c.text}"
+                    for i, (a, c) in enumerate(zip(answers, crits))
+                )
+                text = self.client.complete(
+                    model,
+                    self.prompts.gen_system,
+                    self.prompts.fuse_with_critiques_user.format(
+                        query=rq.text,
+                        drafts_with_critiques=drafts_with_critiques,
+                    ),
+                )
+                return RAnswer(
+                    text=text, stage=Draft, production_query=rq.text
+                )
+
             case ParGen(models=models, query=q):
                 rq = self.evaluate(q, env)
                 results: list[RAnswer] = []
@@ -381,6 +439,14 @@ class Interpreter:
                 for _ in range(n):
                     current = self._one_peer_round(models, current, context, vis)
                 return current
+
+            case ParPeerReview(
+                models=models, drafts=ds, context=context, visibility=vis
+            ):
+                drafts_resolved = self.evaluate(ds, env)
+                return self._par_peer_review(
+                    models, drafts_resolved, context, vis
+                )
 
             case ParScore(models=models, drafts=ds):
                 answers = self.evaluate(ds, env)

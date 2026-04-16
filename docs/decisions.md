@@ -362,6 +362,86 @@ D' via reconcile.py).
 
 ---
 
+## 2026-04-16 Add ParPeerReview and FuseWithCritiques; condition E migrates; old variant kept
+
+**Decision:** Add two new IR nodes — `ParPeerReview(models,
+drafts, ctx, vis) -> [Critique[Answer[Draft]]]` (peer review
+producing critiques only, cyclic 1-peer assignment, no
+revision step) and `FuseWithCritiques(model, drafts,
+critiques, query) -> Answer[Draft]` (a model reads drafts
+paired with aligned critiques and writes fresh). Migrate
+`condition_e` from `ParGen → PeerReviseRound → Fuse(meta over
+revised drafts)` to the design-faithful `ParGen → ParPeerReview
+→ FuseWithCritiques(meta over drafts + raw critiques)`. Keep
+the previous shape as `condition_e_writers_revise_then_fuse`,
+a documented alternative macro-model.
+
+**Alternatives considered:**
+
+- **Mutate `condition_e` in place.** Rejected for the same
+  reason as the SelfReviseRound rename: the previous shape is
+  a coherent macro-model worth keeping as a typed building
+  block. Someone may want to ablate "does the writer-revision
+  step before meta-synthesis help?" later.
+- **Generalize `Fuse` to optionally accept critiques** (single
+  node with optional critiques field). Rejected: matches the
+  pattern of keeping structural variations as distinct named
+  nodes (Self/Peer review, ParScore+WeightedVote vs PickOne).
+  The mutation engine reasons over node classes; an
+  enum-tagged or optional-field node introduces field-validity
+  rules.
+- **Decompose `PeerReviseRound` into `ParPeerReview` +
+  `ParReviseFromCritiques`.** Considered. Would let
+  `PeerReviseRound` become syntactic sugar for the composition
+  and make the bundling structure explicit. Deferred — adds
+  a third new node for marginal payoff at the moment. Worth
+  revisiting if any macro-model wants to use the per-step
+  decomposition directly.
+- **Update the design to specify the "writers revise then
+  meta fuses" variant as the canonical E.** Rejected: all
+  three reviewers read the design's E as the meta-does-all-
+  work version, and that version is structurally cleaner (no
+  implicit aggregation rule). The previous implementation was
+  a silent third option, neither of the two the design
+  explicitly considered.
+
+**Rationale:** Same pattern as the previous two reconciliations
+in this round (Self/Peer review and PickOne for B/C). The IR
+is a substrate for the broader protocol-inventory space; the
+current design-faithful E and the previous "writers revise
+first" variant are both real macro-model shapes. Keep both as
+typed building blocks; phase1.py uses whichever matches the
+locked design.
+
+**Implementation notes:**
+
+- `ParPeerReview` reuses the existing `peer_review_*` prompt
+  templates (the review step is identical between
+  `PeerReviseRound` and `ParPeerReview`; only the downstream
+  differs — revise vs surface critiques).
+- `FuseWithCritiques` adds one new prompt template
+  (`fuse_with_critiques_user`) that frames the meta task as
+  "synthesize a final response, drawing on drafts and
+  critiques, write your own."
+- The `drafts` ParGen is referenced twice in the new
+  `condition_e` AST (once by `ParPeerReview`, once by
+  `FuseWithCritiques`). The executor's identity-based
+  memoization guarantees the meta-reviewer sees the same
+  drafts that were peer-reviewed; no `bind` needed.
+- Call counts: new E is 2N + 1 (down from 3N + 1). For Phase 1's
+  3-subject-model E configuration, this is 7 (was 10).
+  `condition_e_writers_revise_then_fuse` retains the 3N + 1
+  shape.
+
+**Status:** Active. ParPeerReview and FuseWithCritiques
+implemented. `condition_e` migrated. The previous variant
+remains callable as `condition_e_writers_revise_then_fuse`.
+phase1.py uses `condition_e` (no change there). All three
+faithfulness reconciliations from the cross-lineage review
+round are now complete.
+
+---
+
 ## 2026-04-08 Small models as subjects, frontier models as judges
 
 **Decision:** Use small/mid-tier models (e.g. Haiku, GPT mini, Gemini

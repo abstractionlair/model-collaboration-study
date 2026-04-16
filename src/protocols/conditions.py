@@ -5,20 +5,18 @@ The functions are parameterized by model names and structural parameters
 (like sample count) so the same condition can be instantiated at
 different budget tiers.
 
-**Faithfulness note (2026-04-16).** Conditions D, D', and E now
-use `PeerReviseRound` / `PeerRounds` — each draft reviewed by a
-different model (cyclic 1-peer-per-draft assignment). This
-matches the design's "1–2 peers" specification at the lower
-bound and resolves the D-family review-semantics faithfulness
-gap surfaced in the cross-lineage review round.
-
-Condition E retains a remaining faithfulness gap: the design
-specifies that the meta-reviewer synthesizes raw critiques and
-writes the final response directly, while the implementation
-has writers revise their drafts before the meta-reviewer fuses
-the revised drafts. Resolution requires a `FuseWithCritiques`
-(or similar) node that lets Fuse consume both drafts and
-critiques; tracked in `docs/status.md` "Currently routed to."
+**Faithfulness status (2026-04-16).** All three faithfulness gaps
+from the cross-lineage review have been reconciled:
+- D-family (Codex #1, Gemini #2): D, D', and E use
+  `PeerReviseRound`/`PeerRounds`, not the self-review variants.
+- B/C aggregation (Opus #1, Codex #2, Gemini #3): B and C use
+  `PickOne`, not pointwise scoring.
+- E composition (Opus #2, Codex #3, Gemini #4): E uses
+  `ParPeerReview` + `FuseWithCritiques` so the meta-reviewer
+  sees raw critiques and writes the final directly, per the
+  design. The previous implementation lives on as
+  `condition_e_writers_revise_then_fuse` (kept as a building
+  block — a reasonable macro-model in its own right).
 
 Condition D (heterogeneous ReConcile) is expressed in
 reconcile.py. D' is ReConcile instantiated with a homogeneous pool
@@ -34,8 +32,10 @@ from src.ir.surface import (
     bind,
     finalize,
     fuse,
+    fuse_with_critiques,
     gen,
     par_gen,
+    par_peer_review,
     peer_revise_round,
     pick_one,
     query,
@@ -150,31 +150,62 @@ def condition_e(
     subject_models: list[str],
     meta_reviewer: str,
 ) -> Expr[Answer[Final]]:
-    """ParGen + one PeerReviseRound + Fuse by a meta-reviewer.
+    """ParGen + ParPeerReview + FuseWithCritiques (design-faithful E).
 
-    Each subject model generates a draft, then one round of
-    peer-review-and-revise improves the drafts (each draft
-    critiqued by a peer per cyclic assignment, original writer
-    revises), then a designated meta-reviewer reads all improved
-    drafts and writes a fresh synthesized response. The
-    meta-reviewer's synthesis IS the final answer — no separate
-    aggregation step. Requires len(subject_models) >= 2.
+    Each subject model generates a draft, peer reviewers
+    (cyclic 1-peer-per-draft) produce critiques on the drafts,
+    then a designated meta-reviewer reads each draft paired
+    with its critique and writes a fresh synthesized response.
+    The meta-reviewer's synthesis IS the final answer — no
+    separate aggregation step. Requires len(subject_models) >= 2.
 
     The meta_reviewer should typically be drawn from
-    subject_models (it's a peer, not an external judge), but this
-    is not enforced.
+    subject_models (it's a peer, not an external judge), but
+    this is not enforced.
 
-    Fuse is the node that makes this expressible: it reads
-    multiple peer drafts and writes fresh, unlike WeightedVote
-    (mechanical selection) or Revise (one draft + one critique).
+    Migrated 2026-04-16 from the writers-revise-then-fuse
+    variant (kept available as
+    `condition_e_writers_revise_then_fuse`) to match the design
+    specification: meta synthesizes raw critiques directly,
+    not revised drafts. Resolves the E composition gap
+    surfaced in the cross-lineage review.
 
-    Remaining faithfulness gap (E composition): the design
-    specifies that the meta-reviewer synthesizes raw critiques
-    directly, not revised drafts. This implementation has writers
-    revise before the meta-reviewer fuses, which is
-    structurally a different macro-model. Resolution requires a
-    FuseWithCritiques-style node; tracked in
-    `docs/status.md` "Currently routed to."
+    Call count: 2N + 1 (was 3N + 1).
+    """
+    q = query()
+    drafts = par_gen(subject_models, q)
+    critiques = par_peer_review(subject_models, drafts, FRESH, PEERS_GROUPED)
+    # `drafts` is referenced twice (here and inside `critiques`);
+    # identity-based memoization in the executor guarantees the
+    # meta-reviewer sees the same drafts that were peer-reviewed.
+    return finalize(
+        fuse_with_critiques(meta_reviewer, drafts, critiques, q)
+    )
+
+
+def condition_e_writers_revise_then_fuse(
+    subject_models: list[str],
+    meta_reviewer: str,
+) -> Expr[Answer[Final]]:
+    """ParGen + PeerReviseRound + Fuse over revised drafts.
+
+    The pre-2026-04-16 implementation of condition E. Kept as a
+    typed building block — it's a coherent macro-model shape
+    that an experiment may want to test as an alternative to the
+    design-faithful E. Differences from `condition_e` (the
+    current design-faithful version):
+    - Subject models revise their own drafts from the peer
+      critiques before the meta-reviewer sees anything.
+    - Meta-reviewer uses `Fuse` (drafts only) rather than
+      `FuseWithCritiques` (drafts + raw critiques).
+    - Higher cost (3N + 1 calls vs the design version's 2N + 1).
+
+    The two macro-models test different intuitions about where
+    the integration work happens. The design committed to E as
+    the meta-does-all-work version; this variant gives writers
+    a revision pass first.
+
+    Requires len(subject_models) >= 2.
     """
     q = query()
     drafts = par_gen(subject_models, q)

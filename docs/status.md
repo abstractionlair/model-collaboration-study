@@ -24,7 +24,7 @@ yet adapts SWE-bench / LiveCodeBench / BFCL to the executor), a
 run manifest schema, budget-cap enforcement, and the pre-kickoff
 power analysis.
 
-**Three independent system reviews complete on 2026-04-16:**
+**Three independent system reviews completed on 2026-04-16:**
 - `docs/reviews/system-review-opus47-2026-04-16.md` (Opus 4.7,
   fresh-context)
 - `docs/reviews/system-review-codex-2026-04-16.md` (Codex /
@@ -32,30 +32,35 @@ power analysis.
 - `docs/reviews/system-review-gemini-2026-04-16.md` (Gemini 3.1
   Pro, `mcs-coord-gemini`)
 
-**All three converge on *Revise and re-review*.** Cross-lineage
-triangulation surfaced two findings the same-family Opus review
-missed:
+All three converged on *Revise and re-review*. The architectural
+foundation (IR / executor / spec layer split, selector-as-oracle
+discipline in code) was sound across all three reviewers; the
+needed work was targeted reconciliation, not rethink.
 
-- **Codex's D-family catch.** `ReviseRound` in the executor is
-  self-review-informed-by-peers, not peer review of each draft by
-  1–2 peers as the design specifies. Larger faithfulness gap than
-  Opus 4.7's B/C and E findings; reframes those alongside it.
-- **Gemini's temperature-collapse catch.** At `temperature=0`,
-  `ParGen` on a homogeneous pool produces N identical drafts.
-  Conditions B and D' mechanically collapse to single-pass
-  baselines. Invalidates the matched-budget controls those
-  conditions are supposed to provide.
+**Reconciliations done as of 2026-04-16:**
+- Design-doc scrub (commit `f295e59`): removed stale
+  "executable scoring is the selection rule" language; deleted
+  duplicated subsection.
+- D-family review semantics (commits `82627d3` + follow-up):
+  renamed self-review nodes; added `PeerReviseRound`/
+  `PeerRounds` with cyclic 1-peer assignment; D/D'/E migrated.
+- B/C aggregation (commit `4609c33`): added `PickOne`
+  comparative-selection node; B/C migrated. ParScore +
+  WeightedVote retained for D/D' confidence-weighted
+  aggregation.
+- E composition (this commit): added `ParPeerReview` and
+  `FuseWithCritiques`; new `condition_e` is design-faithful;
+  previous variant kept as `condition_e_writers_revise_then_fuse`.
 
-Plus Codex's design-doc internal-inconsistency catch: the
-Independent Variables section of the locked
-`experimental-design.md` still has stale "executable scoring is
-the selection rule" language contradicting the macro-model
-framing. Needs a scrub before further faithfulness review can
-work cleanly.
-
-Architectural foundation (IR / executor / spec layer split,
-selector-as-oracle discipline in code) is sound across all three
-reviewers. Next round is targeted reconciliation, not rethink.
+**Still open** (from the reviews, tracked under "Currently
+routed to"): implementation bugs (Google retry classification,
+score/pick parsers, WeightedVote tie-breaking, empty-response
+handling, `ApiClient.calls` infra-failure telemetry); Phase 1
+readiness gating (`_best_model`, `_n_samples_for_b`,
+`PHASE1_PRICING`); generation stochasticity (`temperature > 0`
+to avoid Gemini's homogeneous-pool collapse); FakeClient unit
+tests; real within-step parallelism. Next round of cross-lineage
+review should land before any of these fixes get bundled.
 
 
 ## Next up
@@ -136,13 +141,14 @@ order (per all three reviewers' converged recommendations):
      confidence-weighted aggregation). Call counts: B(N=3) and
      C now N+1 calls instead of 2N. `decisions.md` 2026-04-16
      entry recorded.
-   - **E composition** (Opus #2, Codex #3, Gemini #4): **Next.**
-     Add `ParPeerReview` (peer review producing critiques only,
-     no revision; cyclic 1-peer assignment) and
-     `FuseWithCritiques` (meta reads drafts + aligned critiques,
-     writes fresh). Rename existing `condition_e` to
-     `condition_e_writers_revise_then_fuse`; new `condition_e`
-     uses the new nodes per the design.
+   - ~~**E composition** (Opus #2, Codex #3, Gemini #4):~~
+     **Done 2026-04-16.** Added `ParPeerReview` (peer review
+     producing critiques only) and `FuseWithCritiques` (meta
+     reads drafts + aligned critiques, writes fresh). New
+     `condition_e` is design-faithful: ParGen → ParPeerReview
+     → FuseWithCritiques. Previous variant kept as
+     `condition_e_writers_revise_then_fuse`. Call count: 2N+1
+     (was 3N+1). `decisions.md` 2026-04-16 entry recorded.
 2. ~~**Design-doc scrub** (Codex #4, Gemini #6): remove the
    stale "selection rule is fixed to pick the candidate that
    passes the executable check" language from the IV section of

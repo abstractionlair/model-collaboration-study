@@ -147,6 +147,8 @@ The current node set, all frozen dataclasses inheriting from
 | `PeerRounds`        | `Int -> [Model] -> [Answer[Draft]] -> [Answer[Draft]]` (N peer-rounds)    |
 | `ParScore`          | `[Model] -> [Answer[Draft]] -> [Score[Answer[Draft]]]`                    |
 | `PickOne`           | `Model -> [Answer[Draft]] -> Answer[Draft]` (single judge picks one)      |
+| `ParPeerReview`     | `[Model] -> [Answer[Draft]] -> [Critique[Answer[Draft]]]` (peer review only) |
+| `FuseWithCritiques` | `Model -> [Answer[Draft]] -> [Critique] -> Query -> Answer[Draft]`        |
 | `Fuse`          | `Model -> [Answer[Draft]] -> Query -> Answer[Draft]`                      |
 | `WeightedVote`  | `[Answer[Draft]] -> [Score[Answer[Draft]]] -> Answer[Draft]`              |
 | `Var`           | reference to a Let-bound variable                                         |
@@ -407,7 +409,8 @@ expression:
 - `condition_c(subject_models, judge_model)` — heterogeneous ParGen + PickOne (peer-LLM picks)
 - `condition_d` — re-exported `reconcile()` from `reconcile.py` (peer-review aggregation)
 - `condition_d_prime(model, pool_size, n_rounds)` — homogeneous ReConcile
-- `condition_e(subject_models, meta_reviewer)` — ParGen + PeerReviseRound + Fuse (E composition gap remaining: meta fuses revised drafts, design specifies fuse over raw critiques)
+- `condition_e(subject_models, meta_reviewer)` — ParGen + ParPeerReview + FuseWithCritiques (design-faithful: meta sees drafts paired with raw critiques, writes fresh)
+- `condition_e_writers_revise_then_fuse(subject_models, meta_reviewer)` — pre-2026-04-16 E shape: ParGen + PeerReviseRound + Fuse over revised drafts. Kept as a building block.
 
 All six build cleanly, pass `mypy --strict`, and run end-to-end
 through the executor with `FakeClient`.
@@ -437,8 +440,7 @@ reviews what, with what visibility, in how many rounds.
   condition factories. Current-shape call counts at the
   configurations used by `phase1.py`: A=1, B(N=3)=4, C=4,
   D(3 models, 1 round)=12, D'(3 models, 1 round)=12, E(3
-  models, 1 round, 1 meta) = 10 (will drop to 7 after the E
-  composition migration). FakeClient unit tests are not yet
+  models, 1 meta)=7. FakeClient unit tests are not yet
   committed (review #13 of `system-review-opus47-2026-04-16.md`).
 - End-to-end smoke tests with real APIs passed on 2026-04-16:
   all conditions A–E across four providers (Anthropic, OpenAI,
