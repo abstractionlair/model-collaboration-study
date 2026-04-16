@@ -14,6 +14,7 @@ from .api_client import ApiClient, CallRecord, InfrastructureError
 from .client import FakeClient, ModelClient
 from .interpreter import Env, Interpreter, run
 from .runtime import RAnswer, RCritique, RQuery, RScore, assert_final
+from .tracing import TraceEntry, TracingClient
 
 __all__ = [
     "ApiClient",
@@ -21,6 +22,8 @@ __all__ = [
     "InfrastructureError",
     "FakeClient",
     "ModelClient",
+    "TracingClient",
+    "TraceEntry",
     "Env",
     "Interpreter",
     "run",

@@ -39,7 +39,12 @@ from the parallel track. Next: experiment-spec layer and real
 4. ~~Integrate `PromptTemplates` into the executor.~~ Done.
    Interpreter accepts `PromptTemplates`; defaults to
    structured-critique format from `src/experiment/prompts.py`.
-5. Pre-kickoff: run the power analysis gate that the experimental
+5. ~~End-to-end smoke tests with real APIs.~~ Done 2026-04-16.
+   All conditions A–E pass across 4 providers (Anthropic, OpenAI,
+   Google, xAI). 49 API calls, 0 retries. Intermediate steps
+   (review, revise, fuse) verified to attempt what was asked.
+   TracingClient captures full request/response traces.
+6. Pre-kickoff: run the power analysis gate that the experimental
    design specifies, to decide whether the full three-stratum
    interaction test is feasible or the middle-band-only fallback
    applies.
@@ -47,10 +52,8 @@ from the parallel track. Next: experiment-spec layer and real
 
 ## Currently routed to
 
-`src/executor/api_client.py` — wiring a real `ModelClient` with
-Anthropic, OpenAI, and Google API adapters, retry/backoff for
-infrastructure failures, and token-usage tracking for cost
-accounting.
+None. Smoke tests passed; next active artifact will be
+determined by what follows from the results.
 
 
 ## Blockers

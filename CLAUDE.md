@@ -177,3 +177,6 @@ Update when a file is added or repurposed.
 
 - `scripts/hooks/commit-msg` — status-discipline hook.
 - `scripts/install-hooks.sh` — installs the repo's hooks.
+- `scripts/smoke_test.py` — end-to-end smoke tests with real
+  API calls. Runs all conditions, checks response quality and
+  intermediate step behavior.

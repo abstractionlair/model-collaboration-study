@@ -1,4 +1,4 @@
-"""Real model client backed by Anthropic, OpenAI, and Google APIs.
+"""Real model client backed by Anthropic, OpenAI, Google, and xAI APIs.
 
 Routes model IDs to the appropriate provider SDK, retries
 infrastructure failures with exponential backoff, and tracks
@@ -8,11 +8,13 @@ Provider routing is by model-ID prefix:
   - "claude-*"  → Anthropic
   - "gpt-*"     → OpenAI
   - "gemini-*"  → Google
+  - "grok-*"    → xAI (OpenAI-compatible API)
 
 API keys are read from environment variables:
   - ANTHROPIC_API_KEY
   - OPENAI_API_KEY
   - GOOGLE_API_KEY  (or GEMINI_API_KEY)
+  - XAI_API_KEY
 
 SDK clients are created lazily on first use, so missing keys for
 unused providers don't cause errors.
@@ -124,6 +126,7 @@ class ApiClient:
         self._anthropic: anthropic.Anthropic | None = None
         self._openai: openai.OpenAI | None = None
         self._google: google.genai.Client | None = None
+        self._xai: openai.OpenAI | None = None
 
     # ------------------------------------------------------------------
     # Lazy provider initialization
@@ -138,6 +141,17 @@ class ApiClient:
         if self._openai is None:
             self._openai = openai.OpenAI()
         return self._openai
+
+    def _get_xai(self) -> openai.OpenAI:
+        if self._xai is None:
+            api_key = os.environ.get("XAI_API_KEY")
+            if not api_key:
+                raise ValueError("Set XAI_API_KEY to use Grok models")
+            self._xai = openai.OpenAI(
+                api_key=api_key,
+                base_url="https://api.x.ai/v1",
+            )
+        return self._xai
 
     def _get_google(self) -> google.genai.Client:
         if self._google is None:
@@ -163,9 +177,11 @@ class ApiClient:
             return "openai"
         if model.startswith("gemini"):
             return "google"
+        if model.startswith("grok"):
+            return "xai"
         raise ValueError(
             f"Unknown model prefix: {model!r}. "
-            "Expected 'claude-*', 'gpt-*', or 'gemini-*'."
+            "Expected 'claude-*', 'gpt-*', 'gemini-*', or 'grok-*'."
         )
 
     # ------------------------------------------------------------------
@@ -205,6 +221,32 @@ class ApiClient:
     ) -> tuple[str, int, int]:
         """Call OpenAI API. Returns (text, input_tokens, output_tokens)."""
         client = self._get_openai()
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user},
+                ],
+            )
+        except _OPENAI_INFRA as e:
+            raise InfrastructureError(str(e)) from e
+
+        text = response.choices[0].message.content or "" if response.choices else ""
+        usage = response.usage
+        return (
+            text,
+            usage.prompt_tokens if usage else 0,
+            usage.completion_tokens if usage else 0,
+        )
+
+    def _call_xai(
+        self, model: str, system: str, user: str
+    ) -> tuple[str, int, int]:
+        """Call xAI API (OpenAI-compatible). Returns (text, input_tokens, output_tokens)."""
+        client = self._get_xai()
         try:
             response = client.chat.completions.create(
                 model=model,
@@ -266,6 +308,7 @@ class ApiClient:
             "anthropic": self._call_anthropic,
             "openai": self._call_openai,
             "google": self._call_google,
+            "xai": self._call_xai,
         }[provider]
 
         retries = 0

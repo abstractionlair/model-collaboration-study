@@ -259,9 +259,11 @@ every node currently in the IR, so CCR and ReConcile run end-to-end.
   (`production_query`) needed for `WITH_PRODUCTION` reviews.
 - `client.py` — `ModelClient` Protocol with one method:
   `complete(model, system, user) -> str`. `FakeClient` is a
-  deterministic stand-in for tests, recording every call and
-  returning structured strings. A real client (Anthropic, OpenAI)
-  satisfies the same Protocol.
+  deterministic stand-in for tests.
+- `api_client.py` — `ApiClient`, real API calls to Anthropic,
+  OpenAI, Google, and xAI with retry/backoff and usage tracking.
+- `tracing.py` — `TracingClient`, wraps any `ModelClient` and
+  captures full request/response traces for inspection.
 - `interpreter.py` — `Interpreter` class with `evaluate(expr, env)`
   that pattern-matches on AST nodes. `Env` is an immutable
   binding environment for `Let`/`Var`. `run(expr, client, query)`
@@ -404,6 +406,11 @@ reviews what, with what visibility, in how many rounds.
   ablation), and all six Phase 1 condition factories (A: 1 call,
   B(N=3): 6 calls, C: 6 calls, D: 12 calls, D': 12 calls,
   E: 10 calls).
+- End-to-end smoke tests with real APIs passed on 2026-04-16:
+  all conditions A–E across four providers (Anthropic, OpenAI,
+  Google, xAI), 49 calls, 0 retries. Intermediate steps
+  (review, revise, fuse) verified to attempt intended behavior.
+  See `scripts/smoke_test.py`.
 
 
 ## Looking ahead
