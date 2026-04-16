@@ -218,13 +218,20 @@ even though not named in the research question:
   versus adversarial debate. Treated as a higher-cost ablation,
   deferred from Phase 1.
 
-**Selection rule** (inventory: F) and **judge information
-regime** (inventory: G) are not varied in Phase 1. With
-executable scoring, the selection rule is fixed to "pick the
-candidate that passes the executable check" (or the one that
-passes the most tests, for partial-credit cases), and there is
-no judge to vary the information regime of. These become IVs in
-Phase 2 when LLM-judged open-ended tasks enter the suite.
+**Selection rule** (inventory: F) is no longer a free-floating
+IV under the macro-model framing. Each macro-model in the
+matrix carries its own internal aggregation step (or none, in
+Condition E) as part of its pinned specification — see
+Macro-Model Conditions for the per-condition commitments.
+Selection-vs-fusion as a structural axis is reserved for
+follow-on ablations on the winning family. Crucially, the
+executable evaluator is never the macro-model's aggregation
+step — see Framing: macro-models for the rule.
+
+**Judge information regime** (inventory: G) does not apply in
+Phase 1, since there is no LLM judge — final scoring is
+executable. G becomes an IV in Phase 2 when LLM-judged
+open-ended tasks enter the suite.
 
 Inventory variables E (session context), J (confidence weighting),
 K (identity blinding), L (judgment format pairwise vs pointwise),
@@ -369,47 +376,6 @@ B, C, D, E) **plus one surgical heterogeneity control** (D'
 within the D family). Finer-grain axis isolation (critique
 format, round count, selection-vs-fusion) is reserved for
 follow-on ablations on whichever family Phase 1 surfaces as most
-promising. Codex flagged the earlier draft's ambiguity between
-"screen" and "isolating experiment"; this is the resolution.
-
-### What the matrix tests
-
-The comparisons the design supports, stated modestly:
-
-- **A → B:** protocol-free compute scaling within a single
-  model. The cleanest isolating comparison in the matrix:
-  controls for "is inference-time compute doing the work by
-  itself?"
-- **B → D':** the protocol-family comparison *with pool
-  composition held constant*. Tests whether review/revise
-  machinery helps *at all*, inside a single model. Not a pure
-  isolation of "machinery" — B and D' also differ in their
-  internal selectors (majority vote vs. ReConcile aggregation).
-  The comparison is "does the D-family machinery beat the
-  B-family baseline on the same pool?" not "does review/revise
-  machinery in isolation help."
-- **D' → D:** heterogeneous pool composition vs. homogeneous,
-  with protocol family and internal selector held constant
-  *under market prices*. This is the cleanest heterogeneity
-  comparison the matrix supports. It does not, by itself,
-  separate lineage diversity from price arbitrage — the
-  heterogeneous pool includes cheaper models and therefore buys
-  more tokens at matched dollars. See the Compute Budget
-  Structure section for the arbitrage discussion and the
-  proposed pinned-price follow-on.
-- **C vs. D vs. E:** family-level comparisons of three
-  heterogeneous protocol shapes at matched dollars. These are
-  not isolating comparisons — each family differs in topology,
-  selector, and round structure. They are screen-level
-  comparisons: "which family is most worth isolating in
-  follow-on work?"
-
-This is an intentionally screened matrix, not an exhaustive
-factorial. Phase 1 is a **screen of protocol families** (A, B,
-C, D, E) **plus one surgical isolating control** (D' for
-heterogeneity inside the D family). Finer-grain axis isolation
-(critique format, round count) is reserved for follow-on
-ablations on whichever family Phase 1 surfaces as most
 promising. Codex flagged the earlier draft's ambiguity between
 "screen" and "isolating experiment"; this is the resolution.
 

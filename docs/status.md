@@ -126,13 +126,20 @@ order (per all three reviewers' converged recommendations):
      `FuseWithCritiques` node and make E match the design OR
      update the design to adopt the implemented "writers revise
      then meta integrates" variant.
-2. **Design-doc scrub** (Codex #4, Gemini #6): remove the stale
-   "selection rule is fixed to pick the candidate that passes the
-   executable check" language from the IV section of
-   `experimental-design.md`; it contradicts the macro-model
-   framing. Also remove the duplicated "What the matrix tests"
-   section. Without this, faithfulness reviewers compare against
-   contradictory design text.
+2. ~~**Design-doc scrub** (Codex #4, Gemini #6): remove the
+   stale "selection rule is fixed to pick the candidate that
+   passes the executable check" language from the IV section of
+   `experimental-design.md`; remove the duplicated "What the
+   matrix tests" section.~~ Done 2026-04-16. The IV paragraph on
+   F (selection rule) was rewritten to align with the macro-model
+   framing (selectors are per-condition aggregation steps, not a
+   global rule; executable evaluator is never the aggregator);
+   judge-information-regime sentence preserved as its own
+   paragraph. The duplicate matrix-tests section (older "protocol
+   families" wording) was deleted; the macro-model-vocabulary
+   version remains. Done before the faithfulness reconciliations
+   so next-round reviewers compare against single-source-of-truth
+   design text.
 3. **Implementation bugs** (small, local fixes):
    - Google retry classification — narrow to status-based
      (408/429/5xx), not exception-class-wide.
