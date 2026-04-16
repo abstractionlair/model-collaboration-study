@@ -181,14 +181,23 @@ class ParGen(Expr[list[Answer[Draft]]]):
 
 
 @dataclass(frozen=True)
-class ReviseRound(Expr[list[Answer[Draft]]]):
-    """One round of parallel review-and-revise across models.
+class SelfReviseRound(Expr[list[Answer[Draft]]]):
+    """One round of parallel self-review-and-revise across models.
 
-    Each model reviews its own draft, with visibility of peer drafts
-    controlled by the visibility parameter. Then each model revises
-    its own draft based on the review it generated.
+    Each model reviews its OWN draft (with optional visibility of
+    peer drafts as context, controlled by the visibility parameter)
+    and then revises its own draft based on the review it generated.
+    Reviewer and writer are the same model for each draft.
 
     Type: [Model] -> [Answer[Draft]] -> [Answer[Draft]]
+
+    Renamed from `ReviseRound` on 2026-04-16 to make the
+    self-review semantics explicit. The sibling `PeerReviseRound`
+    (different model critiques each draft) is the design-faithful
+    version for ReConcile-style protocols and will be added when
+    the D-family conditions migrate to it. Both nodes are valid
+    typed building blocks in the IR — pick the one that matches
+    the macro-model you're expressing.
 
     This is not a primitive — it's morally equivalent to
         [revise(m_i, d_i, review(m_i, d_i, peers)) for (m_i, d_i) in zip(models, drafts)]
@@ -205,14 +214,18 @@ class ReviseRound(Expr[list[Answer[Draft]]]):
 
 
 @dataclass(frozen=True)
-class Rounds(Expr[list[Answer[Draft]]]):
-    """N rounds of ReviseRound applied to an initial list of drafts.
+class SelfRounds(Expr[list[Answer[Draft]]]):
+    """N rounds of SelfReviseRound applied to an initial list of drafts.
 
     Type: Int -> [Model] -> [Answer[Draft]] -> [Answer[Draft]]
 
+    Renamed from `Rounds` on 2026-04-16 alongside the
+    SelfReviseRound rename. The sibling `PeerRounds` will follow
+    when PeerReviseRound lands.
+
     Having the round count as an explicit field (rather than
-    unrolling N ReviseRound nodes) makes "change the number of
-    rounds" a local mutation — flip one integer field — instead
+    unrolling N SelfReviseRound nodes) makes "change the number
+    of rounds" a local mutation — flip one integer field — instead
     of a structural tree edit.
     """
     result_type: ClassVar[Any] = list[Answer[Draft]]

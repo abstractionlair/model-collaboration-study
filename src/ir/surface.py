@@ -26,8 +26,8 @@ from .ast import (
     QueryVar,
     Review,
     Revise,
-    ReviseRound,
-    Rounds,
+    SelfReviseRound,
+    SelfRounds,
     WeightedVote,
 )
 from .types import (
@@ -103,27 +103,34 @@ def par_gen(models: list[str], q: Expr[Query]) -> Expr[list[Answer[Draft]]]:
     return ParGen(models=models, query=q)
 
 
-def revise_round(
+def self_revise_round(
     models: list[str],
     drafts: Expr[list[Answer[Draft]]],
     context: ContextMode = FRESH,
     visibility: Visibility = PEERS_GROUPED,
 ) -> Expr[list[Answer[Draft]]]:
-    """One round of parallel review-and-revise across models."""
-    return ReviseRound(
+    """One round of parallel self-review-and-revise across models.
+
+    Each model reviews its OWN draft (with peer drafts visible per
+    the visibility annotation) and revises it. The peer-review
+    sibling (`peer_revise_round`, different model critiques each
+    draft) is the design-faithful version for ReConcile-style
+    protocols and will be added when D/D'/E migrate to it.
+    """
+    return SelfReviseRound(
         models=models, drafts=drafts, context=context, visibility=visibility
     )
 
 
-def rounds(
+def self_rounds(
     n: int,
     models: list[str],
     drafts: Expr[list[Answer[Draft]]],
     context: ContextMode = FRESH,
     visibility: Visibility = PEERS_GROUPED,
 ) -> Expr[list[Answer[Draft]]]:
-    """N rounds of review-and-revise across models."""
-    return Rounds(
+    """N rounds of self-review-and-revise across models."""
+    return SelfRounds(
         n=n,
         models=models,
         drafts=drafts,
@@ -177,7 +184,7 @@ def bind(
 
     Usage:
         result = bind(
-            rounds(3, models, par_gen(models, q)),
+            self_rounds(3, models, par_gen(models, q)),
             lambda r: finalize(weighted_vote(r, par_score(models, r))),
         )
 

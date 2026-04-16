@@ -27,8 +27,8 @@ from src.ir.ast import (
     QueryVar,
     Review,
     Revise,
-    ReviseRound,
-    Rounds,
+    SelfReviseRound,
+    SelfRounds,
     Var,
     WeightedVote,
 )
@@ -100,7 +100,7 @@ class Interpreter:
                 )
         raise ValueError(f"Unknown visibility: {visibility}")
 
-    def _review_and_revise_one(
+    def _self_review_and_revise_one(
         self,
         model: str,
         own: RAnswer,
@@ -108,6 +108,15 @@ class Interpreter:
         context: ContextMode,
         visibility: Visibility,
     ) -> RAnswer:
+        """Self-review semantics: `model` is both reviewer and reviser.
+
+        The reviewer (= writer) sees its own draft and produces a
+        critique, then revises its own draft from that critique.
+        Peer drafts may be visible per the visibility annotation
+        but are context for self-reflection, not the artifact under
+        review. The peer-review sibling will live in
+        `_peer_review_and_revise_one` once added.
+        """
         system = self._system_for(context)
         crit_text = self.client.complete(
             model, system, self._review_prompt(own, peers, visibility)
@@ -123,18 +132,26 @@ class Interpreter:
             text=revised_text, stage=Draft, production_query=own.production_query
         )
 
-    def _one_round(
+    def _one_self_round(
         self,
         models: list[str],
         drafts: list[RAnswer],
         context: ContextMode,
         visibility: Visibility,
     ) -> list[RAnswer]:
+        """One round of self-review-and-revise across `models`.
+
+        For each draft d_i, model m_i = models[i] reviews and
+        revises its OWN draft (peers visible per the visibility
+        annotation). This is the SelfReviseRound semantics. The
+        peer-review version (each draft reviewed by a different
+        model) will live in `_one_peer_round` once added.
+        """
         out: list[RAnswer] = []
         for i, m in enumerate(models):
             peers = [d for j, d in enumerate(drafts) if j != i]
             out.append(
-                self._review_and_revise_one(
+                self._self_review_and_revise_one(
                     m, drafts[i], peers, context, visibility
                 )
             )
@@ -226,18 +243,18 @@ class Interpreter:
                     )
                 return results
 
-            case ReviseRound(
+            case SelfReviseRound(
                 models=models, drafts=ds, context=context, visibility=vis
             ):
                 current = self.evaluate(ds, env)
-                return self._one_round(models, current, context, vis)
+                return self._one_self_round(models, current, context, vis)
 
-            case Rounds(
+            case SelfRounds(
                 n=n, models=models, drafts=ds, context=context, visibility=vis
             ):
                 current = self.evaluate(ds, env)
                 for _ in range(n):
-                    current = self._one_round(models, current, context, vis)
+                    current = self._one_self_round(models, current, context, vis)
                 return current
 
             case ParScore(models=models, drafts=ds):

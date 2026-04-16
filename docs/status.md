@@ -113,19 +113,30 @@ reviewers. Next round is targeted reconciliation, not rethink.
 order (per all three reviewers' converged recommendations):
 
 1. **Faithfulness reconciliations** — decide and record in
-   `decisions.md`. Each is a code-or-design choice:
-   - **D-family review semantics** (Codex #1, Gemini #2): make
-     `ReviseRound` actually peer-review (different model
-     critiques each draft) OR update the design to adopt the
-     self-review-with-peer-context variant. Currently the largest
-     gap.
-   - **B/C aggregation** (Opus #1, Codex #2, Gemini #3): add a
-     comparative-selection IR node and use it OR formally adopt
-     pointwise scoring in the design.
-   - **E composition** (Opus #2, Codex #3, Gemini #4): add a
-     `FuseWithCritiques` node and make E match the design OR
-     update the design to adopt the implemented "writers revise
-     then meta integrates" variant.
+   `decisions.md`. Each is a code-or-design choice. The chosen
+   pattern is **keep the existing component as a renamed building
+   block, then add a new sibling that matches the design**, on
+   the principle that the IR is the substrate for the broader
+   protocol-inventory space and self-review / pointwise / fused-
+   over-revised-drafts are all real macro-model shapes worth
+   keeping pluggable.
+   - **D-family review semantics** (Codex #1, Gemini #2):
+     **In progress 2026-04-16.** Step 1 (rename
+     `ReviseRound` → `SelfReviseRound`, `Rounds` → `SelfRounds`)
+     in flight; step 2 (add `PeerReviseRound` /
+     `PeerRounds`, migrate D/D'/E to use them) follows.
+   - **B/C aggregation** (Opus #1, Codex #2, Gemini #3): rename
+     the current `ParScore + WeightedVote` pattern as the
+     pointwise-scoring building block; add a `PickOne` (or
+     similar) comparative-selection node; migrate B/C to it.
+     Same shape.
+   - **E composition** (Opus #2, Codex #3, Gemini #4): keep the
+     current "writers revise, then meta fuses revised drafts"
+     macro-model under a name that says so; add
+     `FuseWithCritiques` (and probably a separable peer-review-
+     producing-critiques node) to express the design's E
+     specification. Migrate the named-as-E condition to the
+     design version.
 2. ~~**Design-doc scrub** (Codex #4, Gemini #6): remove the
    stale "selection rule is fixed to pick the candidate that
    passes the executable check" language from the IV section of

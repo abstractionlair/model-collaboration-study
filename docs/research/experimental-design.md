@@ -102,10 +102,11 @@ restated in the language this framing makes natural.
   model pool, round count, aggregation step, anything — are
   different macro-models.
 - **Building blocks** are the typed IR primitives from
-  `src/ir/` (Gen, Review, Revise, ParGen, ReviseRound, Rounds,
-  ParScore, WeightedVote, Let, and so on). Each macro-model is
-  a composition of these blocks. The same blocks get reused
-  across many macro-models.
+  `src/ir/` (Gen, Review, Revise, ParGen, SelfReviseRound,
+  SelfRounds, Fuse, ParScore, WeightedVote, Let, and so on, with
+  peer-review siblings planned). Each macro-model is a
+  composition of these blocks. The same blocks get reused across
+  many macro-models.
 
 The building-block layer is load-bearing for two downstream
 goals beyond Phase 1:
@@ -305,16 +306,18 @@ part of the macro-model itself.
   diversity alone produces a real gain at matched dollars.
 
 - **D. Heterogeneous ReConcile-style.** `ParGen` producing one
-  sample from each of the N subject models, then one
-  `ReviseRound` where each draft is reviewed by 1–2 peers
-  (identities blinded), then writers revise once from the
-  structured feedback, then a **ReConcile-native
-  confidence-weighted aggregation** block commits to a final
-  answer. Roughly the ReConcile shape in
-  `src/protocols/reconcile.py`, with caveats — ReConcile's
-  convincing-samples mechanism and the exact aggregation rule
-  are not yet reflected in the IR version; the mapping is
-  loose.
+  sample from each of the N subject models, then one peer-review
+  round where each draft is reviewed by 1–2 peers (identities
+  blinded), then writers revise once from the structured
+  feedback, then a **ReConcile-native confidence-weighted
+  aggregation** block commits to a final answer. Roughly the
+  ReConcile shape in `src/protocols/reconcile.py`, with caveats:
+  ReConcile's convincing-samples mechanism and the exact
+  aggregation rule are not yet reflected in the IR version; and
+  as of 2026-04-16 the implementation uses `SelfReviseRound`
+  (self-review with peer-context visibility) rather than the
+  peer-review the design specifies — `PeerReviseRound` is
+  planned, see `decisions.md` 2026-04-16.
 
 - **D'. Homogeneous ReConcile-style.** Structurally identical
   to D — same blocks, same topology, same aggregation — except

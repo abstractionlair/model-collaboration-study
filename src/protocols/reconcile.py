@@ -6,11 +6,19 @@ Expresses the protocol from:
 
 Structure:
 1. Each model independently generates an initial draft.
-2. For N rounds: each model reviews its draft, seeing grouped peer
-   answers, and revises based on the review.
+2. For N rounds: review-and-revise across the pool, with peer
+   drafts grouped as visibility context.
 3. Each model produces a confidence score for its refined draft.
 4. Weighted vote selects the team answer.
 5. Finalize wraps the selected draft as the committed final answer.
+
+**Faithfulness note (2026-04-16).** Step 2 currently uses
+`SelfRounds` (each model self-reviews its own draft with peer
+drafts as context). The ReConcile paper's round-table format has
+each agent critiquing peer drafts, not self-reviewing. The
+peer-review sibling (`PeerRounds`) is planned; this protocol
+will migrate to it. Tracked in `decisions.md` 2026-04-16 entry
+"Rename ReviseRound/Rounds to SelfReviseRound/SelfRounds."
 
 Notes:
 - "Convincing samples" (per-model few-shot demonstrations of
@@ -18,8 +26,8 @@ Notes:
   the experiment spec layer, not the protocol IR.
 - Confidence is captured by par_score rather than baked into gen, so
   that confidence extraction can be mutated independently.
-- Rounds is a single node with an explicit count, so mutating the
-  round count is a local field change.
+- SelfRounds is a single node with an explicit count, so mutating
+  the round count is a local field change.
 """
 
 from __future__ import annotations
@@ -32,7 +40,7 @@ from src.ir.surface import (
     par_gen,
     par_score,
     query,
-    rounds,
+    self_rounds,
     weighted_vote,
 )
 from src.ir.types import Answer, Final
@@ -43,9 +51,14 @@ def reconcile(
     models: list[str],
     n_rounds: int = 3,
 ) -> Expr[Answer[Final]]:
-    """Build the ReConcile protocol AST."""
+    """Build the ReConcile protocol AST.
+
+    Currently uses self-review-with-peer-context per the
+    faithfulness note in the module docstring. Will migrate to
+    peer review once `PeerRounds` lands.
+    """
     q = query()
-    refined = rounds(
+    refined = self_rounds(
         n_rounds, models, par_gen(models, q), FRESH, PEERS_GROUPED
     )
     return bind(

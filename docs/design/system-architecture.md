@@ -140,20 +140,20 @@ The current node set, all frozen dataclasses inheriting from
 | `Review`        | `Model -> Answer[Draft] -> Critique[Answer[Draft]]`                       |
 | `Revise`        | `Model -> Answer[Draft] -> Critique[Answer[Draft]] -> Answer[Draft]`      |
 | `Finalize`      | `Answer[Draft] -> Answer[Final]`                                          |
-| `ParGen`        | `[Model] -> Query -> [Answer[Draft]]`                                     |
-| `ReviseRound`   | `[Model] -> [Answer[Draft]] -> [Answer[Draft]]`                           |
-| `Rounds`        | `Int -> [Model] -> [Answer[Draft]] -> [Answer[Draft]]`                    |
-| `ParScore`      | `[Model] -> [Answer[Draft]] -> [Score[Answer[Draft]]]`                    |
+| `ParGen`            | `[Model] -> Query -> [Answer[Draft]]`                                     |
+| `SelfReviseRound`   | `[Model] -> [Answer[Draft]] -> [Answer[Draft]]` (each model self-reviews) |
+| `SelfRounds`        | `Int -> [Model] -> [Answer[Draft]] -> [Answer[Draft]]` (N self-rounds)    |
+| `ParScore`          | `[Model] -> [Answer[Draft]] -> [Score[Answer[Draft]]]`                    |
 | `Fuse`          | `Model -> [Answer[Draft]] -> Query -> Answer[Draft]`                      |
 | `WeightedVote`  | `[Answer[Draft]] -> [Score[Answer[Draft]]] -> Answer[Draft]`              |
 | `Var`           | reference to a Let-bound variable                                         |
 | `Let`           | `Expr[T1] -> (Expr[T1] -> Expr[T2]) -> Expr[T2]`                          |
 
-**Why bundled nodes like `ReviseRound` and `Rounds` exist.** They
-are not primitives — `ReviseRound` is morally
-`[revise(m_i, d_i, review(m_i, d_i, peers)) for ...]`, and `Rounds`
-is just N applications of `ReviseRound`. They exist as single
-nodes because:
+**Why bundled nodes like `SelfReviseRound` and `SelfRounds`
+exist.** They are not primitives — `SelfReviseRound` is morally
+`[revise(m_i, d_i, review(m_i, d_i, peers)) for ...]`, and
+`SelfRounds` is just N applications of `SelfReviseRound`. They
+exist as single nodes because:
 
 1. Mutating "the number of rounds" should be a local field change,
    not a structural tree edit.
@@ -164,6 +164,21 @@ nodes because:
 
 Add a primitive only when a protocol forces a per-step variation
 that the bundle can't express.
+
+**Self-review vs peer-review as separate building blocks.**
+`SelfReviseRound` is the current self-review-with-peer-context
+node (renamed from `ReviseRound` on 2026-04-16 after three
+independent reviewers flagged a design-vs-implementation
+mismatch). The design-faithful sibling `PeerReviseRound` — each
+draft reviewed by a different model — is planned but not yet
+implemented. Both are intended to live alongside each other as
+typed building blocks: self-review is a real macro-model shape
+worth keeping available even after the peer-review sibling
+lands, because several protocols in the inventory use it
+(consensus-via-self-reflection, single-pass-then-self-critique,
+etc.). Pick the one that matches the macro-model being
+expressed. See `docs/decisions.md` 2026-04-16 for the rename
+rationale.
 
 **Fuse and the "many → one" family.** `Fuse` is a model that
 reads multiple peer drafts and writes a fresh response — needed
@@ -193,8 +208,8 @@ before the mutation engine itself can be written.
 A thin facade in front of the AST classes:
 
 - Lowercase factory functions: `query()`, `gen()`, `review()`,
-  `revise()`, `finalize()`, `par_gen()`, `revise_round()`, `rounds()`,
-  `par_score()`, `weighted_vote()`.
+  `revise()`, `finalize()`, `par_gen()`, `self_revise_round()`,
+  `self_rounds()`, `par_score()`, `weighted_vote()`, `fuse()`.
 - Bare enum constants: `FRESH`, `ACCUMULATED`, `ARTIFACT_ONLY`,
   `WITH_PRODUCTION`, `PEERS_GROUPED`, `ALL_VISIBLE`.
 - `bind(value, lambda v: body)` for Let bindings, with optional
@@ -212,7 +227,7 @@ authoring API uses a Python closure (HOAS):
 
 ```python
 bind(
-    rounds(n, models, par_gen(models, q)),
+    self_rounds(n, models, par_gen(models, q)),
     lambda r: finalize(weighted_vote(r, par_score(models, r))),
 )
 ```
@@ -376,7 +391,7 @@ expression:
 - `condition_c(subject_models, judge_model)` — heterogeneous ParGen + peer scoring
 - `condition_d` — re-exported `reconcile()` from `reconcile.py`
 - `condition_d_prime(model, pool_size, n_rounds)` — homogeneous ReConcile
-- `condition_e(subject_models, meta_reviewer)` — ParGen + ReviseRound + Fuse
+- `condition_e(subject_models, meta_reviewer)` — ParGen + SelfReviseRound + Fuse (will migrate to peer-review sibling when it lands)
 
 All six build cleanly, pass `mypy --strict`, and run end-to-end
 through the executor with `FakeClient`.

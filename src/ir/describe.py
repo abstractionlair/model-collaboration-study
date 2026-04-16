@@ -20,9 +20,9 @@ from .ast import (
     ParScore,
     QueryVar,
     Review,
-    ReviseRound,
     Revise,
-    Rounds,
+    SelfReviseRound,
+    SelfRounds,
     Var,
     WeightedVote,
 )
@@ -65,17 +65,17 @@ def describe(expr: Expr[Any], indent: int = 0) -> str:
                 f"{pad}ParGen({models}) : Query -> [Answer[Draft]]\n{q}"
             )
 
-        case ReviseRound(models=models, drafts=drafts, context=ctx, visibility=vis):
+        case SelfReviseRound(models=models, drafts=drafts, context=ctx, visibility=vis):
             d = describe(drafts, indent + 1)
             return (
-                f"{pad}ReviseRound({models}, ctx={ctx.value}, vis={vis.value}) "
+                f"{pad}SelfReviseRound({models}, ctx={ctx.value}, vis={vis.value}) "
                 f": [Answer[Draft]] -> [Answer[Draft]]\n{d}"
             )
 
-        case Rounds(n=n, models=models, drafts=drafts, context=ctx, visibility=vis):
+        case SelfRounds(n=n, models=models, drafts=drafts, context=ctx, visibility=vis):
             d = describe(drafts, indent + 1)
             return (
-                f"{pad}Rounds(n={n}, {models}, ctx={ctx.value}, vis={vis.value}) "
+                f"{pad}SelfRounds(n={n}, {models}, ctx={ctx.value}, vis={vis.value}) "
                 f": [Answer[Draft]] -> [Answer[Draft]]\n{d}"
             )
 

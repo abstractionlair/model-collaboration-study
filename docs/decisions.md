@@ -240,6 +240,67 @@ them when a concrete protocol requires them.
 
 ---
 
+## 2026-04-16 Rename ReviseRound/Rounds to SelfReviseRound/SelfRounds; add peer-review siblings later
+
+**Decision:** Rename the existing `ReviseRound` and `Rounds` IR
+nodes to `SelfReviseRound` and `SelfRounds` to make their
+self-review-with-peer-context semantics explicit, and commit to
+adding `PeerReviseRound` / `PeerRounds` as sibling nodes for the
+peer-review macro-model that the experimental design's D-family
+specifies. Both flavors are intended to coexist as typed
+building blocks. Conditions D, D', and E continue to use the
+self-review nodes for now and will migrate to the peer-review
+siblings as those land.
+
+**Alternatives considered:**
+
+- **Mutate the existing nodes' semantics in place** (change
+  `ReviseRound` from self-review to peer-review under the same
+  name). Rejected: loses the self-review macro-model as an
+  available building block. Several protocols in
+  `docs/research/protocol-inventory.md` use self-review-with-
+  peer-context as their core (consensus-via-self-reflection,
+  single-pass-then-self-critique). The IR is supposed to be the
+  substrate for the broader inventory, not just for whichever
+  conditions Phase 1 tests.
+- **Generalize `ReviseRound(reviewer_role: Self | Peer)`** as a
+  parametric node. Rejected: adds authoring-time complexity for
+  no Phase 1 payoff. Two distinct node names compose more
+  cleanly with mutation (a structural mutation that swaps Self
+  for Peer is just a node-class swap; no field-validity rules to
+  reason about).
+- **Generalize `Rounds(n, single_round_expr)`** so the round
+  count is orthogonal to the round kind. Rejected for now (same
+  reason — adds authoring complexity for no Phase 1 payoff). May
+  revisit if more round kinds appear.
+- **Update the experimental design to adopt self-review.**
+  Rejected: would defeat the heterogeneity comparison D/D' is
+  built around. All three independent reviewers (Opus 4.7,
+  Codex, Gemini) flagged self-review as destroying the
+  cross-lineage critique signal that makes the D-family
+  meaningful.
+
+**Rationale:** The faithfulness gap was identified in three
+independent reviews (`docs/reviews/system-review-*-2026-04-16.md`).
+The pattern of choice — keep the existing component as a renamed
+typed building block, then add the design-faithful sibling — was
+adopted as the project-wide pattern for resolving this round's
+faithfulness gaps (see also `decisions.md` entries to come for
+B/C aggregation and E composition). The principle is that the IR
+is a substrate for the protocol-inventory space, not a minimum
+expression of just the locked Phase 1 conditions; pluggable
+typed components are higher-leverage than tightly-fit ones.
+
+**Status:** Active. SelfReviseRound and SelfRounds are
+implemented. PeerReviseRound and PeerRounds are reserved names,
+not yet implemented — add when migrating D/D'/E. Once the
+sibling nodes land, the conditions in `src/protocols/conditions.py`
+should be reviewed to use whichever node matches each macro-model
+specification, and `src/protocols/reconcile.py` should migrate
+to PeerRounds.
+
+---
+
 ## 2026-04-08 Small models as subjects, frontier models as judges
 
 **Decision:** Use small/mid-tier models (e.g. Haiku, GPT mini, Gemini
