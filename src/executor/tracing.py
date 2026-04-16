@@ -35,11 +35,26 @@ class TraceEntry:
     def step_type(self) -> str:
         """Classify this call by what the prompt is asking for.
 
-        Order matters: revise prompts contain "critique" (in the
-        embedded critique text), so "revise" must be checked before
-        "review"/"critique".
+        Order matters. More-specific prompts (fuse_with_critiques,
+        pick_one) are checked before less-specific ones (fuse,
+        review) because the specific prompts share substrings with
+        the general ones. Revise before review/critique because
+        revise prompts embed critique text.
+
+        Brittleness note: the classifier inspects prompt-text
+        substrings. Custom PromptTemplates with different wording
+        will silently misclassify. Known-limitation; fixing
+        structurally would require plumbing the step type through
+        the executor as explicit metadata. Tracked in review #15
+        of `docs/reviews/system-review-opus47-2026-04-16.md`.
         """
         lower = self.user_prompt.lower()
+        # More-specific matchers first (they share substrings with
+        # the general ones).
+        if "critique of draft" in lower and "synthesize" in lower:
+            return "fuse_with_critiques"
+        if "pick the single best" in lower and "candidate number" in lower:
+            return "pick_one"
         if "write your own response" in lower and "peer drafts" in lower:
             return "fuse"
         if "confidence" in lower and "0.0-1.0" in lower:

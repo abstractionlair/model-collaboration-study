@@ -11,6 +11,9 @@ critique format) is used.
 
 from __future__ import annotations
 
+import logging
+import random
+import re
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -43,6 +46,9 @@ from .client import ModelClient
 from .runtime import RAnswer, RCritique, RQuery, RScore
 
 
+logger = logging.getLogger(__name__)
+
+
 @dataclass(frozen=True)
 class Env:
     """Immutable binding environment for Let/Var."""
@@ -57,12 +63,27 @@ class Env:
         return self.bindings[name]
 
 
+@dataclass
+class InterpreterTelemetry:
+    """Non-fatal event counters collected during a single run.
+
+    Preserves information about measurement-quality events that
+    would otherwise be silent: score/pick parse failures,
+    WeightedVote/PickOne ties, etc. The runner can consult these
+    after a run to decide whether results are trustworthy.
+    """
+    score_parse_failures: int = 0
+    pick_parse_failures: int = 0
+    weighted_vote_ties: int = 0
+
+
 class Interpreter:
     def __init__(
         self,
         client: ModelClient,
         query_text: str,
         prompts: PromptTemplates | None = None,
+        seed: int | None = None,
     ) -> None:
         self.client = client
         self.query_text = query_text
@@ -73,6 +94,13 @@ class Interpreter:
         # in both the review and the revise step — they must see the
         # same draft, not two independent model calls.
         self._cache: dict[int, Any] = {}
+        # Seeded Random for deterministic tie-breaking across runs.
+        # If seed is None, uses Python's default random state (still
+        # not position-biased, just non-reproducible).
+        self._rng = random.Random(seed)
+        # Telemetry for silent-failure modes. Populated during
+        # evaluate() and inspected by the caller afterward.
+        self.telemetry = InterpreterTelemetry()
 
     def _system_for(self, context: ContextMode) -> str:
         if context is ContextMode.FRESH:
@@ -457,15 +485,32 @@ class Interpreter:
                         self.prompts.gen_system,
                         self.prompts.score_user.format(draft=ans.text),
                     )
-                    scores.append(RScore(value=_parse_score(text)))
+                    parsed = _parse_score(text)
+                    if parsed is None:
+                        self.telemetry.score_parse_failures += 1
+                        logger.warning(
+                            "score parse failure from %s: %r (using 0.5 fallback)",
+                            m, text[:120],
+                        )
+                        parsed = 0.5
+                    scores.append(RScore(value=parsed))
                 return scores
 
             case WeightedVote(drafts=ds, scores=ss):
                 answers = self.evaluate(ds, env)
                 scores = self.evaluate(ss, env)
-                best_idx = max(
-                    range(len(answers)), key=lambda i: scores[i].value
-                )
+                best = max(s.value for s in scores)
+                tied = [i for i, s in enumerate(scores) if s.value == best]
+                if len(tied) > 1:
+                    self.telemetry.weighted_vote_ties += 1
+                    logger.warning(
+                        "WeightedVote tie among indices %r at score %.3f "
+                        "(random tie-break)",
+                        tied, best,
+                    )
+                    best_idx = self._rng.choice(tied)
+                else:
+                    best_idx = tied[0]
                 return answers[best_idx]
 
             case PickOne(judge=judge, drafts=ds):
@@ -482,6 +527,13 @@ class Interpreter:
                     ),
                 )
                 idx = _parse_pick(text, n=len(answers))
+                if idx is None:
+                    self.telemetry.pick_parse_failures += 1
+                    logger.warning(
+                        "pick parse failure from %s: %r (random fallback among %d)",
+                        judge, text[:120], len(answers),
+                    )
+                    idx = self._rng.randrange(len(answers))
                 return answers[idx]
 
             case Var(name=name):
@@ -494,34 +546,95 @@ class Interpreter:
         raise NotImplementedError(f"Unhandled node: {type(expr).__name__}")
 
 
-def _parse_score(text: str) -> float:
-    for tok in text.replace(",", " ").split():
+_FLOAT_RE = re.compile(r"-?\d+\.?\d*")
+
+
+def _parse_score(text: str) -> float | None:
+    """Parse a confidence score in [0, 1] from a model response.
+
+    The prompt asks for "0.0-1.0, return only the number." Models
+    mostly comply, but sometimes include prose ("Confidence: 0.8
+    (high)") or use different scales ("7 out of 10"). Priorities:
+
+    1. Last float in [0, 1] — compliant models usually write the
+       score last ("therefore 0.8"); preferring the last avoids
+       picking up spurious numbers from the prompt echo.
+    2. Last "N out of 10" or "N/10" pattern with N in [0, 10] —
+       convert to [0, 1].
+    3. None — caller should log and fall back explicitly.
+
+    Returns None on parse failure. The caller is expected to log
+    a telemetry event and use a fallback; this function's job is
+    to be honest about what it could and couldn't find.
+    """
+    # Priority 1: last float in [0, 1]
+    floats_in_range: list[float] = []
+    for match in _FLOAT_RE.finditer(text):
         try:
-            v = float(tok)
+            v = float(match.group())
         except ValueError:
             continue
-        return max(0.0, min(1.0, v))
-    return 0.5
+        if 0.0 <= v <= 1.0:
+            floats_in_range.append(v)
+    if floats_in_range:
+        return floats_in_range[-1]
+
+    # Priority 2: "X out of 10" or "X/10"
+    ratio = re.search(
+        r"(\d+(?:\.\d+)?)\s*(?:/|out of)\s*10\b", text, re.IGNORECASE,
+    )
+    if ratio is not None:
+        try:
+            v = float(ratio.group(1))
+        except ValueError:
+            return None
+        if 0.0 <= v <= 10.0:
+            return v / 10.0
+
+    return None
 
 
-def _parse_pick(text: str, n: int) -> int:
+_INT_RE = re.compile(r"\b(\d+)\b")
+
+
+def _parse_pick(text: str, n: int) -> int | None:
     """Parse a 1-indexed candidate selection from a judge's response.
 
-    Returns a 0-indexed candidate position in [0, n). Falls back
-    to 0 (first candidate) if no valid integer in [1, n] is
-    found, mirroring the position-bias behavior of WeightedVote
-    on ties; the silent fallback is a known issue tracked
-    alongside _parse_score in the broader implementation-bugs
-    item (see status.md).
+    Returns a 0-indexed candidate position in [0, n), or None on
+    parse failure. The caller should log a telemetry event and
+    fall back explicitly (e.g., random choice over candidates)
+    rather than silently picking the first — position bias in
+    the baseline would skew the compute-matched comparison.
+
+    Priorities:
+    1. Integer in [1, n] immediately after "candidate" (case-
+       insensitive), if present — picks up "Candidate 3" style
+       responses cleanly.
+    2. Last integer in [1, n] in the response — prefer trailing
+       (models often write the choice at the end).
     """
-    for tok in text.replace(",", " ").replace(".", " ").split():
+    # Priority 1: "Candidate N" pattern
+    for match in re.finditer(r"candidate\s*(\d+)", text, re.IGNORECASE):
         try:
-            v = int(tok)
+            v = int(match.group(1))
         except ValueError:
             continue
         if 1 <= v <= n:
             return v - 1
-    return 0
+
+    # Priority 2: last integer in [1, n]
+    ints_in_range: list[int] = []
+    for match in _INT_RE.finditer(text):
+        try:
+            v = int(match.group(1))
+        except ValueError:
+            continue
+        if 1 <= v <= n:
+            ints_in_range.append(v)
+    if ints_in_range:
+        return ints_in_range[-1] - 1
+
+    return None
 
 
 def run(
@@ -529,10 +642,15 @@ def run(
     client: ModelClient,
     query_text: str,
     prompts: PromptTemplates | None = None,
+    seed: int | None = None,
 ) -> Any:
     """Evaluate an expression against a client and a query string.
 
     If prompts is None, DEFAULT_PROMPTS (structured-critique format
-    from the experiment-spec layer) is used.
+    from the experiment-spec layer) is used. If seed is None,
+    tie-breaking and parse-failure fallbacks use Python's default
+    random state (non-reproducible but non-positional-biased).
     """
-    return Interpreter(client, query_text, prompts).evaluate(expr, Env())
+    return Interpreter(client, query_text, prompts, seed=seed).evaluate(
+        expr, Env()
+    )

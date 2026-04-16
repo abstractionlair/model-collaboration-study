@@ -144,13 +144,35 @@ The unified blocker list for the next round of work:
 
 ## Currently routed to
 
-**Operational-readiness work** from the round-2 reviews. The
-seven-item blocker list above is the source of truth for this
-batch; items are independent enough to pick off in any order,
-though the two parser fixes + generation stochasticity should
-probably land together since they interact. After the batch, a
-round-3 cross-lineage review should be able to recommend
+**Operational-readiness work** from the round-2 reviews. **In
+progress 2026-04-16** — landing as two commits:
+
+- **Commit 1 (measurement quality + observability + tests):**
+  parser fixes with parse-failure telemetry, WeightedVote
+  tie-breaking via seeded random, temperature made optional
+  (omit to use vendor defaults), TracingClient step_type
+  updated for PickOne and FuseWithCritiques, FakeClient-backed
+  unit tests.
+- **Commit 2 (API reliability + Phase 1 gates):** Google retry
+  narrowed to 408/429/5xx, empty-response → CapabilityFailure,
+  CallRecord.status field with infra- and capability-failure
+  logging, pre-calibration placeholders removed (best_model /
+  n_samples / pricing must be passed explicitly).
+
+After this, round-3 cross-lineage review should be capable of
 `Proceed` per both round-2 reviewers' forecasts.
+
+**Policy decision on temperature (2026-04-16):** The design's
+"Common Interface Constraints" section originally said "Same
+temperature policy." Clarified: the policy is to leave
+temperature at the vendor default unless a specific reason
+says otherwise. Modern models are tuned for their defaults;
+forcing `temperature=0` causes mode collapse (Gemini's
+homogeneous-pool observation), and picking a specific non-
+default number is guessing against the vendor's tuning. The
+`temperature` field on ApiClient is now `Optional[float]`
+defaulting to None; explicit overrides remain available for
+reproducibility testing or temperature ablations.
 
 ### Historical: the faithfulness reconciliations (completed)
 

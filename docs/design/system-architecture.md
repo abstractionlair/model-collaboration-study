@@ -433,15 +433,19 @@ reviews what, with what visibility, in how many rounds.
 - Deliberately-broken protocols produce the expected type errors
   at check time. This is the bedrock of mutation safety: if a
   mutated protocol type-checks, it has a fighting chance of running.
-- The executor has been hand-verified with a deterministic
-  `FakeClient` against CCR (3 calls), SA (3 calls, production
-  query visible to reviewer), ReConcile (D-family peer-review
-  shape; counts depend on N and rounds), and all six Phase 1
-  condition factories. Current-shape call counts at the
-  configurations used by `phase1.py`: A=1, B(N=3)=4, C=4,
-  D(3 models, 1 round)=12, D'(3 models, 1 round)=12, E(3
-  models, 1 meta)=7. FakeClient unit tests are not yet
-  committed (review #13 of `system-review-opus47-2026-04-16.md`).
+- The executor has a FakeClient-backed unit test suite in
+  `tests/` covering: identity memoization, ParGen / ParScore
+  alignment, SelfRounds(N) call-count math, PeerReviseRound
+  cyclic reviewer assignment and reviewer≠writer invariant,
+  WeightedVote argmax + non-positional tie-breaking, PickOne
+  selection + non-positional parse-failure fallback,
+  ParPeerReview / FuseWithCritiques drafts-to-critiques
+  alignment, and all six Phase 1 condition call-count contracts
+  (A=1, B(N=3)=4, C=4, D@3=12, D'@3=12, E@3=7,
+  condition_e_writers_revise_then_fuse@3=10). Parser tests in
+  `tests/test_parsers.py` pin `_parse_score` and `_parse_pick`
+  behavior on prose, mixed scales, and malformed inputs.
+  Executable with `pytest tests/`.
 - End-to-end smoke tests with real APIs passed on 2026-04-16:
   all conditions A–E across four providers (Anthropic, OpenAI,
   Google, xAI), 49 calls, 0 retries. Smoke test verifies that

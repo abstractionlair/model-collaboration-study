@@ -112,9 +112,23 @@ class ApiClient:
         max_retries: int = 3,
         backoff_base: float = 1.0,
         backoff_max: float = 60.0,
-        temperature: float = 0.0,
+        temperature: float | None = None,
         max_tokens: int = 4096,
     ) -> None:
+        """Construct the client.
+
+        `temperature=None` (the default) means "use each vendor's
+        default." Modern models are tuned for their defaults;
+        forcing `temperature=0` causes mode collapse on
+        homogeneous pools and picking a non-default number is
+        guessing against the vendor's tuning. Override explicitly
+        for reproducibility testing or for temperature
+        ablations — not as a blanket "same-across-providers"
+        guard. See `docs/decisions.md` 2026-04-16 for the policy.
+
+        `max_tokens` stays pinned because all vendors need some
+        limit and bounding it protects the dollar budget.
+        """
         self.max_retries = max_retries
         self.backoff_base = backoff_base
         self.backoff_max = backoff_max
@@ -193,14 +207,16 @@ class ApiClient:
     ) -> tuple[str, int, int]:
         """Call Anthropic API. Returns (text, input_tokens, output_tokens)."""
         client = self._get_anthropic()
+        kwargs: dict[str, Any] = {
+            "model": model,
+            "max_tokens": self.max_tokens,
+            "system": system,
+            "messages": [{"role": "user", "content": user}],
+        }
+        if self.temperature is not None:
+            kwargs["temperature"] = self.temperature
         try:
-            response = client.messages.create(
-                model=model,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                system=system,
-                messages=[{"role": "user", "content": user}],
-            )
+            response = client.messages.create(**kwargs)
         except _ANTHROPIC_INFRA as e:
             raise InfrastructureError(str(e)) from e
 
@@ -221,16 +237,18 @@ class ApiClient:
     ) -> tuple[str, int, int]:
         """Call OpenAI API. Returns (text, input_tokens, output_tokens)."""
         client = self._get_openai()
+        kwargs: dict[str, Any] = {
+            "model": model,
+            "max_tokens": self.max_tokens,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+        }
+        if self.temperature is not None:
+            kwargs["temperature"] = self.temperature
         try:
-            response = client.chat.completions.create(
-                model=model,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                messages=[
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user},
-                ],
-            )
+            response = client.chat.completions.create(**kwargs)
         except _OPENAI_INFRA as e:
             raise InfrastructureError(str(e)) from e
 
@@ -247,16 +265,18 @@ class ApiClient:
     ) -> tuple[str, int, int]:
         """Call xAI API (OpenAI-compatible). Returns (text, input_tokens, output_tokens)."""
         client = self._get_xai()
+        kwargs: dict[str, Any] = {
+            "model": model,
+            "max_tokens": self.max_tokens,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+        }
+        if self.temperature is not None:
+            kwargs["temperature"] = self.temperature
         try:
-            response = client.chat.completions.create(
-                model=model,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                messages=[
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user},
-                ],
-            )
+            response = client.chat.completions.create(**kwargs)
         except _OPENAI_INFRA as e:
             raise InfrastructureError(str(e)) from e
 
@@ -273,15 +293,17 @@ class ApiClient:
     ) -> tuple[str, int, int]:
         """Call Google GenAI API. Returns (text, input_tokens, output_tokens)."""
         client = self._get_google()
+        config_kwargs: dict[str, Any] = {
+            "system_instruction": system,
+            "max_output_tokens": self.max_tokens,
+        }
+        if self.temperature is not None:
+            config_kwargs["temperature"] = self.temperature
         try:
             response = client.models.generate_content(
                 model=model,
                 contents=user,
-                config=google.genai.types.GenerateContentConfig(
-                    system_instruction=system,
-                    max_output_tokens=self.max_tokens,
-                    temperature=self.temperature,
-                ),
+                config=google.genai.types.GenerateContentConfig(**config_kwargs),
             )
         except _GOOGLE_INFRA as e:
             raise InfrastructureError(str(e)) from e
