@@ -442,6 +442,96 @@ round are now complete.
 
 ---
 
+## 2026-04-16 Temperature policy: vendor default, not 0 or any fixed number
+
+**Decision:** `ApiClient.temperature` is `Optional[float]`
+defaulting to `None`. When None, the kwarg is omitted from
+each provider call and each vendor's default temperature takes
+over. Explicit numeric overrides remain available for
+reproducibility testing and temperature ablations, but are not
+used in the normal Phase 1 run.
+
+**Alternatives considered:**
+
+- **`temperature=0` uniform across providers** (the previous
+  default). Rejected: Gemini's round-1 review observation
+  showed that at `temperature=0`, `ParGen` on a homogeneous
+  pool produces N identical drafts, mathematically collapsing
+  Conditions B and D' into single-pass baselines. The round-2
+  review reinforced this: with `PickOne`, B at `temperature=0`
+  presents N indistinguishable candidates to the judge, which
+  destroys the compute-scaling comparison. Forcing mode
+  collapse defeats the experiment's purpose.
+- **A specific non-zero temperature (e.g., 0.7) uniform across
+  providers.** Rejected: each vendor has tuned its default
+  for its own model family; picking a specific number is
+  guessing against the vendor's tuning without evidence. "Same
+  temperature policy across providers" was always a fair-
+  comparison requirement; it is better read as same *policy*
+  (leave it alone) than same *number*.
+- **Make temperature a per-call field on prompt templates.**
+  Rejected as premature until a concrete use case wants
+  per-step temperature control.
+
+**Rationale:** The original motivation for pinning temperature
+was fair comparison across providers. But the interaction
+between `temperature=0` and homogeneous-pool conditions
+(collapsing them to single-pass baselines) was a larger threat
+to fair comparison than the vendor-default variance this
+policy was trying to eliminate. Leaving temperature at
+vendor defaults restores the ensemble diversity that the
+macro-model matrix depends on, without introducing a
+guessed-number bias.
+
+**Status:** Active. Implemented in
+`src/executor/api_client.py`: `temperature: Optional[float] =
+None` in `__init__`; provider calls conditionally include the
+kwarg. Tests in `tests/test_api_client.py`.
+
+---
+
+## 2026-04-16 Phase 1 calibration parameters required, not defaulted
+
+**Decision:** `build_phase1_conditions()` and
+`build_phase1_spec()` take `best_model`, `n_samples_for_b`, and
+`pricing` as required keyword arguments — no defaults.
+Previously these were supplied by `_best_model()` (returning
+Haiku as a "conservative" placeholder), `_n_samples_for_b()`
+(hand-picked 1/3/6), and a hardcoded `PHASE1_PRICING`. All
+round-1 reviewers flagged these placeholders as footguns:
+running pre-calibration could silently violate the matched-
+budget discipline at the heart of the research question.
+
+The module constants stay (`SUBJECT_MODELS`, the renamed
+`PHASE1_PRICING_DRAFT`), so a caller can explicitly pass them
+after verifying — but bare `build_phase1_spec()` calls are no
+longer possible.
+
+**Alternatives considered:**
+
+- **Gate the placeholders with a `calibrated=True` flag.**
+  Works but is easier to bypass by accident.
+- **Raise `NotImplementedError` from `_best_model()` and
+  `_n_samples_for_b()`.** Fine for those two, but doesn't help
+  with the pricing case (which had a real placeholder value).
+  Making everything a required argument is more uniform.
+- **Keep the placeholders and rely on an external pre-run
+  check.** Rejected: the round-1 reviewers' concern was
+  specifically that nothing forces the check. An external
+  discipline that isn't enforced is a policy, not a gate.
+
+**Rationale:** The matched-budget discipline is load-bearing
+for the entire research question. Quietly miscalibrated
+baselines would taint the main comparison. Making the builder
+refuse to run without explicit calibration parameters is the
+cheapest way to enforce the discipline — no new tooling, just
+a function signature change.
+
+**Status:** Active. Implemented in `src/experiment/phase1.py`;
+tests in `tests/test_phase1.py`.
+
+---
+
 ## 2026-04-08 Small models as subjects, frontier models as judges
 
 **Decision:** Use small/mid-tier models (e.g. Haiku, GPT mini, Gemini

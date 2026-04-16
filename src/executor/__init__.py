@@ -10,7 +10,12 @@ Two ModelClient implementations:
 - ApiClient: real API calls to Anthropic, OpenAI, and Google
 """
 
-from .api_client import ApiClient, CallRecord, InfrastructureError
+from .api_client import (
+    ApiClient,
+    CallRecord,
+    CapabilityFailure,
+    InfrastructureError,
+)
 from .client import FakeClient, ModelClient
 from .interpreter import Env, Interpreter, run
 from .runtime import RAnswer, RCritique, RQuery, RScore, assert_final
@@ -19,6 +24,7 @@ from .tracing import TraceEntry, TracingClient
 __all__ = [
     "ApiClient",
     "CallRecord",
+    "CapabilityFailure",
     "InfrastructureError",
     "FakeClient",
     "ModelClient",

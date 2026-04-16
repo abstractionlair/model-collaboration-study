@@ -708,8 +708,19 @@ vendor-specific feature stacks rather than the protocol structure:
 
 - Text in / text out only.
 - No web search, file search, or code execution tools.
-- Same max output length.
-- Same temperature policy.
+- Same max output length (`max_tokens` pinned across providers;
+  bounds cost and prevents runaway generation).
+- **Same temperature policy: vendor default.** The policy is
+  "leave it alone unless there's a specific reason otherwise."
+  Modern models are tuned for their defaults; forcing
+  `temperature=0` causes mode collapse on homogeneous pools
+  (Gemini's round-1 catch — B and D' collapse to single-pass
+  baselines), and picking a non-default number is guessing
+  against the vendor's tuning. The `ApiClient.temperature`
+  field is `Optional[float]` defaulting to None; explicit
+  numeric overrides remain available for reproducibility
+  testing or temperature ablations. See `decisions.md`
+  2026-04-16.
 - Same context budget as far as feasible.
 - Same critique rubric across reviewers.
 - Pin model versions wherever possible (OpenAI supports snapshots

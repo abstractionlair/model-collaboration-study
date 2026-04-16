@@ -32,6 +32,7 @@ import anthropic
 import google.genai
 import google.genai.errors
 import google.genai.types
+import httpx
 import openai
 
 
@@ -44,12 +45,29 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class CallRecord:
-    """One model API call with usage and cost metadata."""
+    """One model API attempt with usage and cost metadata.
+
+    `status` is one of:
+      - "success": call succeeded, text returned normally
+      - "capability_failure": call returned (tokens billed) but
+        the response is unusable (e.g., empty or whitespace-only)
+      - "infra_failure": infrastructure error exhausted retries;
+        token counts will typically be zero since no successful
+        response was produced
+
+    Capability failures still record their tokens because they
+    count against the dollar budget (the macro-model did spend
+    money to produce zero-length output). Infra failures do not
+    count against the budget per the design's failure-handling
+    policy; they're logged here purely as diagnostic telemetry.
+    """
     model: str
     input_tokens: int
     output_tokens: int
     latency_seconds: float
-    retries: int  # infra retries before success
+    retries: int
+    status: str = "success"
+    error: str | None = None
 
 
 # ============================================================================
@@ -62,6 +80,20 @@ class InfrastructureError(Exception):
     Wraps the provider-specific exception so retry logic doesn't need
     to know which SDK threw. The original exception is chained via
     __cause__.
+    """
+    pass
+
+
+class CapabilityFailure(Exception):
+    """Non-retryable capability failure (e.g., empty response).
+
+    Raised when a call completes successfully at the API level
+    but the macro-model's function-from-context-to-response is
+    broken for that input (per the design: zero-length output
+    is a capability failure, not infrastructure). Tokens have
+    already been billed by the time this is raised; the
+    corresponding CallRecord is appended with status =
+    "capability_failure" before the raise.
     """
     pass
 
@@ -84,10 +116,32 @@ _OPENAI_INFRA = (
     openai.RateLimitError,
 )
 
-_GOOGLE_INFRA = (
-    google.genai.errors.ServerError,
-    google.genai.errors.ClientError,
-)
+# Google SDK: ServerError covers 5xx; ClientError covers ALL 4xx
+# (including 400 Bad Request, 401/403 auth, 404 not-found), most
+# of which are NOT retryable. The helper below filters to only
+# the retryable subset. httpx connection / timeout errors are
+# also treated as infra.
+_GOOGLE_RETRYABLE_HTTP_CODES = frozenset({408, 429})
+
+
+def _is_google_infra(exc: BaseException) -> bool:
+    """Identify Google SDK exceptions that deserve retry as infra.
+
+    - ServerError (5xx) — retry
+    - ClientError with status 408 Request Timeout or 429 Too
+      Many Requests — retry
+    - ClientError with other 4xx (400, 401, 403, 404, 422, ...)
+      — do NOT retry (these are config or capability issues;
+      retrying burns quota and masks the underlying problem).
+    - httpx network/timeout errors — retry (transport-level).
+    """
+    if isinstance(exc, google.genai.errors.ServerError):
+        return True
+    if isinstance(exc, google.genai.errors.ClientError):
+        return exc.code in _GOOGLE_RETRYABLE_HTTP_CODES
+    if isinstance(exc, (httpx.TimeoutException, httpx.NetworkError)):
+        return True
+    return False
 
 
 # ============================================================================
@@ -305,7 +359,11 @@ class ApiClient:
                 contents=user,
                 config=google.genai.types.GenerateContentConfig(**config_kwargs),
             )
-        except _GOOGLE_INFRA as e:
+        except google.genai.errors.APIError as e:
+            if _is_google_infra(e):
+                raise InfrastructureError(str(e)) from e
+            raise  # 400/401/403/404/etc. — capability/config, not infra
+        except (httpx.TimeoutException, httpx.NetworkError) as e:
             raise InfrastructureError(str(e)) from e
 
         text = response.text or ""
@@ -321,9 +379,24 @@ class ApiClient:
     def complete(self, model: str, system: str, user: str) -> str:
         """Call a model API with retry logic for infrastructure failures.
 
-        Infrastructure failures (network, rate limits, server errors)
-        are retried with exponential backoff. Capability failures (the
-        model responds, but the response is wrong/empty) pass through.
+        Infrastructure failures (network, rate limits, 5xx, narrowly
+        scoped 4xx like 408/429) are retried with exponential
+        backoff. Other 4xx (400/401/403/404/...) pass through as
+        regular exceptions — they're config/capability issues and
+        retrying burns quota without helping.
+
+        Empty or whitespace-only responses at the API layer are
+        treated as capability failures per the design's failure-
+        handling policy: the macro-model's function-from-context-
+        to-response is broken for that input. Tokens are recorded
+        (cost was spent) and a CapabilityFailure is raised.
+
+        Every attempt — success, exhausted-infra, and capability
+        failure — produces a CallRecord with an appropriate
+        status field. Success records carry full tokens;
+        exhausted-infra records carry zero tokens and the last
+        error message; capability-failure records carry full
+        tokens and the failure message.
         """
         provider = self._route(model)
         call_fn = {
@@ -340,18 +413,46 @@ class ApiClient:
             try:
                 text, input_tokens, output_tokens = call_fn(model, system, user)
                 latency = time.monotonic() - t0
+                if not text.strip():
+                    err = (
+                        f"empty/whitespace-only response from {model} "
+                        f"(tokens billed; treated as capability failure)"
+                    )
+                    self.calls.append(CallRecord(
+                        model=model,
+                        input_tokens=input_tokens,
+                        output_tokens=output_tokens,
+                        latency_seconds=latency,
+                        retries=retries,
+                        status="capability_failure",
+                        error=err,
+                    ))
+                    logger.warning(err)
+                    raise CapabilityFailure(err)
                 self.calls.append(CallRecord(
                     model=model,
                     input_tokens=input_tokens,
                     output_tokens=output_tokens,
                     latency_seconds=latency,
                     retries=retries,
+                    status="success",
                 ))
                 return text
 
             except InfrastructureError as e:
                 retries += 1
                 if attempt == self.max_retries:
+                    latency = time.monotonic() - t0
+                    err = str(e)
+                    self.calls.append(CallRecord(
+                        model=model,
+                        input_tokens=0,
+                        output_tokens=0,
+                        latency_seconds=latency,
+                        retries=retries,
+                        status="infra_failure",
+                        error=err,
+                    ))
                     logger.error(
                         "Infrastructure failure on %s after %d retries: %s",
                         model, retries, e,
@@ -386,3 +487,15 @@ class ApiClient:
     @property
     def total_retries(self) -> int:
         return sum(c.retries for c in self.calls)
+
+    @property
+    def successful_calls(self) -> int:
+        return sum(1 for c in self.calls if c.status == "success")
+
+    @property
+    def infra_failures(self) -> int:
+        return sum(1 for c in self.calls if c.status == "infra_failure")
+
+    @property
+    def capability_failures(self) -> int:
+        return sum(1 for c in self.calls if c.status == "capability_failure")

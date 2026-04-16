@@ -5,8 +5,20 @@ conditions A/B/C/D/D'/E at their respective budget tiers, against
 the three committed task buckets (SWE-bench Verified, LiveCodeBench,
 BFCL) stratified by difficulty.
 
-Model IDs and pricing are pinned at kickoff. The builder takes
-these as inputs and produces the fully-resolved spec.
+**Calibration contract.** The builder takes calibration results
+as required arguments — no defaults for `best_model`,
+`n_samples_for_b`, or `pricing`. Previous versions had
+placeholder defaults (Haiku as "conservative" best-model,
+hand-picked 1/3/6 sample counts, hardcoded pricing "verify
+before kickoff"); round-1 reviewers flagged these as footguns
+because a caller running pre-calibration could quietly violate
+the matched-budget discipline. Requiring explicit args forces
+the caller to have real values.
+
+Module constants remain for convenience (`GPT_MINI`, `HAIKU`,
+`FLASH`, `SUBJECT_MODELS`, `PHASE1_PRICING_DRAFT`,
+`PHASE1_STRATA`), but using them is an explicit choice the
+caller makes.
 """
 
 from __future__ import annotations
@@ -43,9 +55,14 @@ FLASH = "gemini-2.5-flash"
 
 SUBJECT_MODELS = [GPT_MINI, HAIKU, FLASH]
 
-# Phase 1 pricing anchors (USD per 1M tokens in/out).
-# Captured during exploratory phase — MUST be re-verified at kickoff.
-PHASE1_PRICING = PricingTable(
+# Pricing anchors captured during the exploratory phase.
+# **NOT verified pricing.** Caller must explicitly pass a
+# `PricingTable` (which they may construct from this draft, but
+# only after confirming rates against current vendor docs) to
+# `build_phase1_spec`. Named with `_DRAFT` suffix to remind
+# callers that bare use would violate the "verify before kickoff"
+# rule from the design.
+PHASE1_PRICING_DRAFT = PricingTable(
     entries={
         GPT_MINI: PricingEntry(GPT_MINI, input_per_1m=0.75, output_per_1m=4.50),
         HAIKU: PricingEntry(HAIKU, input_per_1m=1.00, output_per_1m=5.00),
@@ -69,62 +86,83 @@ PHASE1_TASKS = [
 # Condition builder
 # ============================================================================
 
-def _best_model() -> str:
-    """The best single subject model for baselines A and B.
 
-    Determined empirically during calibration. Placeholder: use
-    the most expensive model (Haiku) as a conservative default.
-    Update after calibration runs.
+def build_phase1_conditions(
+    *,
+    best_model: str,
+    n_samples_for_b: dict[BudgetTier, int],
+    subject_models: list[str] = SUBJECT_MODELS,
+) -> list[ConditionSpec]:
+    """Build all Phase 1 condition-tier pairs.
+
+    Args:
+        best_model: The best single subject model — determined by
+            calibration, used for A, B, and as the judge in C,
+            the pool for D', and the meta-reviewer in E. No
+            default: pre-calibration callers would otherwise
+            silently use a wrong baseline.
+        n_samples_for_b: N per budget tier for Condition B.
+            Must cover BudgetTier.X, BudgetTier.TWO_X,
+            BudgetTier.FOUR_X. Determined by calibration against
+            real per-call costs; no default because hand-picked
+            values (1/3/6 was the previous placeholder) can
+            violate the $X-cap discipline.
+        subject_models: The N-model subject pool. Defaults to
+            the module-level SUBJECT_MODELS constant; override
+            for ablations.
+
+    Raises:
+        ValueError: if n_samples_for_b is missing any tier, or
+            if best_model is not in the subject_models pool
+            (C's judge and D's pool must be peer-LLMs).
     """
-    return HAIKU
+    missing = {BudgetTier.X, BudgetTier.TWO_X, BudgetTier.FOUR_X} - set(
+        n_samples_for_b
+    )
+    if missing:
+        raise ValueError(
+            f"n_samples_for_b must cover all budget tiers; "
+            f"missing {sorted(t.value for t in missing)}"
+        )
+    if best_model not in subject_models:
+        raise ValueError(
+            f"best_model {best_model!r} must be in subject_models "
+            f"{subject_models!r} (the judge in C and meta-reviewer "
+            f"in E are drawn from the pool as peer-LLMs)"
+        )
 
-
-def _n_samples_for_b(tier: BudgetTier) -> int:
-    """How many samples B generates at each budget tier.
-
-    Rough heuristic: at $X, one gen + one score ≈ 1.5× the cost
-    of A, so N=1 is a sanity check (scoring overhead only). At
-    higher tiers, scale linearly. Exact N will be refined during
-    calibration when actual per-call costs are measured.
-    """
-    return {BudgetTier.X: 1, BudgetTier.TWO_X: 3, BudgetTier.FOUR_X: 6}[tier]
-
-
-def build_phase1_conditions() -> list[ConditionSpec]:
-    """Build all Phase 1 condition-tier pairs."""
-    best = _best_model()
     conditions: list[ConditionSpec] = []
 
     # A: single-model, one pass. Only at $X.
     conditions.append(ConditionSpec(
         name="A",
         label="Single-model, one pass",
-        protocol=condition_a(best),
+        protocol=condition_a(best_model),
         budget_tier=BudgetTier.X,
-        models=[best],
+        models=[best_model],
     ))
 
     # B: single-model repeat-and-aggregate. All three tiers.
     for tier in BudgetTier:
-        n = _n_samples_for_b(tier)
+        n = n_samples_for_b[tier]
         conditions.append(ConditionSpec(
             name="B",
             label=f"Single-model repeat-and-aggregate (N={n})",
-            protocol=condition_b(best, n),
+            protocol=condition_b(best_model, n),
             budget_tier=tier,
-            models=[best],
+            models=[best_model],
         ))
 
     # C: heterogeneous parallel + peer-LLM aggregation. $2X and $4X.
     # Judge is drawn from the subject pool (peer-LLM, not external).
-    judge = best  # the best model also judges
+    judge = best_model
     for tier in [BudgetTier.TWO_X, BudgetTier.FOUR_X]:
         conditions.append(ConditionSpec(
             name="C",
             label="Heterogeneous parallel + peer-LLM aggregation",
-            protocol=condition_c(SUBJECT_MODELS, judge),
+            protocol=condition_c(subject_models, judge),
             budget_tier=tier,
-            models=SUBJECT_MODELS,
+            models=subject_models,
         ))
 
     # D: heterogeneous ReConcile-style. $2X and $4X.
@@ -132,54 +170,82 @@ def build_phase1_conditions() -> list[ConditionSpec]:
         conditions.append(ConditionSpec(
             name="D",
             label="Heterogeneous ReConcile-style",
-            protocol=condition_d(SUBJECT_MODELS, n_rounds=1),
+            protocol=condition_d(subject_models, n_rounds=1),
             budget_tier=tier,
-            models=SUBJECT_MODELS,
+            models=subject_models,
         ))
 
     # D': homogeneous ReConcile-style. $2X and $4X.
-    pool_size = len(SUBJECT_MODELS)
+    pool_size = len(subject_models)
     for tier in [BudgetTier.TWO_X, BudgetTier.FOUR_X]:
         conditions.append(ConditionSpec(
             name="D'",
             label="Homogeneous ReConcile-style",
-            protocol=condition_d_prime(best, pool_size, n_rounds=1),
+            protocol=condition_d_prime(best_model, pool_size, n_rounds=1),
             budget_tier=tier,
-            models=[best],
+            models=[best_model],
         ))
 
     # E: hierarchical synthesis. $2X and $4X.
     # Meta-reviewer drawn from the subject pool.
-    meta_reviewer = best
+    meta_reviewer = best_model
     for tier in [BudgetTier.TWO_X, BudgetTier.FOUR_X]:
         conditions.append(ConditionSpec(
             name="E",
             label="Hierarchical synthesis",
-            protocol=condition_e(SUBJECT_MODELS, meta_reviewer),
+            protocol=condition_e(subject_models, meta_reviewer),
             budget_tier=tier,
-            models=SUBJECT_MODELS,
+            models=subject_models,
         ))
 
     return conditions
 
 
 def build_phase1_spec(
+    *,
+    best_model: str,
+    n_samples_for_b: dict[BudgetTier, int],
+    pricing: PricingTable,
+    subject_models: list[str] = SUBJECT_MODELS,
     base_cost_x: float | None = None,
     seeds: int = 5,
 ) -> ExperimentSpec:
     """Build the complete Phase 1 experiment specification.
 
+    All calibration-dependent parameters are required arguments.
+    See `build_phase1_conditions` for the rationale.
+
     Args:
-        base_cost_x: The $X anchor (average cost of Condition A on
-            one task instance). None if not yet calibrated.
+        best_model: The best single subject model (calibrated).
+        n_samples_for_b: N per budget tier for Condition B.
+        pricing: PricingTable with entries for every model in
+            subject_models. No default — the "verify before
+            kickoff" discipline requires the caller to have
+            confirmed rates against current vendor docs. Use
+            `PHASE1_PRICING_DRAFT` as a starting point if the
+            rates still match reality.
+        subject_models: Defaults to SUBJECT_MODELS.
+        base_cost_x: The $X anchor (average cost of Condition A
+            on one task instance). None if not yet calibrated;
+            compute from a dry run and re-invoke.
         seeds: Number of random seeds per condition-tier pair.
     """
+    for m in subject_models:
+        if m not in pricing.entries:
+            raise ValueError(
+                f"pricing table missing entry for subject model {m!r}"
+            )
+
     return ExperimentSpec(
         name="phase1-method-validation",
-        conditions=build_phase1_conditions(),
+        conditions=build_phase1_conditions(
+            best_model=best_model,
+            n_samples_for_b=n_samples_for_b,
+            subject_models=subject_models,
+        ),
         task_buckets=PHASE1_TASKS,
         strata=PHASE1_STRATA,
-        pricing=PHASE1_PRICING,
+        pricing=pricing,
         prompts=DEFAULT_PROMPTS,
         base_cost_x=base_cost_x,
         seeds=seeds,

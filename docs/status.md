@@ -56,41 +56,45 @@ needed work was targeted reconciliation, not rethink.
 - `docs/reviews/system-review-codex-2026-04-16-round2.md`
 - `docs/reviews/system-review-gemini-2026-04-16-round2.md`
 
-Both reviewers confirm the three faithfulness gaps are
-resolved and the reconciliation work is structurally sound;
-both remain at *Revise and re-review* strictly for operational
-readiness reasons (no structural/faithfulness work remaining).
-The unified blocker list for the next round of work:
+Both reviewers confirmed the three faithfulness gaps are
+resolved. Both listed an operational-readiness blocker set;
+**all seven items addressed 2026-04-16** across two commits
+(`10a2f5b` measurement/observability/tests, and the follow-up
+API-reliability/calibration-gates commit). Summary of what
+landed:
 
-1. **Parser silent fallbacks** (Codex #5, Gemini #4). Fix
-   `_parse_score`, `_parse_pick`, and `WeightedVote` tie-
-   breaking. The pick-parser fallback to candidate 1 is now
-   directly affecting B and C, so silent parse failure =
-   silent first-candidate bias. Add telemetry.
-2. **Generation stochasticity** (Gemini #2, Codex #9). Gemini
-   emphasizes this is urgent: at `temperature=0`, B and D'
-   still mechanically collapse to Condition A. Gemini's new
-   observation — with `PickOne`, B at temp=0 presents N
-   indistinguishable candidates to the judge; either the judge
-   fails to parse (→ candidate 1 by default) or outputs
-   arbitrarily. Either way the compute-scaling baseline is
-   destroyed. Must be fixed before any smoke test claims to
-   measure anything.
-3. **Google retry classification** (Codex #6). Narrow to
-   status-based (408/429/5xx).
-4. **Empty-response handling and failed-call telemetry**
-   (Codex #7). Distinguish capability-failure from infra-
-   failure; record exhausted retries in `ApiClient.calls`.
-5. **Pre-calibration gates** (Codex #8). Make `_best_model`,
-   `_n_samples_for_b`, and `PHASE1_PRICING` fail loudly if
-   invoked before real calibration.
-6. **TracingClient step_type staleness** (Codex #4, new
-   finding this round). `pick_one` falls through to `gen`;
-   `fuse_with_critiques` gets classified as `fuse` by accident
-   (shared "write your own response" phrasing).
-7. **FakeClient unit tests** (Codex #10, unchanged from round
-   1). Codex flags: not blocking this round, but shouldn't
-   slide further given the IR now has more branching families.
+1. ~~Parser silent fallbacks (Codex #5, Gemini #4).~~
+   `_parse_score` and `_parse_pick` now return None on failure;
+   caller logs + seeded random fallback. WeightedVote ties
+   broken by seeded random with telemetry.
+2. ~~Generation stochasticity (Gemini #2, Codex #9).~~
+   `ApiClient.temperature` is now `Optional[float]` defaulting
+   to None; omitted from provider calls so vendor defaults
+   apply. `decisions.md` 2026-04-16 entry on the temperature
+   policy.
+3. ~~Google retry classification (Codex #6).~~ Narrowed via
+   `_is_google_infra()` predicate to 408/429/5xx + httpx
+   network/timeout errors. Other 4xx propagate as regular
+   exceptions.
+4. ~~Empty-response handling and failed-call telemetry
+   (Codex #7).~~ `CapabilityFailure` exception; empty responses
+   raise it (with CallRecord appended so tokens are billed).
+   Exhausted infra retries also now record CallRecord entries.
+   New `CallRecord.status` field and count properties on
+   ApiClient.
+5. ~~Pre-calibration gates (Codex #8).~~ `build_phase1_conditions`
+   and `build_phase1_spec` now require `best_model`,
+   `n_samples_for_b`, and `pricing` as explicit keyword args.
+   `PHASE1_PRICING` renamed to `PHASE1_PRICING_DRAFT`.
+6. ~~TracingClient step_type staleness (Codex #4, round-2).~~
+   Recognizes `pick_one` and `fuse_with_critiques`.
+   More-specific matchers ordered first.
+7. ~~FakeClient unit tests (Codex #10, round-1).~~ 44 tests in
+   `tests/` covering identity memoization, ParGen/ParScore
+   alignment, cyclic peer assignment, WeightedVote/PickOne
+   non-positional fallback, drafts/critiques alignment,
+   Phase 1 call counts, parser behavior, ApiClient status
+   tracking, and calibration-gate errors.
 
 
 ## Next up
@@ -144,35 +148,31 @@ The unified blocker list for the next round of work:
 
 ## Currently routed to
 
-**Operational-readiness work** from the round-2 reviews. **In
-progress 2026-04-16** — landing as two commits:
+**Operational-readiness work** from the round-2 reviews —
+**Done 2026-04-16** across two commits:
 
-- **Commit 1 (measurement quality + observability + tests):**
-  parser fixes with parse-failure telemetry, WeightedVote
-  tie-breaking via seeded random, temperature made optional
-  (omit to use vendor defaults), TracingClient step_type
-  updated for PickOne and FuseWithCritiques, FakeClient-backed
-  unit tests.
-- **Commit 2 (API reliability + Phase 1 gates):** Google retry
-  narrowed to 408/429/5xx, empty-response → CapabilityFailure,
-  CallRecord.status field with infra- and capability-failure
-  logging, pre-calibration placeholders removed (best_model /
-  n_samples / pricing must be passed explicitly).
+- Commit `10a2f5b` (measurement quality + observability +
+  tests): parser fixes with parse-failure telemetry,
+  WeightedVote tie-breaking via seeded random, temperature
+  made optional (omit to use vendor defaults), TracingClient
+  step_type updated for PickOne and FuseWithCritiques,
+  FakeClient-backed unit tests in `tests/` (28 tests).
+- This commit (API reliability + Phase 1 gates): Google retry
+  narrowed to 408/429/5xx + httpx network errors (other 4xx
+  propagate as regular exceptions), empty-response →
+  CapabilityFailure, CallRecord.status field with infra- and
+  capability-failure logging, pre-calibration placeholders
+  removed (best_model / n_samples_for_b / pricing required as
+  explicit kwargs; `PHASE1_PRICING` renamed to
+  `PHASE1_PRICING_DRAFT`). Additional tests in
+  `tests/test_api_client.py` and `tests/test_phase1.py` (16
+  tests).
 
-After this, round-3 cross-lineage review should be capable of
-`Proceed` per both round-2 reviewers' forecasts.
-
-**Policy decision on temperature (2026-04-16):** The design's
-"Common Interface Constraints" section originally said "Same
-temperature policy." Clarified: the policy is to leave
-temperature at the vendor default unless a specific reason
-says otherwise. Modern models are tuned for their defaults;
-forcing `temperature=0` causes mode collapse (Gemini's
-homogeneous-pool observation), and picking a specific non-
-default number is guessing against the vendor's tuning. The
-`temperature` field on ApiClient is now `Optional[float]`
-defaulting to None; explicit overrides remain available for
-reproducibility testing or temperature ablations.
+44 unit tests total; mypy --strict passes on 24 files (21
+source + 3 test). All round-2 blockers addressed. Ready for
+round-3 cross-lineage review — both round-2 reviewers
+forecasted `Proceed` as achievable once these operational
+fixes landed.
 
 ### Historical: the faithfulness reconciliations (completed)
 
