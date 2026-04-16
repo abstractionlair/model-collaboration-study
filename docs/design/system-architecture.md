@@ -283,13 +283,15 @@ construction. Identity-keyed caching is safe because:
   names, so within a single run a `Var`'s identity uniquely
   determines its binding.
 
-### Placeholder prompts
+### Prompt templates
 
-The interpreter currently inlines default prompt templates
-(`GEN_USER`, `REVIEW_ARTIFACT`, etc.). These are explicitly
-placeholders — they belong in the experiment-spec layer. When that
-layer exists, the interpreter will accept prompt templates as
-configuration instead of inlining them.
+The interpreter accepts a `PromptTemplates` instance (from the
+experiment-spec layer) that controls all prompt text. If omitted,
+`DEFAULT_PROMPTS` from `src/experiment/prompts.py` is used — the
+structured-critique format specified in the experimental design.
+Custom prompts can be passed via `run(expr, client, query,
+prompts=custom)` or directly to `Interpreter(client, query,
+prompts=custom)`.
 
 ### ApiClient (`src/executor/api_client.py`)
 
@@ -424,13 +426,6 @@ feels painful.
 **Micro-parser for a text DSL.** A small parser for a Haskell-like
 text syntax that produces the Python AST. Defer until the surface
 layer feels inadequate.
-
-**Prompt template integration.** The experiment-spec layer defines
-`PromptTemplates` with structured-critique defaults. The executor
-still inlines its own placeholder strings. When the real
-`ModelClient` lands, the interpreter should accept a
-`PromptTemplates` instance and use it instead of the hardcoded
-strings.
 
 **Session continuation for real clients.** The `ApiClient` handles
 `FRESH` context only (sufficient for Phase 1). Implementing real

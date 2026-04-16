@@ -4,16 +4,9 @@ Walks an Expr and produces the runtime value of type determined by
 the expression's result_type. Uses structural pattern matching on
 the AST node classes.
 
-Scope:
-- Covers every node currently defined in src/ir/ast.py, so CCR and
-  ReConcile run end-to-end.
-- Default prompts are placeholder strings. They belong in the
-  experiment-spec layer; when that exists, the interpreter will
-  take prompt templates as configuration instead of inlining them.
-- ContextMode FRESH vs ACCUMULATED only matters for clients that
-  maintain session history. The executor passes the mode through
-  to the client opaquely via `system` text for now — a real client
-  will need to interpret it against its own session model.
+Prompt templates are supplied via PromptTemplates from the
+experiment-spec layer. If omitted, DEFAULT_PROMPTS (structured-
+critique format) is used.
 """
 
 from __future__ import annotations
@@ -21,6 +14,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from src.experiment.prompts import DEFAULT_PROMPTS
+from src.experiment.spec import PromptTemplates
 from src.ir.ast import (
     Expr,
     Finalize,
@@ -43,47 +38,6 @@ from .client import ModelClient
 from .runtime import RAnswer, RCritique, RQuery, RScore
 
 
-SYSTEM_FRESH = "You are an assistant answering a task in isolation."
-SYSTEM_ACCUMULATED = "You are an assistant continuing a conversation."
-
-GEN_USER = "Task:\n{query}\n\nProvide your answer."
-
-REVIEW_ARTIFACT = (
-    "Please review the following draft answer and write a critique "
-    "pointing out strengths and weaknesses.\n\nDraft:\n{draft}"
-)
-REVIEW_WITH_PRODUCTION = (
-    "The original task was:\n{query}\n\nPlease review the following "
-    "draft answer and write a critique.\n\nDraft:\n{draft}"
-)
-REVIEW_PEERS = (
-    "Please review your draft answer in light of the peer drafts "
-    "below, and write a critique of your own draft.\n\nYour draft:\n"
-    "{draft}\n\nPeer drafts:\n{peers}"
-)
-REVIEW_ALL = (
-    "The original task was:\n{query}\n\nPeer drafts:\n{peers}\n\n"
-    "Please review your draft and write a critique.\n\nYour draft:\n{draft}"
-)
-
-REVISE_USER = (
-    "Given this critique:\n{critique}\n\nRevise the draft below and "
-    "return only the revised answer.\n\nDraft:\n{draft}"
-)
-
-FUSE_USER = (
-    "Task:\n{query}\n\nThe following peer drafts were produced by "
-    "different models working on this task:\n\n{drafts}\n\n"
-    "Write your own response to the task, informed by but not "
-    "constrained to the peer drafts above."
-)
-
-SCORE_USER = (
-    "Rate your confidence (0.0-1.0) that the following answer is "
-    "correct. Return only the number.\n\nAnswer:\n{draft}"
-)
-
-
 @dataclass(frozen=True)
 class Env:
     """Immutable binding environment for Let/Var."""
@@ -99,9 +53,15 @@ class Env:
 
 
 class Interpreter:
-    def __init__(self, client: ModelClient, query_text: str) -> None:
+    def __init__(
+        self,
+        client: ModelClient,
+        query_text: str,
+        prompts: PromptTemplates | None = None,
+    ) -> None:
         self.client = client
         self.query_text = query_text
+        self.prompts = prompts or DEFAULT_PROMPTS
         # Identity-based memoization: a shared sub-expression must
         # evaluate to the same runtime value every time it's referenced
         # in a single run. In CCR, for example, `d = gen(...)` is used
@@ -110,9 +70,9 @@ class Interpreter:
         self._cache: dict[int, Any] = {}
 
     def _system_for(self, context: ContextMode) -> str:
-        return (
-            SYSTEM_FRESH if context is ContextMode.FRESH else SYSTEM_ACCUMULATED
-        )
+        if context is ContextMode.FRESH:
+            return self.prompts.gen_system
+        return self.prompts.accumulated_system
 
     def _review_prompt(
         self,
@@ -123,15 +83,17 @@ class Interpreter:
         peers_text = "\n---\n".join(p.text for p in peers) if peers else ""
         match visibility:
             case Visibility.ARTIFACT_ONLY:
-                return REVIEW_ARTIFACT.format(draft=target.text)
+                return self.prompts.review_artifact.format(draft=target.text)
             case Visibility.WITH_PRODUCTION:
-                return REVIEW_WITH_PRODUCTION.format(
+                return self.prompts.review_with_production.format(
                     query=target.production_query, draft=target.text
                 )
             case Visibility.PEERS_GROUPED:
-                return REVIEW_PEERS.format(draft=target.text, peers=peers_text)
+                return self.prompts.review_peers.format(
+                    draft=target.text, peers=peers_text
+                )
             case Visibility.ALL:
-                return REVIEW_ALL.format(
+                return self.prompts.review_all.format(
                     query=target.production_query,
                     draft=target.text,
                     peers=peers_text,
@@ -153,7 +115,9 @@ class Interpreter:
         revised_text = self.client.complete(
             model,
             system,
-            REVISE_USER.format(critique=crit_text, draft=own.text),
+            self.prompts.revise_user.format(
+                critique=crit_text, draft=own.text
+            ),
         )
         return RAnswer(
             text=revised_text, stage=Draft, production_query=own.production_query
@@ -192,7 +156,9 @@ class Interpreter:
             case Gen(model=model, query=q):
                 rq = self.evaluate(q, env)
                 text = self.client.complete(
-                    model, SYSTEM_FRESH, GEN_USER.format(query=rq.text)
+                    model,
+                    self.prompts.gen_system,
+                    self.prompts.gen_user.format(query=rq.text),
                 )
                 return RAnswer(
                     text=text, stage=Draft, production_query=rq.text
@@ -212,8 +178,10 @@ class Interpreter:
                 crit = self.evaluate(c, env)
                 text = self.client.complete(
                     model,
-                    SYSTEM_FRESH,
-                    REVISE_USER.format(critique=crit.text, draft=ans.text),
+                    self.prompts.gen_system,
+                    self.prompts.revise_user.format(
+                        critique=crit.text, draft=ans.text
+                    ),
                 )
                 return RAnswer(
                     text=text, stage=Draft, production_query=ans.production_query
@@ -235,8 +203,10 @@ class Interpreter:
                 )
                 text = self.client.complete(
                     model,
-                    SYSTEM_FRESH,
-                    FUSE_USER.format(query=rq.text, drafts=drafts_text),
+                    self.prompts.gen_system,
+                    self.prompts.fuse_user.format(
+                        query=rq.text, drafts=drafts_text
+                    ),
                 )
                 return RAnswer(
                     text=text, stage=Draft, production_query=rq.text
@@ -247,7 +217,9 @@ class Interpreter:
                 results: list[RAnswer] = []
                 for m in models:
                     text = self.client.complete(
-                        m, SYSTEM_FRESH, GEN_USER.format(query=rq.text)
+                        m,
+                        self.prompts.gen_system,
+                        self.prompts.gen_user.format(query=rq.text),
                     )
                     results.append(
                         RAnswer(text=text, stage=Draft, production_query=rq.text)
@@ -273,7 +245,9 @@ class Interpreter:
                 scores: list[RScore] = []
                 for m, ans in zip(models, answers):
                     text = self.client.complete(
-                        m, SYSTEM_FRESH, SCORE_USER.format(draft=ans.text)
+                        m,
+                        self.prompts.gen_system,
+                        self.prompts.score_user.format(draft=ans.text),
                     )
                     scores.append(RScore(value=_parse_score(text)))
                 return scores
@@ -306,6 +280,15 @@ def _parse_score(text: str) -> float:
     return 0.5
 
 
-def run(expr: Expr[Any], client: ModelClient, query_text: str) -> Any:
-    """Evaluate an expression against a client and a query string."""
-    return Interpreter(client, query_text).evaluate(expr, Env())
+def run(
+    expr: Expr[Any],
+    client: ModelClient,
+    query_text: str,
+    prompts: PromptTemplates | None = None,
+) -> Any:
+    """Evaluate an expression against a client and a query string.
+
+    If prompts is None, DEFAULT_PROMPTS (structured-critique format
+    from the experiment-spec layer) is used.
+    """
+    return Interpreter(client, query_text, prompts).evaluate(expr, Env())

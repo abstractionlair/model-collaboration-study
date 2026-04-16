@@ -120,20 +120,23 @@ class PromptTemplates:
 
     These replace the placeholder strings currently inlined in
     src/executor/interpreter.py. Template variables use Python
-    str.format() syntax: {query}, {draft}, {critique}, {peers}.
+    str.format() syntax: {query}, {draft}, {critique}, {peers},
+    {drafts}.
 
     The default structured-critique format is the baseline for
     Phase 1. The critique-format axis (free-form vs structured
     flags vs flag-only) is a follow-on ablation.
     """
-    gen_system: str
-    gen_user: str               # expects {query}
-    review_artifact: str        # expects {draft}
-    review_with_production: str # expects {query}, {draft}
-    review_peers: str           # expects {draft}, {peers}
-    review_all: str             # expects {query}, {draft}, {peers}
-    revise_user: str            # expects {draft}, {critique}
-    score_user: str             # expects {draft}
+    gen_system: str               # system prompt for FRESH context
+    accumulated_system: str       # system prompt for ACCUMULATED context
+    gen_user: str                 # expects {query}
+    review_artifact: str          # expects {draft}
+    review_with_production: str   # expects {query}, {draft}
+    review_peers: str             # expects {draft}, {peers}
+    review_all: str               # expects {query}, {draft}, {peers}
+    revise_user: str              # expects {draft}, {critique}
+    fuse_user: str                # expects {query}, {drafts}
+    score_user: str               # expects {draft}
 
 
 # ============================================================================

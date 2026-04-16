@@ -18,7 +18,7 @@ from .spec import PromptTemplates
 
 # System prompts
 _GEN_SYSTEM = "You are an assistant answering a task in isolation."
-_REVIEW_SYSTEM = _GEN_SYSTEM  # same for now; could diverge
+_ACCUMULATED_SYSTEM = "You are an assistant continuing a conversation."
 
 # Generation
 _GEN_USER = "Task:\n{query}\n\nProvide your answer."
@@ -83,6 +83,16 @@ _REVISE_USER = (
 )
 
 # Confidence scoring
+# Fusion (meta-reviewer reads peer drafts and writes fresh)
+_FUSE_USER = (
+    "Task:\n{query}\n\n"
+    "The following peer drafts were produced by different models "
+    "working on this task:\n\n{drafts}\n\n"
+    "Write your own response to the task, informed by but not "
+    "constrained to the peer drafts above."
+)
+
+# Confidence scoring
 _SCORE_USER = (
     "Rate your confidence (0.0-1.0) that the following answer is "
     "correct. Return only the number.\n\nAnswer:\n{draft}"
@@ -91,11 +101,13 @@ _SCORE_USER = (
 
 DEFAULT_PROMPTS = PromptTemplates(
     gen_system=_GEN_SYSTEM,
+    accumulated_system=_ACCUMULATED_SYSTEM,
     gen_user=_GEN_USER,
     review_artifact=_REVIEW_ARTIFACT,
     review_with_production=_REVIEW_WITH_PRODUCTION,
     review_peers=_REVIEW_PEERS,
     review_all=_REVIEW_ALL,
     revise_user=_REVISE_USER,
+    fuse_user=_FUSE_USER,
     score_user=_SCORE_USER,
 )

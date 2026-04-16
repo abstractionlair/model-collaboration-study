@@ -36,8 +36,9 @@ from the parallel track. Next: experiment-spec layer and real
 3. ~~Wire a real `ModelClient`.~~ Done — `src/executor/api_client.py`.
    Anthropic, OpenAI, and Google adapters with retry/backoff and
    token-usage tracking.
-4. Integrate `PromptTemplates` from the spec layer into the
-   executor (replace hardcoded placeholder strings).
+4. ~~Integrate `PromptTemplates` into the executor.~~ Done.
+   Interpreter accepts `PromptTemplates`; defaults to
+   structured-critique format from `src/experiment/prompts.py`.
 5. Pre-kickoff: run the power analysis gate that the experimental
    design specifies, to decide whether the full three-stratum
    interaction test is feasible or the middle-band-only fallback
