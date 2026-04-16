@@ -23,6 +23,8 @@ from .ast import (
     Let,
     ParGen,
     ParScore,
+    PeerReviseRound,
+    PeerRounds,
     QueryVar,
     Review,
     Revise,
@@ -131,6 +133,40 @@ def self_rounds(
 ) -> Expr[list[Answer[Draft]]]:
     """N rounds of self-review-and-revise across models."""
     return SelfRounds(
+        n=n,
+        models=models,
+        drafts=drafts,
+        context=context,
+        visibility=visibility,
+    )
+
+
+def peer_revise_round(
+    models: list[str],
+    drafts: Expr[list[Answer[Draft]]],
+    context: ContextMode = FRESH,
+    visibility: Visibility = PEERS_GROUPED,
+) -> Expr[list[Answer[Draft]]]:
+    """One round of peer-review-and-revise across models.
+
+    For each draft d_i, the peer reviewer at index (i+1) % N
+    produces the critique and the original writer m_i revises
+    its own draft from that critique. Requires at least 2 models.
+    """
+    return PeerReviseRound(
+        models=models, drafts=drafts, context=context, visibility=visibility
+    )
+
+
+def peer_rounds(
+    n: int,
+    models: list[str],
+    drafts: Expr[list[Answer[Draft]]],
+    context: ContextMode = FRESH,
+    visibility: Visibility = PEERS_GROUPED,
+) -> Expr[list[Answer[Draft]]]:
+    """N rounds of peer-review-and-revise across models."""
+    return PeerRounds(
         n=n,
         models=models,
         drafts=drafts,

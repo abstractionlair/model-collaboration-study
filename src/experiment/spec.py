@@ -126,17 +126,28 @@ class PromptTemplates:
     The default structured-critique format is the baseline for
     Phase 1. The critique-format axis (free-form vs structured
     flags vs flag-only) is a follow-on ablation.
+
+    The `review_*` family is for SelfReviseRound (writer reviews
+    its own draft, possibly with peer drafts as context). The
+    `peer_review_*` family is for PeerReviseRound (a different
+    model reviews someone else's draft, identity blinded). The
+    visibility annotation selects which of the four templates in
+    each family is used.
     """
-    gen_system: str               # system prompt for FRESH context
-    accumulated_system: str       # system prompt for ACCUMULATED context
-    gen_user: str                 # expects {query}
-    review_artifact: str          # expects {draft}
-    review_with_production: str   # expects {query}, {draft}
-    review_peers: str             # expects {draft}, {peers}
-    review_all: str               # expects {query}, {draft}, {peers}
-    revise_user: str              # expects {draft}, {critique}
-    fuse_user: str                # expects {query}, {drafts}
-    score_user: str               # expects {draft}
+    gen_system: str                    # system prompt for FRESH context
+    accumulated_system: str            # system prompt for ACCUMULATED context
+    gen_user: str                      # expects {query}
+    review_artifact: str               # self-review: expects {draft}
+    review_with_production: str        # self-review: expects {query}, {draft}
+    review_peers: str                  # self-review: expects {draft}, {peers}
+    review_all: str                    # self-review: expects {query}, {draft}, {peers}
+    peer_review_artifact: str          # peer review: expects {draft}
+    peer_review_with_production: str   # peer review: expects {query}, {draft}
+    peer_review_peers: str             # peer review: expects {draft}, {peers}
+    peer_review_all: str               # peer review: expects {query}, {draft}, {peers}
+    revise_user: str                   # expects {draft}, {critique}
+    fuse_user: str                     # expects {query}, {drafts}
+    score_user: str                    # expects {draft}
 
 
 # ============================================================================

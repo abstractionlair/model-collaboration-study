@@ -310,14 +310,12 @@ part of the macro-model itself.
   round where each draft is reviewed by 1–2 peers (identities
   blinded), then writers revise once from the structured
   feedback, then a **ReConcile-native confidence-weighted
-  aggregation** block commits to a final answer. Roughly the
-  ReConcile shape in `src/protocols/reconcile.py`, with caveats:
-  ReConcile's convincing-samples mechanism and the exact
-  aggregation rule are not yet reflected in the IR version; and
-  as of 2026-04-16 the implementation uses `SelfReviseRound`
-  (self-review with peer-context visibility) rather than the
-  peer-review the design specifies — `PeerReviseRound` is
-  planned, see `decisions.md` 2026-04-16.
+  aggregation** block commits to a final answer. Implemented in
+  `src/protocols/reconcile.py` as `PeerRounds` (cyclic
+  1-peer-per-draft assignment, lower bound of "1–2 peers"),
+  with two remaining caveats: ReConcile's convincing-samples
+  mechanism and the exact aggregation rule from the paper are
+  not yet reflected in the IR version.
 
 - **D'. Homogeneous ReConcile-style.** Structurally identical
   to D — same blocks, same topology, same aggregation — except

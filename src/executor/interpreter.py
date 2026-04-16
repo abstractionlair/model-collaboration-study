@@ -24,6 +24,8 @@ from src.ir.ast import (
     Let,
     ParGen,
     ParScore,
+    PeerReviseRound,
+    PeerRounds,
     QueryVar,
     Review,
     Revise,
@@ -80,6 +82,11 @@ class Interpreter:
         peers: list[RAnswer],
         visibility: Visibility,
     ) -> str:
+        """Build the self-review prompt for a SelfReviseRound step.
+
+        Used when the reviewer IS the writer (target.text is the
+        reviewer's own draft).
+        """
         peers_text = "\n---\n".join(p.text for p in peers) if peers else ""
         match visibility:
             case Visibility.ARTIFACT_ONLY:
@@ -94,6 +101,41 @@ class Interpreter:
                 )
             case Visibility.ALL:
                 return self.prompts.review_all.format(
+                    query=target.production_query,
+                    draft=target.text,
+                    peers=peers_text,
+                )
+        raise ValueError(f"Unknown visibility: {visibility}")
+
+    def _peer_review_prompt(
+        self,
+        target: RAnswer,
+        other_drafts: list[RAnswer],
+        visibility: Visibility,
+    ) -> str:
+        """Build the peer-review prompt for a PeerReviseRound step.
+
+        Used when the reviewer is NOT the writer. `other_drafts`
+        contains every draft except the target; under blinding,
+        the reviewer's own draft (which appears in this list for
+        N >= 2) is indistinguishable from the others.
+        """
+        peers_text = (
+            "\n---\n".join(p.text for p in other_drafts) if other_drafts else ""
+        )
+        match visibility:
+            case Visibility.ARTIFACT_ONLY:
+                return self.prompts.peer_review_artifact.format(draft=target.text)
+            case Visibility.WITH_PRODUCTION:
+                return self.prompts.peer_review_with_production.format(
+                    query=target.production_query, draft=target.text
+                )
+            case Visibility.PEERS_GROUPED:
+                return self.prompts.peer_review_peers.format(
+                    draft=target.text, peers=peers_text
+                )
+            case Visibility.ALL:
+                return self.prompts.peer_review_all.format(
                     query=target.production_query,
                     draft=target.text,
                     peers=peers_text,
@@ -144,8 +186,7 @@ class Interpreter:
         For each draft d_i, model m_i = models[i] reviews and
         revises its OWN draft (peers visible per the visibility
         annotation). This is the SelfReviseRound semantics. The
-        peer-review version (each draft reviewed by a different
-        model) will live in `_one_peer_round` once added.
+        peer-review version is in `_one_peer_round`.
         """
         out: list[RAnswer] = []
         for i, m in enumerate(models):
@@ -153,6 +194,75 @@ class Interpreter:
             out.append(
                 self._self_review_and_revise_one(
                     m, drafts[i], peers, context, visibility
+                )
+            )
+        return out
+
+    def _peer_review_and_revise_one(
+        self,
+        reviewer: str,
+        writer: str,
+        target: RAnswer,
+        other_drafts: list[RAnswer],
+        context: ContextMode,
+        visibility: Visibility,
+    ) -> RAnswer:
+        """Peer-review semantics: `reviewer` ≠ `writer`.
+
+        The peer reviewer produces a critique of `target` (the
+        writer's draft); the original writer then revises its
+        own draft from the peer critique. Identity is blinded in
+        the prompt — the reviewer is told the draft comes from
+        "a peer AI," not from a specific vendor.
+        """
+        system = self._system_for(context)
+        crit_text = self.client.complete(
+            reviewer,
+            system,
+            self._peer_review_prompt(target, other_drafts, visibility),
+        )
+        revised_text = self.client.complete(
+            writer,
+            system,
+            self.prompts.revise_user.format(
+                critique=crit_text, draft=target.text
+            ),
+        )
+        return RAnswer(
+            text=revised_text,
+            stage=Draft,
+            production_query=target.production_query,
+        )
+
+    def _one_peer_round(
+        self,
+        models: list[str],
+        drafts: list[RAnswer],
+        context: ContextMode,
+        visibility: Visibility,
+    ) -> list[RAnswer]:
+        """One round of peer-review-and-revise across `models`.
+
+        Reviewer assignment: cyclic shift by one. For each draft
+        d_i (writer m_i = models[i]), the reviewer is
+        models[(i+1) % N]. This gives 1 peer per draft (lower
+        bound of the design's "1–2 peers" wording). Requires N >= 2.
+        """
+        n = len(models)
+        if n < 2:
+            raise ValueError(
+                "PeerReviseRound requires at least 2 models; "
+                f"got {n}. Use SelfReviseRound for single-model pools."
+            )
+        out: list[RAnswer] = []
+        for i in range(n):
+            writer = models[i]
+            reviewer = models[(i + 1) % n]
+            target = drafts[i]
+            other_drafts = [d for j, d in enumerate(drafts) if j != i]
+            out.append(
+                self._peer_review_and_revise_one(
+                    reviewer, writer, target, other_drafts, context, visibility
                 )
             )
         return out
@@ -255,6 +365,20 @@ class Interpreter:
                 current = self.evaluate(ds, env)
                 for _ in range(n):
                     current = self._one_self_round(models, current, context, vis)
+                return current
+
+            case PeerReviseRound(
+                models=models, drafts=ds, context=context, visibility=vis
+            ):
+                current = self.evaluate(ds, env)
+                return self._one_peer_round(models, current, context, vis)
+
+            case PeerRounds(
+                n=n, models=models, drafts=ds, context=context, visibility=vis
+            ):
+                current = self.evaluate(ds, env)
+                for _ in range(n):
+                    current = self._one_peer_round(models, current, context, vis)
                 return current
 
             case ParScore(models=models, drafts=ds):

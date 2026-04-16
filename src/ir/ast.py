@@ -220,13 +220,71 @@ class SelfRounds(Expr[list[Answer[Draft]]]):
     Type: Int -> [Model] -> [Answer[Draft]] -> [Answer[Draft]]
 
     Renamed from `Rounds` on 2026-04-16 alongside the
-    SelfReviseRound rename. The sibling `PeerRounds` will follow
-    when PeerReviseRound lands.
+    SelfReviseRound rename. Sibling `PeerRounds` exists for the
+    peer-review macro-model.
 
     Having the round count as an explicit field (rather than
     unrolling N SelfReviseRound nodes) makes "change the number
     of rounds" a local mutation — flip one integer field — instead
     of a structural tree edit.
+    """
+    result_type: ClassVar[Any] = list[Answer[Draft]]
+    n: int
+    models: list[str]
+    drafts: Expr[list[Answer[Draft]]]
+    context: ContextMode
+    visibility: Visibility
+
+
+@dataclass(frozen=True)
+class PeerReviseRound(Expr[list[Answer[Draft]]]):
+    """One round of peer-review-and-revise across models.
+
+    For each draft d_i (produced by writer m_i = models[i]), a
+    DIFFERENT model — the peer reviewer m_{(i+1) % N} — produces
+    the critique. The original writer m_i then revises its own
+    draft from the peer critique. Reviewer ≠ writer for each
+    draft (requires N ≥ 2).
+
+    Type: [Model] -> [Answer[Draft]] -> [Answer[Draft]]
+
+    The `models` field is the writer pool. Reviewers are derived
+    by a fixed cyclic-shift-by-one assignment: reviewer of
+    draft_i = models[(i+1) % len(models)]. This gives 1 peer per
+    draft (lower bound of the design's "1–2 peers" wording for
+    the D-family) and matches the existing call count of 2 per
+    draft per round (one review, one revise). Other peer-
+    assignment rules (2-peer cyclic, all-N-1) would be
+    additional named nodes if needed; deferred until a use case
+    exists.
+
+    Visibility annotation controls what the reviewer sees
+    alongside the target draft. Identity remains blinded per the
+    K=blinded lock — drafts are presented as "from a peer AI,"
+    never with vendor labels.
+
+    Sibling of SelfReviseRound (each model self-reviews its own
+    draft). Both nodes are valid building blocks; pick the one
+    that matches the macro-model being expressed.
+    """
+    result_type: ClassVar[Any] = list[Answer[Draft]]
+    models: list[str]
+    drafts: Expr[list[Answer[Draft]]]
+    context: ContextMode
+    visibility: Visibility
+
+
+@dataclass(frozen=True)
+class PeerRounds(Expr[list[Answer[Draft]]]):
+    """N rounds of PeerReviseRound applied to an initial list of drafts.
+
+    Type: Int -> [Model] -> [Answer[Draft]] -> [Answer[Draft]]
+
+    Sibling of SelfRounds. Bundles N applications of
+    PeerReviseRound the same way SelfRounds bundles
+    SelfReviseRound — round count is a local field for cheap
+    mutation; per-round assignment uses the same cyclic-shift-
+    by-one rule as PeerReviseRound.
     """
     result_type: ClassVar[Any] = list[Answer[Draft]]
     n: int

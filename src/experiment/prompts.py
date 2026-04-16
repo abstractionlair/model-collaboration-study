@@ -75,6 +75,59 @@ _REVIEW_ALL = (
     "\nYour draft:\n{draft}"
 )
 
+# Peer review (different model critiques the target draft; identity blinded)
+_PEER_REVIEW_ARTIFACT = (
+    "Review the following draft answer, produced by a peer AI. "
+    "For each of these dimensions, note any issues you find:\n"
+    "- Correctness\n"
+    "- Completeness\n"
+    "- Unnecessary assumptions\n"
+    "- Tool-use correctness\n"
+    "- Code safety / likely test failures\n"
+    "- Confidence (high / medium / low)\n"
+    "\nDraft under review:\n{draft}"
+)
+
+_PEER_REVIEW_WITH_PRODUCTION = (
+    "The original task was:\n{query}\n\n"
+    "Review the following draft answer, produced by a peer AI. "
+    "For each of these dimensions, note any issues you find:\n"
+    "- Correctness\n"
+    "- Completeness\n"
+    "- Unnecessary assumptions\n"
+    "- Tool-use correctness\n"
+    "- Code safety / likely test failures\n"
+    "- Confidence (high / medium / low)\n"
+    "\nDraft under review:\n{draft}"
+)
+
+_PEER_REVIEW_PEERS = (
+    "Review the following draft answer, produced by a peer AI, "
+    "considering the other peer drafts below as context. "
+    "For each of these dimensions, note any issues you find:\n"
+    "- Correctness\n"
+    "- Completeness\n"
+    "- Unnecessary assumptions\n"
+    "- Tool-use correctness\n"
+    "- Code safety / likely test failures\n"
+    "- Confidence (high / medium / low)\n"
+    "\nDraft under review:\n{draft}\n\nOther peer drafts:\n{peers}"
+)
+
+_PEER_REVIEW_ALL = (
+    "The original task was:\n{query}\n\n"
+    "Other peer drafts:\n{peers}\n\n"
+    "Review the following draft answer, produced by a peer AI. "
+    "For each of these dimensions, note any issues you find:\n"
+    "- Correctness\n"
+    "- Completeness\n"
+    "- Unnecessary assumptions\n"
+    "- Tool-use correctness\n"
+    "- Code safety / likely test failures\n"
+    "- Confidence (high / medium / low)\n"
+    "\nDraft under review:\n{draft}"
+)
+
 # Revision
 _REVISE_USER = (
     "Given this critique:\n{critique}\n\n"
@@ -107,6 +160,10 @@ DEFAULT_PROMPTS = PromptTemplates(
     review_with_production=_REVIEW_WITH_PRODUCTION,
     review_peers=_REVIEW_PEERS,
     review_all=_REVIEW_ALL,
+    peer_review_artifact=_PEER_REVIEW_ARTIFACT,
+    peer_review_with_production=_PEER_REVIEW_WITH_PRODUCTION,
+    peer_review_peers=_PEER_REVIEW_PEERS,
+    peer_review_all=_PEER_REVIEW_ALL,
     revise_user=_REVISE_USER,
     fuse_user=_FUSE_USER,
     score_user=_SCORE_USER,

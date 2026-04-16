@@ -143,6 +143,8 @@ The current node set, all frozen dataclasses inheriting from
 | `ParGen`            | `[Model] -> Query -> [Answer[Draft]]`                                     |
 | `SelfReviseRound`   | `[Model] -> [Answer[Draft]] -> [Answer[Draft]]` (each model self-reviews) |
 | `SelfRounds`        | `Int -> [Model] -> [Answer[Draft]] -> [Answer[Draft]]` (N self-rounds)    |
+| `PeerReviseRound`   | `[Model] -> [Answer[Draft]] -> [Answer[Draft]]` (cyclic 1-peer review)    |
+| `PeerRounds`        | `Int -> [Model] -> [Answer[Draft]] -> [Answer[Draft]]` (N peer-rounds)    |
 | `ParScore`          | `[Model] -> [Answer[Draft]] -> [Score[Answer[Draft]]]`                    |
 | `Fuse`          | `Model -> [Answer[Draft]] -> Query -> Answer[Draft]`                      |
 | `WeightedVote`  | `[Answer[Draft]] -> [Score[Answer[Draft]]] -> Answer[Draft]`              |
@@ -166,19 +168,31 @@ Add a primitive only when a protocol forces a per-step variation
 that the bundle can't express.
 
 **Self-review vs peer-review as separate building blocks.**
-`SelfReviseRound` is the current self-review-with-peer-context
-node (renamed from `ReviseRound` on 2026-04-16 after three
+`SelfReviseRound` is the self-review-with-peer-context node
+(renamed from `ReviseRound` on 2026-04-16 after three
 independent reviewers flagged a design-vs-implementation
-mismatch). The design-faithful sibling `PeerReviseRound` — each
-draft reviewed by a different model — is planned but not yet
-implemented. Both are intended to live alongside each other as
-typed building blocks: self-review is a real macro-model shape
-worth keeping available even after the peer-review sibling
-lands, because several protocols in the inventory use it
-(consensus-via-self-reflection, single-pass-then-self-critique,
-etc.). Pick the one that matches the macro-model being
-expressed. See `docs/decisions.md` 2026-04-16 for the rename
+mismatch). `PeerReviseRound` is the design-faithful sibling
+(each draft reviewed by a different model, cyclic 1-peer-per-
+draft assignment, requires N >= 2). Both live alongside each
+other as typed building blocks: self-review is a real macro-
+model shape worth keeping available, because several protocols
+in the inventory use it (consensus-via-self-reflection,
+single-pass-then-self-critique, etc.). Pick the one that
+matches the macro-model being expressed. ReConcile and the D/
+D'/E conditions migrated to the peer-review sibling on
+2026-04-16. See `docs/decisions.md` 2026-04-16 for the rename
 rationale.
+
+**Peer-assignment rules.** `PeerReviseRound` hard-codes a
+cyclic-shift-by-one rule: reviewer of draft i =
+models[(i+1) % N]. Other peer-assignment rules (2-peer cyclic
+for the upper bound of the design's "1–2 peers"; all-N-1 for
+maximum critique signal) are not currently implemented. They
+would either be additional named nodes or a refactor of
+`PeerReviseRound` to take a peer-rule parameter; deferred until
+a use case requires them. The current rule matches the
+existing call count (2 calls per draft per round) and the
+lower bound of the design's wording.
 
 **Fuse and the "many → one" family.** `Fuse` is a model that
 reads multiple peer drafts and writes a fresh response — needed
@@ -209,7 +223,8 @@ A thin facade in front of the AST classes:
 
 - Lowercase factory functions: `query()`, `gen()`, `review()`,
   `revise()`, `finalize()`, `par_gen()`, `self_revise_round()`,
-  `self_rounds()`, `par_score()`, `weighted_vote()`, `fuse()`.
+  `self_rounds()`, `peer_revise_round()`, `peer_rounds()`,
+  `par_score()`, `weighted_vote()`, `fuse()`.
 - Bare enum constants: `FRESH`, `ACCUMULATED`, `ARTIFACT_ONLY`,
   `WITH_PRODUCTION`, `PEERS_GROUPED`, `ALL_VISIBLE`.
 - `bind(value, lambda v: body)` for Let bindings, with optional
@@ -391,7 +406,7 @@ expression:
 - `condition_c(subject_models, judge_model)` — heterogeneous ParGen + peer scoring
 - `condition_d` — re-exported `reconcile()` from `reconcile.py`
 - `condition_d_prime(model, pool_size, n_rounds)` — homogeneous ReConcile
-- `condition_e(subject_models, meta_reviewer)` — ParGen + SelfReviseRound + Fuse (will migrate to peer-review sibling when it lands)
+- `condition_e(subject_models, meta_reviewer)` — ParGen + PeerReviseRound + Fuse (E composition gap remaining: meta fuses revised drafts, design specifies fuse over raw critiques)
 
 All six build cleanly, pass `mypy --strict`, and run end-to-end
 through the executor with `FakeClient`.

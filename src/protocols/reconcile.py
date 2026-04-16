@@ -6,19 +6,17 @@ Expresses the protocol from:
 
 Structure:
 1. Each model independently generates an initial draft.
-2. For N rounds: review-and-revise across the pool, with peer
-   drafts grouped as visibility context.
+2. For N rounds: each draft is critiqued by a peer (cyclic
+   1-peer-per-draft assignment), then the writer revises its own
+   draft from the peer critique. Other peer drafts visible to
+   the reviewer per the visibility annotation.
 3. Each model produces a confidence score for its refined draft.
 4. Weighted vote selects the team answer.
 5. Finalize wraps the selected draft as the committed final answer.
 
-**Faithfulness note (2026-04-16).** Step 2 currently uses
-`SelfRounds` (each model self-reviews its own draft with peer
-drafts as context). The ReConcile paper's round-table format has
-each agent critiquing peer drafts, not self-reviewing. The
-peer-review sibling (`PeerRounds`) is planned; this protocol
-will migrate to it. Tracked in `decisions.md` 2026-04-16 entry
-"Rename ReviseRound/Rounds to SelfReviseRound/SelfRounds."
+Migrated to `PeerRounds` on 2026-04-16; previously used
+`SelfRounds` (a faithfulness gap surfaced by the cross-lineage
+review round). See `decisions.md` 2026-04-16 entry.
 
 Notes:
 - "Convincing samples" (per-model few-shot demonstrations of
@@ -26,8 +24,9 @@ Notes:
   the experiment spec layer, not the protocol IR.
 - Confidence is captured by par_score rather than baked into gen, so
   that confidence extraction can be mutated independently.
-- SelfRounds is a single node with an explicit count, so mutating
+- PeerRounds is a single node with an explicit count, so mutating
   the round count is a local field change.
+- Requires N >= 2 (peer review is undefined for a single model).
 """
 
 from __future__ import annotations
@@ -39,8 +38,8 @@ from src.ir.surface import (
     finalize,
     par_gen,
     par_score,
+    peer_rounds,
     query,
-    self_rounds,
     weighted_vote,
 )
 from src.ir.types import Answer, Final
@@ -53,12 +52,13 @@ def reconcile(
 ) -> Expr[Answer[Final]]:
     """Build the ReConcile protocol AST.
 
-    Currently uses self-review-with-peer-context per the
-    faithfulness note in the module docstring. Will migrate to
-    peer review once `PeerRounds` lands.
+    Uses peer-review-with-peer-context per the design's D
+    specification. Reviewer for draft i is models[(i+1) % N];
+    the original writer m_i revises its own draft from the peer
+    critique. Requires N >= 2.
     """
     q = query()
-    refined = self_rounds(
+    refined = peer_rounds(
         n_rounds, models, par_gen(models, q), FRESH, PEERS_GROUPED
     )
     return bind(

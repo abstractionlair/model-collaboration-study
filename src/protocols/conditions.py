@@ -5,19 +5,24 @@ The functions are parameterized by model names and structural parameters
 (like sample count) so the same condition can be instantiated at
 different budget tiers.
 
-**Faithfulness note (2026-04-16).** Conditions D, D', and E
-currently use `SelfReviseRound` / `SelfRounds` — each model
-reviews its own draft with peer drafts as visibility context.
-The promoted experimental design specifies peer review (each
-draft reviewed by 1–2 peers) for the D-family and raw-critique
-synthesis for E. The peer-review sibling nodes
-(`PeerReviseRound`, `PeerRounds`, plus a `FuseWithCritiques`-
-style node for E) are planned; D, D', and E will migrate to them
-as those nodes land. Tracked in `decisions.md` 2026-04-16 entry
-"Rename ReviseRound/Rounds to SelfReviseRound/SelfRounds."
+**Faithfulness note (2026-04-16).** Conditions D, D', and E now
+use `PeerReviseRound` / `PeerRounds` — each draft reviewed by a
+different model (cyclic 1-peer-per-draft assignment). This
+matches the design's "1–2 peers" specification at the lower
+bound and resolves the D-family review-semantics faithfulness
+gap surfaced in the cross-lineage review round.
 
-Condition D (heterogeneous ReConcile) is already expressed in
-reconcile.py. D' is ReConcile instantiated with a homogeneous pool.
+Condition E retains a remaining faithfulness gap: the design
+specifies that the meta-reviewer synthesizes raw critiques and
+writes the final response directly, while the implementation
+has writers revise their drafts before the meta-reviewer fuses
+the revised drafts. Resolution requires a `FuseWithCritiques`
+(or similar) node that lets Fuse consume both drafts and
+critiques; tracked in `docs/status.md` "Currently routed to."
+
+Condition D (heterogeneous ReConcile) is expressed in
+reconcile.py. D' is ReConcile instantiated with a homogeneous pool
+(requires pool_size >= 2 since peer review is undefined for N=1).
 """
 
 from __future__ import annotations
@@ -32,9 +37,8 @@ from src.ir.surface import (
     gen,
     par_gen,
     par_score,
+    peer_revise_round,
     query,
-    self_revise_round,
-    self_rounds,
     weighted_vote,
 )
 from src.ir.types import Answer, Final
@@ -152,13 +156,15 @@ def condition_e(
     subject_models: list[str],
     meta_reviewer: str,
 ) -> Expr[Answer[Final]]:
-    """ParGen + one SelfReviseRound + Fuse by a meta-reviewer.
+    """ParGen + one PeerReviseRound + Fuse by a meta-reviewer.
 
     Each subject model generates a draft, then one round of
-    self-review-with-peer-context improves the drafts, then a
-    designated meta-reviewer reads all improved drafts and writes
-    a fresh synthesized response. The meta-reviewer's synthesis
-    IS the final answer — no separate aggregation step.
+    peer-review-and-revise improves the drafts (each draft
+    critiqued by a peer per cyclic assignment, original writer
+    revises), then a designated meta-reviewer reads all improved
+    drafts and writes a fresh synthesized response. The
+    meta-reviewer's synthesis IS the final answer — no separate
+    aggregation step. Requires len(subject_models) >= 2.
 
     The meta_reviewer should typically be drawn from
     subject_models (it's a peer, not an external judge), but this
@@ -168,13 +174,15 @@ def condition_e(
     multiple peer drafts and writes fresh, unlike WeightedVote
     (mechanical selection) or Revise (one draft + one critique).
 
-    See module docstring for the faithfulness note: the design
-    specifies peer review producing critiques and the meta
-    synthesizing those critiques directly. This implementation
-    will migrate when the relevant peer-review and
-    fuse-with-critiques nodes land.
+    Remaining faithfulness gap (E composition): the design
+    specifies that the meta-reviewer synthesizes raw critiques
+    directly, not revised drafts. This implementation has writers
+    revise before the meta-reviewer fuses, which is
+    structurally a different macro-model. Resolution requires a
+    FuseWithCritiques-style node; tracked in
+    `docs/status.md` "Currently routed to."
     """
     q = query()
     drafts = par_gen(subject_models, q)
-    revised = self_revise_round(subject_models, drafts, FRESH, PEERS_GROUPED)
+    revised = peer_revise_round(subject_models, drafts, FRESH, PEERS_GROUPED)
     return finalize(fuse(meta_reviewer, revised, q))

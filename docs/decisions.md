@@ -291,13 +291,13 @@ is a substrate for the protocol-inventory space, not a minimum
 expression of just the locked Phase 1 conditions; pluggable
 typed components are higher-leverage than tightly-fit ones.
 
-**Status:** Active. SelfReviseRound and SelfRounds are
-implemented. PeerReviseRound and PeerRounds are reserved names,
-not yet implemented — add when migrating D/D'/E. Once the
-sibling nodes land, the conditions in `src/protocols/conditions.py`
-should be reviewed to use whichever node matches each macro-model
-specification, and `src/protocols/reconcile.py` should migrate
-to PeerRounds.
+**Status:** Active. SelfReviseRound and SelfRounds implemented
+in commit `82627d3` (2026-04-16). PeerReviseRound and PeerRounds
+implemented and D/D'/E migrated in the follow-up commit on the
+same day; cyclic 1-peer-per-draft assignment (lower bound of
+the design's "1–2 peers"); requires N >= 2. Other peer-
+assignment rules (2-peer cyclic, all-N-1) deferred — see
+`docs/design/system-architecture.md` "Peer-assignment rules."
 
 ---
 

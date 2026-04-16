@@ -120,11 +120,15 @@ order (per all three reviewers' converged recommendations):
    protocol-inventory space and self-review / pointwise / fused-
    over-revised-drafts are all real macro-model shapes worth
    keeping pluggable.
-   - **D-family review semantics** (Codex #1, Gemini #2):
-     **In progress 2026-04-16.** Step 1 (rename
-     `ReviseRound` → `SelfReviseRound`, `Rounds` → `SelfRounds`)
-     in flight; step 2 (add `PeerReviseRound` /
-     `PeerRounds`, migrate D/D'/E to use them) follows.
+   - ~~**D-family review semantics** (Codex #1, Gemini #2):~~
+     **Done 2026-04-16.** Two commits: `82627d3` renamed the
+     existing self-review nodes to `SelfReviseRound` /
+     `SelfRounds`; the follow-up added `PeerReviseRound` /
+     `PeerRounds` (cyclic 1-peer assignment, N >= 2), four
+     `peer_review_*` prompt templates, and migrated D/D'/E.
+     `decisions.md` updated. The E composition gap (meta fuses
+     revised drafts, design specifies raw critiques) remains —
+     see the E item below.
    - **B/C aggregation** (Opus #1, Codex #2, Gemini #3): rename
      the current `ParScore + WeightedVote` pattern as the
      pointwise-scoring building block; add a `PickOne` (or

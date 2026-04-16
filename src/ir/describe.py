@@ -18,6 +18,8 @@ from .ast import (
     Let,
     ParGen,
     ParScore,
+    PeerReviseRound,
+    PeerRounds,
     QueryVar,
     Review,
     Revise,
@@ -76,6 +78,20 @@ def describe(expr: Expr[Any], indent: int = 0) -> str:
             d = describe(drafts, indent + 1)
             return (
                 f"{pad}SelfRounds(n={n}, {models}, ctx={ctx.value}, vis={vis.value}) "
+                f": [Answer[Draft]] -> [Answer[Draft]]\n{d}"
+            )
+
+        case PeerReviseRound(models=models, drafts=drafts, context=ctx, visibility=vis):
+            d = describe(drafts, indent + 1)
+            return (
+                f"{pad}PeerReviseRound({models}, ctx={ctx.value}, vis={vis.value}) "
+                f": [Answer[Draft]] -> [Answer[Draft]]\n{d}"
+            )
+
+        case PeerRounds(n=n, models=models, drafts=drafts, context=ctx, visibility=vis):
+            d = describe(drafts, indent + 1)
+            return (
+                f"{pad}PeerRounds(n={n}, {models}, ctx={ctx.value}, vis={vis.value}) "
                 f": [Answer[Draft]] -> [Answer[Draft]]\n{d}"
             )
 
