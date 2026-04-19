@@ -129,24 +129,47 @@ works (Gemini); calibration should empirically verify that
 homogeneous pools show meaningful variance under vendor
 default rather than assume (Codex).
 
-**Done 2026-04-19** in a single commit:
+**Done 2026-04-19** in commit `c5211a2`:
 - `_parse_score` priorities reordered: bare-number → "N out of
   10" → labeled (Score:/Confidence:/Rating:) → last-float-in-
-  range → None. Specific patterns now beat the generic
-  last-float fallback so scale echoes can't hijack.
+  range → None.
 - `_parse_pick` rewritten: bare response (`fullmatch` on
   optional "Candidate" + integer) → pick-verb pattern
   (`pick|choose|select|prefer|winner|answer is|...` near a
-  number) → None. Negative references ("candidate 3 is
-  incomplete") no longer hijack.
-- `run()` now returns `(result, telemetry)`; the runner can
-  finally see parse failures and ties. smoke_test.py and the
-  test suite updated to unpack. Two new tests verify
-  telemetry visibility (one for the basic
-  case, one for the parse-failure-counter increment).
-- New parser tests for both adversarial cases: the scale-echo
-  + N/10 mix, and "I pick X because candidate Y is incomplete."
+  number) → None.
+- `run()` now returns `(result, telemetry)`. smoke_test.py and
+  the test suite updated to unpack and surface non-zero
+  counters as issues.
 - 49 unit tests passing; mypy --strict clean on 24 files.
+
+**Round 4 cross-lineage reviews landed 2026-04-19:**
+- `docs/reviews/system-review-codex-2026-04-19.md`
+- `docs/reviews/system-review-gemini-2026-04-19.md`
+
+**Both reviewers recommend Proceed.** No structural,
+faithfulness, or operational blockers remain. Minor
+non-blocking notes for future hardening:
+- Looser pick-verb phrasings ("my pick is 2", "I vote for 2",
+  "choice: 2") return None rather than wrong; degrade to
+  seeded-random fallback with telemetry. Worth widening when
+  real traces show them (Codex).
+- Score format "0.7/1.0" still falls through to last-float and
+  parses as 1.0. Edge case on an edge case; not blocking
+  (both reviewers).
+- `smoke_test.py` pins `temperature=0.0` for deterministic
+  plumbing — appropriate for smoke tests, must stay scoped to
+  smoke-test behavior and not leak into Phase 1 defaults.
+- Vendor-default temperature variance remains a real
+  interpretive confound that should be named explicitly when
+  discussing why heterogeneity works (Gemini, restated).
+- A `RunResult` dataclass may become cleaner than the tuple
+  if more per-run metadata accumulates; tuple is the right
+  pragmatic choice for now (Codex).
+
+**System is structurally sound, hermetically sealed from
+ground truth, and ready for benchmark integration.** The
+operational-readiness phase that opened on 2026-04-16 is
+complete.
 
 
 ## Next up
@@ -199,6 +222,48 @@ default rather than assume (Codex).
 
 
 ## Currently routed to
+
+**Next phase: benchmark integration and runner work.** Both
+round-4 reviewers signed off on the system as ready to
+proceed. The next major items, in roughly the order the design
+implies:
+
+1. **Benchmark adapters.** Adapt SWE-bench Verified,
+   LiveCodeBench, and BFCL to the executor. Each needs a way
+   to (a) load task instances, (b) format the task as a
+   `query_text` for `run()`, (c) score the macro-model's
+   final answer (executable per-bucket: patch acceptance,
+   test execution, BFCL executability), and (d) NOT leak
+   ground truth into the query text (selector-as-oracle
+   discipline applies at the adapter boundary).
+2. **Experiment runner.** Drives `ExperimentSpec` end-to-end:
+   instantiates clients, iterates conditions × tiers ×
+   buckets × seeds, snapshots `client.calls` per run for
+   per-task cost attribution, accumulates
+   `InterpreterTelemetry` per task instance, enforces
+   `BudgetTier` caps (truncating or excluding macro-models
+   that would exceed), separates infra failures from
+   capability failures, retries infra failures off-budget.
+3. **Run manifest schema.** Per-run record of inputs and
+   outputs: protocol AST, model assignments, prompt
+   templates, seed, raw response trace, parse-failure /
+   tie counts, dollar cost, success/failure verdict.
+   Tracked in `docs/backlog.md`.
+4. **Pre-kickoff power analysis** (operational gate from the
+   experimental design). Estimate power for the Protocol ×
+   Stratum interaction test against the pre-declared utility
+   curve. If below 80%, the pre-declared middle-band fallback
+   triggers automatically.
+
+The real within-step parallelism gap (`ParGen`/`ParScore`/etc.
+are sequential for-loops) is also still tracked as a future
+fix; will matter at Phase 1 wallclock but doesn't block
+benchmark-adapter or runner work.
+
+### Historical: completed work routes (preserved for reference)
+
+Below is the trail of what landed during the
+operational-readiness phase. Kept for future reviewers.
 
 **Operational-readiness work** from the round-2 reviews —
 **Done 2026-04-16** across two commits:
