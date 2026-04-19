@@ -154,7 +154,7 @@ def run_condition(
     """Run one condition and return (success, response_preview, issues)."""
     client.clear()
     try:
-        result = run(protocol, client, TEST_QUERY)
+        result, telemetry = run(protocol, client, TEST_QUERY)
     except Exception as e:
         return False, "", [f"{label}: EXCEPTION: {type(e).__name__}: {e}"]
 
@@ -162,6 +162,24 @@ def run_condition(
     issues: list[str] = []
     issues.extend(check_response_quality(response, label))
     issues.extend(check_intermediate_steps(client.trace, label))
+
+    # Surface non-fatal telemetry events as issues — silent parse
+    # failures and ties were the round-2/3 reviewers' main concern.
+    if telemetry.score_parse_failures:
+        issues.append(
+            f"{label}: {telemetry.score_parse_failures} score parse "
+            f"failure(s) (used 0.5 fallback)"
+        )
+    if telemetry.pick_parse_failures:
+        issues.append(
+            f"{label}: {telemetry.pick_parse_failures} pick parse "
+            f"failure(s) (used random fallback)"
+        )
+    if telemetry.weighted_vote_ties:
+        issues.append(
+            f"{label}: {telemetry.weighted_vote_ties} WeightedVote "
+            f"tie(s) (broken by random)"
+        )
 
     preview = response[:150].replace("\n", " ")
     if len(response) > 150:

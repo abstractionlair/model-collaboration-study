@@ -1,6 +1,6 @@
 # Project Status
 
-**Last updated:** 2026-04-16
+**Last updated:** 2026-04-19
 
 The volatile top of the stack. Read at session start to know what's
 happening and what to do next. Write at *task start*, not task end:
@@ -95,6 +95,58 @@ landed:
    non-positional fallback, drafts/critiques alignment,
    Phase 1 call counts, parser behavior, ApiClient status
    tracking, and calibration-gate errors.
+
+**Round 3 cross-lineage reviews landed 2026-04-17:**
+- `docs/reviews/system-review-codex-2026-04-17.md`
+- `docs/reviews/system-review-gemini-2026-04-17.md`
+
+Both reviewers confirmed the operational-readiness fixes
+mostly hold; both at *Revise and re-review* for two specific,
+fixable items:
+
+1. **Parser priorities are inverted.** Both reviewers
+   independently caught this. `_parse_score` checks last-float
+   in [0,1] before the "N out of 10" pattern, so scale-echo
+   responses ("On a scale of 0.0-1.0, I'd rate this 7 out of
+   10") parse to 1.0 instead of 0.7. `_parse_pick` grabs the
+   last in-range integer, hijacking "I pick 2 because
+   candidate 3 is incomplete" → 3. Fix: check specific
+   semantic patterns first; prefer None over confidently
+   wrong.
+2. **Telemetry black hole** (Gemini, new). The
+   `InterpreterTelemetry` added in commit `10a2f5b` is
+   inaccessible to callers because `run()` instantiates the
+   `Interpreter`, calls `evaluate()`, returns only the result,
+   and discards the Interpreter (and its telemetry). Fix:
+   `run()` returns `(value, telemetry)` tuple OR runner uses
+   Interpreter directly.
+
+Other reviewer notes (not blocking, archived for the analysis
+phase): vendor-default temperature variance is a real
+interpretive confound (similar shape to price arbitrage) and
+should be named explicitly when discussing why heterogeneity
+works (Gemini); calibration should empirically verify that
+homogeneous pools show meaningful variance under vendor
+default rather than assume (Codex).
+
+**Done 2026-04-19** in a single commit:
+- `_parse_score` priorities reordered: bare-number → "N out of
+  10" → labeled (Score:/Confidence:/Rating:) → last-float-in-
+  range → None. Specific patterns now beat the generic
+  last-float fallback so scale echoes can't hijack.
+- `_parse_pick` rewritten: bare response (`fullmatch` on
+  optional "Candidate" + integer) → pick-verb pattern
+  (`pick|choose|select|prefer|winner|answer is|...` near a
+  number) → None. Negative references ("candidate 3 is
+  incomplete") no longer hijack.
+- `run()` now returns `(result, telemetry)`; the runner can
+  finally see parse failures and ties. smoke_test.py and the
+  test suite updated to unpack. Two new tests verify
+  telemetry visibility (one for the basic
+  case, one for the parse-failure-counter increment).
+- New parser tests for both adversarial cases: the scale-echo
+  + N/10 mix, and "I pick X because candidate Y is incomplete."
+- 49 unit tests passing; mypy --strict clean on 24 files.
 
 
 ## Next up

@@ -300,7 +300,10 @@ every node currently in the IR, so CCR and ReConcile run end-to-end.
 - `interpreter.py` — `Interpreter` class with `evaluate(expr, env)`
   that pattern-matches on AST nodes. `Env` is an immutable
   binding environment for `Let`/`Var`. `run(expr, client, query)`
-  is the top-level entry point.
+  is the top-level entry point; returns `(result, telemetry)`
+  where telemetry is an `InterpreterTelemetry` dataclass with
+  per-run counters for parse failures and ties (so the runner
+  can decide whether outputs are trustworthy).
 
 ### Identity-based memoization
 

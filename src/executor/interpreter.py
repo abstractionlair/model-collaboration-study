@@ -547,27 +547,82 @@ class Interpreter:
 
 
 _FLOAT_RE = re.compile(r"-?\d+\.?\d*")
+_BARE_FLOAT_RE = re.compile(r"^-?\d+(?:\.\d+)?$")
+_RATIO_RE = re.compile(
+    r"\b(\d+(?:\.\d+)?)\s*(?:/|out of)\s*10\b", re.IGNORECASE,
+)
+_LABELED_SCORE_RE = re.compile(
+    # "Score: 0.8", "Confidence = 0.85", "Rating is 0.9", etc.
+    r"\b(?:score|confidence|rating)\b[\s:=]*?(?:is|of|=)?\s*(-?\d+(?:\.\d+)?)",
+    re.IGNORECASE,
+)
 
 
 def _parse_score(text: str) -> float | None:
     """Parse a confidence score in [0, 1] from a model response.
 
-    The prompt asks for "0.0-1.0, return only the number." Models
-    mostly comply, but sometimes include prose ("Confidence: 0.8
-    (high)") or use different scales ("7 out of 10"). Priorities:
+    The prompt asks for "0.0-1.0, return only the number." When
+    models comply, the response is a bare number; when they don't
+    we look for specific high-signal patterns. Priorities are
+    ordered most-specific to least-specific so prompt echoes
+    can't hijack the parse:
 
-    1. Last float in [0, 1] — compliant models usually write the
-       score last ("therefore 0.8"); preferring the last avoids
-       picking up spurious numbers from the prompt echo.
-    2. Last "N out of 10" or "N/10" pattern with N in [0, 10] —
-       convert to [0, 1].
-    3. None — caller should log and fall back explicitly.
+    1. Bare-number response — "0.7", "0.7." — return it directly.
+    2. "N out of 10" or "N/10" pattern — convert to [0, 1]. This
+       MUST come before the generic last-float fallback so a
+       response that echoes the "0.0-1.0" scale before giving an
+       N/10 score doesn't get misparsed as 0.0 or 1.0.
+    3. Labeled score pattern — "Score: X", "Confidence = X",
+       "Rating is X" — return X if in [0, 1].
+    4. Last float in [0, 1] — for compliant-with-prose responses
+       like "I'm 0.85 confident."
+    5. None — caller should log and fall back explicitly.
 
     Returns None on parse failure. The caller is expected to log
     a telemetry event and use a fallback; this function's job is
     to be honest about what it could and couldn't find.
+
+    Round-3 reviewers (Codex, Gemini) flagged the previous
+    priority order (last-float-in-range first, ratio second) as
+    confidently misparsing scale-echo responses. The current
+    order prefers explicit semantic patterns over generic
+    extraction.
     """
-    # Priority 1: last float in [0, 1]
+    # Priority 1: bare-number response
+    bare = text.strip().rstrip(".").rstrip(")").strip()
+    if _BARE_FLOAT_RE.fullmatch(bare):
+        try:
+            v = float(bare)
+        except ValueError:
+            pass
+        else:
+            if 0.0 <= v <= 1.0:
+                return v
+
+    # Priority 2: "N out of 10" / "N/10" — must come before
+    # generic last-float to avoid scale-echo hijacks.
+    ratio = _RATIO_RE.search(text)
+    if ratio is not None:
+        try:
+            v = float(ratio.group(1))
+        except ValueError:
+            pass
+        else:
+            if 0.0 <= v <= 10.0:
+                return v / 10.0
+
+    # Priority 3: labeled score
+    labeled = _LABELED_SCORE_RE.search(text)
+    if labeled is not None:
+        try:
+            v = float(labeled.group(1))
+        except ValueError:
+            pass
+        else:
+            if 0.0 <= v <= 1.0:
+                return v
+
+    # Priority 4: last float in [0, 1] — last-resort generic.
     floats_in_range: list[float] = []
     for match in _FLOAT_RE.finditer(text):
         try:
@@ -579,22 +634,17 @@ def _parse_score(text: str) -> float | None:
     if floats_in_range:
         return floats_in_range[-1]
 
-    # Priority 2: "X out of 10" or "X/10"
-    ratio = re.search(
-        r"(\d+(?:\.\d+)?)\s*(?:/|out of)\s*10\b", text, re.IGNORECASE,
-    )
-    if ratio is not None:
-        try:
-            v = float(ratio.group(1))
-        except ValueError:
-            return None
-        if 0.0 <= v <= 10.0:
-            return v / 10.0
-
     return None
 
 
 _INT_RE = re.compile(r"\b(\d+)\b")
+_BARE_PICK_RE = re.compile(r"^(?:candidate\s+)?(\d+)$", re.IGNORECASE)
+_PICK_VERB_RE = re.compile(
+    # "I pick 2", "choose candidate 3", "winner: 1", "the answer is 4", etc.
+    r"\b(?:pick|choose|select|prefer|winner|answer\s+is|best\s+is|"
+    r"go\s+with|select(?:ed)?)\s*[:=]?\s*(?:candidate\s+)?(\d+)",
+    re.IGNORECASE,
+)
 
 
 def _parse_pick(text: str, n: int) -> int | None:
@@ -602,37 +652,48 @@ def _parse_pick(text: str, n: int) -> int | None:
 
     Returns a 0-indexed candidate position in [0, n), or None on
     parse failure. The caller should log a telemetry event and
-    fall back explicitly (e.g., random choice over candidates)
-    rather than silently picking the first — position bias in
-    the baseline would skew the compute-matched comparison.
+    fall back explicitly (seeded random) rather than silently
+    picking the first.
 
-    Priorities:
-    1. Integer in [1, n] immediately after "candidate" (case-
-       insensitive), if present — picks up "Candidate 3" style
-       responses cleanly.
-    2. Last integer in [1, n] in the response — prefer trailing
-       (models often write the choice at the end).
+    Priorities (most-specific to least-specific):
+
+    1. Bare response — "2", "Candidate 3", "Candidate 3." — the
+       compliant case for "respond with ONLY the candidate
+       number." `re.fullmatch` ensures only-this-and-nothing-else.
+    2. Pick verb + number — "I pick 2", "choose candidate 3",
+       "winner: 1". Captures the picked candidate even when the
+       response also mentions other candidates ("I pick 2
+       because candidate 3 is incomplete").
+    3. None — anything ambiguous (multiple candidates mentioned
+       without a clear pick verb, or no parseable integer in
+       range) falls through to the seeded-random fallback at the
+       call site.
+
+    The previous "Candidate N" anywhere + "last in-range integer"
+    heuristics were flagged in round 3 as hijacking responses
+    that mention rejected candidates ("candidate 3 is incomplete")
+    or that name candidates with negative framing.
     """
-    # Priority 1: "Candidate N" pattern
-    for match in re.finditer(r"candidate\s*(\d+)", text, re.IGNORECASE):
+    # Priority 1: bare response (with optional trailing period)
+    bare = text.strip().rstrip(".").rstrip(")").strip()
+    bare_match = _BARE_PICK_RE.fullmatch(bare)
+    if bare_match is not None:
+        try:
+            v = int(bare_match.group(1))
+        except ValueError:
+            pass
+        else:
+            if 1 <= v <= n:
+                return v - 1
+
+    # Priority 2: pick verb + number
+    for match in _PICK_VERB_RE.finditer(text):
         try:
             v = int(match.group(1))
         except ValueError:
             continue
         if 1 <= v <= n:
             return v - 1
-
-    # Priority 2: last integer in [1, n]
-    ints_in_range: list[int] = []
-    for match in _INT_RE.finditer(text):
-        try:
-            v = int(match.group(1))
-        except ValueError:
-            continue
-        if 1 <= v <= n:
-            ints_in_range.append(v)
-    if ints_in_range:
-        return ints_in_range[-1] - 1
 
     return None
 
@@ -643,14 +704,26 @@ def run(
     query_text: str,
     prompts: PromptTemplates | None = None,
     seed: int | None = None,
-) -> Any:
-    """Evaluate an expression against a client and a query string.
+) -> tuple[Any, InterpreterTelemetry]:
+    """Evaluate an expression and return (result, telemetry).
 
-    If prompts is None, DEFAULT_PROMPTS (structured-critique format
-    from the experiment-spec layer) is used. If seed is None,
-    tie-breaking and parse-failure fallbacks use Python's default
-    random state (non-reproducible but non-positional-biased).
+    If prompts is None, DEFAULT_PROMPTS (structured-critique
+    format from the experiment-spec layer) is used. If seed is
+    None, tie-breaking and parse-failure fallbacks use Python's
+    default random state (non-reproducible but non-positional-
+    biased).
+
+    Returns a tuple `(result, telemetry)`. The telemetry object
+    holds non-fatal event counters (parse failures, ties) that
+    would otherwise be silent — callers should inspect it to
+    decide whether the run's outputs are trustworthy. Round-3
+    review (Gemini) flagged the previous single-value return as
+    a structural blind spot: the InterpreterTelemetry was being
+    garbage-collected with the Interpreter, so the runner had
+    no way to access it. Use this function from production
+    callers; for ad-hoc cases that genuinely don't care about
+    telemetry, unpack with `result, _ = run(...)`.
     """
-    return Interpreter(client, query_text, prompts, seed=seed).evaluate(
-        expr, Env()
-    )
+    interpreter = Interpreter(client, query_text, prompts, seed=seed)
+    result = interpreter.evaluate(expr, Env())
+    return result, interpreter.telemetry

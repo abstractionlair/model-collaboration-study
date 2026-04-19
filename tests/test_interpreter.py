@@ -220,7 +220,7 @@ def test_weighted_vote_picks_argmax() -> None:
         drafts,
         lambda ds: weighted_vote(ds, par_score(["m1", "m2", "m3"], ds)),
     )
-    result = run(Finalize(draft=protocol), client, "q")
+    result, _ = run(Finalize(draft=protocol), client, "q")
     assert result.text == "draft-from-m2", (
         f"expected m2's draft (score 0.9) to win; got {result.text!r}"
     )
@@ -229,13 +229,15 @@ def test_weighted_vote_picks_argmax() -> None:
 def test_weighted_vote_tie_break_is_not_positional() -> None:
     """When all scores tie, WeightedVote picks randomly (with the
     seed), not always the first candidate. Run with different
-    seeds and confirm both 'm1' and 'm3' can win."""
+    seeds and confirm both 'm1' and 'm3' can win. Also verify
+    the tie is recorded in telemetry."""
     def responder(model: str, system: str, user: str) -> str:
         if "Rate your confidence" in user:
             return "0.5"  # all tie
         return f"draft-from-{model}"
 
     winners = set()
+    last_telemetry = None
     for seed in range(10):
         client = FakeClient(responder=responder)
         q = query()
@@ -244,13 +246,17 @@ def test_weighted_vote_tie_break_is_not_positional() -> None:
             drafts,
             lambda ds: weighted_vote(ds, par_score(["m1", "m2", "m3"], ds)),
         )
-        result = run(Finalize(draft=protocol), client, "q", seed=seed)
+        result, telemetry = run(Finalize(draft=protocol), client, "q", seed=seed)
         winners.add(result.text)
+        last_telemetry = telemetry
 
     # With 10 different seeds, we should see at least 2 distinct winners.
     assert len(winners) >= 2, (
         f"tie-break appears positional; only saw winners {winners}"
     )
+    # Telemetry should record the tie that triggered the random fallback.
+    assert last_telemetry is not None
+    assert last_telemetry.weighted_vote_ties == 1
 
 
 def test_pick_one_selects_parsed_candidate() -> None:
@@ -264,29 +270,36 @@ def test_pick_one_selects_parsed_candidate() -> None:
     client = FakeClient(responder=responder)
     q = query()
     drafts = par_gen(["m1", "m2", "m3"], q)
-    result = run(Finalize(draft=pick_one("m1", drafts)), client, "q")
+    result, _ = run(Finalize(draft=pick_one("m1", drafts)), client, "q")
     assert result.text == "draft-from-m2"
 
 
 def test_pick_one_parse_failure_is_random_not_positional() -> None:
     """If the judge's response can't be parsed, PickOne falls back
-    randomly (with seed), not to candidate 1."""
+    randomly (with seed), not to candidate 1. Telemetry records
+    the parse failure."""
     def responder(model: str, system: str, user: str) -> str:
         if "pick the single best one" in user.lower():
             return "I think they're all great!"  # no parseable integer
         return f"draft-from-{model}"
 
     winners = set()
+    last_telemetry = None
     for seed in range(10):
         client = FakeClient(responder=responder)
         q = query()
         drafts = par_gen(["m1", "m2", "m3"], q)
-        result = run(Finalize(draft=pick_one("m1", drafts)), client, "q", seed=seed)
+        result, telemetry = run(
+            Finalize(draft=pick_one("m1", drafts)), client, "q", seed=seed,
+        )
         winners.add(result.text)
+        last_telemetry = telemetry
 
     assert len(winners) >= 2, (
         f"parse-failure fallback appears positional; only saw winners {winners}"
     )
+    assert last_telemetry is not None
+    assert last_telemetry.pick_parse_failures == 1
 
 
 # ----------------------------------------------------------------
@@ -314,7 +327,7 @@ def test_fuse_with_critiques_pairs_drafts_with_critiques() -> None:
     q = query()
     drafts = par_gen(["m1", "m2", "m3"], q)
     critiques = par_peer_review(["m1", "m2", "m3"], drafts, FRESH, PEERS_GROUPED)
-    result = run(
+    result, _ = run(
         Finalize(draft=fuse_with_critiques("m1", drafts, critiques, q)),
         client, "q",
     )
@@ -381,3 +394,45 @@ def test_phase1_condition_call_counts() -> None:
         assert len(client.calls) == expected, (
             f"{name}: expected {expected} calls, got {len(client.calls)}"
         )
+
+
+# ----------------------------------------------------------------
+# run() returns telemetry
+# ----------------------------------------------------------------
+
+
+def test_run_returns_telemetry_visible_to_caller() -> None:
+    """The `run()` convenience function returns a `(result,
+    telemetry)` tuple. Round-3 review (Gemini) flagged the
+    previous single-value return as a structural blind spot:
+    the runner had no way to access parse-failure or tie counts.
+    """
+    client = FakeClient()
+    result, telemetry = run(condition_a("m1"), client, "q")
+    # The result is the final RAnswer; telemetry is a fresh
+    # InterpreterTelemetry with all counters at zero (Condition A
+    # has no parsing or aggregation).
+    assert result.text.startswith("[gen|m1|")
+    assert telemetry.score_parse_failures == 0
+    assert telemetry.pick_parse_failures == 0
+    assert telemetry.weighted_vote_ties == 0
+
+
+def test_run_telemetry_records_parse_failures() -> None:
+    """A response that the score parser can't extract a number
+    from triggers the silent-fallback path; telemetry records it."""
+    def garbage_responder(model: str, system: str, user: str) -> str:
+        if "Rate your confidence" in user:
+            return "I think this is pretty good"  # no parseable number
+        return f"draft-from-{model}"
+
+    client = FakeClient(responder=garbage_responder)
+    q = query()
+    drafts = par_gen(["m1", "m2", "m3"], q)
+    protocol = bind(
+        drafts,
+        lambda ds: weighted_vote(ds, par_score(["m1", "m2", "m3"], ds)),
+    )
+    _, telemetry = run(Finalize(draft=protocol), client, "q", seed=0)
+    # Three score calls all failed to parse.
+    assert telemetry.score_parse_failures == 3

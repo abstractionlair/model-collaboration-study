@@ -7,7 +7,7 @@ underlying client.
 
 Usage:
     client = TracingClient(ApiClient())
-    result = run(protocol, client, query)
+    result, telemetry = run(protocol, client, query)
     for entry in client.trace:
         print(entry)
 """
