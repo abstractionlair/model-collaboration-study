@@ -245,11 +245,22 @@ added) OR much larger N OR both.
 
 **One unexpected finding from D+E validation on `parallel`:**
 Condition A passed 9/9, but Condition D (3-model, 1-round peer
-revision) passed only 2/3 — the failure was a value-type coercion
-error where peer revision converged on the wrong type.
-Collaborative protocols can occasionally **degrade** single-
-model output under specific shapes. Flagged as a signal to watch
-in Phase 1, not as a scorer bug.
+revision) passed only 2/3. The failure was on
+`parallel_2::calculate_resistance`: the schema declares
+`resistivity` as a string enum (`'copper'` / `'aluminum'`), and
+each A-run correctly emitted the string label, but D's final
+revision emitted `resistivity: 2.82e-08` — aluminum's real-world
+physics constant in ohm-meters. The scorer rejected it as
+wrong-type per upstream semantics. Most plausible reading
+(unconfirmed without a per-round trace): a peer critique during
+D's revision cycle plausibly-but-wrongly pushed "use the actual
+physical value, not just the label," and the final aggregated
+answer locked that in. Collaborative protocols can occasionally
+**degrade** single-model output when a peer critique sounds
+authoritative on a topic the original answer was already correct
+about. n=1 observation; could be fluke or the first sign of a
+systematic pattern worth naming. Flagged as a signal to watch in
+Phase 1, not a scorer bug or a system error.
 
 131 tests total (18 new BFCL tests: 4 on `multiple`, 8 on
 `parallel`, 1 on `parallel_multiple`, 1 on `live_simple`, 4 on

@@ -202,16 +202,24 @@ either larger N (power analysis item) or a harder within-BFCL
 subset (e.g. the high-index `parallel_multiple` tasks, or
 `live_parallel_multiple` once added) or both.
 
-**One surprise.** D was 2/3 on `parallel`, the lone failure was
-`parallel_2::calculate_resistance` where the meta-aggregated
-output emitted `resistivity` as a float (`2.82e-08`) where the
-schema declared `string`. All three A runs passed this task
-individually; D converged to a wrong type after peer
-revision. Not a scorer bug — the error message is correct. Suggests
-that collaborative protocols can occasionally **degrade** single-
-model output under value-type-coercion failure modes; worth
-watching in Phase 1 as a potential inversion of the
-collaboration-lifts-capability hypothesis on specific shapes.
+**One surprise.** D was 2/3 on `parallel`. The lone failure was
+`parallel_2::calculate_resistance`. The schema declares
+`resistivity` as a string enum (`'copper'` / `'aluminum'`). All
+three A runs passed this task individually, each emitting the
+string label. D's final revision emitted `resistivity: 2.82e-08`
+— aluminum's real-world physics constant in ohm-meters. The
+scorer correctly rejected it as wrong-type per upstream
+semantics. The per-round trace isn't saved in the run log, so
+the exact drift story is inferred: most plausibly, a peer
+critique during D's revision cycle argued "use the actual
+physical value, not just the label," and the final aggregated
+answer locked that in — a plausible-sounding critique pushing
+three initially-correct answers away from correct. Not a scorer
+bug, not a system error — a genuine collaborative-output failure
+where peer review inverted the collaboration-lifts-capability
+hypothesis. n=1 on a small validation; could be fluke or the
+first sign of a systematic pattern worth naming. Worth a
+tracing-enabled re-run before treating as a phenomenon.
 
 **What this validates.**
 - Multi-call JSON extraction path works on real model output.
