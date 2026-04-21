@@ -236,18 +236,31 @@ Proceed but flagged that 100% ceiling on simple_python means
 D/E have no headroom; must widen BFCL categories before
 Phase 1 kickoff.
 
-**Fix landed in follow-up commit:** `_value_matches_list_of_dicts`
-helper ports upstream's `list_dict_checker` (position-aligned
-per-dict match against per-alternative accepted lists).
-`_check_simple_call` dispatches `array[dict]` to the new
-helper; other list-of-X paths unchanged. Five new tests cover
-simple_python_96's shape + wrong-position, wrong-length,
-missing-required-subfield, multi-alternative. Real-data
-check: both array[dict] tasks in the corpus
-(`simple_python_96`, `simple_python_335`) score correctly now.
-Two deliberate deviations from upstream (exact dotted-name
-match, `is_variable` branch skipped) documented inline in the
-module docstring. Re-pinging Codex after commit.
+**Fix landed in follow-up commit (`3f9ddb7`):**
+`_value_matches_list_of_dicts` helper ports upstream's
+`list_dict_checker` (position-aligned per-dict match against
+per-alternative accepted lists). `_check_simple_call`
+dispatches `array[dict]` to the new helper; other list-of-X
+paths unchanged. Five new tests cover simple_python_96's
+shape + wrong-position, wrong-length, missing-required-subfield,
+multi-alternative. Real-data check: both array[dict] tasks in
+the corpus (`simple_python_96`, `simple_python_335`) score
+correctly now. Two deliberate deviations from upstream (exact
+dotted-name match, `is_variable` branch skipped) documented
+inline in the module docstring.
+
+**Round-5 re-review 2026-04-21: Codex → Proceed.** "The
+`array[dict]` fix addresses the concrete faithfulness bug …
+The five new tests are the right ones for this fix … From my
+previous list, the remaining concrete concerns are now
+correctly downgraded to explicit deviations rather than hidden
+mismatches." One non-blocking test gap noted: no unit test for
+optional-array[dict] omission (the `[""]` sentinel case on
+`simple_python_335::deck`). Added in the subsequent commit —
+test mirrors the 335 shape and confirms model omission passes.
+
+113 tests total (up from 107 at start of session); mypy
+`--strict` clean.
 
 - `src/experiment/benchmarks/bfcl.py` — `BFCLBench`
   implementing the protocol. AST scorer ported from Gorilla's

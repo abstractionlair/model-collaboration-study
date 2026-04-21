@@ -477,6 +477,40 @@ def test_check_list_of_dicts_missing_required_subfield_fails() -> None:
     assert not result.passed
 
 
+def test_check_list_of_dicts_optional_omitted() -> None:
+    """Mirrors simple_python_335's `deck` param: declared as
+    `array[dict]` but accepted values are just `[""]`, meaning
+    the only acceptable answer is to omit it. Model leaving it
+    off should pass."""
+    schema: dict[str, Any] = {
+        "name": "find_card_in_deck",
+        "parameters": {
+            "type": "dict",
+            "properties": {
+                "rank": {"type": "string", "description": "rank"},
+                "suit": {"type": "string", "description": "suit"},
+                "deck": {
+                    "type": "array",
+                    "items": {"type": "dict", "properties": {}},
+                    "description": "optional",
+                },
+            },
+            "required": ["rank", "suit"],
+        },
+    }
+    gt = {
+        "find_card_in_deck": {
+            "rank": ["Queen"], "suit": ["Hearts"], "deck": [""],
+        },
+    }
+    call = {
+        "name": "find_card_in_deck",
+        "arguments": {"rank": "Queen", "suit": "Hearts"},
+    }
+    result = _check_simple_call(schema, call, gt)
+    assert result.passed, result.detail
+
+
 def test_check_list_of_dicts_alternative_match() -> None:
     """When ground truth lists multiple alternatives, the model's
     list just needs to match one of them."""
