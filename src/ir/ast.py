@@ -19,8 +19,10 @@ from .types import (
     Critique,
     Draft,
     Final,
+    ParseFailurePolicy,
     Query,
     Score,
+    TieBreakPolicy,
     Visibility,
 )
 
@@ -411,6 +413,13 @@ class WeightedVote(Expr[Answer[Draft]]):
     choosing among candidates with comparative context, use
     `PickOne` instead.
 
+    `tie_break` controls how ties among max-scoring drafts are
+    resolved. Default is RANDOM (seeded at the interpreter level);
+    FIRST and LAST give deterministic alternatives. Moved up to
+    the AST 2026-04-19; previously tie resolution was hardcoded
+    into the interpreter, which foreclosed the design space the
+    IR is supposed to keep open.
+
     Note: this produces Answer[Draft], not Answer[Final]. A protocol
     wanting the selected draft to be treated as final should wrap
     this in Finalize. This separates the structural operation
@@ -419,6 +428,7 @@ class WeightedVote(Expr[Answer[Draft]]):
     result_type: ClassVar[Any] = Answer[Draft]
     drafts: Expr[list[Answer[Draft]]]
     scores: Expr[list[Score[Answer[Draft]]]]
+    tie_break: TieBreakPolicy = TieBreakPolicy.RANDOM
 
 
 @dataclass(frozen=True)
@@ -442,12 +452,22 @@ class PickOne(Expr[Answer[Draft]]):
     Identity blinding: the judge sees candidates as numbered
     options, never with vendor labels. Per the K=blinded lock.
 
+    `on_parse_failure` controls what happens when the judge's
+    response can't be parsed into a 1-indexed candidate number.
+    Default RANDOM falls back via the interpreter's seeded RNG
+    and records the event in InterpreterTelemetry; RAISE
+    surfaces a ParseFailure exception instead. Moved up to the
+    AST 2026-04-19 alongside WeightedVote.tie_break for the
+    same reason: this is a protocol-design choice, not an
+    executor implementation detail.
+
     Note: produces Answer[Draft]; wrap in Finalize for committed
     final answers.
     """
     result_type: ClassVar[Any] = Answer[Draft]
     judge: str
     drafts: Expr[list[Answer[Draft]]]
+    on_parse_failure: ParseFailurePolicy = ParseFailurePolicy.RANDOM
 
 
 # ============================================================================

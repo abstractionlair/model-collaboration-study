@@ -114,19 +114,29 @@ invariants fail at edit time.
 text. This prevents a mutation engine from substituting a critique
 of one target for a critique of another.
 
-### Annotations: ContextMode and Visibility
+### Annotations: ContextMode, Visibility, TieBreakPolicy, ParseFailurePolicy
 
-Two enum-valued parameters that are the main structural knobs for
+Enum-valued parameters that are the main structural knobs for
 many protocols:
 
 - `ContextMode.{FRESH, ACCUMULATED}` — whether a step runs in a
   fresh context or inherits session history
 - `Visibility.{ARTIFACT_ONLY, WITH_PRODUCTION, PEERS_GROUPED, ALL}`
   — what a reviewer sees alongside the target artifact
+- `TieBreakPolicy.{RANDOM, FIRST, LAST}` — how `WeightedVote`
+  resolves ties among max-scoring drafts. Seeded RNG stays on
+  the interpreter; the policy says whether to use it.
+- `ParseFailurePolicy.{RANDOM, RAISE}` — what `PickOne` does
+  when the judge response can't be parsed into a candidate
+  number. RANDOM falls back via the interpreter's seeded RNG
+  with telemetry; RAISE surfaces a `ParseFailure` exception.
 
 These are not types in the strict sense — they don't change type
 signatures — so mutations can flip them freely. They're the
 "cheap, type-safe knobs" the mutation engine will turn most often.
+The last two were moved up to the AST 2026-04-19 after Scott
+noted that hardcoding the policies into the interpreter
+foreclosed the design space the IR exists to keep open.
 
 ### AST nodes (`src/ir/ast.py`)
 
@@ -146,13 +156,13 @@ The current node set, all frozen dataclasses inheriting from
 | `PeerReviseRound`   | `[Model] -> [Answer[Draft]] -> [Answer[Draft]]` (cyclic 1-peer review)    |
 | `PeerRounds`        | `Int -> [Model] -> [Answer[Draft]] -> [Answer[Draft]]` (N peer-rounds)    |
 | `ParScore`          | `[Model] -> [Answer[Draft]] -> [Score[Answer[Draft]]]`                    |
-| `PickOne`           | `Model -> [Answer[Draft]] -> Answer[Draft]` (single judge picks one)      |
+| `WeightedVote`      | `[Answer[Draft]] x [Score] -> Answer[Draft]` (+ `tie_break` policy)        |
+| `PickOne`           | `Model -> [Answer[Draft]] -> Answer[Draft]` (+ `on_parse_failure` policy) |
 | `ParPeerReview`     | `[Model] -> [Answer[Draft]] -> [Critique[Answer[Draft]]]` (peer review only) |
 | `FuseWithCritiques` | `Model -> [Answer[Draft]] -> [Critique] -> Query -> Answer[Draft]`        |
-| `Fuse`          | `Model -> [Answer[Draft]] -> Query -> Answer[Draft]`                      |
-| `WeightedVote`  | `[Answer[Draft]] -> [Score[Answer[Draft]]] -> Answer[Draft]`              |
-| `Var`           | reference to a Let-bound variable                                         |
-| `Let`           | `Expr[T1] -> (Expr[T1] -> Expr[T2]) -> Expr[T2]`                          |
+| `Fuse`              | `Model -> [Answer[Draft]] -> Query -> Answer[Draft]`                      |
+| `Var`               | reference to a Let-bound variable                                         |
+| `Let`               | `Expr[T1] -> (Expr[T1] -> Expr[T2]) -> Expr[T2]`                          |
 
 **Why bundled nodes like `SelfReviseRound` and `SelfRounds`
 exist.** They are not primitives — `SelfReviseRound` is morally

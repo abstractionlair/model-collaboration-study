@@ -223,6 +223,24 @@ complete.
 
 ## Currently routed to
 
+**Done 2026-04-19**: tie-break and parse-failure policy
+pulled from the interpreter up to the AST as enum fields on
+`WeightedVote` and `PickOne`. `TieBreakPolicy`
+(RANDOM/FIRST/LAST) and `ParseFailurePolicy` (RANDOM/RAISE)
+enums live alongside `ContextMode` and `Visibility` in
+`src/ir/types.py`. Interpreter dispatches via
+`_resolve_tie()` and `_recover_parse_failure()`. Seeded RNG
+stays on the interpreter as a run-level resource. Defaults
+preserve current behavior (RANDOM for both). New
+`ParseFailure` exception for the RAISE case. 54 unit tests
+passing (up from 49); mypy --strict clean on 24 files.
+`docs/decisions.md` 2026-04-19 entry records the rationale.
+
+Neither Codex nor Gemini caught this across four review
+rounds; both treated tie-breaking as an implementation
+detail. Scott's diagnosis was sharper: it's a design choice
+that belongs at the AST level.
+
 **Next phase: benchmark integration and runner work.** Both
 round-4 reviewers signed off on the system as ready to
 proceed. The next major items, in roughly the order the design

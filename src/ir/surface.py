@@ -41,8 +41,10 @@ from .types import (
     Critique,
     Draft,
     Final,
+    ParseFailurePolicy,
     Query,
     Score,
+    TieBreakPolicy,
     Visibility,
 )
 
@@ -231,22 +233,34 @@ def fuse_with_critiques(
 def weighted_vote(
     drafts: Expr[list[Answer[Draft]]],
     scores: Expr[list[Score[Answer[Draft]]]],
+    tie_break: TieBreakPolicy = TieBreakPolicy.RANDOM,
 ) -> Expr[Answer[Draft]]:
-    """Confidence-weighted selection from a list of drafts."""
-    return WeightedVote(drafts=drafts, scores=scores)
+    """Confidence-weighted selection from a list of drafts.
+
+    `tie_break` defaults to RANDOM (seeded at the interpreter
+    level); pass FIRST or LAST for deterministic alternatives.
+    """
+    return WeightedVote(drafts=drafts, scores=scores, tie_break=tie_break)
 
 
 def pick_one(
     judge: str,
     drafts: Expr[list[Answer[Draft]]],
+    on_parse_failure: ParseFailurePolicy = ParseFailurePolicy.RANDOM,
 ) -> Expr[Answer[Draft]]:
     """A single judge model picks one draft from a list of candidates.
 
     The judge sees all candidates side-by-side and returns a
     selection. Comparative selection — distinct from
     `par_score + weighted_vote`, which scores in isolation.
+
+    `on_parse_failure` defaults to RANDOM (seeded fallback,
+    telemetry-tracked); pass RAISE to surface a ParseFailure
+    exception instead.
     """
-    return PickOne(judge=judge, drafts=drafts)
+    return PickOne(
+        judge=judge, drafts=drafts, on_parse_failure=on_parse_failure,
+    )
 
 
 # ============================================================================

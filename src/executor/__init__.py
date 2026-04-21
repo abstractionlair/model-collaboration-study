@@ -17,7 +17,7 @@ from .api_client import (
     InfrastructureError,
 )
 from .client import FakeClient, ModelClient
-from .interpreter import Env, Interpreter, run
+from .interpreter import Env, Interpreter, InterpreterTelemetry, ParseFailure, run
 from .runtime import RAnswer, RCritique, RQuery, RScore, assert_final
 from .tracing import TraceEntry, TracingClient
 
@@ -32,6 +32,8 @@ __all__ = [
     "TraceEntry",
     "Env",
     "Interpreter",
+    "InterpreterTelemetry",
+    "ParseFailure",
     "run",
     "RAnswer",
     "RCritique",

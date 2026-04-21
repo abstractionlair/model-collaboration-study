@@ -532,6 +532,73 @@ tests in `tests/test_phase1.py`.
 
 ---
 
+## 2026-04-19 Tie-break and parse-failure policy live on the AST, not the interpreter
+
+**Decision:** Add `TieBreakPolicy` (RANDOM / FIRST / LAST) and
+`ParseFailurePolicy` (RANDOM / RAISE) enums in
+`src/ir/types.py`, alongside the existing `ContextMode` and
+`Visibility` enums. Attach `tie_break: TieBreakPolicy =
+TieBreakPolicy.RANDOM` to `WeightedVote` and
+`on_parse_failure: ParseFailurePolicy = ParseFailurePolicy.RANDOM`
+to `PickOne`. The interpreter dispatches on the enums (via
+`_resolve_tie()` and `_recover_parse_failure()` helpers). Seeded
+RNG stays on the interpreter as a run-level resource; what
+moves to the AST is the *choice* of whether to use it.
+
+**Alternatives considered:**
+
+- **Leave the policies baked into the interpreter.** Status quo
+  before this decision. Rejected: tie-break and parse-failure
+  fallback are protocol-design choices, not executor
+  implementation details. Hardcoding them at the interpreter
+  level forecloses the design space — every `WeightedVote` /
+  `PickOne` across every macro-model inherits the same rule,
+  with no way to vary it per-condition or mutate it in
+  follow-on ablations.
+- **Sibling nodes per policy** (e.g., `WeightedVoteRandomTie`,
+  `WeightedVoteFirstTie`). Rejected: tie-break and parse-
+  failure don't change the node's type signature or the shape
+  of its children. That's the structural cue the existing
+  `ContextMode` / `Visibility` enums use: same type, same
+  children, different behavior. Enum parameters match that
+  precedent; sibling nodes are reserved for variations that
+  change structure (Self/PeerReviseRound, ParScore+WeightedVote
+  vs PickOne, Fuse vs FuseWithCritiques).
+- **Only include RANDOM** in the enums. Rejected: if we're
+  moving the policy to the AST at all, including the
+  alternatives we've actually considered (FIRST = the old
+  position-biased behavior, still occasionally desired for
+  determinism; LAST as the symmetric counterpart; RAISE for
+  tests and dry runs) is cheap and keeps the design space
+  visible rather than hidden behind "add it later."
+
+**Rationale:** The IR exists to be the substrate for the
+protocol-inventory space, not just for the locked Phase 1
+conditions. When a policy decision gets baked into the
+executor, the IR stops being able to express the research
+question the executor is enacting. This pattern —
+interpreter-level fallback quietly growing into a protocol-
+design choice — is the one Scott caught when reviewing the
+operational-readiness fixes. Moving it up to the AST is a
+structural correction, not a feature add.
+
+Both Codex and Gemini missed this across four review rounds:
+they treated the tie-break logic as an implementation detail.
+The lesson for future review rounds is that any time a
+reviewer-approved "implementation fix" introduces a policy
+that affects measurement, it's worth checking whether the
+policy belongs at the AST level.
+
+**Status:** Active. Implemented in `src/ir/types.py`,
+`src/ir/ast.py`, `src/ir/surface.py`, `src/ir/describe.py`,
+`src/executor/interpreter.py`. Defaults preserve current
+behavior (RANDOM for both). `ParseFailure` exception added to
+`src/executor/interpreter.py` for the RAISE case. Tests in
+`tests/test_interpreter.py` pin each enum value's dispatch
+behavior.
+
+---
+
 ## 2026-04-08 Small models as subjects, frontier models as judges
 
 **Decision:** Use small/mid-tier models (e.g. Haiku, GPT mini, Gemini

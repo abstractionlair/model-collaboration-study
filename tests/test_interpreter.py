@@ -21,7 +21,9 @@ pin exact call counts and sequences.
 
 from __future__ import annotations
 
-from src.executor import FakeClient, Interpreter, run
+import pytest
+
+from src.executor import FakeClient, Interpreter, ParseFailure, run
 from src.ir.surface import (
     FRESH,
     PEERS_GROUPED,
@@ -43,6 +45,7 @@ from src.ir.surface import (
     weighted_vote,
 )
 from src.ir.ast import Finalize
+from src.ir.types import ParseFailurePolicy, TieBreakPolicy
 from src.protocols.ccr import ccr
 from src.protocols.conditions import (
     condition_a,
@@ -436,3 +439,121 @@ def test_run_telemetry_records_parse_failures() -> None:
     _, telemetry = run(Finalize(draft=protocol), client, "q", seed=0)
     # Three score calls all failed to parse.
     assert telemetry.score_parse_failures == 3
+
+
+# ----------------------------------------------------------------
+# Tie-break and parse-failure policy dispatch (AST-level)
+# ----------------------------------------------------------------
+
+
+def _all_tied_responder(model: str, system: str, user: str) -> str:
+    if "Rate your confidence" in user:
+        return "0.5"
+    return f"draft-from-{model}"
+
+
+def test_weighted_vote_tie_break_first() -> None:
+    """TieBreakPolicy.FIRST picks the lowest-index tied candidate
+    deterministically. Useful when reproducibility matters more
+    than avoiding position bias."""
+    client = FakeClient(responder=_all_tied_responder)
+    q = query()
+    drafts = par_gen(["m1", "m2", "m3"], q)
+    protocol = bind(
+        drafts,
+        lambda ds: weighted_vote(
+            ds, par_score(["m1", "m2", "m3"], ds),
+            tie_break=TieBreakPolicy.FIRST,
+        ),
+    )
+    # With FIRST, position 0 wins every time regardless of seed.
+    for seed in range(5):
+        client.calls.clear()
+        result, _ = run(Finalize(draft=protocol), client, "q", seed=seed)
+        assert result.text == "draft-from-m1"
+
+
+def test_weighted_vote_tie_break_last() -> None:
+    """TieBreakPolicy.LAST picks the highest-index tied candidate
+    deterministically."""
+    client = FakeClient(responder=_all_tied_responder)
+    q = query()
+    drafts = par_gen(["m1", "m2", "m3"], q)
+    protocol = bind(
+        drafts,
+        lambda ds: weighted_vote(
+            ds, par_score(["m1", "m2", "m3"], ds),
+            tie_break=TieBreakPolicy.LAST,
+        ),
+    )
+    for seed in range(5):
+        client.calls.clear()
+        result, _ = run(Finalize(draft=protocol), client, "q", seed=seed)
+        assert result.text == "draft-from-m3"
+
+
+def test_weighted_vote_tie_break_default_is_random() -> None:
+    """The default WeightedVote (no tie_break kwarg) uses RANDOM —
+    same as passing TieBreakPolicy.RANDOM explicitly."""
+    default_q = query()
+    default_drafts = par_gen(["m1", "m2", "m3"], default_q)
+    default_protocol = Finalize(draft=bind(
+        default_drafts,
+        lambda ds: weighted_vote(
+            ds, par_score(["m1", "m2", "m3"], ds),
+        ),
+    ))
+
+    random_q = query()
+    random_drafts = par_gen(["m1", "m2", "m3"], random_q)
+    random_protocol = Finalize(draft=bind(
+        random_drafts,
+        lambda ds: weighted_vote(
+            ds, par_score(["m1", "m2", "m3"], ds),
+            tie_break=TieBreakPolicy.RANDOM,
+        ),
+    ))
+
+    # Under the same seed, default and RANDOM must land on the
+    # same winner — confirms the default is RANDOM.
+    default_client = FakeClient(responder=_all_tied_responder)
+    default_result, _ = run(default_protocol, default_client, "q", seed=42)
+
+    random_client = FakeClient(responder=_all_tied_responder)
+    random_result, _ = run(random_protocol, random_client, "q", seed=42)
+
+    assert default_result.text == random_result.text
+
+
+def _garbage_pick_responder(model: str, system: str, user: str) -> str:
+    if "pick the single best one" in user.lower():
+        return "I can't decide"  # no parseable integer
+    return f"draft-from-{model}"
+
+
+def test_pick_one_on_parse_failure_raise() -> None:
+    """ParseFailurePolicy.RAISE surfaces a ParseFailure when the
+    judge response can't be parsed. Useful for dry runs where
+    the goal is to catch parse failures rather than absorb them."""
+    client = FakeClient(responder=_garbage_pick_responder)
+    q = query()
+    drafts = par_gen(["m1", "m2", "m3"], q)
+    protocol = Finalize(draft=pick_one(
+        "m1", drafts, on_parse_failure=ParseFailurePolicy.RAISE,
+    ))
+    with pytest.raises(ParseFailure, match="parse failure"):
+        run(protocol, client, "q")
+
+
+def test_pick_one_default_on_parse_failure_is_random() -> None:
+    """The default PickOne (no on_parse_failure kwarg) uses
+    RANDOM and falls back via the interpreter's seeded RNG."""
+    client = FakeClient(responder=_garbage_pick_responder)
+    q = query()
+    drafts = par_gen(["m1", "m2", "m3"], q)
+    # No kwarg: default is RANDOM. Does NOT raise.
+    result, telemetry = run(
+        Finalize(draft=pick_one("m1", drafts)), client, "q", seed=0,
+    )
+    assert result.text.startswith("draft-from-")
+    assert telemetry.pick_parse_failures == 1

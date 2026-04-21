@@ -130,18 +130,20 @@ def describe(expr: Expr[Any], indent: int = 0) -> str:
                 f"{d}\n{c}\n{q}"
             )
 
-        case WeightedVote(drafts=drafts, scores=scores):
+        case WeightedVote(drafts=drafts, scores=scores, tie_break=tb):
             d = describe(drafts, indent + 1)
             s = describe(scores, indent + 1)
             return (
-                f"{pad}WeightedVote : [Answer[Draft]] x [Score] -> Answer[Draft]\n"
+                f"{pad}WeightedVote(tie_break={tb.value}) "
+                f": [Answer[Draft]] x [Score] -> Answer[Draft]\n"
                 f"{d}\n{s}"
             )
 
-        case PickOne(judge=judge, drafts=drafts):
+        case PickOne(judge=judge, drafts=drafts, on_parse_failure=opf):
             d = describe(drafts, indent + 1)
             return (
-                f"{pad}PickOne({judge}) : [Answer[Draft]] -> Answer[Draft]\n{d}"
+                f"{pad}PickOne({judge}, on_parse_failure={opf.value}) "
+                f": [Answer[Draft]] -> Answer[Draft]\n{d}"
             )
 
         case Var(name=name):

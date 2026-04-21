@@ -37,9 +37,11 @@ from .types import (
     Draft,
     Final,
     Flag,
+    ParseFailurePolicy,
     Plan,
     Query,
     Score,
+    TieBreakPolicy,
     Visibility,
 )
 
@@ -55,6 +57,8 @@ __all__ = [
     "Plan",
     "ContextMode",
     "Visibility",
+    "TieBreakPolicy",
+    "ParseFailurePolicy",
     # AST
     "Expr",
     "QueryVar",

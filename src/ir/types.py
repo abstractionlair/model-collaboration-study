@@ -129,3 +129,46 @@ class Visibility(Enum):
     WITH_PRODUCTION = "with_production"      # artifact + how it was produced
     PEERS_GROUPED = "peers_grouped"          # artifact + peer answers grouped
     ALL = "all"                              # everything
+
+
+class TieBreakPolicy(Enum):
+    """How an aggregator resolves ties among equally-ranked candidates.
+
+    Ties arise naturally (multiple drafts with the same score, or
+    same parse-failure-fallback value) and would otherwise be
+    resolved by arbitrary implementation behavior (e.g., first-
+    encountered index). Different macro-models may want different
+    policies; exposing the choice at the AST level lets the
+    mutation engine flip it and lets each condition spec its
+    own rule.
+
+    Current values:
+    - RANDOM: seeded random over tied candidates. Default for
+      Phase 1; eliminates systematic position bias.
+    - FIRST: lowest index wins. Deterministic but position-
+      biased; occasionally the right choice when reproducibility
+      matters more than unbiasedness.
+    - LAST: highest index wins. Symmetric counterpart to FIRST.
+    """
+    RANDOM = "random"
+    FIRST = "first"
+    LAST = "last"
+
+
+class ParseFailurePolicy(Enum):
+    """How a node recovers when it can't parse a model response.
+
+    Applies to `PickOne` when `_parse_pick` returns None because
+    the judge response is ambiguous or uninterpretable.
+
+    Current values:
+    - RANDOM: seeded random over the candidate set. Keeps the
+      run going so a single parse failure doesn't abort a whole
+      benchmark run; parse-failure events are recorded in
+      `InterpreterTelemetry`.
+    - RAISE: surface a `ParseFailure` exception. For tests,
+      dry runs, or setups where parse failures should be treated
+      as hard errors rather than tolerated with a fallback.
+    """
+    RANDOM = "random"
+    RAISE = "raise"

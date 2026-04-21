@@ -40,7 +40,14 @@ from src.ir.ast import (
     Var,
     WeightedVote,
 )
-from src.ir.types import ContextMode, Draft, Final, Visibility
+from src.ir.types import (
+    ContextMode,
+    Draft,
+    Final,
+    ParseFailurePolicy,
+    TieBreakPolicy,
+    Visibility,
+)
 
 from .client import ModelClient
 from .runtime import RAnswer, RCritique, RQuery, RScore
@@ -61,6 +68,20 @@ class Env:
 
     def lookup(self, name: str) -> Any:
         return self.bindings[name]
+
+
+class ParseFailure(Exception):
+    """Raised by `PickOne` when `on_parse_failure=RAISE` and the
+    judge's response can't be parsed into a candidate number.
+
+    The default `ParseFailurePolicy.RANDOM` triggers a seeded-
+    random fallback with telemetry instead; callers opt into
+    this exception by setting the policy at AST construction
+    time. Use for tests, dry runs, or setups where parse
+    failures should be treated as hard errors rather than
+    tolerated.
+    """
+    pass
 
 
 @dataclass
@@ -298,6 +319,47 @@ class Interpreter:
             )
         return out
 
+    def _resolve_tie(
+        self, tied_indices: list[int], policy: TieBreakPolicy,
+    ) -> int:
+        """Dispatch on `TieBreakPolicy` to pick among tied indices.
+
+        The policy comes from the AST node; the randomness source
+        (seeded at `Interpreter.__init__`) stays here because it's
+        a run-level resource, not a macro-model concern.
+        """
+        match policy:
+            case TieBreakPolicy.RANDOM:
+                return self._rng.choice(tied_indices)
+            case TieBreakPolicy.FIRST:
+                return tied_indices[0]
+            case TieBreakPolicy.LAST:
+                return tied_indices[-1]
+        raise ValueError(f"Unknown TieBreakPolicy: {policy}")
+
+    def _recover_parse_failure(
+        self,
+        policy: ParseFailurePolicy,
+        n: int,
+        judge: str,
+        response: str,
+    ) -> int:
+        """Dispatch on `ParseFailurePolicy` to recover a pick index.
+
+        RANDOM uses the interpreter's seeded RNG; RAISE surfaces
+        a ParseFailure so the caller can treat parse failures as
+        hard errors.
+        """
+        match policy:
+            case ParseFailurePolicy.RANDOM:
+                return self._rng.randrange(n)
+            case ParseFailurePolicy.RAISE:
+                raise ParseFailure(
+                    f"pick parse failure from {judge}: "
+                    f"{response[:120]!r} (n={n})"
+                )
+        raise ValueError(f"Unknown ParseFailurePolicy: {policy}")
+
     def _par_peer_review(
         self,
         models: list[str],
@@ -496,7 +558,7 @@ class Interpreter:
                     scores.append(RScore(value=parsed))
                 return scores
 
-            case WeightedVote(drafts=ds, scores=ss):
+            case WeightedVote(drafts=ds, scores=ss, tie_break=tie_break):
                 answers = self.evaluate(ds, env)
                 scores = self.evaluate(ss, env)
                 best = max(s.value for s in scores)
@@ -505,15 +567,17 @@ class Interpreter:
                     self.telemetry.weighted_vote_ties += 1
                     logger.warning(
                         "WeightedVote tie among indices %r at score %.3f "
-                        "(random tie-break)",
-                        tied, best,
+                        "(policy=%s)",
+                        tied, best, tie_break.value,
                     )
-                    best_idx = self._rng.choice(tied)
+                    best_idx = self._resolve_tie(tied, tie_break)
                 else:
                     best_idx = tied[0]
                 return answers[best_idx]
 
-            case PickOne(judge=judge, drafts=ds):
+            case PickOne(
+                judge=judge, drafts=ds, on_parse_failure=on_parse_failure,
+            ):
                 answers = self.evaluate(ds, env)
                 candidates_text = "\n---\n".join(
                     f"Candidate {i+1}:\n{a.text}"
@@ -530,10 +594,13 @@ class Interpreter:
                 if idx is None:
                     self.telemetry.pick_parse_failures += 1
                     logger.warning(
-                        "pick parse failure from %s: %r (random fallback among %d)",
-                        judge, text[:120], len(answers),
+                        "pick parse failure from %s: %r (policy=%s, n=%d)",
+                        judge, text[:120], on_parse_failure.value,
+                        len(answers),
                     )
-                    idx = self._rng.randrange(len(answers))
+                    idx = self._recover_parse_failure(
+                        on_parse_failure, len(answers), judge, text,
+                    )
                 return answers[idx]
 
             case Var(name=name):
