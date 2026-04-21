@@ -219,7 +219,9 @@ class Interpreter:
             model,
             system,
             self.prompts.revise_user.format(
-                critique=crit_text, draft=own.text
+                query=own.production_query,
+                critique=crit_text,
+                draft=own.text,
             ),
         )
         return RAnswer(
@@ -277,7 +279,9 @@ class Interpreter:
             writer,
             system,
             self.prompts.revise_user.format(
-                critique=crit_text, draft=target.text
+                query=target.production_query,
+                critique=crit_text,
+                draft=target.text,
             ),
         )
         return RAnswer(
@@ -434,7 +438,9 @@ class Interpreter:
                     model,
                     self.prompts.gen_system,
                     self.prompts.revise_user.format(
-                        critique=crit.text, draft=ans.text
+                        query=ans.production_query,
+                        critique=crit.text,
+                        draft=ans.text,
                     ),
                 )
                 return RAnswer(

@@ -129,8 +129,16 @@ _PEER_REVIEW_ALL = (
 )
 
 # Revision
+#
+# The task is included at the top so the writer revising from a
+# peer critique can re-anchor to the original request. Without it,
+# a schema-violating but authoritative-sounding critique has no
+# counterweight — see `docs/decisions.md` 2026-04-21 entry and
+# `docs/reviews/bfcl-widen-review-codex-2026-04-21.md` for the
+# round-6 finding that motivated this shape.
 _REVISE_USER = (
-    "Given this critique:\n{critique}\n\n"
+    "The original task was:\n{query}\n\n"
+    "A peer produced this critique of your draft:\n{critique}\n\n"
     "Revise the draft below and return only the revised answer.\n\n"
     "Draft:\n{draft}"
 )

@@ -599,6 +599,79 @@ behavior.
 
 ---
 
+## 2026-04-21 Include the task in revise and peer-review-D prompts
+
+**Decision:** The `_REVISE_USER` prompt template now includes
+the original task text (`{query}` variable at the top). The
+ReConcile-style `condition_d` protocol now uses `ALL_VISIBLE`
+visibility for peer review (was `PEERS_GROUPED`), so the peer
+reviewer sees the original task alongside the target draft and
+the other peers' drafts.
+
+**Alternatives considered:**
+
+- **Keep the status quo** (revise prompt has only `{critique,
+  draft}`; D uses `PEERS_GROUPED` visibility, which hides the
+  task from the reviewer). Rejected: under cross-lineage
+  review of the BFCL widen session, Codex identified this as
+  the concrete cause of a real capability failure
+  (`parallel_2::calculate_resistance`), where a peer critique
+  said "use the physical resistivity value, not just the
+  label," and the revising writer had no way to cross-check
+  that against the schema — because the schema/task was no
+  longer in its context. Single-model runs of the same task
+  passed; D failed. The status quo was a bug in the protocol
+  definition, not a deliberate narrowing.
+- **Treat the context-loss as a deliberate ablation variant
+  to measure.** Rejected as a default: if the experimental
+  framework's *default* peer-review behavior silently omits
+  the task, every D result is measuring "collaboration
+  degrades under schema-violating authoritative critique"
+  rather than the intended "collaboration over solo." The
+  ablation itself (does hiding the task hurt?) is valuable
+  but should be an explicit variant of D, not the default.
+  The current `PEERS_GROUPED` variant remains available in
+  the IR for that future ablation.
+- **Only fix the revise template, leave D's visibility at
+  `PEERS_GROUPED`.** Rejected: the peer reviewer is asked to
+  assess "Correctness" in the structured-critique dimensions
+  list. Without the task, correctness is essentially
+  unreachable — the reviewer can only pattern-match on what
+  looks authoritative. That's the mechanism by which the
+  plausible-sounding-but-wrong critique got through.
+
+**Rationale:** This is a protocol-definition bug, surfaced by
+cross-lineage review (Codex round-6, 2026-04-21) and validated
+by re-running `parallel_2` with D: it failed before the fix,
+passes after. The `_REVISE_USER` change adds `{query}` to the
+template and updates three call sites in
+`src/executor/interpreter.py` (self-revise, peer-revise, and
+the standalone `Revise` IR node case) to pass
+`target.production_query`. The `reconcile()` change swaps one
+import (`PEERS_GROUPED` → `ALL_VISIBLE`) and the visibility
+argument in `peer_rounds(...)`. Neither change adds new IR
+constructs; both use the existing design's expressive range.
+
+Neither Opus 4.7 (first-round system review), Codex, nor
+Gemini caught this across the first five review rounds. Codex
+found it in round 6 only because the BFCL widen validation
+produced a concrete failure it could trace. The lesson: a
+prompt template that *seems* self-contained may still be
+mis-specified relative to what a downstream critique can do
+with it; hermetic sealing from ground truth (the
+selector-as-oracle discipline) should not be confused with
+hiding the task from participants in a protocol round.
+
+**Status:** Active. Implemented in
+`src/experiment/prompts.py` (`_REVISE_USER` template),
+`src/experiment/spec.py` (field-comment update),
+`src/executor/interpreter.py` (three `revise_user.format(...)`
+call sites), `src/protocols/reconcile.py` (import + protocol
+body). Re-validation run: `parallel_2` under D, 1/1 pass
+(was 0/1 before the fix); A and E remain passing.
+
+---
+
 ## 2026-04-08 Small models as subjects, frontier models as judges
 
 **Decision:** Use small/mid-tier models (e.g. Haiku, GPT mini, Gemini

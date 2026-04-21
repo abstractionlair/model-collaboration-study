@@ -278,10 +278,19 @@ not inherit accidentally. Tracked as routed work below.
 - `docs/reviews/bfcl-widen-review-gemini-2026-04-21.md` — Proceed,
   with "power analysis is now the immediate unblocker."
 
-No code changes from the widen review itself (one docstring
-typo in `scripts/download_bfcl.py` was fixed). The
-prompt-template context-loss finding is system-level, beyond
-the widen scope, and is now routed as a separate item.
+**Prompt-context fix landed 2026-04-21** in response to the
+Codex finding. `_REVISE_USER` now starts with "The original
+task was:\n{query}" (was `{critique, draft}` only); the three
+`revise_user.format(...)` call sites in
+`src/executor/interpreter.py` now pass
+`target.production_query`. `reconcile()` now uses
+`ALL_VISIBLE` (was `PEERS_GROUPED`), so the peer reviewer in D
+sees the task alongside the target draft and peer drafts.
+Re-validation on `parallel_2::calculate_resistance`: D now
+1/1 (was 0/1 before the fix); A and E unchanged. `PEERS_GROUPED`
+variant remains available in the IR for future ablation work.
+`decisions.md` 2026-04-21 entry records the rationale. 131
+tests pass; mypy `--strict` clean.
 
 131 tests total (18 new BFCL tests: 4 on `multiple`, 8 on
 `parallel`, 1 on `parallel_multiple`, 1 on `live_simple`, 4 on
@@ -292,7 +301,7 @@ coverage). mypy `--strict` clean on the updated adapter.
 
 **Next session — pick one of four remaining.**
 
-Five items remain before Phase 1 kickoff:
+Four items remain before Phase 1 kickoff:
 
 1. **Pre-kickoff power analysis** (~half session). Operational
    gate from `experimental-design.md`. Simulate Protocol ×
@@ -305,28 +314,16 @@ Five items remain before Phase 1 kickoff:
    finding:** 100% ceiling confirmed empirically across all
    widened BFCL categories; both widen reviewers agree this is
    now the clearest next unblocker.
-2. **Prompt-template context discipline** (~half session,
-   design-heavy). Codex's widen-review surfaced that
-   `_REVISE_USER` and `_PEER_REVIEW_USER` omit the original
-   task, while `_FUSE_USER` / `_FUSE_WITH_CRITIQUES_USER`
-   include it. This is an open design choice, not an
-   accidental inconsistency that needs "fixing": including the
-   task makes revise more robust but may mask critique-
-   driven-degradation phenomena the study wants to measure.
-   Decide deliberately; log to `decisions.md`; if the call is
-   "include task in revise/peer-review," update the templates
-   and re-run a small widen validation to see if
-   `parallel_2::calculate_resistance` still degrades under D.
-3. **LiveCodeBench adapter** (~1 session). Coding tasks with
+2. **LiveCodeBench adapter** (~1 session). Coding tasks with
    executable tests, no Docker. Middle-weight; sits between
    BFCL and SWE-bench in effort. Reuses the `Benchmark`
    protocol shape.
-4. **SWE-bench Verified adapter** (multi-session, 2–3 sittings).
+3. **SWE-bench Verified adapter** (multi-session, 2–3 sittings).
    Heaviest: requires x86_64 + Docker + 120 GB storage + 16 GB
    RAM + 8 CPU cores. Plan an explicit session-1 scope
    ("one instance end-to-end, defer the rest"). Verify host
    has Docker + disk before starting.
-5. **Run-manifest schema** (~half session). Persists per-run:
+4. **Run-manifest schema** (~half session). Persists per-run:
    protocol AST (serialised), model assignments, prompt
    templates, seed, full trace, costs, verdict. Can fold into
    any of the above.

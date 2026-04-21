@@ -1,0 +1,147 @@
+{
+  "benchmark": "bfcl_parallel",
+  "timestamp": "2026-04-21T23-21-55",
+  "task_ids": [
+    "parallel_2"
+  ],
+  "seed": 0,
+  "available_providers": [
+    "anthropic",
+    "google",
+    "openai",
+    "xai"
+  ],
+  "subject_models": [
+    "gpt-5.4-mini",
+    "claude-haiku-4-5",
+    "gemini-2.5-flash"
+  ],
+  "elapsed_seconds": 57.5708161550574,
+  "conditions": [
+    {
+      "name": "A (gpt-5.4-mini)",
+      "pass_rate": 1.0,
+      "abort_count": 0,
+      "total_dollars": 0.0006915,
+      "tasks": [
+        {
+          "task_id": "parallel_2",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 1.951293712016195,
+          "input_tokens": 316,
+          "output_tokens": 101,
+          "dollars": 0.0006915,
+          "successful_calls": 1,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        }
+      ]
+    },
+    {
+      "name": "A (claude-haiku-4-5)",
+      "pass_rate": 1.0,
+      "abort_count": 0,
+      "total_dollars": 0.00093,
+      "tasks": [
+        {
+          "task_id": "parallel_2",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 0.9808999141678214,
+          "input_tokens": 355,
+          "output_tokens": 115,
+          "dollars": 0.00093,
+          "successful_calls": 1,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        }
+      ]
+    },
+    {
+      "name": "A (gemini-2.5-flash)",
+      "pass_rate": 1.0,
+      "abort_count": 0,
+      "total_dollars": 0.0003855,
+      "tasks": [
+        {
+          "task_id": "parallel_2",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 1.286031932104379,
+          "input_tokens": 335,
+          "output_tokens": 114,
+          "dollars": 0.0003855,
+          "successful_calls": 1,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        }
+      ]
+    },
+    {
+      "name": "D (gpt-5.4-mini+claude-haiku-4-5+gemini-2.5-flash)",
+      "pass_rate": 1.0,
+      "abort_count": 0,
+      "total_dollars": 0.011158999999999999,
+      "tasks": [
+        {
+          "task_id": "parallel_2",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 22.791699904948473,
+          "input_tokens": 5666,
+          "output_tokens": 1692,
+          "dollars": 0.011158999999999999,
+          "successful_calls": 12,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        }
+      ]
+    },
+    {
+      "name": "E (gpt-5.4-mini+claude-haiku-4-5+gemini-2.5-flash, meta=gpt-5.4-mini)",
+      "pass_rate": 1.0,
+      "abort_count": 0,
+      "total_dollars": 0.012311699999999998,
+      "tasks": [
+        {
+          "task_id": "parallel_2",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 30.555808498058468,
+          "input_tokens": 4884,
+          "output_tokens": 2347,
+          "dollars": 0.012311699999999998,
+          "successful_calls": 7,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        }
+      ]
+    }
+  ]
+}

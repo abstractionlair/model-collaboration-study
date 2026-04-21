@@ -18,6 +18,13 @@ Migrated to `PeerRounds` on 2026-04-16; previously used
 `SelfRounds` (a faithfulness gap surfaced by the cross-lineage
 review round). See `decisions.md` 2026-04-16 entry.
 
+Visibility was `PEERS_GROUPED` (peers + draft, task hidden)
+through 2026-04-21; moved to `ALL_VISIBLE` per the round-6
+context-loss finding so the peer reviewer can see the original
+task alongside the other peers' drafts. A reviewer asked to
+assess "Correctness" cannot do so without the task. See
+`decisions.md` 2026-04-21 entry.
+
 Notes:
 - "Convincing samples" (per-model few-shot demonstrations of
   persuasive explanations) are prompt-level details that belong in
@@ -32,8 +39,8 @@ Notes:
 from __future__ import annotations
 
 from src.ir.surface import (
+    ALL_VISIBLE,
     FRESH,
-    PEERS_GROUPED,
     bind,
     finalize,
     par_gen,
@@ -52,14 +59,17 @@ def reconcile(
 ) -> Expr[Answer[Final]]:
     """Build the ReConcile protocol AST.
 
-    Uses peer-review-with-peer-context per the design's D
-    specification. Reviewer for draft i is models[(i+1) % N];
-    the original writer m_i revises its own draft from the peer
-    critique. Requires N >= 2.
+    Uses `ALL_VISIBLE`: the peer reviewer sees the original task,
+    the target draft, and the other peers' drafts. This matches
+    the ReConcile paper (each agent has the question in hand
+    during the round-table phase) and ensures the reviewer can
+    assess the "Correctness" critique dimension. Reviewer for
+    draft i is models[(i+1) % N]; the original writer m_i
+    revises its own draft from the peer critique. Requires N >= 2.
     """
     q = query()
     refined = peer_rounds(
-        n_rounds, models, par_gen(models, q), FRESH, PEERS_GROUPED
+        n_rounds, models, par_gen(models, q), FRESH, ALL_VISIBLE
     )
     return bind(
         refined,
