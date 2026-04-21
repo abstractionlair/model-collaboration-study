@@ -289,11 +289,17 @@ class ApiClient:
     def _call_openai(
         self, model: str, system: str, user: str
     ) -> tuple[str, int, int]:
-        """Call OpenAI API. Returns (text, input_tokens, output_tokens)."""
+        """Call OpenAI API. Returns (text, input_tokens, output_tokens).
+
+        Uses `max_completion_tokens` rather than `max_tokens`:
+        GPT-5 family models (including gpt-5.4-mini) reject the
+        older `max_tokens` parameter as unsupported. Surfaced by
+        the HumanEval validation run 2026-04-21.
+        """
         client = self._get_openai()
         kwargs: dict[str, Any] = {
             "model": model,
-            "max_tokens": self.max_tokens,
+            "max_completion_tokens": self.max_tokens,
             "messages": [
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},
@@ -319,6 +325,9 @@ class ApiClient:
     ) -> tuple[str, int, int]:
         """Call xAI API (OpenAI-compatible). Returns (text, input_tokens, output_tokens)."""
         client = self._get_xai()
+        # xAI Grok accepts `max_tokens`; newer xAI models may
+        # eventually require `max_completion_tokens` like OpenAI
+        # GPT-5 family. Keep `max_tokens` until a model rejects it.
         kwargs: dict[str, Any] = {
             "model": model,
             "max_tokens": self.max_tokens,

@@ -223,6 +223,37 @@ complete.
 
 ## Currently routed to
 
+**Done 2026-04-21**: framework-validation run against a
+HumanEval subset. Built a minimal `Benchmark` abstraction
+(Task / ScoreResult / Benchmark) that SWE-bench /
+LiveCodeBench / BFCL adapters will share, a HumanEval
+adapter using the official `human-eval` package, a minimal
+runner at `src/experiment/runner.py`, a driver at
+`scripts/run_humaneval.py`, and 11 new unit tests.
+
+**Results (10 tasks, 4 conditions, ~5 min, $0.20 total):**
+
+| Condition | Pass | $ | Calls | Avg |
+|-----------|------|----|-------|-----|
+| A (gpt-5.4-mini) | 10/10 | $0.008 | 10 | 1.2s |
+| A (claude-haiku-4-5) | 10/10 | $0.011 | 10 | 1.7s |
+| D (hetero, 1 round) | 10/10 | $0.098 | 80 | 15.1s |
+| E (hetero, meta-synth) | 10/10 | $0.080 | 50 | 13.7s |
+
+One tie-break event in D (seeded-random resolved as
+designed). No infra / capability / parse failures. Call
+counts match architecture-doc predictions exactly.
+
+**One real bug surfaced and fixed during the run:** OpenAI's
+GPT-5 family rejects `max_tokens` as unsupported; switched
+`_call_openai` to `max_completion_tokens`. Smoke test's job.
+
+Full write-up in `data/mini_bench_runs/README.md`.
+
+Not a research benchmark — HumanEval stays out of the Phase
+1 matrix (SWE-bench / LiveCodeBench / BFCL). Framework
+validation only.
+
 **Done 2026-04-19**: tie-break and parse-failure policy
 pulled from the interpreter up to the AST as enum fields on
 `WeightedVote` and `PickOne`. `TieBreakPolicy`

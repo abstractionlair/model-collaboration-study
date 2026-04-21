@@ -1,0 +1,104 @@
+{
+  "timestamp": "2026-04-21T11-26-40",
+  "task_ids": [
+    "HumanEval/0",
+    "HumanEval/1"
+  ],
+  "seed": 0,
+  "available_providers": [
+    "anthropic",
+    "openai",
+    "xai"
+  ],
+  "subject_models": [
+    "gpt-5.4-mini",
+    "claude-haiku-4-5"
+  ],
+  "elapsed_seconds": 6.27900962298736,
+  "conditions": [
+    {
+      "name": "A (gpt-5.4-mini)",
+      "pass_rate": 1.0,
+      "abort_count": 0,
+      "total_dollars": 0.0019214999999999998,
+      "tasks": [
+        {
+          "task_id": "HumanEval/0",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "passed",
+          "elapsed": 2.2568487101234496,
+          "input_tokens": 176,
+          "output_tokens": 168,
+          "dollars": 0.0008879999999999999,
+          "successful_calls": 1,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        },
+        {
+          "task_id": "HumanEval/1",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "passed",
+          "elapsed": 1.5632562297396362,
+          "input_tokens": 166,
+          "output_tokens": 202,
+          "dollars": 0.0010335,
+          "successful_calls": 1,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        }
+      ]
+    },
+    {
+      "name": "A (claude-haiku-4-5)",
+      "pass_rate": 1.0,
+      "abort_count": 0,
+      "total_dollars": 0.002611,
+      "tasks": [
+        {
+          "task_id": "HumanEval/0",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "passed",
+          "elapsed": 1.066102622076869,
+          "input_tokens": 188,
+          "output_tokens": 190,
+          "dollars": 0.0011380000000000001,
+          "successful_calls": 1,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        },
+        {
+          "task_id": "HumanEval/1",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "passed",
+          "elapsed": 1.2997140791267157,
+          "input_tokens": 193,
+          "output_tokens": 256,
+          "dollars": 0.001473,
+          "successful_calls": 1,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        }
+      ]
+    }
+  ]
+}

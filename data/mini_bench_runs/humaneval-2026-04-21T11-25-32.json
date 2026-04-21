@@ -1,0 +1,104 @@
+{
+  "timestamp": "2026-04-21T11-25-32",
+  "task_ids": [
+    "HumanEval/0",
+    "HumanEval/1"
+  ],
+  "seed": 0,
+  "available_providers": [
+    "anthropic",
+    "openai",
+    "xai"
+  ],
+  "subject_models": [
+    "gpt-5.4-mini",
+    "claude-haiku-4-5"
+  ],
+  "elapsed_seconds": 4.848564006853849,
+  "conditions": [
+    {
+      "name": "A (gpt-5.4-mini)",
+      "pass_rate": 0.0,
+      "abort_count": 2,
+      "total_dollars": 0,
+      "tasks": [
+        {
+          "task_id": "HumanEval/0",
+          "passed": false,
+          "fraction": 0.0,
+          "detail": "BadRequestError: Error code: 400 - {'error': {'message': \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\", 'type': 'invalid_request_error', ",
+          "elapsed": 1.4790656827390194,
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "dollars": 0,
+          "successful_calls": 0,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": "BadRequestError: Error code: 400 - {'error': {'message': \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\", 'type': 'invalid_request_error', 'param': 'max_tokens', 'code': 'unsupported_parameter'}}"
+        },
+        {
+          "task_id": "HumanEval/1",
+          "passed": false,
+          "fraction": 0.0,
+          "detail": "BadRequestError: Error code: 400 - {'error': {'message': \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\", 'type': 'invalid_request_error', ",
+          "elapsed": 0.0805678116157651,
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "dollars": 0,
+          "successful_calls": 0,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": "BadRequestError: Error code: 400 - {'error': {'message': \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\", 'type': 'invalid_request_error', 'param': 'max_tokens', 'code': 'unsupported_parameter'}}"
+        }
+      ]
+    },
+    {
+      "name": "A (claude-haiku-4-5)",
+      "pass_rate": 1.0,
+      "abort_count": 0,
+      "total_dollars": 0.0026360000000000003,
+      "tasks": [
+        {
+          "task_id": "HumanEval/0",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "passed",
+          "elapsed": 1.6981024672277272,
+          "input_tokens": 188,
+          "output_tokens": 185,
+          "dollars": 0.001113,
+          "successful_calls": 1,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        },
+        {
+          "task_id": "HumanEval/1",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "passed",
+          "elapsed": 1.5444313548505306,
+          "input_tokens": 193,
+          "output_tokens": 266,
+          "dollars": 0.001523,
+          "successful_calls": 1,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        }
+      ]
+    }
+  ]
+}
