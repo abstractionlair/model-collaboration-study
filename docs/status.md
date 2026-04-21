@@ -223,6 +223,59 @@ complete.
 
 ## Currently routed to
 
+**Next session — pick one of three.** Framework foundation
+is green (all four review rounds Proceed; end-to-end
+HumanEval validation passed; all three providers working).
+Three roughly-independent items remain before Phase 1 kickoff.
+Pick one per session:
+
+1. **BFCL adapter** (~1 session). Berkeley Function Call
+   Leaderboard: tool-use benchmark, executability-based
+   scoring (valid JSON matching declared tool surface). No
+   Docker, no code execution in subprocess — lightest of the
+   three Phase 1 benchmarks. Shape: implement `Benchmark`
+   protocol, format tool surface in query, parse
+   function-call JSON from response, compare against
+   reference. Good first adapter — proves the abstraction
+   holds for a non-coding task shape.
+
+2. **Pre-kickoff power analysis** (~half a session). The
+   operational gate from `experimental-design.md`: simulate
+   Protocol × Stratum interaction test against the
+   pre-declared utility curve (easy −5pp, middle +10pp, hard
+   0pp) at the actual Phase 1 N per stratum × condition ×
+   tier. If <80% power, the middle-band fallback triggers
+   automatically per the locked design. Self-contained —
+   pure statistics work with `scipy`/`statsmodels`, no
+   external deps. Unblocks calibration-time decisions about
+   task-instance counts.
+
+3. **SWE-bench Verified adapter** (multi-session,
+   2–3 sittings). Heaviest of the three: requires x86_64 +
+   Docker + 120 GB storage + 16 GB RAM + 8 CPU cores (per
+   design). Shape: official `swebench` harness drives
+   container-per-instance test execution. Tricky bits:
+   query formatting (how much repo context to pass),
+   patch extraction from model responses (diff vs. full
+   file), scoring (propagating test results through the
+   Docker boundary). Verify host has Docker + disk before
+   starting. Probably best tackled with an explicit
+   budget-for-session-1 plan ("get one instance to run
+   end-to-end, defer the rest").
+
+`LiveCodeBench` is also in the Phase 1 matrix but isn't
+listed here — it sits between BFCL and SWE-bench in effort
+(coding tasks with executable tests, no Docker). Pick it up
+after BFCL if the adapter shape is holding up.
+
+**Run-manifest schema** is a small follow-on that can be
+folded into whichever adapter session or done separately —
+it's ~half a session on its own. Needs to persist per-run:
+protocol AST (serialized), model assignments, prompt
+templates, seed, full trace, costs, verdict.
+
+---
+
 **Done 2026-04-21 (follow-up)**: Google key fallback wired.
 Vault stores the generative key under
 `GOOGLE_EMBEDDING_API_KEY` / `GEMINI_EMBEDDING_API_KEY`
