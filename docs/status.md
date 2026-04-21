@@ -223,6 +223,21 @@ complete.
 
 ## Currently routed to
 
+**Done 2026-04-21 (follow-up)**: Google key fallback wired.
+Vault stores the generative key under
+`GOOGLE_EMBEDDING_API_KEY` / `GEMINI_EMBEDDING_API_KEY`
+deliberately (prevents the `gemini` CLI from auto-switching);
+verified end-to-end that it's a generic key. Framework now
+reads the canonical names first, then falls back to the
+`_EMBEDDING_` names (`ApiClient._get_google`,
+`run_humaneval.py::available_providers`,
+`smoke_test.py::available_models`). Documented in CLAUDE.md §
+"API credentials" and in my project memory
+(`reference_vault.md`). Three new tests in `test_api_client.py`
+pin the fallback priority. Validation re-run with all three
+providers live: 3 HumanEval tasks × 5 conditions (A × 3
+models + D + E), 15/15 pass, $0.09, ~4 min.
+
 **Done 2026-04-21**: framework-validation run against a
 HumanEval subset. Built a minimal `Benchmark` abstraction
 (Task / ScoreResult / Benchmark) that SWE-bench /

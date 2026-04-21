@@ -223,12 +223,26 @@ class ApiClient:
 
     def _get_google(self) -> google.genai.Client:
         if self._google is None:
-            api_key = os.environ.get("GOOGLE_API_KEY") or os.environ.get(
-                "GEMINI_API_KEY"
+            # Fallback chain: prefer the canonical names, then
+            # accept the intentionally-renamed vault keys. The
+            # vault stores Scott's Google generative key as
+            # GOOGLE_EMBEDDING_API_KEY / GEMINI_EMBEDDING_API_KEY
+            # specifically to keep the `gemini` CLI from picking
+            # it up automatically — it IS a generic key that
+            # works for generation, just named to avoid an
+            # auto-switch side effect. See CLAUDE.md § "API
+            # credentials" for the rationale.
+            api_key = (
+                os.environ.get("GOOGLE_API_KEY")
+                or os.environ.get("GEMINI_API_KEY")
+                or os.environ.get("GOOGLE_EMBEDDING_API_KEY")
+                or os.environ.get("GEMINI_EMBEDDING_API_KEY")
             )
             if not api_key:
                 raise ValueError(
-                    "Set GOOGLE_API_KEY or GEMINI_API_KEY to use Gemini models"
+                    "Set GOOGLE_API_KEY / GEMINI_API_KEY (or the "
+                    "_EMBEDDING_ counterparts from the vault) to use "
+                    "Gemini models"
                 )
             self._google = google.genai.Client(api_key=api_key)
         return self._google

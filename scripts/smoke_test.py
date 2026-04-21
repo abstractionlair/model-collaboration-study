@@ -75,7 +75,14 @@ def available_models() -> list[str]:
         models.append(ANTHROPIC_MODEL)
     if os.environ.get("OPENAI_API_KEY"):
         models.append(OPENAI_MODEL)
-    if os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY"):
+    # Google's key is also accepted under the *_EMBEDDING_*
+    # names (see CLAUDE.md § API credentials, ApiClient._get_google).
+    if (
+        os.environ.get("GOOGLE_API_KEY")
+        or os.environ.get("GEMINI_API_KEY")
+        or os.environ.get("GOOGLE_EMBEDDING_API_KEY")
+        or os.environ.get("GEMINI_EMBEDDING_API_KEY")
+    ):
         models.append(GOOGLE_MODEL)
     if os.environ.get("XAI_API_KEY"):
         models.append(XAI_MODEL)

@@ -91,6 +91,28 @@ inventing a false one. Applies to all models working in this
 repo.
 
 
+## API credentials
+
+Keys live in `~/.vault/` under per-provider collections
+(`anthropic`, `openai`, `google`, `xai`). Run scripts via
+`vault exec <collections> -- python3 <script>` to inject
+them as env vars.
+
+One quirk worth knowing: the Google generative API key is
+stored in the vault as `GOOGLE_EMBEDDING_API_KEY` /
+`GEMINI_EMBEDDING_API_KEY`, not under the canonical
+`GOOGLE_API_KEY` / `GEMINI_API_KEY` names. It **is** a
+generic key that works for generation — the embedding-style
+naming is deliberate, to prevent the `gemini` CLI from
+automatically switching to it whenever the env var is in
+scope. `src/executor/api_client.py`'s `_get_google()` reads
+the canonical names first, then falls back to the
+`_EMBEDDING_` names. The driver scripts' availability checks
+(`scripts/run_humaneval.py::available_providers`,
+`scripts/smoke_test.py::available_models`) do the same.
+Preserve this behavior when touching API-key handling.
+
+
 ## How this project works
 
 Artifact-driven: each phase produces a document, and conversations

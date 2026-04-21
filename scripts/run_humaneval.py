@@ -64,7 +64,14 @@ def available_providers() -> set[str]:
         avail.add("anthropic")
     if os.environ.get("OPENAI_API_KEY"):
         avail.add("openai")
-    if os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY"):
+    # Google's key is also accepted under the *_EMBEDDING_*
+    # names (see CLAUDE.md § API credentials, ApiClient._get_google).
+    if (
+        os.environ.get("GOOGLE_API_KEY")
+        or os.environ.get("GEMINI_API_KEY")
+        or os.environ.get("GOOGLE_EMBEDDING_API_KEY")
+        or os.environ.get("GEMINI_EMBEDDING_API_KEY")
+    ):
         avail.add("google")
     if os.environ.get("XAI_API_KEY"):
         avail.add("xai")

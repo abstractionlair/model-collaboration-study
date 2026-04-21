@@ -212,3 +212,67 @@ def test_temperature_explicit_is_passed() -> None:
 
     kwargs = fake_sdk.messages.create.call_args.kwargs
     assert kwargs["temperature"] == 0.5
+
+
+# ----------------------------------------------------------------
+# Google API key fallback chain
+# ----------------------------------------------------------------
+
+
+def test_google_key_fallback_uses_canonical_first(
+    monkeypatch: "pytest.MonkeyPatch",
+) -> None:
+    """GOOGLE_API_KEY takes priority over the vault's
+    *_EMBEDDING_* variants when both are set."""
+    monkeypatch.setenv("GOOGLE_API_KEY", "canonical")
+    monkeypatch.setenv("GEMINI_API_KEY", "canonical-gemini")
+    monkeypatch.setenv("GOOGLE_EMBEDDING_API_KEY", "embedding-google")
+    monkeypatch.setenv("GEMINI_EMBEDDING_API_KEY", "embedding-gemini")
+
+    captured: dict[str, str] = {}
+    import google.genai
+
+    def fake_client(*, api_key: str) -> MagicMock:
+        captured["api_key"] = api_key
+        return MagicMock()
+
+    monkeypatch.setattr(google.genai, "Client", fake_client)
+    client = ApiClient()
+    client._get_google()
+    assert captured["api_key"] == "canonical"
+
+
+def test_google_key_fallback_uses_embedding_names_when_canonical_absent(
+    monkeypatch: "pytest.MonkeyPatch",
+) -> None:
+    """When only the vault's *_EMBEDDING_* names are set (the
+    common case on Scott's vault), the client falls back to
+    them. See CLAUDE.md § API credentials for rationale."""
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.setenv("GOOGLE_EMBEDDING_API_KEY", "embedding-google")
+
+    captured: dict[str, str] = {}
+    import google.genai
+
+    def fake_client(*, api_key: str) -> MagicMock:
+        captured["api_key"] = api_key
+        return MagicMock()
+
+    monkeypatch.setattr(google.genai, "Client", fake_client)
+    client = ApiClient()
+    client._get_google()
+    assert captured["api_key"] == "embedding-google"
+
+
+def test_google_key_fallback_raises_when_nothing_set(
+    monkeypatch: "pytest.MonkeyPatch",
+) -> None:
+    for name in (
+        "GOOGLE_API_KEY", "GEMINI_API_KEY",
+        "GOOGLE_EMBEDDING_API_KEY", "GEMINI_EMBEDDING_API_KEY",
+    ):
+        monkeypatch.delenv(name, raising=False)
+    client = ApiClient()
+    with pytest.raises(ValueError, match="GOOGLE_API_KEY"):
+        client._get_google()
