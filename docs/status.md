@@ -223,6 +223,55 @@ complete.
 
 ## Currently routed to
 
+**Next session — pick one.** BFCL adapter (simple_python
+only) landed + round-5 Proceed. Five items remain before
+Phase 1 kickoff; each is a separate session. Rough order of
+natural fit:
+
+1. **Widen BFCL categories** (~1 session). Add scorers for
+   `multiple` / `parallel` / `live_simple` (and eventually
+   `live_multiple`, `live_parallel`, `live_parallel_multiple`).
+   Addresses Gemini's round-5 primary finding: simple_python
+   alone hits a 100% ceiling for frontier models, which
+   guarantees D/E have zero headroom on the tool-use stratum.
+   Directly builds on the adapter that just landed — new
+   categories are new scorer functions off the existing
+   dispatch point. Upstream reference: same
+   `ast_checker.py` in the Gorilla repo
+   (`parallel_function_checker_no_order` +
+   `multiple_function_checker`).
+2. **Pre-kickoff power analysis** (~half session). Operational
+   gate from `experimental-design.md`. Simulate Protocol ×
+   Stratum interaction test against the pre-declared utility
+   curve (easy −5pp, middle +10pp, hard 0pp) at actual Phase 1
+   N per stratum × condition × tier. If <80% power,
+   middle-band fallback triggers automatically per locked
+   design. Self-contained — pure `scipy`/`statsmodels`, no
+   external deps.
+3. **LiveCodeBench adapter** (~1 session). Coding tasks with
+   executable tests, no Docker. Middle-weight; sits between
+   BFCL and SWE-bench in effort. Reuses the `Benchmark`
+   protocol shape.
+4. **SWE-bench Verified adapter** (multi-session, 2–3 sittings).
+   Heaviest: requires x86_64 + Docker + 120 GB storage + 16 GB
+   RAM + 8 CPU cores. Plan an explicit session-1 scope
+   ("one instance end-to-end, defer the rest"). Verify host
+   has Docker + disk before starting.
+5. **Run-manifest schema** (~half session). Persists per-run:
+   protocol AST (serialised), model assignments, prompt
+   templates, seed, full trace, costs, verdict. Can fold into
+   any of the above.
+
+Opus 4.7's recommendation (not binding): **(1) widen BFCL** is
+the cleanest next increment — same mental model as the
+session that just ended, addresses the review's named
+strategic risk, small per-category scope. **(2) power
+analysis** is equally valuable but a context switch to pure
+stats — probably better for a fresh window and its own focus.
+SWE-bench is big enough to deserve its own fresh start.
+
+---
+
 **Done 2026-04-21: BFCL adapter (simple_python category).**
 First Phase-1-matrix benchmark adapter. Proves the
 `Benchmark` abstraction holds for a non-coding task shape.
