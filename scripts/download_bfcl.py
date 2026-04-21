@@ -30,16 +30,25 @@ _BASE_URL = (
     "berkeley-function-call-leaderboard/bfcl_eval/data"
 )
 
-# (relative-path-in-data-dir, remote URL)
+_CATEGORIES: list[str] = [
+    "simple_python",
+    "multiple",
+    "parallel",
+    "parallel_multiple",
+    "live_simple",
+]
+
+
+def _category_files(cat: str) -> list[tuple[str, str]]:
+    fname = f"BFCL_v4_{cat}.json"
+    return [
+        (fname, f"{_BASE_URL}/{fname}"),
+        (f"possible_answer/{fname}", f"{_BASE_URL}/possible_answer/{fname}"),
+    ]
+
+
 _FILES: list[tuple[str, str]] = [
-    (
-        "BFCL_v4_simple_python.json",
-        f"{_BASE_URL}/BFCL_v4_simple_python.json",
-    ),
-    (
-        "possible_answer/BFCL_v4_simple_python.json",
-        f"{_BASE_URL}/possible_answer/BFCL_v4_simple_python.json",
-    ),
+    f for cat in _CATEGORIES for f in _category_files(cat)
 ]
 
 

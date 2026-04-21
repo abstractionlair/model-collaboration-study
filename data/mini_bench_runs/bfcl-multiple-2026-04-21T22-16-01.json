@@ -1,0 +1,201 @@
+{
+  "benchmark": "bfcl_multiple",
+  "timestamp": "2026-04-21T22-16-01",
+  "task_ids": [
+    "multiple_0",
+    "multiple_1",
+    "multiple_2"
+  ],
+  "seed": 0,
+  "available_providers": [
+    "anthropic",
+    "google",
+    "openai",
+    "xai"
+  ],
+  "subject_models": [
+    "gpt-5.4-mini",
+    "claude-haiku-4-5",
+    "gemini-2.5-flash"
+  ],
+  "elapsed_seconds": 11.716183216776699,
+  "conditions": [
+    {
+      "name": "A (gpt-5.4-mini)",
+      "pass_rate": 1.0,
+      "abort_count": 0,
+      "total_dollars": 0.0015795,
+      "tasks": [
+        {
+          "task_id": "multiple_0",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 1.9417694080621004,
+          "input_tokens": 651,
+          "output_tokens": 31,
+          "dollars": 0.0006277499999999999,
+          "successful_calls": 1,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        },
+        {
+          "task_id": "multiple_1",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 1.634583035018295,
+          "input_tokens": 521,
+          "output_tokens": 41,
+          "dollars": 0.00057525,
+          "successful_calls": 1,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        },
+        {
+          "task_id": "multiple_2",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 0.6202260525897145,
+          "input_tokens": 370,
+          "output_tokens": 22,
+          "dollars": 0.0003765,
+          "successful_calls": 1,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        }
+      ]
+    },
+    {
+      "name": "A (claude-haiku-4-5)",
+      "pass_rate": 1.0,
+      "abort_count": 0,
+      "total_dollars": 0.0024200000000000003,
+      "tasks": [
+        {
+          "task_id": "multiple_0",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 1.6413634768687189,
+          "input_tokens": 744,
+          "output_tokens": 42,
+          "dollars": 0.000954,
+          "successful_calls": 1,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        },
+        {
+          "task_id": "multiple_1",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 0.5591599582694471,
+          "input_tokens": 605,
+          "output_tokens": 45,
+          "dollars": 0.00083,
+          "successful_calls": 1,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        },
+        {
+          "task_id": "multiple_2",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 0.6642398089170456,
+          "input_tokens": 436,
+          "output_tokens": 40,
+          "dollars": 0.0006360000000000001,
+          "successful_calls": 1,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        }
+      ]
+    },
+    {
+      "name": "A (gemini-2.5-flash)",
+      "pass_rate": 1.0,
+      "abort_count": 0,
+      "total_dollars": 0.0009314,
+      "tasks": [
+        {
+          "task_id": "multiple_0",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 1.6144073908217251,
+          "input_tokens": 724,
+          "output_tokens": 82,
+          "dollars": 0.00042219999999999996,
+          "successful_calls": 1,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        },
+        {
+          "task_id": "multiple_1",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 1.1737758894450963,
+          "input_tokens": 591,
+          "output_tokens": 58,
+          "dollars": 0.0003223,
+          "successful_calls": 1,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        },
+        {
+          "task_id": "multiple_2",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 1.8650069269351661,
+          "input_tokens": 423,
+          "output_tokens": 24,
+          "dollars": 0.0001869,
+          "successful_calls": 1,
+          "capability_failures": 0,
+          "infra_failures": 0,
+          "score_parse_failures": 0,
+          "pick_parse_failures": 0,
+          "weighted_vote_ties": 0,
+          "aborted": null
+        }
+      ]
+    }
+  ]
+}

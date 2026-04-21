@@ -223,52 +223,88 @@ complete.
 
 ## Currently routed to
 
-**Next session — pick one.** BFCL adapter (simple_python
-only) landed + round-5 Proceed. Five items remain before
-Phase 1 kickoff; each is a separate session. Rough order of
-natural fit:
+**Done 2026-04-21: widen BFCL categories.** `BFCLBench` now
+covers five categories via a `category=` parameter:
+`simple_python` (original), `multiple`, `parallel`,
+`parallel_multiple`, `live_simple`. Single-call categories
+(`simple_python` / `multiple` / `live_simple`) go through the
+existing `_check_simple_call`; multi-call categories (`parallel` /
+`parallel_multiple`) go through a new `_check_parallel_no_order`
+ported from upstream's `parallel_function_checker_no_order`. A
+second extractor `_extract_function_calls` handles JSON arrays of
+`{name, arguments}` objects for the multi-call path.
 
-1. **Widen BFCL categories** (~1 session). Add scorers for
-   `multiple` / `parallel` / `live_simple` (and eventually
-   `live_multiple`, `live_parallel`, `live_parallel_multiple`).
-   Addresses Gemini's round-5 primary finding: simple_python
-   alone hits a 100% ceiling for frontier models, which
-   guarantees D/E have zero headroom on the tool-use stratum.
-   Directly builds on the adapter that just landed — new
-   categories are new scorer functions off the existing
-   dispatch point. Upstream reference: same
-   `ast_checker.py` in the Gorilla repo
-   (`parallel_function_checker_no_order` +
-   `multiple_function_checker`).
-2. **Pre-kickoff power analysis** (~half session). Operational
+**Empirical finding from this session's validation:** 100%
+ceiling confirmed across all new categories at small N.
+`multiple` 9/9, `parallel` 9/9, `parallel_multiple` 30/30,
+`live_simple` 30/30 on Condition A. Gemini's round-5 warning is
+directly validated — frontier models one-shot BFCL across the
+board. Phase 1 tool-use stratum needs either a harder within-BFCL
+subset (high-index `parallel_multiple`, or `live_parallel_*` once
+added) OR much larger N OR both.
+
+**One unexpected finding from D+E validation on `parallel`:**
+Condition A passed 9/9, but Condition D (3-model, 1-round peer
+revision) passed only 2/3 — the failure was a value-type coercion
+error where peer revision converged on the wrong type.
+Collaborative protocols can occasionally **degrade** single-
+model output under specific shapes. Flagged as a signal to watch
+in Phase 1, not as a scorer bug.
+
+131 tests total (18 new BFCL tests: 4 on `multiple`, 8 on
+`parallel`, 1 on `parallel_multiple`, 1 on `live_simple`, 4 on
+`_extract_function_calls`, plus direct `_check_parallel_no_order`
+coverage). mypy `--strict` clean on the updated adapter.
+
+---
+
+**Next session — pick one of four remaining.**
+
+Four items remain before Phase 1 kickoff:
+
+1. **Pre-kickoff power analysis** (~half session). Operational
    gate from `experimental-design.md`. Simulate Protocol ×
    Stratum interaction test against the pre-declared utility
    curve (easy −5pp, middle +10pp, hard 0pp) at actual Phase 1
    N per stratum × condition × tier. If <80% power,
    middle-band fallback triggers automatically per locked
    design. Self-contained — pure `scipy`/`statsmodels`, no
-   external deps.
-3. **LiveCodeBench adapter** (~1 session). Coding tasks with
+   external deps. **Escalated from #2 by this session's
+   finding:** 100% ceiling confirmed empirically across all
+   widened BFCL categories. Before committing to Phase 1 N,
+   need to know what N gives us power at the utility-curve
+   assumptions on a ceiling-bounded stratum.
+2. **LiveCodeBench adapter** (~1 session). Coding tasks with
    executable tests, no Docker. Middle-weight; sits between
    BFCL and SWE-bench in effort. Reuses the `Benchmark`
    protocol shape.
-4. **SWE-bench Verified adapter** (multi-session, 2–3 sittings).
+3. **SWE-bench Verified adapter** (multi-session, 2–3 sittings).
    Heaviest: requires x86_64 + Docker + 120 GB storage + 16 GB
    RAM + 8 CPU cores. Plan an explicit session-1 scope
    ("one instance end-to-end, defer the rest"). Verify host
    has Docker + disk before starting.
-5. **Run-manifest schema** (~half session). Persists per-run:
+4. **Run-manifest schema** (~half session). Persists per-run:
    protocol AST (serialised), model assignments, prompt
    templates, seed, full trace, costs, verdict. Can fold into
    any of the above.
 
-Opus 4.7's recommendation (not binding): **(1) widen BFCL** is
-the cleanest next increment — same mental model as the
-session that just ended, addresses the review's named
-strategic risk, small per-category scope. **(2) power
-analysis** is equally valuable but a context switch to pure
-stats — probably better for a fresh window and its own focus.
-SWE-bench is big enough to deserve its own fresh start.
+**Residual BFCL work** (not routed as a session, likely folds
+into #1 or a future calibration pass):
+- Add `live_multiple`, `live_parallel`, `live_parallel_multiple`.
+  All three reuse existing scorers; only data fetch + dispatch
+  wiring needed.
+- Investigate high-index `parallel_multiple` tasks to see if
+  the 100% ceiling breaks at higher difficulty within the
+  category (cheap experiment: run N=30 on `parallel_multiple`
+  tasks 100+).
+
+Opus 4.7's recommendation for the next session (not binding):
+**(1) power analysis** is now the clearest unblock for Phase 1
+kickoff — the widening session confirmed Gemini's ceiling
+empirically, so we need to know the operational N story before
+committing further bench work. LiveCodeBench is the natural
+technical follow-on from the two adapters that just landed, but
+doesn't answer a current strategic question.
 
 ---
 

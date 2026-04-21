@@ -157,3 +157,81 @@ differentiation).
   tests cover failure modes (wrong name, missing required,
   type mismatch, string normalisation), but we haven't yet
   seen real models produce interesting failures here.
+
+## 2026-04-21 — BFCL widen-categories validation
+
+Four new BFCL categories exercised end-to-end after extending
+`BFCLBench` beyond `simple_python`: `multiple`, `parallel`,
+`parallel_multiple`, `live_simple`. Goal was pipeline coverage,
+not statistical differentiation — confirming the multi-call
+extractor path, the no-order matcher, and the multi-tool query
+templates all compose with Condition A (and, for `parallel`,
+with D and E).
+
+**Configuration.**
+- Same subject-model pool as above (`gpt-5.4-mini`,
+  `claude-haiku-4-5`, `gemini-2.5-flash`).
+- Temperature: vendor defaults. Seed: 0.
+
+**Condition A per category.**
+
+| Category | Tasks | A-pass (combined) | $ |
+|-----------|-------|-------------------|---|
+| multiple | 3 | 9/9 | $0.005 |
+| parallel | 3 | 9/9 | $0.005 |
+| parallel_multiple | 10 | 30/30 | $0.021 |
+| live_simple | 10 | 30/30 | $0.012 |
+
+**Condition A + D + E on `parallel` (3 tasks).**
+
+| Condition | Pass | $ |
+|-----------|------|---|
+| A (gpt-5.4-mini) | 3/3 | $0.002 |
+| A (claude-haiku-4-5) | 3/3 | $0.003 |
+| A (gemini-2.5-flash) | 3/3 | $0.001 |
+| D (all three, 1 round) | 2/3 | $0.039 |
+| E (all three, meta=gpt-mini) | 3/3 | $0.033 |
+
+**What's notable.** Condition A hits 100% on every category at
+these small N's, including the hardest one (`parallel_multiple`
+at N=10). **This is direct empirical confirmation of Gemini's
+round-5 finding:** frontier models one-shot BFCL so reliably that
+the tool-use stratum has no headroom for collaborative protocols
+to demonstrate capability lift at small N. Phase 1 kickoff needs
+either larger N (power analysis item) or a harder within-BFCL
+subset (e.g. the high-index `parallel_multiple` tasks, or
+`live_parallel_multiple` once added) or both.
+
+**One surprise.** D was 2/3 on `parallel`, the lone failure was
+`parallel_2::calculate_resistance` where the meta-aggregated
+output emitted `resistivity` as a float (`2.82e-08`) where the
+schema declared `string`. All three A runs passed this task
+individually; D converged to a wrong type after peer
+revision. Not a scorer bug — the error message is correct. Suggests
+that collaborative protocols can occasionally **degrade** single-
+model output under value-type-coercion failure modes; worth
+watching in Phase 1 as a potential inversion of the
+collaboration-lifts-capability hypothesis on specific shapes.
+
+**What this validates.**
+- Multi-call JSON extraction path works on real model output.
+- No-order matching correctly pairs model calls to GT items
+  irrespective of emission order (swap test: some real responses
+  emitted calls in reverse of the question order; all scored
+  correctly).
+- Multi-tool query templates elicit the right tool-picking
+  behavior from all three subject model families (no
+  hallucinated tool names in 39 attempts across `multiple` and
+  `parallel_multiple`).
+- `live_simple` (real-user queries with more varied phrasing
+  than curated `simple_python`) still has the 100% ceiling at
+  N=10 — the distribution shift alone doesn't break it.
+- D and E conditions compose with multi-call output: peer review
+  and meta-fusion can produce valid JSON arrays, not just single
+  JSON objects.
+
+**What this does NOT validate.**
+- Whether the 100% ceiling holds at Phase 1's operational N or
+  breaks — that's the power-analysis question.
+- `live_multiple` / `live_parallel` / `live_parallel_multiple` /
+  `multi_turn_*` — not ported in this session.

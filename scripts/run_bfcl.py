@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Framework-validation run against a BFCL simple_python subset.
+"""Framework-validation run against a BFCL subset.
 
 Runs Condition A (one pass) with each available subject model
 plus Condition D (heterogeneous ReConcile-style) and Condition
 E (hierarchical synthesis), same shape as `run_humaneval.py`.
-The goal is to prove the `Benchmark` abstraction holds for a
-non-coding task type (structured function-call output with AST
-scoring) as a counterweight to the coding-shaped HumanEval
-validation.
+
+Supports the five BFCL categories the adapter covers:
+`simple_python`, `multiple`, `parallel`, `parallel_multiple`,
+`live_simple`. Pick one per run with `--category`.
 
 **Not a research run.** Passes-vs-fails here is mostly a
 function of whether the models can produce the requested JSON
@@ -19,11 +19,13 @@ Writes a results log to `data/mini_bench_runs/`.
 Usage:
     # Fetch data first (one-time), then run
     python3 scripts/download_bfcl.py
-    vault exec anthropic,openai,google,xai -- python3 scripts/run_bfcl.py
+    vault exec anthropic,openai,google,xai -- \\
+        python3 scripts/run_bfcl.py
 
-    # Specific task subset or count
-    python3 scripts/run_bfcl.py --tasks simple_python_0,simple_python_1
-    python3 scripts/run_bfcl.py --count 5
+    # Pick a category and task subset
+    python3 scripts/run_bfcl.py --category multiple --count 3
+    python3 scripts/run_bfcl.py --category parallel \\
+        --tasks parallel_0,parallel_1
     python3 scripts/run_bfcl.py --skip-d-and-e  # Condition A only
 """
 
@@ -109,11 +111,22 @@ def format_summary(results: list[ConditionResults]) -> str:
     return "\n".join(lines)
 
 
+SUPPORTED_CATEGORIES = (
+    "simple_python", "multiple", "parallel",
+    "parallel_multiple", "live_simple",
+)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "--category", type=str, default="simple_python",
+        choices=SUPPORTED_CATEGORIES,
+        help="BFCL category to run (default: simple_python).",
+    )
+    parser.add_argument(
         "--count", type=int, default=10,
-        help="Number of BFCL simple_python tasks (default: 10).",
+        help="Number of tasks (default: 10).",
     )
     parser.add_argument(
         "--tasks", type=str, default=None,
@@ -135,8 +148,9 @@ def main() -> int:
     )
     logger = logging.getLogger("run_bfcl")
 
-    questions_path = BFCL_DATA / "BFCL_v4_simple_python.json"
-    answers_path = BFCL_DATA / "possible_answer" / "BFCL_v4_simple_python.json"
+    fname = f"BFCL_v4_{args.category}.json"
+    questions_path = BFCL_DATA / fname
+    answers_path = BFCL_DATA / "possible_answer" / fname
     if not questions_path.exists() or not answers_path.exists():
         logger.error(
             "BFCL data not found at %s. "
@@ -156,16 +170,31 @@ def main() -> int:
 
     if args.tasks:
         task_ids = [t.strip() for t in args.tasks.split(",") if t.strip()]
+        benchmark = BFCLBench(
+            category=args.category,
+            questions_path=questions_path,
+            answers_path=answers_path,
+            task_ids=task_ids,
+        )
     else:
-        task_ids = [f"simple_python_{i}" for i in range(args.count)]
-    benchmark = BFCLBench(
-        questions_path=questions_path,
-        answers_path=answers_path,
-        task_ids=task_ids,
-    )
+        # Load the full category, then take the first N ids in
+        # file order. (Some categories, e.g. live_simple, don't
+        # have a sequential numeric suffix.)
+        all_bench = BFCLBench(
+            category=args.category,
+            questions_path=questions_path,
+            answers_path=answers_path,
+        )
+        task_ids = [t.id for t in list(all_bench.tasks())[: args.count]]
+        benchmark = BFCLBench(
+            category=args.category,
+            questions_path=questions_path,
+            answers_path=answers_path,
+            task_ids=task_ids,
+        )
     logger.info(
-        "Running against %d BFCL tasks: %s",
-        len(task_ids),
+        "Running against %d BFCL tasks (%s): %s",
+        len(task_ids), args.category,
         ", ".join(task_ids[:5]) + ("..." if len(task_ids) > 5 else ""),
     )
 
@@ -225,9 +254,9 @@ def main() -> int:
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     ts = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
-    log_path = OUTPUT_DIR / f"bfcl-{ts}.json"
+    log_path = OUTPUT_DIR / f"bfcl-{args.category}-{ts}.json"
     log_data = {
-        "benchmark": "bfcl_simple_python",
+        "benchmark": f"bfcl_{args.category}",
         "timestamp": ts,
         "task_ids": task_ids,
         "seed": args.seed,

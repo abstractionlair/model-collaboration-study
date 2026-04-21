@@ -1,23 +1,30 @@
 """BFCL (Berkeley Function Call Leaderboard) adapter.
 
 Phase 1 commits to BFCL for the "tool use / function calling"
-bucket. This adapter supports the `simple_python` category only
-— one tool, one invocation, AST-matched against BFCL's
-`possible_answer` set. Other categories (multiple / parallel /
-live_*) are future work; the adapter structure is set up so
-they can land as additional scorer functions without
-disturbing the protocol.
+bucket. This adapter supports five BFCL categories:
 
-**Data source.** The BFCL data is not vendored into the repo;
-run `scripts/download_bfcl.py` once to fetch the category
-files into `data/bfcl/`. The official `bfcl-eval` PyPI package
-pins `numpy==1.26.4`, which has no Python 3.13 wheel — vendoring
-the small data files avoids that dependency without pulling in
-the full evaluator toolchain.
+- `simple_python` — one tool, one invocation (v1 scope).
+- `multiple` — N candidate tools, one invocation; model picks
+  the right tool.
+- `parallel` — one tool, N invocations in one response.
+- `parallel_multiple` — N tools, M invocations combining them.
+- `live_simple` — real-user one-tool one-invocation queries
+  (same shape as `simple_python`, different data distribution).
 
-**Scorer.** Ported from `bfcl_eval.eval_checker.ast_eval.ast_checker`
-in the Gorilla repo, specifically `simple_function_checker` and
-its string / list / dict sub-checkers. Behavioural invariants:
+Scoring is ported from Gorilla's
+`bfcl_eval.eval_checker.ast_eval.ast_checker`, covering
+`simple_function_checker` (reused across single-call categories),
+`parallel_function_checker_no_order` (used for `parallel` and
+`parallel_multiple`), and `multiple_function_checker` (which is
+just `simple_function_checker` against the tool chosen from the
+candidate list by GT function name).
+
+**Data source.** Run `scripts/download_bfcl.py` once to fetch
+the data files into `data/bfcl/`. The official `bfcl-eval` PyPI
+package pins `numpy==1.26.4`, which has no Python 3.13 wheel —
+vendoring the small data files avoids that dependency.
+
+**Scoring invariants (from `simple_function_checker`).**
 
 - Function name must match exactly.
 - Required parameters must all be supplied.
@@ -34,6 +41,13 @@ its string / list / dict sub-checkers. Behavioural invariants:
   `""` in their accepted-values list — the BFCL convention
   for "omitting this argument is acceptable."
 
+**Parallel-category semantics.** Per-call matching is
+order-independent: for each ground-truth call, the scorer
+finds any unmatched model call that passes
+`simple_function_checker` and marks it consumed. Equivalent to
+upstream's `parallel_function_checker_no_order`. Exact-count
+required (`len(model_calls) == len(gt_items)`).
+
 **Deliberate deviations from upstream.** Two edge cases where
 this port is narrower than `bfcl_eval`:
 
@@ -45,23 +59,13 @@ this port is narrower than `bfcl_eval`:
    prompted JSON and is asked to emit the exact declared
    name. If a model emits `math_gcd` for a declared
    `math.gcd`, we reject where upstream would accept via
-   `underscore_to_dot`. Verified in validation: 167/400
-   simple_python tasks have dotted names, and the models used
-   (gpt-5.4-mini, claude-haiku-4-5, gemini-2.5-flash) all
-   emit the dotted form when prompted with the schema.
+   `underscore_to_dot`.
 
 2. **`is_variable` branch skipped.** Upstream accepts values
    whose Python type doesn't match the declared schema type
    but does match the type of a non-empty entry in the
-   accepted list — e.g., `venue: string` annotated with
-   `["", True]` in ground truth (`simple_python_307`). We
-   enforce the schema strictly. This affects rare tasks with
-   weird ground-truth annotations; for prompted-JSON output
-   it's not a live failure mode.
-
-Neither deviation affects the 15/15 validation run on
-simple_python_0–2. Both are recorded here so future reviewers
-can judge whether they still hold as BFCL data evolves.
+   accepted list. We enforce the schema strictly. Rare; not a
+   live failure mode for prompted-JSON output.
 """
 
 from __future__ import annotations
@@ -79,7 +83,7 @@ from .base import ScoreResult, Task
 # ============================================================================
 
 
-_QUERY_TEMPLATE = (
+_QUERY_TEMPLATE_SIMPLE = (
     "You have access to exactly one tool. To invoke it, respond with a "
     "single JSON object of the form "
     '`{{"name": "<tool_name>", "arguments": {{"<arg>": <value>, ...}}}}` '
@@ -89,6 +93,65 @@ _QUERY_TEMPLATE = (
     "```json\n{tool_json}\n```\n\n"
     "User request:\n{user_prompt}"
 )
+
+_QUERY_TEMPLATE_MULTIPLE = (
+    "You have access to the tools listed below. Choose exactly ONE tool "
+    "that best satisfies the user request, and invoke it by responding "
+    "with a single JSON object of the form "
+    '`{{"name": "<tool_name>", "arguments": {{"<arg>": <value>, ...}}}}` '
+    "inside one ```json fenced code block. Do not include any prose "
+    "outside the block.\n\n"
+    "Available tools:\n"
+    "```json\n{tool_json}\n```\n\n"
+    "User request:\n{user_prompt}"
+)
+
+_QUERY_TEMPLATE_PARALLEL = (
+    "You have access to exactly one tool. The user request may require "
+    "calling it more than once. Respond with a JSON array of one or more "
+    'objects, each of the form `{{"name": "<tool_name>", "arguments": '
+    '{{"<arg>": <value>, ...}}}}`, one per invocation, inside one ```json '
+    "fenced code block. Do not include any prose outside the block.\n\n"
+    "Tool specification:\n"
+    "```json\n{tool_json}\n```\n\n"
+    "User request:\n{user_prompt}"
+)
+
+_QUERY_TEMPLATE_PARALLEL_MULTIPLE = (
+    "You have access to the tools listed below. The user request may "
+    "require calling one or more of them, possibly multiple times. "
+    "Respond with a JSON array of one or more objects, each of the form "
+    '`{{"name": "<tool_name>", "arguments": {{"<arg>": <value>, ...}}}}`, '
+    "one per invocation, inside one ```json fenced code block. Do not "
+    "include any prose outside the block.\n\n"
+    "Available tools:\n"
+    "```json\n{tool_json}\n```\n\n"
+    "User request:\n{user_prompt}"
+)
+
+_SUPPORTED_CATEGORIES: frozenset[str] = frozenset({
+    "simple_python",
+    "multiple",
+    "parallel",
+    "parallel_multiple",
+    "live_simple",
+})
+
+_SINGLE_CALL_CATEGORIES: frozenset[str] = frozenset({
+    "simple_python", "multiple", "live_simple",
+})
+
+
+def _query_template(category: str) -> str:
+    if category in ("simple_python", "live_simple"):
+        return _QUERY_TEMPLATE_SIMPLE
+    if category == "multiple":
+        return _QUERY_TEMPLATE_MULTIPLE
+    if category == "parallel":
+        return _QUERY_TEMPLATE_PARALLEL
+    if category == "parallel_multiple":
+        return _QUERY_TEMPLATE_PARALLEL_MULTIPLE
+    raise ValueError(f"unknown BFCL category {category!r}")
 
 
 # ============================================================================
@@ -102,10 +165,31 @@ _FENCED_JSON_RE = re.compile(
 )
 
 
+def _coerce_call(obj: Any) -> dict[str, Any] | None:
+    """Validate and normalise a single `{name, arguments}` dict.
+    Returns the canonicalised call on success, None on shape
+    failure. Handles OpenAI-style `arguments` as a JSON-encoded
+    string."""
+    if not isinstance(obj, dict):
+        return None
+    name = obj.get("name")
+    args = obj.get("arguments")
+    if not isinstance(name, str):
+        return None
+    if isinstance(args, str):
+        try:
+            args = json.loads(args)
+        except (json.JSONDecodeError, ValueError):
+            return None
+    if not isinstance(args, dict):
+        return None
+    return {"name": name, "arguments": args}
+
+
 def _extract_function_call(response: str) -> dict[str, Any] | None:
-    """Extract a `{"name": str, "arguments": dict}` object from a
-    response. Returns None on any parse / shape failure — the
-    caller records this as a capability failure.
+    """Extract a single `{"name": str, "arguments": dict}` call
+    from a response. Returns None on any parse / shape failure —
+    the caller records this as a capability failure.
 
     Accepts three shapes, in order: fenced JSON block, bare JSON
     object, OpenAI-style with `arguments` as a JSON-encoded
@@ -121,22 +205,44 @@ def _extract_function_call(response: str) -> dict[str, Any] | None:
             obj = json.loads(cand)
         except (json.JSONDecodeError, ValueError):
             continue
-        if not isinstance(obj, dict):
+        call = _coerce_call(obj)
+        if call is not None:
+            return call
+    return None
+
+
+def _extract_function_calls(response: str) -> list[dict[str, Any]] | None:
+    """Extract a LIST of `{name, arguments}` calls for
+    parallel / parallel_multiple categories. The response is
+    expected to contain a JSON array of call objects; a single
+    object is also accepted and wrapped in a one-element list
+    so 1-call cases in parallel data don't trip on shape.
+    Returns None on any parse / shape failure."""
+    candidates: list[str] = []
+    for match in _FENCED_JSON_RE.finditer(response):
+        candidates.append(match.group(1).strip())
+    candidates.append(response.strip())
+
+    for cand in candidates:
+        try:
+            obj = json.loads(cand)
+        except (json.JSONDecodeError, ValueError):
             continue
-        name = obj.get("name")
-        args = obj.get("arguments")
-        if not isinstance(name, str):
-            continue
-        # OpenAI tool-use shape puts `arguments` as a serialised
-        # JSON string. Unwrap if so.
-        if isinstance(args, str):
-            try:
-                args = json.loads(args)
-            except (json.JSONDecodeError, ValueError):
-                continue
-        if not isinstance(args, dict):
-            continue
-        return {"name": name, "arguments": args}
+        if isinstance(obj, list):
+            calls: list[dict[str, Any]] = []
+            bad = False
+            for item in obj:
+                coerced = _coerce_call(item)
+                if coerced is None:
+                    bad = True
+                    break
+                calls.append(coerced)
+            if not bad and calls:
+                return calls
+        else:
+            single = _coerce_call(obj)
+            if single is not None:
+                return [single]
     return None
 
 
@@ -369,35 +475,109 @@ def _check_simple_call(
     return ScoreResult(passed=True, fraction=1.0, detail="ok")
 
 
+def _find_tool_schema(
+    tools: list[dict[str, Any]], name: str,
+) -> dict[str, Any] | None:
+    for t in tools:
+        if t.get("name") == name:
+            return t
+    return None
+
+
+def _check_parallel_no_order(
+    tool_schemas: list[dict[str, Any]],
+    model_calls: list[dict[str, Any]],
+    gt_items: list[dict[str, Any]],
+) -> ScoreResult:
+    """Ports upstream's `parallel_function_checker_no_order`. For
+    each ground-truth call, find any unmatched model call that
+    passes `_check_simple_call` and consume it. Exact count
+    required."""
+    if len(model_calls) != len(gt_items):
+        return ScoreResult(
+            passed=False, fraction=0.0,
+            detail=(
+                f"expected {len(gt_items)} call(s), "
+                f"got {len(model_calls)}"
+            ),
+        )
+
+    matched: set[int] = set()
+    for i, gt_item in enumerate(gt_items):
+        gt_fn_name = next(iter(gt_item.keys()))
+        schema = _find_tool_schema(tool_schemas, gt_fn_name)
+        if schema is None:
+            return ScoreResult(
+                passed=False, fraction=0.0,
+                detail=(
+                    f"ground-truth call {i} references tool "
+                    f"{gt_fn_name!r}, not declared in task's schema list"
+                ),
+            )
+        found = False
+        last_detail = ""
+        for j, call in enumerate(model_calls):
+            if j in matched:
+                continue
+            r = _check_simple_call(schema, call, gt_item)
+            if r.passed:
+                matched.add(j)
+                found = True
+                break
+            last_detail = r.detail
+        if not found:
+            return ScoreResult(
+                passed=False, fraction=0.0,
+                detail=(
+                    f"no model call matched GT call {i} for "
+                    f"{gt_fn_name!r}; last attempt: {last_detail}"
+                ),
+            )
+    return ScoreResult(passed=True, fraction=1.0, detail="ok")
+
+
 # ============================================================================
 # Benchmark
 # ============================================================================
 
 
 class BFCLBench:
-    """BFCL `simple_python` category as a `Benchmark`.
+    """BFCL benchmark for one of five categories:
+    `simple_python`, `multiple`, `parallel`, `parallel_multiple`,
+    `live_simple`.
 
-    Construct with paths to two JSONL files (questions and
-    `possible_answer`). Fetch them once via
+    Construct with `category` and paths to the two JSONL files
+    (questions and `possible_answer`). Fetch them via
     `scripts/download_bfcl.py` into `data/bfcl/`.
 
     `task_ids` filters to a subset; KeyError if any named id is
     absent from the loaded file.
     """
 
-    name: str = "bfcl_simple_python"
-
     def __init__(
         self,
+        category: str,
         questions_path: Path,
         answers_path: Path,
         task_ids: Iterable[str] | None = None,
     ) -> None:
+        if category not in _SUPPORTED_CATEGORIES:
+            raise ValueError(
+                f"BFCL category {category!r} not supported; "
+                f"supported: {sorted(_SUPPORTED_CATEGORIES)}"
+            )
+        self.category = category
+        self.name = f"bfcl_{category}"
+
         questions = self._load_jsonl(questions_path)
         answers = self._load_jsonl(answers_path)
 
-        self._questions: dict[str, dict[str, Any]] = {q["id"]: q for q in questions}
-        self._answers: dict[str, dict[str, Any]] = {a["id"]: a for a in answers}
+        self._questions: dict[str, dict[str, Any]] = {
+            q["id"]: q for q in questions
+        }
+        self._answers: dict[str, dict[str, Any]] = {
+            a["id"]: a for a in answers
+        }
 
         missing = set(self._questions) - set(self._answers)
         if missing:
@@ -426,11 +606,19 @@ class BFCLBench:
         return rows
 
     def tasks(self) -> Iterable[Task]:
+        template = _query_template(self.category)
         for task_id, q in self._questions.items():
-            tool = q["function"][0]
+            tools = q["function"]
             user_msg = _first_user_message(q["question"])
-            query_text = _QUERY_TEMPLATE.format(
-                tool_json=json.dumps(tool, indent=2),
+            if self.category in ("simple_python", "live_simple", "parallel"):
+                # single tool — render the bare schema dict rather
+                # than a 1-element list for consistency with the
+                # "exactly one tool" phrasing in the template.
+                tool_payload: Any = tools[0]
+            else:
+                tool_payload = tools
+            query_text = template.format(
+                tool_json=json.dumps(tool_payload, indent=2),
                 user_prompt=user_msg,
             )
             yield Task(id=task_id, query_text=query_text)
@@ -441,26 +629,52 @@ class BFCLBench:
 
         q = self._questions[task_id]
         a = self._answers[task_id]
-        tool_schema = q["function"][0]
-        ground_truth_items: list[dict[str, Any]] = a["ground_truth"]
-        # simple_python always has exactly one ground-truth call.
-        ground_truth_item = ground_truth_items[0]
+        tools: list[dict[str, Any]] = q["function"]
+        gt_items: list[dict[str, Any]] = a["ground_truth"]
 
-        call = _extract_function_call(response)
-        if call is None:
+        if self.category in _SINGLE_CALL_CATEGORIES:
+            call = _extract_function_call(response)
+            if call is None:
+                return ScoreResult(
+                    passed=False, fraction=0.0,
+                    detail="failed to extract JSON function call from response",
+                )
+            gt_item = gt_items[0]
+            gt_fn_name = next(iter(gt_item.keys()))
+            # For `multiple`, pick the schema whose name matches
+            # GT. For `simple_python` / `live_simple`, there's
+            # exactly one candidate, so take it directly; the
+            # mismatch-name case is reported by `_check_simple_call`.
+            schema = (
+                _find_tool_schema(tools, gt_fn_name)
+                if self.category == "multiple"
+                else tools[0]
+            )
+            if schema is None:
+                return ScoreResult(
+                    passed=False, fraction=0.0,
+                    detail=(
+                        f"ground-truth function {gt_fn_name!r} not "
+                        f"among candidate tools {[t['name'] for t in tools]!r}"
+                    ),
+                )
+            return _check_simple_call(schema, call, gt_item)
+
+        # parallel / parallel_multiple
+        calls = _extract_function_calls(response)
+        if calls is None:
             return ScoreResult(
                 passed=False, fraction=0.0,
-                detail="failed to extract JSON function call from response",
+                detail="failed to extract JSON function-call list from response",
             )
-
-        return _check_simple_call(tool_schema, call, ground_truth_item)
+        return _check_parallel_no_order(tools, calls, gt_items)
 
 
 def _first_user_message(question_field: list[list[dict[str, str]]]) -> str:
     """BFCL's `question` field is a nested list: outer list for
     conversation turns (single-turn = 1 element), inner list for
-    messages within a turn. simple_python is always single-turn
-    single-user-message; we extract defensively."""
+    messages within a turn. The categories supported here are
+    all single-turn; we extract defensively."""
     for turn in question_field:
         for msg in turn:
             if msg.get("role") == "user":

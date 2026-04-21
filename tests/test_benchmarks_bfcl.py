@@ -16,8 +16,10 @@ import pytest
 
 from src.experiment.benchmarks import BFCLBench, ScoreResult
 from src.experiment.benchmarks.bfcl import (
+    _check_parallel_no_order,
     _check_simple_call,
     _extract_function_call,
+    _extract_function_calls,
     _normalize_string,
 )
 
@@ -561,7 +563,7 @@ def test_bench_loads_and_yields_tasks(tmp_path: Path) -> None:
     }])
     _write_jsonl(af, [{"id": "t0", "ground_truth": [_triangle_ground_truth()]}])
 
-    bench = BFCLBench(qf, af)
+    bench = BFCLBench("simple_python", qf, af)
     tasks = list(bench.tasks())
     assert len(tasks) == 1
     assert tasks[0].id == "t0"
@@ -589,7 +591,7 @@ def test_bench_subset_filter(tmp_path: Path) -> None:
     _write_jsonl(qf, rows_q)
     _write_jsonl(af, rows_a)
 
-    bench = BFCLBench(qf, af, task_ids=["t0", "t2"])
+    bench = BFCLBench("simple_python", qf, af, task_ids=["t0", "t2"])
     assert [t.id for t in bench.tasks()] == ["t0", "t2"]
 
 
@@ -604,7 +606,7 @@ def test_bench_unknown_task_id_raises(tmp_path: Path) -> None:
     _write_jsonl(af, [{"id": "t0", "ground_truth": [_triangle_ground_truth()]}])
 
     with pytest.raises(KeyError, match="no questions for task_ids"):
-        BFCLBench(qf, af, task_ids=["t0", "missing"])
+        BFCLBench("simple_python", qf, af, task_ids=["t0", "missing"])
 
 
 def test_bench_missing_answer_raises(tmp_path: Path) -> None:
@@ -620,7 +622,7 @@ def test_bench_missing_answer_raises(tmp_path: Path) -> None:
     _write_jsonl(af, [])  # no answers at all
 
     with pytest.raises(ValueError, match="no possible_answer"):
-        BFCLBench(qf, af)
+        BFCLBench("simple_python", qf, af)
 
 
 # ============================================================================
@@ -638,7 +640,7 @@ def test_bench_score_correct_response(tmp_path: Path) -> None:
     }])
     _write_jsonl(af, [{"id": "t0", "ground_truth": [_triangle_ground_truth()]}])
 
-    bench = BFCLBench(qf, af)
+    bench = BFCLBench("simple_python", qf, af)
     response = (
         "I'll compute the area.\n"
         "```json\n"
@@ -661,7 +663,7 @@ def test_bench_score_malformed_response(tmp_path: Path) -> None:
     }])
     _write_jsonl(af, [{"id": "t0", "ground_truth": [_triangle_ground_truth()]}])
 
-    bench = BFCLBench(qf, af)
+    bench = BFCLBench("simple_python", qf, af)
     result = bench.score("t0", "I don't feel like using the tool.")
     assert not result.passed
     assert "failed to extract" in result.detail
@@ -677,7 +679,7 @@ def test_bench_score_unknown_task_raises(tmp_path: Path) -> None:
     }])
     _write_jsonl(af, [{"id": "t0", "ground_truth": [_triangle_ground_truth()]}])
 
-    bench = BFCLBench(qf, af)
+    bench = BFCLBench("simple_python", qf, af)
     with pytest.raises(KeyError, match="not in this BFCLBench"):
         bench.score("unknown", "{}")
 
@@ -694,10 +696,380 @@ def test_bench_query_does_not_leak_ground_truth(tmp_path: Path) -> None:
     }])
     _write_jsonl(af, [{"id": "t0", "ground_truth": [_triangle_ground_truth()]}])
 
-    bench = BFCLBench(qf, af)
+    bench = BFCLBench("simple_python", qf, af)
     task = next(iter(bench.tasks()))
     # Ground-truth literally lists `"base": [10]` — the numeric
     # values from the user prompt are fine (they're the task),
     # but the `ground_truth` structure itself must not appear.
     assert "ground_truth" not in task.query_text
     assert '"base": [10]' not in task.query_text
+
+
+# ============================================================================
+# Category validation
+# ============================================================================
+
+
+def test_bench_rejects_unknown_category(tmp_path: Path) -> None:
+    qf = tmp_path / "q.json"
+    af = tmp_path / "a.json"
+    _write_jsonl(qf, [])
+    _write_jsonl(af, [])
+    with pytest.raises(ValueError, match="not supported"):
+        BFCLBench("multi_turn_base", qf, af)
+
+
+# ============================================================================
+# `multiple` category — N candidate tools, one correct
+# ============================================================================
+
+
+def _rectangle_schema() -> dict[str, Any]:
+    return {
+        "name": "calculate_rectangle_area",
+        "description": "Area of a rectangle.",
+        "parameters": {
+            "type": "dict",
+            "properties": {
+                "width": {"type": "integer", "description": "w"},
+                "height": {"type": "integer", "description": "h"},
+            },
+            "required": ["width", "height"],
+        },
+    }
+
+
+def _multiple_fixture(tmp_path: Path) -> tuple[Path, Path]:
+    """Two candidate tools; GT says 'triangle' is the right one."""
+    qf = tmp_path / "q.json"
+    af = tmp_path / "a.json"
+    _write_jsonl(qf, [{
+        "id": "multiple_0",
+        "question": [[{"role": "user", "content": "triangle with base 10 height 5"}]],
+        "function": [_triangle_schema(), _rectangle_schema()],
+    }])
+    _write_jsonl(af, [{
+        "id": "multiple_0",
+        "ground_truth": [_triangle_ground_truth()],
+    }])
+    return qf, af
+
+
+def test_multiple_correct_tool_passes(tmp_path: Path) -> None:
+    qf, af = _multiple_fixture(tmp_path)
+    bench = BFCLBench("multiple", qf, af)
+    response = (
+        '```json\n{"name": "calculate_triangle_area", '
+        '"arguments": {"base": 10, "height": 5}}\n```'
+    )
+    r = bench.score("multiple_0", response)
+    assert r.passed, r.detail
+
+
+def test_multiple_wrong_tool_fails(tmp_path: Path) -> None:
+    qf, af = _multiple_fixture(tmp_path)
+    bench = BFCLBench("multiple", qf, af)
+    # Model picked the rectangle candidate, not the triangle one
+    response = (
+        '```json\n{"name": "calculate_rectangle_area", '
+        '"arguments": {"width": 10, "height": 5}}\n```'
+    )
+    r = bench.score("multiple_0", response)
+    assert not r.passed
+    assert "wrong function name" in r.detail
+
+
+def test_multiple_hallucinated_tool_fails(tmp_path: Path) -> None:
+    """Model made up a tool that wasn't in the schema list."""
+    qf, af = _multiple_fixture(tmp_path)
+    bench = BFCLBench("multiple", qf, af)
+    response = (
+        '```json\n{"name": "compute_area", '
+        '"arguments": {"x": 10, "y": 5}}\n```'
+    )
+    r = bench.score("multiple_0", response)
+    assert not r.passed
+
+
+def test_multiple_query_lists_all_tools(tmp_path: Path) -> None:
+    qf, af = _multiple_fixture(tmp_path)
+    bench = BFCLBench("multiple", qf, af)
+    task = next(iter(bench.tasks()))
+    assert "calculate_triangle_area" in task.query_text
+    assert "calculate_rectangle_area" in task.query_text
+    # Tells the model this is a choose-one-tool task
+    assert "ONE" in task.query_text or "one" in task.query_text
+
+
+# ============================================================================
+# `parallel` category — one tool, multiple invocations
+# ============================================================================
+
+
+def _spotify_schema() -> dict[str, Any]:
+    """Mirrors parallel_0 (`spotify.play`)."""
+    return {
+        "name": "spotify.play",
+        "parameters": {
+            "type": "dict",
+            "properties": {
+                "artist": {"type": "string", "description": "artist"},
+                "duration": {"type": "integer", "description": "minutes"},
+            },
+            "required": ["artist", "duration"],
+        },
+    }
+
+
+def _parallel_fixture(tmp_path: Path) -> tuple[Path, Path]:
+    qf = tmp_path / "q.json"
+    af = tmp_path / "a.json"
+    _write_jsonl(qf, [{
+        "id": "parallel_0",
+        "question": [[{"role": "user", "content": "Play Taylor Swift 20min and Maroon 5 15min"}]],
+        "function": [_spotify_schema()],
+    }])
+    _write_jsonl(af, [{
+        "id": "parallel_0",
+        "ground_truth": [
+            {"spotify.play": {"artist": ["Taylor Swift"], "duration": [20]}},
+            {"spotify.play": {"artist": ["Maroon 5"], "duration": [15]}},
+        ],
+    }])
+    return qf, af
+
+
+def test_extract_function_calls_array() -> None:
+    r = (
+        '```json\n'
+        '[{"name": "f", "arguments": {"x": 1}}, '
+        '{"name": "g", "arguments": {"y": 2}}]\n'
+        '```'
+    )
+    assert _extract_function_calls(r) == [
+        {"name": "f", "arguments": {"x": 1}},
+        {"name": "g", "arguments": {"y": 2}},
+    ]
+
+
+def test_extract_function_calls_single_object_wrapped() -> None:
+    """If the response is a single call object rather than a list,
+    wrap it in a 1-list. Keeps 1-call parallel cases forgiving."""
+    r = '```json\n{"name": "f", "arguments": {"x": 1}}\n```'
+    assert _extract_function_calls(r) == [{"name": "f", "arguments": {"x": 1}}]
+
+
+def test_extract_function_calls_empty_array_returns_none() -> None:
+    r = '```json\n[]\n```'
+    assert _extract_function_calls(r) is None
+
+
+def test_extract_function_calls_invalid_element_returns_none() -> None:
+    """One bad element in the array rejects the whole thing."""
+    r = (
+        '```json\n'
+        '[{"name": "f", "arguments": {"x": 1}}, '
+        '{"oops": "bad"}]\n'
+        '```'
+    )
+    assert _extract_function_calls(r) is None
+
+
+def test_parallel_correct_order_passes(tmp_path: Path) -> None:
+    qf, af = _parallel_fixture(tmp_path)
+    bench = BFCLBench("parallel", qf, af)
+    response = (
+        '```json\n[\n'
+        '  {"name": "spotify.play", "arguments": {"artist": "Taylor Swift", "duration": 20}},\n'
+        '  {"name": "spotify.play", "arguments": {"artist": "Maroon 5", "duration": 15}}\n'
+        ']\n```'
+    )
+    r = bench.score("parallel_0", response)
+    assert r.passed, r.detail
+
+
+def test_parallel_swapped_order_still_passes(tmp_path: Path) -> None:
+    """parallel uses no-order matching; the model can emit calls
+    in any order."""
+    qf, af = _parallel_fixture(tmp_path)
+    bench = BFCLBench("parallel", qf, af)
+    response = (
+        '```json\n[\n'
+        '  {"name": "spotify.play", "arguments": {"artist": "Maroon 5", "duration": 15}},\n'
+        '  {"name": "spotify.play", "arguments": {"artist": "Taylor Swift", "duration": 20}}\n'
+        ']\n```'
+    )
+    r = bench.score("parallel_0", response)
+    assert r.passed, r.detail
+
+
+def test_parallel_wrong_count_fails(tmp_path: Path) -> None:
+    qf, af = _parallel_fixture(tmp_path)
+    bench = BFCLBench("parallel", qf, af)
+    # Only one call where two are expected
+    response = (
+        '```json\n[\n'
+        '  {"name": "spotify.play", "arguments": {"artist": "Taylor Swift", "duration": 20}}\n'
+        ']\n```'
+    )
+    r = bench.score("parallel_0", response)
+    assert not r.passed
+    assert "expected 2" in r.detail
+
+
+def test_parallel_missing_one_call_fails(tmp_path: Path) -> None:
+    """Right count, but one call has wrong values."""
+    qf, af = _parallel_fixture(tmp_path)
+    bench = BFCLBench("parallel", qf, af)
+    response = (
+        '```json\n[\n'
+        '  {"name": "spotify.play", "arguments": {"artist": "Taylor Swift", "duration": 20}},\n'
+        '  {"name": "spotify.play", "arguments": {"artist": "Beyonce", "duration": 15}}\n'
+        ']\n```'
+    )
+    r = bench.score("parallel_0", response)
+    assert not r.passed
+
+
+def test_parallel_extra_call_fails(tmp_path: Path) -> None:
+    """Count must match exactly — extra call should fail."""
+    qf, af = _parallel_fixture(tmp_path)
+    bench = BFCLBench("parallel", qf, af)
+    response = (
+        '```json\n[\n'
+        '  {"name": "spotify.play", "arguments": {"artist": "Taylor Swift", "duration": 20}},\n'
+        '  {"name": "spotify.play", "arguments": {"artist": "Maroon 5", "duration": 15}},\n'
+        '  {"name": "spotify.play", "arguments": {"artist": "BTS", "duration": 10}}\n'
+        ']\n```'
+    )
+    r = bench.score("parallel_0", response)
+    assert not r.passed
+
+
+def test_parallel_query_says_multiple_invocations(tmp_path: Path) -> None:
+    qf, af = _parallel_fixture(tmp_path)
+    bench = BFCLBench("parallel", qf, af)
+    task = next(iter(bench.tasks()))
+    # The prompt should signal "JSON array" so models know to
+    # emit multiple calls
+    assert "array" in task.query_text.lower()
+
+
+# ============================================================================
+# `parallel_multiple` — N tools, M invocations combining them
+# ============================================================================
+
+
+def test_parallel_multiple_mixed_tools_passes(tmp_path: Path) -> None:
+    """Mirrors parallel_multiple_0 shape: two different tools,
+    two calls combining them."""
+    sum_tool: dict[str, Any] = {
+        "name": "math_toolkit.sum_of_multiples",
+        "parameters": {
+            "type": "dict",
+            "properties": {
+                "lower_limit": {"type": "integer", "description": "lo"},
+                "upper_limit": {"type": "integer", "description": "hi"},
+                "multiples": {
+                    "type": "array",
+                    "items": {"type": "integer"},
+                    "description": "of",
+                },
+            },
+            "required": ["lower_limit", "upper_limit", "multiples"],
+        },
+    }
+    primes_tool: dict[str, Any] = {
+        "name": "math_toolkit.product_of_primes",
+        "parameters": {
+            "type": "dict",
+            "properties": {"count": {"type": "integer", "description": "n"}},
+            "required": ["count"],
+        },
+    }
+    qf = tmp_path / "q.json"
+    af = tmp_path / "a.json"
+    _write_jsonl(qf, [{
+        "id": "parallel_multiple_0",
+        "question": [[{"role": "user", "content": "sums and primes"}]],
+        "function": [sum_tool, primes_tool],
+    }])
+    _write_jsonl(af, [{
+        "id": "parallel_multiple_0",
+        "ground_truth": [
+            {"math_toolkit.sum_of_multiples": {
+                "lower_limit": [1], "upper_limit": [1000],
+                "multiples": [[3, 5]],
+            }},
+            {"math_toolkit.product_of_primes": {"count": [5]}},
+        ],
+    }])
+
+    bench = BFCLBench("parallel_multiple", qf, af)
+    # Emit in reversed order to exercise no-order matching
+    response = (
+        '```json\n[\n'
+        '  {"name": "math_toolkit.product_of_primes", "arguments": {"count": 5}},\n'
+        '  {"name": "math_toolkit.sum_of_multiples", "arguments": '
+        '{"lower_limit": 1, "upper_limit": 1000, "multiples": [3, 5]}}\n'
+        ']\n```'
+    )
+    r = bench.score("parallel_multiple_0", response)
+    assert r.passed, r.detail
+
+
+# ============================================================================
+# live_simple — same scoring shape as simple_python
+# ============================================================================
+
+
+def test_live_simple_scores_as_simple(tmp_path: Path) -> None:
+    """live_simple has the same shape as simple_python; it's a
+    different data distribution, not a different scorer."""
+    qf = tmp_path / "q.json"
+    af = tmp_path / "a.json"
+    _write_jsonl(qf, [{
+        "id": "live_simple_0-0-0",
+        "question": [[{"role": "user", "content": "user 7890 special black"}]],
+        "function": [{
+            "name": "get_user_info",
+            "parameters": {
+                "type": "dict",
+                "properties": {
+                    "user_id": {"type": "integer", "description": "id"},
+                    "special": {"type": "string", "description": "note"},
+                },
+                "required": ["user_id"],
+            },
+        }],
+    }])
+    _write_jsonl(af, [{
+        "id": "live_simple_0-0-0",
+        "ground_truth": [{
+            "get_user_info": {"user_id": [7890], "special": ["black"]},
+        }],
+    }])
+    bench = BFCLBench("live_simple", qf, af)
+    response = (
+        '```json\n{"name": "get_user_info", '
+        '"arguments": {"user_id": 7890, "special": "black"}}\n```'
+    )
+    r = bench.score("live_simple_0-0-0", response)
+    assert r.passed, r.detail
+
+
+# ============================================================================
+# _check_parallel_no_order unit tests (direct)
+# ============================================================================
+
+
+def test_check_parallel_gt_refs_unknown_tool() -> None:
+    """If GT names a tool that isn't in the schema list, surface
+    that specifically rather than a generic match-failure."""
+    schemas = [_spotify_schema()]
+    calls = [{"name": "spotify.play", "arguments": {"artist": "a", "duration": 1}}]
+    # GT references a tool not in the schemas list
+    gt = [{"ghost.play": {"artist": ["a"], "duration": [1]}}]
+    r = _check_parallel_no_order(schemas, calls, gt)
+    assert not r.passed
+    assert "not declared in task's schema list" in r.detail

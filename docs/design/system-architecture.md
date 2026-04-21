@@ -448,7 +448,7 @@ Phase 1 status of each adapter:
 | Adapter          | State         | Scoring                      |
 |------------------|---------------|------------------------------|
 | `HumanEvalBench` | Done (framework validation; not in Phase 1 matrix) | Sandboxed subprocess via `human-eval` package |
-| `BFCLBench`      | Done (2026-04-21; simple_python category only) | AST match ported from Gorilla `simple_function_checker` |
+| `BFCLBench`      | Done (2026-04-21; five categories: `simple_python`, `multiple`, `parallel`, `parallel_multiple`, `live_simple`) | AST match ported from Gorilla `simple_function_checker` + `parallel_function_checker_no_order` |
 | LiveCodeBench    | Pending       | Executable test results per instance |
 | SWE-bench Verified | Pending     | Docker-per-instance test execution |
 
@@ -456,10 +456,16 @@ BFCL's evaluator is vendored at the logic level rather than via
 the `bfcl-eval` PyPI package — the package pins
 `numpy==1.26.4`, which has no Python 3.13 wheel. The data files
 are fetched by `scripts/download_bfcl.py` into `data/bfcl/`
-(gitignored). The port covers the simple_python category only;
-the other BFCL categories (multiple / parallel / live_*) will
-land as additional scorer functions without disturbing the
-adapter interface.
+(gitignored). `BFCLBench(category=...)` dispatches five
+categories onto two scorer paths: `_check_simple_call` covers
+`simple_python` / `multiple` / `live_simple`;
+`_check_parallel_no_order` covers `parallel` /
+`parallel_multiple`. Multi-call categories use a separate
+extractor that yields a list of `{name, arguments}` objects.
+The remaining BFCL categories (`live_multiple`, `live_parallel`,
+`live_parallel_multiple`, `multi_turn_*`) are future work; the
+first three reuse existing scorers and only need data fetch +
+dispatch wiring.
 
 ### Why the spec layer is separate from the IR
 
