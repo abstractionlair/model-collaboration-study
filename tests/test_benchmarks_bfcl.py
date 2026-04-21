@@ -356,6 +356,163 @@ def test_check_list_length_mismatch_fails() -> None:
 
 
 # ============================================================================
+# _check_simple_call — list[dict] (array-of-dict arguments)
+# ============================================================================
+
+
+def _database_query_schema() -> dict[str, Any]:
+    """Mirrors simple_python_96 (`database.query`)."""
+    return {
+        "name": "database.query",
+        "parameters": {
+            "type": "dict",
+            "properties": {
+                "table": {"type": "string", "description": "table name"},
+                "conditions": {
+                    "type": "array",
+                    "items": {
+                        "type": "dict",
+                        "properties": {
+                            "field": {"type": "string", "description": "col"},
+                            "operation": {
+                                "type": "string",
+                                "description": "op",
+                                "enum": ["<", ">", "=", ">=", "<="],
+                            },
+                            "value": {"type": "string", "description": "val"},
+                        },
+                        "required": ["field", "operation", "value"],
+                    },
+                    "description": "Filters",
+                },
+            },
+            "required": ["table", "conditions"],
+        },
+    }
+
+
+def _database_query_ground_truth() -> dict[str, Any]:
+    return {
+        "database.query": {
+            "table": ["user"],
+            "conditions": [[
+                {"field": ["age"], "operation": [">"], "value": ["25"]},
+                {"field": ["job"], "operation": ["="], "value": ["engineer"]},
+            ]],
+        },
+    }
+
+
+def test_check_list_of_dicts_match() -> None:
+    """simple_python_96-shape: array[dict] with per-position dict
+    acceptance. Canonical model output should pass."""
+    call = {
+        "name": "database.query",
+        "arguments": {
+            "table": "user",
+            "conditions": [
+                {"field": "age", "operation": ">", "value": "25"},
+                {"field": "job", "operation": "=", "value": "engineer"},
+            ],
+        },
+    }
+    result = _check_simple_call(
+        _database_query_schema(), call, _database_query_ground_truth(),
+    )
+    assert result.passed, result.detail
+
+
+def test_check_list_of_dicts_wrong_position_fails() -> None:
+    """Upstream's list_dict_checker is position-ordered: swapping
+    dict slots in the model output should fail if the alternative
+    in ground truth is position-specific."""
+    call = {
+        "name": "database.query",
+        "arguments": {
+            "table": "user",
+            "conditions": [
+                {"field": "job", "operation": "=", "value": "engineer"},
+                {"field": "age", "operation": ">", "value": "25"},
+            ],
+        },
+    }
+    result = _check_simple_call(
+        _database_query_schema(), call, _database_query_ground_truth(),
+    )
+    assert not result.passed
+
+
+def test_check_list_of_dicts_wrong_length_fails() -> None:
+    call = {
+        "name": "database.query",
+        "arguments": {
+            "table": "user",
+            "conditions": [
+                {"field": "age", "operation": ">", "value": "25"},
+            ],
+        },
+    }
+    result = _check_simple_call(
+        _database_query_schema(), call, _database_query_ground_truth(),
+    )
+    assert not result.passed
+
+
+def test_check_list_of_dicts_missing_required_subfield_fails() -> None:
+    """Each inner dict is itself subject to required-field checks
+    by the dict_checker path. Omitting a required key fails."""
+    call = {
+        "name": "database.query",
+        "arguments": {
+            "table": "user",
+            "conditions": [
+                {"field": "age", "operation": ">"},  # missing 'value'
+                {"field": "job", "operation": "=", "value": "engineer"},
+            ],
+        },
+    }
+    result = _check_simple_call(
+        _database_query_schema(), call, _database_query_ground_truth(),
+    )
+    assert not result.passed
+
+
+def test_check_list_of_dicts_alternative_match() -> None:
+    """When ground truth lists multiple alternatives, the model's
+    list just needs to match one of them."""
+    schema = _database_query_schema()
+    # Two alternatives: (age>25, job=engineer) OR (age>30, job=scientist)
+    gt = {
+        "database.query": {
+            "table": ["user"],
+            "conditions": [
+                [
+                    {"field": ["age"], "operation": [">"], "value": ["25"]},
+                    {"field": ["job"], "operation": ["="], "value": ["engineer"]},
+                ],
+                [
+                    {"field": ["age"], "operation": [">"], "value": ["30"]},
+                    {"field": ["job"], "operation": ["="], "value": ["scientist"]},
+                ],
+            ],
+        },
+    }
+    # Match second alternative
+    call = {
+        "name": "database.query",
+        "arguments": {
+            "table": "user",
+            "conditions": [
+                {"field": "age", "operation": ">", "value": "30"},
+                {"field": "job", "operation": "=", "value": "scientist"},
+            ],
+        },
+    }
+    result = _check_simple_call(schema, call, gt)
+    assert result.passed
+
+
+# ============================================================================
 # BFCLBench loading / subsetting
 # ============================================================================
 

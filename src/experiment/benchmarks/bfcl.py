@@ -34,11 +34,34 @@ its string / list / dict sub-checkers. Behavioural invariants:
   `""` in their accepted-values list — the BFCL convention
   for "omitting this argument is acceptable."
 
-This matches the upstream checker for simple_python; it does
-not attempt to replicate the `is_variable` edge case (where a
-model returns a symbolic reference like `"x"` rather than a
-value), which is rare for models explicitly instructed to
-emit concrete-value JSON.
+**Deliberate deviations from upstream.** Two edge cases where
+this port is narrower than `bfcl_eval`:
+
+1. **Exact function-name match, no dot/underscore normalisation.**
+   Upstream's `convert_func_name` replaces `.` with `_` for
+   model families whose native tool-calling API forbids dots
+   in tool names (OpenAI, Mistral, Google). We don't use
+   native tool-calling — the model sees the tool schema in
+   prompted JSON and is asked to emit the exact declared
+   name. If a model emits `math_gcd` for a declared
+   `math.gcd`, we reject where upstream would accept via
+   `underscore_to_dot`. Verified in validation: 167/400
+   simple_python tasks have dotted names, and the models used
+   (gpt-5.4-mini, claude-haiku-4-5, gemini-2.5-flash) all
+   emit the dotted form when prompted with the schema.
+
+2. **`is_variable` branch skipped.** Upstream accepts values
+   whose Python type doesn't match the declared schema type
+   but does match the type of a non-empty entry in the
+   accepted list — e.g., `venue: string` annotated with
+   `["", True]` in ground truth (`simple_python_307`). We
+   enforce the schema strictly. This affects rare tasks with
+   weird ground-truth annotations; for prompted-JSON output
+   it's not a live failure mode.
+
+Neither deviation affects the 15/15 validation run on
+simple_python_0–2. Both are recorded here so future reviewers
+can judge whether they still hold as BFCL data evolves.
 """
 
 from __future__ import annotations
@@ -195,6 +218,34 @@ def _value_matches_list(
     return False
 
 
+def _value_matches_list_of_dicts(
+    value: list[Any], accepted: list[Any],
+) -> bool:
+    """Handle `array[dict]` arguments. Mirrors upstream's
+    `list_dict_checker`: `accepted` is a list of alternative
+    answers; each alternative is a position-indexed list of
+    per-slot dict acceptance specs. The model's list must match
+    every position of at least one alternative, matching each
+    position via the same rules as `_value_matches_dict` on a
+    single-alternative wrapper."""
+    for alternative in accepted:
+        if not isinstance(alternative, list):
+            continue
+        if len(alternative) != len(value):
+            continue
+        ok = True
+        for model_dict, position_spec in zip(value, alternative):
+            if not isinstance(model_dict, dict) or not isinstance(position_spec, dict):
+                ok = False
+                break
+            if not _value_matches_dict(model_dict, [position_spec]):
+                ok = False
+                break
+        if ok:
+            return True
+    return False
+
+
 def _value_matches_dict(value: dict[str, Any], accepted: list[Any]) -> bool:
     for candidate in accepted:
         if not isinstance(candidate, dict):
@@ -288,8 +339,15 @@ def _check_simple_call(
         if expected_type is str:
             ok = _value_matches_string(value, accepted)
         elif expected_type is list:
-            nested = declared_type in _NESTED_TYPES and schema.get("items", {}).get("type") == "string"
-            ok = _value_matches_list(value, accepted, nested_is_string=nested)
+            nested_type = None
+            if declared_type in _NESTED_TYPES:
+                nested_type = schema.get("items", {}).get("type")
+            if nested_type == "dict":
+                ok = _value_matches_list_of_dicts(value, accepted)
+            else:
+                ok = _value_matches_list(
+                    value, accepted, nested_is_string=(nested_type == "string"),
+                )
         elif expected_type is dict:
             ok = _value_matches_dict(value, accepted)
         else:
