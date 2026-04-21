@@ -10,11 +10,13 @@ the Phase 1 matrix.
 """
 
 from .base import Benchmark, ScoreResult, Task
+from .bfcl import BFCLBench
 from .humaneval import HumanEvalBench
 
 __all__ = [
     "Benchmark",
     "ScoreResult",
     "Task",
+    "BFCLBench",
     "HumanEvalBench",
 ]

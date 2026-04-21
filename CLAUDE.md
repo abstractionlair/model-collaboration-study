@@ -191,7 +191,9 @@ Update when a file is added or repurposed.
   injected `ModelClient`.
 - `src/experiment/` — experiment-spec layer (Layer 3). Core types
   in `spec.py`, default prompts in `prompts.py`, Phase 1 builder
-  in `phase1.py`.
+  in `phase1.py`, benchmark adapters in `benchmarks/`
+  (`HumanEvalBench` for framework validation, `BFCLBench` for
+  Phase 1 tool-use bucket; SWE-bench / LiveCodeBench pending).
 - `src/ir_haskell/` — reference Haskell implementation (aesthetic
   documentation, not a source language).
 
@@ -202,3 +204,9 @@ Update when a file is added or repurposed.
 - `scripts/smoke_test.py` — end-to-end smoke tests with real
   API calls. Runs all conditions, checks response quality and
   intermediate step behavior.
+- `scripts/run_humaneval.py` — framework-validation driver
+  against HumanEval (Condition A × each model + D + E).
+- `scripts/download_bfcl.py` — one-time fetch of BFCL data
+  into `data/bfcl/` (gitignored); needed before `run_bfcl.py`.
+- `scripts/run_bfcl.py` — framework-validation driver against
+  BFCL simple_python; same shape as `run_humaneval.py`.

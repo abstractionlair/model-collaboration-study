@@ -428,6 +428,39 @@ expression:
 All six build cleanly, pass `mypy --strict`, and run end-to-end
 through the executor with `FakeClient`.
 
+### Benchmark adapters (`src/experiment/benchmarks/`)
+
+The `Benchmark` protocol (`base.py`) decouples the runner from
+any particular benchmark's data layout or scoring harness. Each
+adapter:
+
+- Exposes `name`, `tasks() -> Iterable[Task]`, and
+  `score(task_id, response) -> ScoreResult`.
+- Formats each task as a `query_text` that preserves the
+  selector-as-oracle discipline (no ground-truth, hidden
+  tests, or reference solutions leak into the text a macro-
+  model sees).
+- Scores executably — binary (`passed`) or fractional, with a
+  human-readable `detail` string for trace inspection.
+
+Phase 1 status of each adapter:
+
+| Adapter          | State         | Scoring                      |
+|------------------|---------------|------------------------------|
+| `HumanEvalBench` | Done (framework validation; not in Phase 1 matrix) | Sandboxed subprocess via `human-eval` package |
+| `BFCLBench`      | Done (2026-04-21; simple_python category only) | AST match ported from Gorilla `simple_function_checker` |
+| LiveCodeBench    | Pending       | Executable test results per instance |
+| SWE-bench Verified | Pending     | Docker-per-instance test execution |
+
+BFCL's evaluator is vendored at the logic level rather than via
+the `bfcl-eval` PyPI package — the package pins
+`numpy==1.26.4`, which has no Python 3.13 wheel. The data files
+are fetched by `scripts/download_bfcl.py` into `data/bfcl/`
+(gitignored). The port covers the simple_python category only;
+the other BFCL categories (multiple / parallel / live_*) will
+land as additional scorer functions without disturbing the
+adapter interface.
+
 ### Why the spec layer is separate from the IR
 
 A single IR definition of ReConcile should be runnable against

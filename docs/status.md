@@ -1,6 +1,6 @@
 # Project Status
 
-**Last updated:** 2026-04-19
+**Last updated:** 2026-04-21
 
 The volatile top of the stack. Read at session start to know what's
 happening and what to do next. Write at *task start*, not task end:
@@ -223,13 +223,82 @@ complete.
 
 ## Currently routed to
 
-**Next session — pick one of three.** Framework foundation
-is green (all four review rounds Proceed; end-to-end
-HumanEval validation passed; all three providers working).
-Three roughly-independent items remain before Phase 1 kickoff.
-Pick one per session:
+**Done 2026-04-21: BFCL adapter (simple_python category).**
+First Phase-1-matrix benchmark adapter. Proves the
+`Benchmark` abstraction holds for a non-coding task shape.
 
-1. **BFCL adapter** (~1 session). Berkeley Function Call
+- `src/experiment/benchmarks/bfcl.py` — `BFCLBench`
+  implementing the protocol. AST scorer ported from Gorilla's
+  `simple_function_checker`: function-name match, required-
+  params present, strict type check (bool/int distinguished),
+  value match against accepted-values list with BFCL's
+  string-normalisation rules (strip `[ ,./-_*^]`, lowercase,
+  single→double quotes), list/dict variants with the same
+  normalisation, `""` sentinel for optional-omission. Skipped
+  the `is_variable` case (rare when models are told to emit
+  concrete-value JSON).
+- `scripts/download_bfcl.py` — idempotent fetcher for the
+  JSONL files from the Gorilla repo. Data lands in
+  `data/bfcl/` (gitignored). Installing the official
+  `bfcl-eval` PyPI package was the first path tried, but it
+  pins `numpy==1.26.4` which has no Python 3.13 wheel;
+  vendoring just the data avoids the full evaluator dep.
+- `scripts/run_bfcl.py` — driver mirroring
+  `run_humaneval.py`: Condition A × each subject model + D +
+  E, writes a JSON log to `data/mini_bench_runs/`.
+- `tests/test_benchmarks_bfcl.py` — 33 tests covering
+  normalisation, extraction (fenced / bare / OpenAI-style /
+  prose-surround / invalid), scorer (happy path, wrong name,
+  missing required, unexpected param, wrong value, wrong
+  type, bool/int confusion, int→float coercion, list, dict,
+  optional-omission). Hand-authored in-test data — real BFCL
+  files don't need to be downloaded to run the suite.
+
+**Validation:** 3 tasks × 5 conditions (A × 3 models + D + E),
+15/15 pass, $0.05, ~3 min. Full telemetry clean (no parse
+fails, no ties, no infra/capability failures). 66 total calls;
+cost-per-condition matches the per-node call-count predictions
+(A=1/task, D=12/task with three-model cycle, E=7/task with
+meta synthesis). Log at
+`data/mini_bench_runs/bfcl-2026-04-21T12-20-49.json`.
+
+Total test count: **107** (33 new BFCL tests, up from 74
+before this session); mypy `--strict` clean on the new files.
+
+---
+
+**Next session — pick one of two remaining.** BFCL (option 1)
+landed; power analysis and SWE-bench still open. Same
+trade-offs as before:
+
+- **Pre-kickoff power analysis** (~half session) — pure stats,
+  self-contained, unblocks calibration-time decisions about
+  task-instance counts. Uses pre-declared utility curve (easy
+  −5pp, middle +10pp, hard 0pp) at Phase 1 N per stratum ×
+  condition × tier. If <80% power, middle-band fallback
+  triggers automatically per locked design.
+- **SWE-bench Verified adapter** (multi-session) — heaviest;
+  needs x86_64 + Docker + 120 GB + 16 GB RAM + 8 CPUs. Plan
+  for 2–3 sittings with an explicit session-1 scope ("one
+  instance end-to-end").
+
+`LiveCodeBench` is a natural follow-on to BFCL (coding tasks
+with executable tests, no Docker) — smaller than SWE-bench,
+larger than BFCL. Pick it up after either of the above.
+
+**Run-manifest schema** is a half-session follow-on that can
+be folded into any adapter session. Needs to persist per-run:
+protocol AST (serialized), model assignments, prompt
+templates, seed, full trace, costs, verdict.
+
+---
+
+**Pick-one routing (preserved for reference).** Framework
+foundation is green (all four review rounds Proceed; end-to-end
+HumanEval + BFCL validation passed; all three providers
+working).
+
+1. **BFCL adapter** (~1 session) **— done 2026-04-21.** Berkeley Function Call
    Leaderboard: tool-use benchmark, executability-based
    scoring (valid JSON matching declared tool surface). No
    Docker, no code execution in subprocess — lightest of the

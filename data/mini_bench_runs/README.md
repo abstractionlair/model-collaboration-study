@@ -1,6 +1,7 @@
-# Framework-validation runs against HumanEval
+# Framework-validation runs
 
-This directory holds results from runs of `scripts/run_humaneval.py`.
+This directory holds results from runs of
+`scripts/run_humaneval.py` and `scripts/run_bfcl.py`.
 
 **These are NOT research results.** HumanEval is heavily
 contaminated in training data; it is used here only to
@@ -88,3 +89,71 @@ break.
 **Next up.** Phase 1 benchmark adapters (SWE-bench Verified /
 LiveCodeBench / BFCL) use the same `Benchmark` abstraction;
 the runner is ready to drive them once the adapters land.
+
+## 2026-04-21 — BFCL framework-validation run
+
+First validation of the `Benchmark` abstraction on a
+non-coding task shape. BFCL `simple_python` category: one
+declared tool, one expected call, AST-matched against the
+published `possible_answer` set. Proves the adapter
+abstraction holds beyond code-shaped tasks (HumanEval) — in
+particular that the query-formatting / response-parsing /
+executable-scoring triangle works for structured-output
+benchmarks too.
+
+**Configuration.**
+- 3 BFCL tasks (`simple_python_0` through `simple_python_2`).
+- Available providers: anthropic, openai, google (all three
+  subject-model providers live).
+- Subject models: `gpt-5.4-mini`, `claude-haiku-4-5`,
+  `gemini-2.5-flash`.
+- Temperature: vendor defaults.
+- Seed: 0.
+
+**Results.**
+
+| Condition | Pass | Aborts | Dollars | Calls |
+|-----------|------|--------|---------|-------|
+| A (gpt-5.4-mini) | 3/3 | 0 | $0.001 | 3 |
+| A (claude-haiku-4-5) | 3/3 | 0 | $0.002 | 3 |
+| A (gemini-2.5-flash) | 3/3 | 0 | $0.001 | 3 |
+| D (all three, 1 round) | 3/3 | 0 | $0.024 | 36 |
+| E (all three, meta=gpt-mini) | 3/3 | 0 | $0.023 | 21 |
+
+**Total:** ~2.9 minutes wallclock, ~$0.05 USD, 66 API calls.
+
+**Telemetry.** No parse failures, no ties, no infra failures,
+no capability failures. All five conditions scored 100% —
+expected, because `simple_python` is deliberately easy (the
+benchmark purpose is calibration, not capability
+differentiation).
+
+**What this validates.**
+- `BFCLBench` loads + subsets correctly against the real
+  Gorilla `main` snapshot (400 tasks in the file).
+- Query formatting (user prompt + tool JSON schema + output
+  instructions) elicits conforming JSON from all three
+  subject-model families.
+- JSON extraction handles the shapes models actually emit —
+  fenced ```json blocks, occasional prose before/after, extra
+  keys beyond name/arguments.
+- AST-based scoring (function-name + per-param type and value
+  match against accepted-values list) produces
+  consistent-with-upstream verdicts on real inputs.
+- The `Benchmark` abstraction composes cleanly with D and E
+  protocols — peer-review critique + meta-synthesis produce
+  valid JSON-structured output when the final-pass model is
+  asked to emit JSON. (This was the non-obvious integration
+  risk: does a multi-round protocol preserve the output
+  format discipline? Yes, for these models on this task.)
+
+**What this does NOT validate.**
+- Harder BFCL categories (multiple, parallel, live_*) — future
+  adapter work.
+- Any performance differentiation between conditions — all
+  three subject models solve simple_python one-shot, so the
+  multi-round conditions have no headroom.
+- Scoring semantics beyond the happy path at scale — unit
+  tests cover failure modes (wrong name, missing required,
+  type mismatch, string normalisation), but we haven't yet
+  seen real models produce interesting failures here.
