@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Fetch BFCL data files for the simple_python category.
+"""Fetch BFCL data files for the categories supported by the adapter.
+
+Currently fetches five categories: simple_python, multiple,
+parallel, parallel_multiple, live_simple. See `_CATEGORIES`.
 
 BFCL's official `bfcl-eval` PyPI package pins numpy==1.26.4,
 which has no Python 3.13 wheel. The data itself, though, is a

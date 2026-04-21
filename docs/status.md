@@ -251,16 +251,37 @@ revision) passed only 2/3. The failure was on
 each A-run correctly emitted the string label, but D's final
 revision emitted `resistivity: 2.82e-08` — aluminum's real-world
 physics constant in ohm-meters. The scorer rejected it as
-wrong-type per upstream semantics. Most plausible reading
-(unconfirmed without a per-round trace): a peer critique during
-D's revision cycle plausibly-but-wrongly pushed "use the actual
-physical value, not just the label," and the final aggregated
-answer locked that in. Collaborative protocols can occasionally
-**degrade** single-model output when a peer critique sounds
-authoritative on a topic the original answer was already correct
-about. n=1 observation; could be fluke or the first sign of a
-systematic pattern worth naming. Flagged as a signal to watch in
-Phase 1, not a scorer bug or a system error.
+wrong-type per upstream semantics.
+
+**Codex's widen-review (below) traced the mechanism concretely:**
+D's revise template `_REVISE_USER` at `src/experiment/prompts.py:131`
+takes only `{critique, draft}`; the revise call site at
+`src/executor/interpreter.py:276–282` passes only those two.
+The original task/schema is **not in the prompt** when the
+writer revises. So a schema-violating but authoritative-sounding
+critique has no anchor to resist. E's fuse prompt
+(`_FUSE_USER`, line 138) starts with `Task:\n{query}\n\n` — E
+has the task in-context during synthesis; D does not. This
+explains why all three A runs (which have the task) passed,
+while D (which doesn't, during revise) failed.
+
+Gemini's complementary framing: this is exactly the
+"authoritative deception / over-correction" failure mode the
+study should measure. Both readings compatible. The actionable
+piece is Codex's: prompt-template context discipline is an
+open design choice that this study should make deliberately,
+not inherit accidentally. Tracked as routed work below.
+
+**Round-6 cross-lineage reviews landed 2026-04-21:**
+- `docs/reviews/bfcl-widen-review-codex-2026-04-21.md` — Proceed,
+  with the `parallel_2` context-loss finding above.
+- `docs/reviews/bfcl-widen-review-gemini-2026-04-21.md` — Proceed,
+  with "power analysis is now the immediate unblocker."
+
+No code changes from the widen review itself (one docstring
+typo in `scripts/download_bfcl.py` was fixed). The
+prompt-template context-loss finding is system-level, beyond
+the widen scope, and is now routed as a separate item.
 
 131 tests total (18 new BFCL tests: 4 on `multiple`, 8 on
 `parallel`, 1 on `parallel_multiple`, 1 on `live_simple`, 4 on
@@ -271,7 +292,7 @@ coverage). mypy `--strict` clean on the updated adapter.
 
 **Next session — pick one of four remaining.**
 
-Four items remain before Phase 1 kickoff:
+Five items remain before Phase 1 kickoff:
 
 1. **Pre-kickoff power analysis** (~half session). Operational
    gate from `experimental-design.md`. Simulate Protocol ×
@@ -280,21 +301,32 @@ Four items remain before Phase 1 kickoff:
    N per stratum × condition × tier. If <80% power,
    middle-band fallback triggers automatically per locked
    design. Self-contained — pure `scipy`/`statsmodels`, no
-   external deps. **Escalated from #2 by this session's
+   external deps. **Escalated from #2 to #1 by this session's
    finding:** 100% ceiling confirmed empirically across all
-   widened BFCL categories. Before committing to Phase 1 N,
-   need to know what N gives us power at the utility-curve
-   assumptions on a ceiling-bounded stratum.
-2. **LiveCodeBench adapter** (~1 session). Coding tasks with
+   widened BFCL categories; both widen reviewers agree this is
+   now the clearest next unblocker.
+2. **Prompt-template context discipline** (~half session,
+   design-heavy). Codex's widen-review surfaced that
+   `_REVISE_USER` and `_PEER_REVIEW_USER` omit the original
+   task, while `_FUSE_USER` / `_FUSE_WITH_CRITIQUES_USER`
+   include it. This is an open design choice, not an
+   accidental inconsistency that needs "fixing": including the
+   task makes revise more robust but may mask critique-
+   driven-degradation phenomena the study wants to measure.
+   Decide deliberately; log to `decisions.md`; if the call is
+   "include task in revise/peer-review," update the templates
+   and re-run a small widen validation to see if
+   `parallel_2::calculate_resistance` still degrades under D.
+3. **LiveCodeBench adapter** (~1 session). Coding tasks with
    executable tests, no Docker. Middle-weight; sits between
    BFCL and SWE-bench in effort. Reuses the `Benchmark`
    protocol shape.
-3. **SWE-bench Verified adapter** (multi-session, 2–3 sittings).
+4. **SWE-bench Verified adapter** (multi-session, 2–3 sittings).
    Heaviest: requires x86_64 + Docker + 120 GB storage + 16 GB
    RAM + 8 CPU cores. Plan an explicit session-1 scope
    ("one instance end-to-end, defer the rest"). Verify host
    has Docker + disk before starting.
-4. **Run-manifest schema** (~half session). Persists per-run:
+5. **Run-manifest schema** (~half session). Persists per-run:
    protocol AST (serialised), model assignments, prompt
    templates, seed, full trace, costs, verdict. Can fold into
    any of the above.

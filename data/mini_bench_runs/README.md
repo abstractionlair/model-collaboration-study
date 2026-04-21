@@ -209,17 +209,27 @@ three A runs passed this task individually, each emitting the
 string label. D's final revision emitted `resistivity: 2.82e-08`
 — aluminum's real-world physics constant in ohm-meters. The
 scorer correctly rejected it as wrong-type per upstream
-semantics. The per-round trace isn't saved in the run log, so
-the exact drift story is inferred: most plausibly, a peer
-critique during D's revision cycle argued "use the actual
-physical value, not just the label," and the final aggregated
-answer locked that in — a plausible-sounding critique pushing
-three initially-correct answers away from correct. Not a scorer
-bug, not a system error — a genuine collaborative-output failure
-where peer review inverted the collaboration-lifts-capability
-hypothesis. n=1 on a small validation; could be fluke or the
-first sign of a systematic pattern worth naming. Worth a
-tracing-enabled re-run before treating as a phenomenon.
+semantics.
+
+**Mechanism (per round-6 cross-lineage review, Codex).** D's
+revise template `_REVISE_USER` at `src/experiment/prompts.py:131`
+takes only `{critique, draft}`; the revise call site at
+`src/executor/interpreter.py:276–282` passes only those two.
+The original task and schema are **not in the prompt** when
+the writer revises. So a critique that says "use the actual
+physical value, not just the label" has no anchor to resist,
+because the revising model can no longer see the schema that
+declared `resistivity: string`. E passes the same task because
+`_FUSE_USER` at line 138 starts with `Task:\n{query}\n\n` —
+E keeps the task in-context during synthesis; D does not.
+
+This is a concrete, reproducible system-level cause — not a
+fluke of one run. It's also an open design choice: including
+the task in revise/peer-review makes revision more robust
+against schema-violating critiques, but may also mask the very
+failure modes the study is set up to measure. Tracked in
+`status.md` as a separate routed session ("prompt-template
+context discipline") before Phase 1 kickoff.
 
 **What this validates.**
 - Multi-call JSON extraction path works on real model output.
