@@ -223,6 +223,58 @@ complete.
 
 ## Currently routed to
 
+**Investigated 2026-04-22: subject-pool swap to weaker variants
+(not adopted).** Both BFCL-widen and LCB-validation sessions
+surfaced the same "no headroom" pattern: the best Condition A
+run was at or near 100%. Initial proposal was to drop one
+capability tier on each subject -- `gpt-5.4-nano-2026-03-17`,
+`gemini-3.1-flash-lite-preview`, `claude-3-5-haiku-20241022` --
+to break the ceiling.
+
+**Probed each ID against the live API.** Two passed
+(`gpt-5.4-nano-2026-03-17`, `gemini-3.1-flash-lite-preview`).
+The Anthropic side returned 404 on every Haiku 3.x variant
+tried (`claude-3-5-haiku-20241022`,
+`claude-3-5-haiku-latest`, `claude-haiku-3-5*`,
+`claude-3-haiku-20240307`, `claude-haiku-3*`). Anthropic's
+account-level model listing and current pricing page both
+confirm: Haiku 4.5 is the smallest current Claude. The
+"Haiku 3.x still listed on the pricing page" recollection
+was out of date.
+
+**Three options surfaced:** (1) asymmetric pool -- keep
+Haiku 4.5, downgrade only the other two; (2) drop Anthropic
+from the small pool, replace with a different vendor's small
+model; (3) stop trying to weaken the subjects and instead
+**select harder within-bucket task subsets** -- the
+calibration step the design's "Task difficulty strata"
+section already calls for.
+
+**Decision: option 3.** Saturation is a task-selection
+problem, not a subject-capability problem; the design
+already names the mechanism for fixing it. Options 1 and 2
+were easier code edits but would have changed what "best
+subject" means partway through the project, with cascading
+effects on the heterogeneity / pool-pricing arguments. No
+code changes from this investigation; the current pool
+(`gpt-5.4-mini`, `claude-haiku-4-5`, `gemini-2.5-flash`)
+stays. The Gemini 2.5 → 3 stale-anchor question is parked
+for the same reason -- jumping to Gemini 3 Flash would
+*worsen* saturation (more capable than 2.5), and we have
+no need to touch the model IDs while we're addressing the
+ceiling via task selection instead.
+
+Per-bucket calibration (already routed for the next
+session) is now scoped to also include **harder-subset
+selection**: for each bucket, find the within-bucket subset
+where the best subject lands near the target middle band
+(45-55% one-shot success). Concretely: BFCL needs
+high-difficulty `parallel_multiple` subsets and the harder
+`live_*` categories yet to be added; LCB needs the
+`difficulty="hard"` filter exercised at meaningful N.
+
+---
+
 **Done 2026-04-22: LiveCodeBench adapter.** Second Phase-1
 benchmark adapter. LCB is the first Phase-1 bucket to use
 **fractional scoring** (n_private_tests_passed / n_total); BFCL
@@ -356,19 +408,23 @@ evidence.
 **Next session — pick one of four remaining before Phase 1 kickoff.**
 LCB adapter done this session. Four open items:
 
-1. **Per-bucket calibration run on the subject models**
-   (~½ session). Run each of BFCL / LCB at meaningful N
-   (30–50 tasks per difficulty label) to see where the
-   three subjects' one-shot pass rates actually land. The
-   power-analysis write-up flagged this as a kickoff
-   prerequisite and both the BFCL-widen and LCB-validation
-   sessions produced direct evidence it's needed: BFCL has a
-   100% ceiling on most categories at small N, and the
-   3-task LCB validation showed gpt-5.4-mini at 100% with
-   two other subjects lower. Without knowing where the
-   middle band actually sits, the interaction / fallback
-   decision can't be made. Reuses the existing adapters;
-   the work is just a bigger run and a short write-up.
+1. **Per-bucket calibration + harder-subset selection**
+   (~1 session, expanded scope). Two parts:
+   (a) Run each of BFCL / LCB at meaningful N (30-50 tasks
+   per difficulty label) on each of the three subject
+   models, see where one-shot pass rates actually land.
+   (b) For each bucket, identify the within-bucket subset
+   where the best subject lands near the middle band
+   (45-55% one-shot success). This is the design's "Task
+   difficulty strata" mechanism, escalated this session
+   from a queued item to the active fix for the saturation
+   problem. Direct evidence both buckets need it: BFCL
+   100% on most categories at small N (widen session); LCB
+   gpt-5.4-mini 100% on 3 tasks (LCB validation). Without
+   the middle band actually existing in our data, the
+   interaction / fallback decision can't be made. Reuses
+   the existing adapters; the work is a bigger run, a
+   subset-selection pass, and a write-up.
 2. **SWE-bench Verified adapter** (multi-session, 2–3
    sittings). Heaviest: x86_64 + Docker + 120 GB + 16 GB RAM
    + 8 CPUs. Plan explicit session-1 scope ("one instance
