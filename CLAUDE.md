@@ -173,6 +173,11 @@ Update when a file is added or repurposed.
   detail, feeds the experimental design.
 - `docs/research/human-validation-notes_draft.md` — staged human
   validation strategy (Phase 3).
+- `docs/research/power-analysis.md` — pre-kickoff power analysis
+  for the Protocol x Stratum interaction test against the
+  pre-declared utility curve. Headline: interaction needs
+  N ~ 425 per cell for 80% power; middle-band fallback needs
+  N ~ 400 per arm.
 
 ### Literature, reviews, discussions
 
@@ -196,6 +201,10 @@ Update when a file is added or repurposed.
   Phase 1 tool-use bucket; SWE-bench / LiveCodeBench pending).
 - `src/ir_haskell/` — reference Haskell implementation (aesthetic
   documentation, not a source language).
+- `analysis/` — standalone analysis scripts and their outputs.
+  `power_analysis.py` (pre-kickoff power simulation for the
+  Protocol x Stratum interaction test) + `power_results.json`
+  (raw grid).
 
 ### Scripts and hooks
 

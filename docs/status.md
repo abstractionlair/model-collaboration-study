@@ -223,6 +223,91 @@ complete.
 
 ## Currently routed to
 
+**Done 2026-04-21: pre-kickoff power analysis.**
+`analysis/power_analysis.py` simulates the pre-registered
+Protocol x Stratum interaction LRT (binomial GLM, 2-df
+interaction term) against the pre-declared utility curve across
+a grid of N per cell. Calibration verified under null curves
+(type-1 ~= alpha at 2,000 sims). Write-up in
+`docs/research/power-analysis.md`; raw grid in
+`analysis/power_results.json`; mypy `--strict` clean; 131 tests
+still passing.
+
+**Headline numbers:**
+- **Interaction test reaches 80% power at N ~ 425 task
+  instances per stratum per protocol** (2,000-sim grid;
+  refined to 4,000 sims around the threshold).
+- **Middle-band fallback test reaches 80% power at N ~ 388
+  per arm** (analytical) / 400 per arm (simulated). Simulation
+  and Fleiss-style analytical agreed to within MC noise.
+- Per-stratum diagnostics: easy-band 5 pp effect is
+  under-powered at realistic Phase 1 N (needs ~1,500+ per arm
+  for 80%); hard-band 0 pp stays at alpha as a calibration check.
+
+**Operational recommendation (non-binding, for kickoff):**
+trigger the middle-band fallback for Phase 1 as a whole. The
+binding argument is structural, not budgetary: SWE-bench
+Verified has 500 instances total (~167 per stratum if
+stratified into thirds), which is well below the 425 needed
+for 80% interaction power, so the fallback triggers for
+SWE-bench on instance availability alone. Running
+interaction-test on BFCL/LCB while SWE-bench runs the
+fallback fragments the primary pre-registration; uniform
+fallback is cleaner. Write-up names this as a kickoff
+decision, not an in-repo commitment.
+
+**Not decided by this analysis (deferred to kickoff):**
+- Per-bucket calibration of absolute rates onto the subject
+  models (one-shot pass rates to confirm the middle band
+  actually lands near 0.50 for BFCL / LiveCodeBench /
+  SWE-bench on the three subjects).
+- Multiplicity correction across the ~10
+  protocol-comparison x tier cells per bucket (Bonferroni
+  raises N per arm to ~620 analytically; FDR lands
+  somewhere between 400 and 620).
+
+**Not added:** a `decisions.md` entry for the fallback. The
+fallback outcome is an operational call Scott should make at
+kickoff once the dollar ceiling and per-bucket calibration
+are in hand; committing now would pre-empt the calibration
+evidence.
+
+---
+
+**Next session -- three remaining before Phase 1 kickoff.**
+Power analysis now done; the three open adapters/schema items
+from the previous session's routing list remain:
+
+1. **LiveCodeBench adapter** (~1 session). Sits between BFCL
+   and SWE-bench in effort; coding tasks with executable
+   tests, no Docker. Reuses the `Benchmark` protocol shape.
+2. **SWE-bench Verified adapter** (multi-session, 2-3
+   sittings). Heaviest: x86_64 + Docker + 120 GB + 16 GB RAM
+   + 8 CPUs. Plan explicit session-1 scope ("one instance
+   end-to-end, defer the rest").
+3. **Run-manifest schema** (~1/2 session). Persists per-run:
+   protocol AST (serialised), model assignments, prompt
+   templates, seed, full trace, costs, verdict. Foldable
+   into any adapter session.
+
+**Also folded in from the power-analysis write-up** (do
+before Phase 1 kickoff, not necessarily next session):
+- Per-bucket calibration runs on the three subject models
+  to confirm the middle band actually exists at the target
+  rates (BFCL ceiling already implies this is a live
+  problem for BFCL specifically).
+- Multiplicity correction decision.
+
+Opus 4.7's recommendation for the next session (not
+binding): **LiveCodeBench adapter** is the natural technical
+follow-on now that the power question is answered. BFCL
+calibration is a smaller follow-up that could piggyback on
+the LCB session or run standalone. SWE-bench is still the
+biggest ask and benefits from landing the other adapters
+first.
+
+---
+
 **Done 2026-04-21: widen BFCL categories.** `BFCLBench` now
 covers five categories via a `category=` parameter:
 `simple_python` (original), `multiple`, `parallel`,

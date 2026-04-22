@@ -1,0 +1,127 @@
+{
+  "alpha": 0.05,
+  "power_target": 0.8,
+  "utility_curve": {
+    "baseline|easy": 0.65,
+    "collab|easy": 0.6,
+    "baseline|middle": 0.5,
+    "collab|middle": 0.6,
+    "baseline|hard": 0.35,
+    "collab|hard": 0.35
+  },
+  "n_sims_per_point": 2000,
+  "seed": 20260421,
+  "grid": [
+    {
+      "n_per_cell": 25,
+      "power_interaction": 0.116,
+      "power_middle_main_sim": 0.1295,
+      "power_easy_main_sim": 0.088,
+      "power_hard_main_sim": 0.0665,
+      "power_middle_main_analytical": 0.1082558741409427,
+      "n_skipped": 0
+    },
+    {
+      "n_per_cell": 50,
+      "power_interaction": 0.1535,
+      "power_middle_main_sim": 0.1765,
+      "power_easy_main_sim": 0.0915,
+      "power_hard_main_sim": 0.051,
+      "power_middle_main_analytical": 0.17002231013034175,
+      "n_skipped": 0
+    },
+    {
+      "n_per_cell": 75,
+      "power_interaction": 0.2135,
+      "power_middle_main_sim": 0.265,
+      "power_easy_main_sim": 0.0965,
+      "power_hard_main_sim": 0.0505,
+      "power_middle_main_analytical": 0.23252299388688386,
+      "n_skipped": 0
+    },
+    {
+      "n_per_cell": 100,
+      "power_interaction": 0.267,
+      "power_middle_main_sim": 0.2985,
+      "power_easy_main_sim": 0.1205,
+      "power_hard_main_sim": 0.0535,
+      "power_middle_main_analytical": 0.29446609702779225,
+      "n_skipped": 0
+    },
+    {
+      "n_per_cell": 150,
+      "power_interaction": 0.3755,
+      "power_middle_main_sim": 0.4295,
+      "power_easy_main_sim": 0.138,
+      "power_hard_main_sim": 0.0475,
+      "power_middle_main_analytical": 0.41291741440563157,
+      "n_skipped": 0
+    },
+    {
+      "n_per_cell": 200,
+      "power_interaction": 0.4935,
+      "power_middle_main_sim": 0.5445,
+      "power_easy_main_sim": 0.184,
+      "power_hard_main_sim": 0.048,
+      "power_middle_main_analytical": 0.5201179041645299,
+      "n_skipped": 0
+    },
+    {
+      "n_per_cell": 300,
+      "power_interaction": 0.647,
+      "power_middle_main_sim": 0.7085,
+      "power_easy_main_sim": 0.2215,
+      "power_hard_main_sim": 0.0535,
+      "power_middle_main_analytical": 0.6930212321878725,
+      "n_skipped": 0
+    },
+    {
+      "n_per_cell": 400,
+      "power_interaction": 0.819,
+      "power_middle_main_sim": 0.8225,
+      "power_easy_main_sim": 0.3195,
+      "power_hard_main_sim": 0.054,
+      "power_middle_main_analytical": 0.8125162706579907,
+      "n_skipped": 0
+    },
+    {
+      "n_per_cell": 600,
+      "power_interaction": 0.9315,
+      "power_middle_main_sim": 0.945,
+      "power_easy_main_sim": 0.443,
+      "power_hard_main_sim": 0.048,
+      "power_middle_main_analytical": 0.9369090217195701,
+      "n_skipped": 0
+    },
+    {
+      "n_per_cell": 800,
+      "power_interaction": 0.978,
+      "power_middle_main_sim": 0.9765,
+      "power_easy_main_sim": 0.5595,
+      "power_hard_main_sim": 0.0415,
+      "power_middle_main_analytical": 0.9808052603079185,
+      "n_skipped": 0
+    },
+    {
+      "n_per_cell": 1200,
+      "power_interaction": 0.998,
+      "power_middle_main_sim": 1.0,
+      "power_easy_main_sim": 0.712,
+      "power_hard_main_sim": 0.05,
+      "power_middle_main_analytical": 0.9985529989624464,
+      "n_skipped": 0
+    },
+    {
+      "n_per_cell": 1600,
+      "power_interaction": 1.0,
+      "power_middle_main_sim": 0.9995,
+      "power_easy_main_sim": 0.834,
+      "power_hard_main_sim": 0.0515,
+      "power_middle_main_analytical": 0.9999095683310443,
+      "n_skipped": 0
+    }
+  ],
+  "n_for_interaction_80pct": 400,
+  "n_for_middle_main_80pct_sim": 400,
+  "n_for_middle_main_80pct_analytical": 388
+}
