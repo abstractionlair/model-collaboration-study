@@ -174,10 +174,10 @@ Update when a file is added or repurposed.
 - `docs/research/human-validation-notes_draft.md` — staged human
   validation strategy (Phase 3).
 - `docs/research/power-analysis.md` — pre-kickoff power analysis
-  for the Protocol x Stratum interaction test against the
+  for the Protocol × Stratum interaction test against the
   pre-declared utility curve. Headline: interaction needs
-  N ~ 425 per cell for 80% power; middle-band fallback needs
-  N ~ 400 per arm.
+  N ≈ 425 per cell for 80% power; middle-band fallback needs
+  N ≈ 400 per arm.
 
 ### Literature, reviews, discussions
 
@@ -198,12 +198,13 @@ Update when a file is added or repurposed.
   in `spec.py`, default prompts in `prompts.py`, Phase 1 builder
   in `phase1.py`, benchmark adapters in `benchmarks/`
   (`HumanEvalBench` for framework validation, `BFCLBench` for
-  Phase 1 tool-use bucket; SWE-bench / LiveCodeBench pending).
+  Phase 1 tool-use bucket, `LiveCodeBenchBench` for Phase 1
+  competitive-coding bucket; SWE-bench pending).
 - `src/ir_haskell/` — reference Haskell implementation (aesthetic
   documentation, not a source language).
 - `analysis/` — standalone analysis scripts and their outputs.
   `power_analysis.py` (pre-kickoff power simulation for the
-  Protocol x Stratum interaction test) + `power_results.json`
+  Protocol × Stratum interaction test) + `power_results.json`
   (raw grid).
 
 ### Scripts and hooks
@@ -219,3 +220,11 @@ Update when a file is added or repurposed.
   into `data/bfcl/` (gitignored); needed before `run_bfcl.py`.
 - `scripts/run_bfcl.py` — framework-validation driver against
   BFCL simple_python; same shape as `run_humaneval.py`.
+- `scripts/download_livecodebench.py` — one-time fetch of an LCB
+  release file into `data/livecodebench/` (gitignored). Decodes
+  upstream's binary-encoded `private_test_cases` once at the
+  trust boundary and writes clean JSON for the runtime adapter
+  to load.
+- `scripts/run_livecodebench.py` — framework-validation driver
+  against LCB; reports strict `Full pass` and fractional
+  `Mean frac` columns.

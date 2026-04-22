@@ -12,6 +12,7 @@ the Phase 1 matrix.
 from .base import Benchmark, ScoreResult, Task
 from .bfcl import BFCLBench
 from .humaneval import HumanEvalBench
+from .livecodebench import LiveCodeBenchBench
 
 __all__ = [
     "Benchmark",
@@ -19,4 +20,5 @@ __all__ = [
     "Task",
     "BFCLBench",
     "HumanEvalBench",
+    "LiveCodeBenchBench",
 ]
