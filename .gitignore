@@ -4,3 +4,4 @@ __pycache__/
 .claude/
 data/bfcl/
 data/livecodebench/
+data/calibration_checkpoint.json

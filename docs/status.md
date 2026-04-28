@@ -223,6 +223,85 @@ complete.
 
 ## Currently routed to
 
+**Done 2026-04-24: per-bucket calibration + harder-subset
+selection.** Both parts ran. Combined: 1,086 calls, $1.61,
+~2h36m wall, no aborts. Full write-up at
+`docs/research/calibration-findings.md`; raw log at
+`data/mini_bench_runs/calibration-all-2026-04-24T23-37-45.json`;
+resumable checkpoint at `data/calibration_checkpoint.json`.
+
+**Headline:**
+
+| Bench | Slice | N | gpt-5.4-mini | claude-haiku-4-5 | gemini-2.5-flash |
+|-------|-------|---|--------------|------------------|------------------|
+| lcb | easy | 26 | 1.00 | 0.96 | 0.85 |
+| lcb | medium | 26 | **0.54** (0.67) | **0.46** (0.70) | 0.08 |
+| lcb | hard | 60 | 0.25 (**0.48**) | 0.20 (**0.56**) | 0.00 |
+| bfcl | simple_python | 50 | 1.00 | 1.00 | 0.98 |
+| bfcl | multiple | 50 | 0.96 | 0.98 | 0.96 |
+| bfcl | parallel | 50 | 0.88 | 0.90 | 0.94 |
+| bfcl | parallel_multiple | 50 | 0.92 | 0.92 | 0.94 |
+| bfcl | live_simple | 50 | 0.82 | 0.92 | 0.82 |
+
+(Strict pass rate; mean_frac in parens where it differs. Bold
+= in-band 0.45-0.55.)
+
+**LCB is usable, BFCL is not.** LCB/medium hits the middle
+band on strict for gpt and haiku; LCB/hard hits it on
+mean_frac for both. The combined LCB medium+hard pool (N=86)
+gives gpt 0.34 strict / 0.54 mean_frac — the cleanest natural
+middle-band slice we have. Gemini-2.5-flash is essentially
+unusable on LCB beyond easy.
+
+BFCL is structurally saturated across all 5 currently-downloaded
+categories at first-50: every cell is 0.82-1.00. Union-of-failures
+subsets are 1-12 tasks per category; even at full 199-399 task
+size, harder-subset selection cannot supply N≈400 middle-band
+tasks per cell. **BFCL as currently constituted cannot run the
+interaction test at 80% power**, and the saturation is a
+property of the data not just N-too-small.
+
+**Best-subject is bucket-specific.** Gpt dominates LCB; gemini
+leads BFCL/parallel; haiku leads BFCL/multiple and live_simple.
+Implication: build_phase1_conditions's single best_model arg
+needs to be invoked once per bucket, not once globally.
+
+**Decisions raised but not made (for Scott at kickoff):**
+1. LCB pool expansion — pull additional `test5`/`test4` releases
+   to reach N≈400 medium+hard pool. ~5 releases needed. Cheap.
+2. BFCL: trigger middle-band fallback (pre-registered, supported
+   by saturation evidence) vs. expand to `live_multiple`/`live_parallel`
+   /`live_parallel_multiple` (uncertain payoff) vs. replace.
+3. LCB scoring: strict pass vs. mean_fraction. Fractional gives
+   more middle-band-shaped slices; load-bearing for power story.
+4. Gemini on LCB: keep (critique-signal value), exclude, or
+   replace.
+
+**Tooling changes:** new `scripts/run_calibration.py` driver
+with `--checkpoint` per-cell-resumable JSON sidecar. Mid-run
+terminal kills no longer lose progress. No changes to adapters,
+condition factories, or runner.
+
+---
+
+**Next session.** Three open items before Phase 1 kickoff
+(LCB+BFCL data choices need Scott's call before any of these
+become well-defined):
+
+1. **SWE-bench Verified adapter** (multi-session, 2-3 sittings).
+   Heaviest. Not blocked by calibration outcomes.
+2. **Run-manifest schema** (~½ session). Foldable into any
+   adapter session.
+3. **LCB functional-testtype support** (~½ session). Only matters
+   if LCB pool needs to expand significantly past medium+hard.
+
+**Kickoff itself** is now blocked on Scott's calls in the four
+decision items above, not on more work from me.
+
+---
+
+---
+
 **Investigated 2026-04-22: subject-pool swap to weaker variants
 (not adopted).** Both BFCL-widen and LCB-validation sessions
 surfaced the same "no headroom" pattern: the best Condition A

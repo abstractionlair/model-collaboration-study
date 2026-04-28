@@ -178,6 +178,11 @@ Update when a file is added or repurposed.
   pre-declared utility curve. Headline: interaction needs
   N ≈ 425 per cell for 80% power; middle-band fallback needs
   N ≈ 400 per arm.
+- `docs/research/calibration-findings.md` — empirical Condition-A
+  pass rates for each subject × bucket × slice (LCB test6 stdin-only
+  + 5 BFCL categories). Headline: LCB/medium and LCB/hard hit the
+  middle band on the two strongest subjects; BFCL is structurally
+  saturated and needs middle-band fallback or category expansion.
 
 ### Literature, reviews, discussions
 
@@ -228,3 +233,7 @@ Update when a file is added or repurposed.
 - `scripts/run_livecodebench.py` — framework-validation driver
   against LCB; reports strict `Full pass` and fractional
   `Mean frac` columns.
+- `scripts/run_calibration.py` — per-bucket calibration driver.
+  Enumerates (bench × slice × subject) cells, runs Condition A,
+  emits one combined JSON log. Resumable via `--checkpoint`
+  (per-cell sidecar JSON; mid-run kills don't lose progress).

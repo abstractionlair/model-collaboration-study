@@ -1,0 +1,377 @@
+{
+  "kind": "calibration",
+  "timestamp": "2026-04-23T21-13-42",
+  "bench_filter": "all",
+  "subject_models": [
+    "gpt-5.4-mini"
+  ],
+  "seed": 0,
+  "bfcl_n": 3,
+  "lcb_n": 3,
+  "lcb_release": "test6",
+  "smoke": true,
+  "elapsed_seconds": 81.62569368584082,
+  "total_dollars": 0.034413,
+  "rows": [
+    {
+      "bench": "lcb",
+      "slice": "easy",
+      "model": "gpt-5.4-mini",
+      "n_tasks": 3,
+      "strict_passed": 3,
+      "strict_pass_rate": 1.0,
+      "mean_fraction": 1.0,
+      "abort_count": 0,
+      "total_dollars": 0.00195525,
+      "task_ids": [
+        "abc387_b",
+        "abc387_a",
+        "abc388_b"
+      ],
+      "tasks": [
+        {
+          "task_id": "abc387_b",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "all private tests passed",
+          "elapsed": 2.252110666129738,
+          "dollars": 0.0006675,
+          "aborted": null
+        },
+        {
+          "task_id": "abc387_a",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "all private tests passed",
+          "elapsed": 1.0459965071640909,
+          "dollars": 0.000438,
+          "aborted": null
+        },
+        {
+          "task_id": "abc388_b",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "all private tests passed",
+          "elapsed": 2.829014621209353,
+          "dollars": 0.00084975,
+          "aborted": null
+        }
+      ]
+    },
+    {
+      "bench": "lcb",
+      "slice": "medium",
+      "model": "gpt-5.4-mini",
+      "n_tasks": 3,
+      "strict_passed": 0,
+      "strict_pass_rate": 0.0,
+      "mean_fraction": 0.44166666666666665,
+      "abort_count": 0,
+      "total_dollars": 0.00893925,
+      "task_ids": [
+        "abc387_c",
+        "abc388_d",
+        "abc388_c"
+      ],
+      "tasks": [
+        {
+          "task_id": "abc387_c",
+          "passed": false,
+          "fraction": 0.1,
+          "detail": "4/40 passed; first failure: test 0: wrong_output: expected '4539581300', got '3466888052'",
+          "elapsed": 2.832883615978062,
+          "dollars": 0.0019132499999999998,
+          "aborted": null
+        },
+        {
+          "task_id": "abc388_d",
+          "passed": false,
+          "fraction": 0.425,
+          "detail": "17/40 passed; first failure: test 2: wrong_output: expected '340859 42653 20311 267471 323103 0 0 431650 10075 215027 95563 362189 182487 95294 209669 422566 283582 295837 73635 454764 263913 243490 2",
+          "elapsed": 7.983614282682538,
+          "dollars": 0.00587475,
+          "aborted": null
+        },
+        {
+          "task_id": "abc388_c",
+          "passed": false,
+          "fraction": 0.8,
+          "detail": "32/40 passed; first failure: test 2: wrong_output: expected '105459437', got '105459436'",
+          "elapsed": 1.2464428059756756,
+          "dollars": 0.00115125,
+          "aborted": null
+        }
+      ]
+    },
+    {
+      "bench": "lcb",
+      "slice": "hard",
+      "model": "gpt-5.4-mini",
+      "n_tasks": 3,
+      "strict_passed": 0,
+      "strict_pass_rate": 0.0,
+      "mean_fraction": 0.44999999999999996,
+      "abort_count": 0,
+      "total_dollars": 0.015899999999999997,
+      "task_ids": [
+        "abc387_f",
+        "abc388_g",
+        "abc388_f"
+      ],
+      "tasks": [
+        {
+          "task_id": "abc387_f",
+          "passed": false,
+          "fraction": 0.075,
+          "detail": "3/40 passed; first failure: test 1: wrong_output: expected '3125', got '1'",
+          "elapsed": 12.98314553918317,
+          "dollars": 0.008496749999999999,
+          "aborted": null
+        },
+        {
+          "task_id": "abc388_g",
+          "passed": false,
+          "fraction": 0.325,
+          "detail": "13/40 passed; first failure: test 1: wrong_output: expected '0\\n0\\n1\\n5\\n7\\n0\\n0\\n0\\n1\\n0\\n3\\n0\\n1\\n0\\n0\\n0\\n0\\n0\\n0\\n0', got '0\\n0\\n1\\n2\\n3\\n0\\n0\\n0\\n1\\n0\\n2\\n0\\n1\\n0\\n0\\n0\\n0\\n0\\n0\\n0'",
+          "elapsed": 3.2514503858983517,
+          "dollars": 0.00306825,
+          "aborted": null
+        },
+        {
+          "task_id": "abc388_f",
+          "passed": false,
+          "fraction": 0.95,
+          "detail": "38/40 passed; first failure: test 16: timeout: timeout after 10.0s",
+          "elapsed": 5.327326040249318,
+          "dollars": 0.004335,
+          "aborted": null
+        }
+      ]
+    },
+    {
+      "bench": "bfcl",
+      "slice": "simple_python",
+      "model": "gpt-5.4-mini",
+      "n_tasks": 3,
+      "strict_passed": 3,
+      "strict_pass_rate": 1.0,
+      "mean_fraction": 1.0,
+      "abort_count": 0,
+      "total_dollars": 0.0008925000000000001,
+      "task_ids": [
+        "simple_python_0",
+        "simple_python_1",
+        "simple_python_2"
+      ],
+      "tasks": [
+        {
+          "task_id": "simple_python_0",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 1.2508133510127664,
+          "dollars": 0.0003285,
+          "aborted": null
+        },
+        {
+          "task_id": "simple_python_1",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 1.350231940858066,
+          "dollars": 0.000234,
+          "aborted": null
+        },
+        {
+          "task_id": "simple_python_2",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 0.702345366589725,
+          "dollars": 0.00033,
+          "aborted": null
+        }
+      ]
+    },
+    {
+      "bench": "bfcl",
+      "slice": "multiple",
+      "model": "gpt-5.4-mini",
+      "n_tasks": 3,
+      "strict_passed": 3,
+      "strict_pass_rate": 1.0,
+      "mean_fraction": 1.0,
+      "abort_count": 0,
+      "total_dollars": 0.0016064999999999999,
+      "task_ids": [
+        "multiple_0",
+        "multiple_1",
+        "multiple_2"
+      ],
+      "tasks": [
+        {
+          "task_id": "multiple_0",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 0.8096862770617008,
+          "dollars": 0.00065475,
+          "aborted": null
+        },
+        {
+          "task_id": "multiple_1",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 0.8599376720376313,
+          "dollars": 0.00057525,
+          "aborted": null
+        },
+        {
+          "task_id": "multiple_2",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 1.0668978430330753,
+          "dollars": 0.0003765,
+          "aborted": null
+        }
+      ]
+    },
+    {
+      "bench": "bfcl",
+      "slice": "parallel",
+      "model": "gpt-5.4-mini",
+      "n_tasks": 3,
+      "strict_passed": 3,
+      "strict_pass_rate": 1.0,
+      "mean_fraction": 1.0,
+      "abort_count": 0,
+      "total_dollars": 0.0019635,
+      "task_ids": [
+        "parallel_0",
+        "parallel_1",
+        "parallel_2"
+      ],
+      "tasks": [
+        {
+          "task_id": "parallel_0",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 1.0972218113020062,
+          "dollars": 0.0005564999999999999,
+          "aborted": null
+        },
+        {
+          "task_id": "parallel_1",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 1.2852051006630063,
+          "dollars": 0.0007155,
+          "aborted": null
+        },
+        {
+          "task_id": "parallel_2",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 1.4536076448857784,
+          "dollars": 0.0006915,
+          "aborted": null
+        }
+      ]
+    },
+    {
+      "bench": "bfcl",
+      "slice": "parallel_multiple",
+      "model": "gpt-5.4-mini",
+      "n_tasks": 3,
+      "strict_passed": 3,
+      "strict_pass_rate": 1.0,
+      "mean_fraction": 1.0,
+      "abort_count": 0,
+      "total_dollars": 0.00199275,
+      "task_ids": [
+        "parallel_multiple_0",
+        "parallel_multiple_1",
+        "parallel_multiple_2"
+      ],
+      "tasks": [
+        {
+          "task_id": "parallel_multiple_0",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 2.3931659618392587,
+          "dollars": 0.00076875,
+          "aborted": null
+        },
+        {
+          "task_id": "parallel_multiple_1",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 0.9082378069870174,
+          "dollars": 0.00067275,
+          "aborted": null
+        },
+        {
+          "task_id": "parallel_multiple_2",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 0.8919628388248384,
+          "dollars": 0.0005512500000000001,
+          "aborted": null
+        }
+      ]
+    },
+    {
+      "bench": "bfcl",
+      "slice": "live_simple",
+      "model": "gpt-5.4-mini",
+      "n_tasks": 3,
+      "strict_passed": 3,
+      "strict_pass_rate": 1.0,
+      "mean_fraction": 1.0,
+      "abort_count": 0,
+      "total_dollars": 0.00116325,
+      "task_ids": [
+        "live_simple_0-0-0",
+        "live_simple_1-1-0",
+        "live_simple_2-2-0"
+      ],
+      "tasks": [
+        {
+          "task_id": "live_simple_0-0-0",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 0.7586649497970939,
+          "dollars": 0.00031725000000000004,
+          "aborted": null
+        },
+        {
+          "task_id": "live_simple_1-1-0",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 0.8312664730474353,
+          "dollars": 0.00042750000000000004,
+          "aborted": null
+        },
+        {
+          "task_id": "live_simple_2-2-0",
+          "passed": true,
+          "fraction": 1.0,
+          "detail": "ok",
+          "elapsed": 0.7420838791877031,
+          "dollars": 0.0004185,
+          "aborted": null
+        }
+      ]
+    }
+  ]
+}
