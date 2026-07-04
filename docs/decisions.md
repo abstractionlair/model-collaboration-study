@@ -690,3 +690,38 @@ capability gap is a feature, not a limitation — it simulates the
 weak-overseer-strong-agent dynamic the oversight literature cares about.
 
 **Status:** Active
+
+## 2026-07-04 Kickoff decisions: LCB pool, BFCL dropped, fractional scoring, Gemini replaced
+
+**Decision (four items, resolving the 4/28 kickoff blockers; Scott, via
+decision packet in the work-graph workbench session):**
+
+1. **LCB pool: expand.** Pull ~5 additional `test5`/`test4` releases to grow
+   the medium+hard pool from N=86 toward N≈400 (the 80%-power threshold for
+   the fallback test per `docs/research/power-analysis.md`).
+2. **BFCL: dropped from Phase 1**, and the pre-declared **uniform middle-band
+   fallback is adopted for the phase as a whole** (the power write-up's
+   operational recommendation; SWE-bench's 500-instance ceiling forces the
+   fallback structurally, and uniform application keeps the pre-registration
+   unfragmented). Function-calling coverage may return in Phase 1.5 via
+   `live_*` expansion if wanted.
+3. **LCB scoring: mean_fraction.** The declared 45–55% middle band exists for
+   the best subject only under fractional scoring (0.54 vs 0.34 strict).
+   Carries an implementation note: the power analysis assumed a binomial GLM,
+   so the test moves to test-case-level binomial or beta regression —
+   kickoff work, not a design change.
+4. **Gemini subject: gemini-2.5-flash replaced by gemini-3-flash** (newly
+   available since the April calibration), preserving the three-lineage
+   cross-critique signal the D-family requires. Requires one cheap
+   recalibration of the Gemini cells.
+
+**Alternatives considered:** staying at N=86 (underpowered); BFCL `live_*`
+expansion (uncertain payoff against structural saturation) or replacement
+benchmark (longest delay); strict scoring (kills the middle band); keeping
+2.5-flash (noise, not signal, beyond easy) or a two-lineage LCB bucket
+(weakens heterogeneity comparison).
+
+**Status:** Active. Kickoff is no longer decision-blocked; remaining
+pre-kickoff work is the SWE-bench Verified adapter (multi-session),
+run-manifest schema (~½ session), the LCB pool pull, and the gemini-3-flash
+recalibration run.

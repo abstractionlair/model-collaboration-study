@@ -1,6 +1,6 @@
 # Project Status
 
-**Last updated:** 2026-04-22
+**Last updated:** 2026-07-04
 
 The volatile top of the stack. Read at session start to know what's
 happening and what to do next. Write at *task start*, not task end:
@@ -297,6 +297,26 @@ become well-defined):
 
 **Kickoff itself** is now blocked on Scott's calls in the four
 decision items above, not on more work from me.
+
+---
+
+**2026-07-04: the four decisions are MADE** (see decisions.md same date):
+LCB pool expands (~5 releases toward N≈400); BFCL dropped from Phase 1 with
+the uniform middle-band fallback adopted phase-wide; LCB scores by
+mean_fraction (test moves to test-case-level binomial or beta regression —
+implementation note, not design change); gemini-2.5-flash replaced by
+gemini-3-flash (recalibrate its cells).
+
+Kickoff is decision-unblocked. Remaining pre-kickoff work, in rough order:
+1. **SWE-bench Verified adapter** (multi-session, 2-3 sittings) — unchanged.
+2. **Run-manifest schema** (~½ session) — unchanged.
+3. **LCB pool pull** (~5 test5/test4 releases) + **gemini-3-flash
+   recalibration run** (new; cheap).
+4. LCB functional-testtype support is likely MOOT under the chosen path
+   (pool grows within medium+hard; no expansion past those test types).
+
+Work-graph: mcs-1 tracks this; the blocking decision-packet node mcs-2 is
+resolved.
 
 ---
 
