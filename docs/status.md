@@ -1,6 +1,6 @@
 # Project Status
 
-**Last updated:** 2026-07-04
+**Last updated:** 2026-07-05
 
 The volatile top of the stack. Read at session start to know what's
 happening and what to do next. Write at *task start*, not task end:
@@ -174,7 +174,8 @@ complete.
 
 ## Next up
 
-1. ~~Build the experiment-spec layer.~~ Done — `src/experiment/`.
+1. **README + dependency manifest for the featured profile page.** In progress on branch `career-9/readme`: add root `README.md` and `requirements.txt`, verify 155 tests pass, and file the delegation report.
+2. ~~Build the experiment-spec layer.~~ Done — `src/experiment/`.
 2. ~~Express macro-models A–E.~~ Done. All 12 condition-tier pairs
    build, type-check, and run through the executor. `Fuse` node
    added to the IR for Condition E.

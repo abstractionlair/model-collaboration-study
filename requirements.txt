@@ -1,0 +1,18 @@
+# Core runtime dependencies
+anthropic>=0.40
+openai>=1.0
+google-genai>=2.0
+httpx>=0.28
+
+# Benchmark adapters
+human-eval>=1.0
+
+# Analysis / power analysis
+numpy>=2.0
+pandas>=2.0
+scipy>=1.10
+statsmodels>=0.14
+
+# Development
+mypy>=1.0
+pytest>=8.0
