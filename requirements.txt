@@ -7,6 +7,9 @@ httpx>=0.28
 # Benchmark adapters
 human-eval>=1.0
 
+# Paper fetching (src/fetch_papers.py)
+llama-parse>=0.4
+
 # Analysis / power analysis
 numpy>=2.0
 pandas>=2.0

@@ -174,18 +174,19 @@ complete.
 
 ## Next up
 
-1. **README + dependency manifest for the featured profile page.** In progress on branch `career-9/readme`: add root `README.md` and `requirements.txt`, verify 155 tests pass, and file the delegation report.
+1. ~~Add a root README and dependency manifest.~~ Done —
+   `README.md`, `requirements.txt`; suite still at 155 passing.
 2. ~~Build the experiment-spec layer.~~ Done — `src/experiment/`.
-2. ~~Express macro-models A–E.~~ Done. All 12 condition-tier pairs
+3. ~~Express macro-models A–E.~~ Done. All 12 condition-tier pairs
    build, type-check, and run through the executor. `Fuse` node
    added to the IR for Condition E.
-3. ~~Wire a real `ModelClient`.~~ Done — `src/executor/api_client.py`.
+4. ~~Wire a real `ModelClient`.~~ Done — `src/executor/api_client.py`.
    Anthropic, OpenAI, and Google adapters with retry/backoff and
    token-usage tracking.
-4. ~~Integrate `PromptTemplates` into the executor.~~ Done.
+5. ~~Integrate `PromptTemplates` into the executor.~~ Done.
    Interpreter accepts `PromptTemplates`; defaults to
    structured-critique format from `src/experiment/prompts.py`.
-5. ~~End-to-end smoke tests with real APIs.~~ Done 2026-04-16.
+6. ~~End-to-end smoke tests with real APIs.~~ Done 2026-04-16.
    All conditions A–E ran across 4 providers (Anthropic, OpenAI,
    Google, xAI) without exceptions. 49 API calls, 0 retries.
    Review responses contain evaluative language; score responses
@@ -196,17 +197,17 @@ complete.
    versus picked one verbatim, or that the score parser
    extracted the intended number. The earlier "verified to
    attempt what was asked" claim was too strong.
-6. ~~Fresh-context independent review of the full system.~~ Done
+7. ~~Fresh-context independent review of the full system.~~ Done
    2026-04-16 by Opus 4.7. Recommendation: *Revise and re-review*.
    See `docs/reviews/system-review-opus47-2026-04-16.md`.
-7. **Cross-lineage review of the system AND of the Opus 4.7
+8. **Cross-lineage review of the system AND of the Opus 4.7
    review document** by Codex (`mcs-coord`) and Gemini
    (`mcs-coord-gemini`). Different training lineages will surface
    what same-family review missed; they are also well-positioned
    to weigh in on the design-vs-implementation faithfulness
    findings (#1, #2 in the review) since they signed off on the
    design wording in the fourth round.
-8. Address review findings. Suggested order:
+9. Address review findings. Suggested order:
    - Decide and document the faithfulness gaps (#1, #2) with
      `decisions.md` entries.
    - Fix the implementation bugs (#3 Google error classification,
@@ -216,7 +217,7 @@ complete.
      `_n_samples_for_b`, #9 `PHASE1_PRICING`) against
      pre-calibration use.
    - Address the variance issue (#11 temperature/seeds).
-9. Then, in some order: benchmark adapters, experiment runner
+10. Then, in some order: benchmark adapters, experiment runner
    with budget-cap enforcement, run manifest schema, pre-kickoff
    power analysis, FakeClient unit tests (review #13), real
    within-step parallelism (review #10).

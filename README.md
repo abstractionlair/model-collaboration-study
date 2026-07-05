@@ -89,5 +89,5 @@ As of 2026-07-05, the suite reports **155 passed** with no API keys required. Th
 
 ## Notes
 
-- API keys are not required for the test suite. They are only needed for the driver scripts (`scripts/run_*.py`, `scripts/smoke_test.py`). Keys are read from `~/.vault/` via the `vault exec` wrapper; see `CLAUDE.md` § API credentials.
+- API keys are not required for the test suite. They are only needed for the driver scripts (`scripts/run_*.py`, `scripts/smoke_test.py`), which read the standard provider API-key environment variables.
 - BFCL is implemented as a benchmark adapter but is no longer in the Phase 1 matrix after the July 2026 decision. It remains useful for framework validation and follow-on work.
