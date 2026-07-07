@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import logging
 import time
+import traceback
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -119,7 +120,20 @@ def run_condition(
         except InfrastructureError as e:
             aborted = f"infra_failure: {e}"
         except Exception as e:
-            aborted = f"{type(e).__name__}: {e}"
+            # Anything else is NOT a classified model/infra failure —
+            # it may be a harness bug. Keep the sweep alive (one bad
+            # task must not kill a long run) but record the full
+            # traceback in the abort record and log it loudly, so a
+            # code bug cannot masquerade as a model failure in the
+            # aggregates.
+            logger.exception(
+                "unexpected exception (possible harness bug) "
+                "task=%s condition=%s", task.id, condition.name,
+            )
+            aborted = (
+                f"unexpected_error: {type(e).__name__}: {e}\n"
+                f"{traceback.format_exc()}"
+            )
         elapsed = time.monotonic() - t0
 
         # Score if we have a response at all. Aborted runs get a
@@ -136,10 +150,24 @@ def run_condition(
         task_calls = client.calls[call_start:]
         input_tokens = sum(c.input_tokens for c in task_calls)
         output_tokens = sum(c.output_tokens for c in task_calls)
+        # Fail loud on unpriced models. Compute-matched dollar
+        # accounting is load-bearing for the study design: a call
+        # silently contributing $0 makes a condition look cheaper
+        # than it is, corrupting the $X/$2X/$4X budget comparison.
+        unpriced = sorted({
+            c.model for c in task_calls if c.model not in pricing.entries
+        })
+        if unpriced:
+            raise ValueError(
+                f"pricing table has no entry for model(s) {unpriced} "
+                f"(task={task.id!r}, condition={condition.name!r}). "
+                "Refusing to compute dollar totals that would silently "
+                "omit these calls; add a PricingEntry for every model "
+                "the condition can invoke."
+            )
         dollars = sum(
             pricing.cost(c.model, c.input_tokens, c.output_tokens)
             for c in task_calls
-            if c.model in pricing.entries
         )
         task_results.append(TaskResult(
             task_id=task.id,

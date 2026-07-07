@@ -6,6 +6,7 @@ actual network calls. Verifies the runner:
 - Iterates tasks in order and accumulates per-task TaskResults.
 - Snapshots `client.calls` per task to derive cost attribution.
 - Applies pricing correctly.
+- Fails loudly when a call's model has no pricing entry.
 - Catches exceptions and records them as aborts.
 """
 
@@ -14,6 +15,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Iterable
 from unittest.mock import MagicMock
+
+import pytest
 
 from src.executor.api_client import ApiClient
 from src.experiment.benchmarks import ScoreResult, Task
@@ -118,6 +121,32 @@ def test_runner_applies_pricing() -> None:
     results = run_condition(condition, bench, client, _PRICING)
     assert results.task_results[0].dollars == 2.0
     assert results.total_dollars == 2.0
+
+
+def test_runner_raises_on_unpriced_model() -> None:
+    """A call from a model with no pricing entry must abort the run
+    loudly — NOT contribute $0 to the compute-matched dollar totals.
+    Budget matching is load-bearing for the study design; silently
+    dropped calls would make a condition look cheaper than it is."""
+    bench = _StubBench(
+        _tasks=[Task(id="t1", query_text="q")],
+        _scores={"t1": ScoreResult(passed=True, fraction=1.0)},
+    )
+    client = _stub_anthropic_client(response_text="some code")
+    condition = ConditionSpec(
+        name="A", label="a", protocol=condition_a("claude-test"),
+        budget_tier=BudgetTier.X, models=["claude-test"],
+    )
+    # Pricing table that does NOT cover "claude-test".
+    other_pricing = PricingTable(
+        entries={
+            "some-other-model": PricingEntry(
+                "some-other-model", input_per_1m=1.0, output_per_1m=2.0,
+            ),
+        },
+    )
+    with pytest.raises(ValueError, match="claude-test"):
+        run_condition(condition, bench, client, other_pricing)
 
 
 def test_runner_records_aborts_as_failures_not_exceptions() -> None:
