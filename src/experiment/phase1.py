@@ -2,8 +2,10 @@
 
 Constructs a concrete ExperimentSpec for the Phase 1 matrix:
 conditions A/B/C/D/D'/E at their respective budget tiers, against
-the three committed task buckets (SWE-bench Verified, LiveCodeBench,
-BFCL) stratified by difficulty.
+the two committed task buckets (SWE-bench Verified, LiveCodeBench)
+stratified by difficulty. BFCL was dropped from Phase 1 by the
+2026-07-04 kickoff decisions (`docs/decisions.md`); function-calling
+coverage may return in Phase 1.5.
 
 **Calibration contract.** The builder takes calibration results
 as required arguments — no defaults for `best_model`,
@@ -51,7 +53,10 @@ from src.protocols.conditions import (
 # Concrete model IDs — verify against vendor docs before kickoff.
 GPT_MINI = "gpt-5.4-mini"
 HAIKU = "claude-haiku-4-5"
-FLASH = "gemini-2.5-flash"
+# Per the 2026-07-04 kickoff decisions (`docs/decisions.md`):
+# gemini-2.5-flash replaced by gemini-3-flash. Requires one cheap
+# recalibration of the Gemini cells before kickoff.
+FLASH = "gemini-3-flash"
 
 SUBJECT_MODELS = [GPT_MINI, HAIKU, FLASH]
 
@@ -66,6 +71,11 @@ PHASE1_PRICING_DRAFT = PricingTable(
     entries={
         GPT_MINI: PricingEntry(GPT_MINI, input_per_1m=0.75, output_per_1m=4.50),
         HAIKU: PricingEntry(HAIKU, input_per_1m=1.00, output_per_1m=5.00),
+        # Carried over from the April gemini-2.5-flash capture when the
+        # subject moved to gemini-3-flash (2026-07-04 kickoff decision).
+        # These rates were never quoted for gemini-3-flash — confirming
+        # them against current vendor docs is part of the required
+        # Gemini recalibration, not optional.
         FLASH: PricingEntry(FLASH, input_per_1m=0.30, output_per_1m=2.50),
     }
 )
@@ -75,10 +85,14 @@ PHASE1_PRICING_DRAFT = PricingTable(
 # Phase 1 task buckets
 # ============================================================================
 
+# BFCL dropped from Phase 1 per the 2026-07-04 kickoff decisions
+# (`docs/decisions.md`): SWE-bench's 500-instance ceiling forces the
+# uniform middle-band fallback structurally, and BFCL's saturation
+# added noise rather than signal. The adapter (`benchmarks/bfcl.py`)
+# is retained for a possible Phase 1.5 `live_*` expansion.
 PHASE1_TASKS = [
     TaskBucket(benchmark="swe-bench-verified"),
     TaskBucket(benchmark="livecodebench"),
-    TaskBucket(benchmark="bfcl"),
 ]
 
 

@@ -15,8 +15,10 @@ from __future__ import annotations
 import pytest
 
 from src.experiment.phase1 import (
+    FLASH,
     HAIKU,
     PHASE1_PRICING_DRAFT,
+    PHASE1_TASKS,
     SUBJECT_MODELS,
     build_phase1_conditions,
     build_phase1_spec,
@@ -94,6 +96,29 @@ def test_build_spec_checks_pricing_covers_subject_models() -> None:
             n_samples_for_b=VALID_N_SAMPLES,
             pricing=partial_pricing,
         )
+
+
+def test_builder_matches_2026_07_04_kickoff_decisions() -> None:
+    """The builder constants must track the committed kickoff
+    decisions (`docs/decisions.md`, 2026-07-04): BFCL is dropped
+    from Phase 1, and the Gemini subject is gemini-3-flash. This
+    pin exists because the builder previously drifted from the
+    decision log — an executable spec that contradicts the
+    pre-registration is a measurement-integrity bug."""
+    assert FLASH == "gemini-3-flash"
+    assert [b.benchmark for b in PHASE1_TASKS] == [
+        "swe-bench-verified",
+        "livecodebench",
+    ]
+    spec = build_phase1_spec(
+        best_model=HAIKU,
+        n_samples_for_b=VALID_N_SAMPLES,
+        pricing=PHASE1_PRICING_DRAFT,
+    )
+    assert all(b.benchmark != "bfcl" for b in spec.task_buckets)
+    assert "gemini-2.5-flash" not in spec.pricing.entries
+    for c in spec.conditions:
+        assert "gemini-2.5-flash" not in c.models
 
 
 def test_build_spec_succeeds_with_explicit_draft_pricing() -> None:
