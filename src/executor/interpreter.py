@@ -546,6 +546,14 @@ class Interpreter:
 
             case ParScore(models=models, drafts=ds):
                 answers = self.evaluate(ds, env)
+                if len(models) != len(answers):
+                    raise ValueError(
+                        f"ParScore: {len(models)} models but "
+                        f"{len(answers)} drafts. The typed IR does not "
+                        "encode list lengths, so this runtime check is "
+                        "the only guard against a silently truncated "
+                        "model/draft pairing."
+                    )
                 scores: list[RScore] = []
                 for m, ans in zip(models, answers):
                     text = self.client.complete(

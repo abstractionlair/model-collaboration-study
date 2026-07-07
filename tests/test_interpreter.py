@@ -122,6 +122,24 @@ def test_parscore_aligns_model_i_with_draft_i() -> None:
     assert [c[0] for c in score_calls] == ["m1", "m2", "m3"]
 
 
+def test_parscore_model_draft_count_mismatch_raises() -> None:
+    """A ParScore whose scorer list is shorter than its draft list
+    must fail loudly. The typed IR does not encode list lengths, so
+    without a runtime guard `zip` would silently truncate and a
+    malformed protocol could aggregate over partially scored
+    candidates."""
+    q = query()
+    drafts = par_gen(["m1", "m2", "m3"], q)
+    protocol = bind(
+        drafts,
+        # 2 scorers for 3 drafts: malformed.
+        lambda ds: weighted_vote(ds, par_score(["m1", "m2"], ds)),
+    )
+    client = FakeClient()
+    with pytest.raises(ValueError, match="ParScore"):
+        run(Finalize(draft=protocol), client, "q")
+
+
 # ----------------------------------------------------------------
 # Rounds(N) call count math
 # ----------------------------------------------------------------
