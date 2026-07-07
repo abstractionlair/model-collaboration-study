@@ -211,6 +211,36 @@ def test_score_no_code_extracted(tmp_path: Path) -> None:
     assert "no code extracted" in result.detail
 
 
+def test_score_subprocess_does_not_inherit_secrets(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Model-generated code must run with a scrubbed environment.
+    The documented run path is `vault exec` with four providers'
+    keys in the parent env; a candidate program that echoes a key
+    must see nothing."""
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-fake-not-a-real-key")
+    path = tmp_path / "lcb.jsonl"
+    rec = _record(
+        "q1",
+        private_tests=[
+            {"input": "", "output": "SCRUBBED", "testtype": "stdin"},
+        ],
+    )
+    _write_jsonl(path, [rec])
+    bench = LiveCodeBenchBench(path, execution_timeout=5.0)
+
+    leak_probe = (
+        "import os\n"
+        'print(os.environ.get("ANTHROPIC_API_KEY", "SCRUBBED"))\n'
+    )
+    result = bench.score("q1", _wrap(leak_probe))
+    # Passes only if the child printed the fallback, i.e. the key
+    # was absent from its environment.
+    assert result.passed is True, (
+        f"candidate code saw the parent's secret: {result.detail}"
+    )
+
+
 # ============================================================================
 # Task iteration + filtering
 # ============================================================================

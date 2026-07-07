@@ -41,7 +41,10 @@ touches pickle — it only reads JSON produced by the fetcher.
 
 **Scoring.** For each task, run the hidden private tests
 serially against the extracted code in a subprocess with a
-per-test wallclock timeout. Output comparison is whitespace-
+per-test wallclock timeout. The subprocess gets a scrubbed
+environment (PATH/HOME only): the wrapper runs under `vault
+exec` with live provider keys, and model-generated code must
+not inherit them. Output comparison is whitespace-
 tolerant (rstrip on each line + strip trailing blank lines) to
 match the conventions of competitive-programming judges without
 being lenient enough to pass wrong answers. Returns a fractional
@@ -52,6 +55,7 @@ is True iff every private test passes.
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import tempfile
@@ -145,13 +149,35 @@ class _TestOutcome:
     detail: str
 
 
+def _scrubbed_env() -> dict[str, str]:
+    """Minimal environment for the child running model-generated code.
+
+    The documented run path (`scripts/run_livecodebench.py`) executes
+    under `vault exec` with live provider API keys in the parent
+    environment. Untrusted candidate code must never inherit those:
+    pass only PATH (to resolve `python3`) and HOME. Everything else —
+    including every `*_API_KEY` — is dropped.
+    """
+    env: dict[str, str] = {}
+    for key in ("PATH", "HOME"):
+        val = os.environ.get(key)
+        if val is not None:
+            env[key] = val
+    env.setdefault("PATH", "/usr/local/bin:/usr/bin:/bin")
+    return env
+
+
 def _run_one_stdin_test(
     code: str,
     stdin_input: str,
     expected_output: str,
     timeout: float,
 ) -> _TestOutcome:
-    """Run `code` once with stdin_input piped in; compare stdout."""
+    """Run `code` once with stdin_input piped in; compare stdout.
+
+    The subprocess gets a scrubbed environment (see `_scrubbed_env`)
+    so candidate code cannot read the scoring wrapper's secrets.
+    """
     with tempfile.NamedTemporaryFile(
         mode="w", suffix=".py", delete=False, encoding="utf-8"
     ) as f:
@@ -165,6 +191,7 @@ def _run_one_stdin_test(
             text=True,
             timeout=timeout,
             check=False,
+            env=_scrubbed_env(),
         )
     except subprocess.TimeoutExpired:
         return _TestOutcome("timeout", f"timeout after {timeout}s")
