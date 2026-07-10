@@ -1,5 +1,11 @@
 # Model Collaboration Study
 
+## Background and Motivation
+
+Elsewhere I describe my usage of multiple models in software development. Separating writing and reviewing of artifacts, sometimes having multiple models review the same artifact or write tests, and seeing if the diversity of the models, i.e. different families, improves results. At the time I'm writing this I haven't done the careful evaluation of this, but from my informal experience, it has been helping. This made me wonder more generally what improvement, if any, we can gain by having multiple models collaborate. And, importantly, at the same cost. This project is an attempt to meaasure this properly. Developed with a lot of help from Claude (and reviews along the way from other models). And description of the details below are also mostly written by Claude.
+
+## Introduction
+
 A pre-registered experiment asking: **at matched compute budget, when does a heterogeneous multi-model collaboration protocol outperform the best single model in the pool, and which structural properties drive the difference?**
 
 The research question is committed in `docs/decisions.md` (2026-04-14) and the experimental design is promoted in `docs/research/experimental-design.md`. The compute-matched constraint is central: any multi-model result that does not beat a compute-matched single-model baseline is treated as a non-result. The study is pre-registered: the design, power analysis, and analysis plan were fixed before data collection.
