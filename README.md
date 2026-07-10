@@ -1,22 +1,5 @@
 # Model Collaboration Study
 
-## Background and Motivation
-
-For a good amount I've time I've sensed that I _should_ be able to delegate more to AI models for software development than people were doing. All aspects of it. But I knew this required a good process and scaffolding and I worried about getting burned if I didn't spend a lot of time reviewing everything. And I did find out through some experiments that I couldn't trust full-on vibe coding. Models were fast enough adnd good enough that I'd become the bottleneck. So more delegating would mean more productivity _if_ I could ensure quality. At least to the same amount I can when I write and review code or, in a work setting, when one colleague writes and another reviews. And the work setting was a good example. There's a very good reason we have different people review code than the people who wrote it. There's also a reason it helps to have other people review natural language writing. So I looked for ways to add independence to model reviews of model written code, and other artifacts. A few ways, which add varying levels of independence are:
-  * Using the same model but with a different, review-focused prompt and/or skills
-  * Using the same model but with a different, review-focused prompt and/or skills, _and_ a different harness with different tools
-  * Using a different model from the same family of models
-  * Using a different model from different families
-  * Using a combination of the different choices above
-
-The pattern I settled on for personal projects, in a casual, ad-hoc manner was me, manually launching different harnesses with different models and asking one to write something and another to review it. Not in scope for the project described below, I also considered writing tests as a review-like function and often had yet another model write those or all the models I had available write some and merge them into one sweet. From my informal observations this worked very well. Especially having Claude write and a GPT review. Though the optimum kept moving as models and harnesses were upgraded. You could fairly say that the improvement from having multiple models write multiple test suites isn't much of a discovery. That's "just" spending more tokens. But the writing and reviewing steps were going to happen anyway and so don't change costs dramatically and, in that case, any improvement is a quality-code-per-dollar win.
-
-At work I only had access to a single frontier model but 1) we have our own internally developed harness with different system prompts, tools, and maybe other differences, and 2) access to less capable open models. This was the environment in which I found _some_ benefit from switching harnesses and prompts/skills. Improvement over using the same model and harness combination just changing the prompt. I also found the less-capable open models still added value, but they did better with more targeted reviews. Both less code/text to review and limiting them to specific kinds of errors, etc. For cost reasons the project below most resembles my use of the open models at work.
-
-## Begin Semi-Foral Mode
-
-(Also, begining text largely written by Claude. I have hesitation having models write text that's about what I think, what my preferences or motivations are, or advocating for things in my name. But for objective things, "just the facts", I think its helpful. But I don't want to obfuscate it.)
-
 A pre-registered experiment asking: **at matched compute budget, when does a heterogeneous multi-model collaboration protocol outperform the best single model in the pool, and which structural properties drive the difference?**
 
 The research question is committed in `docs/decisions.md` (2026-04-14) and the experimental design is promoted in `docs/research/experimental-design.md`. The compute-matched constraint is central: any multi-model result that does not beat a compute-matched single-model baseline is treated as a non-result. The study is pre-registered: the design, power analysis, and analysis plan were fixed before data collection.
