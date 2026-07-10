@@ -2,7 +2,7 @@
 
 ## Background and Motivation
 
-Elsewhere I describe my usage of multiple models in software development. Separating writing and reviewing of artifacts, sometimes having multiple models review the same artifact or write tests, and seeing if the diversity of the models, i.e. different families, improves results. At the time I'm writing this I haven't done the careful evaluation of this, but from my informal experience, it has been helping. This made me wonder more generally what improvement, if any, we can gain by having multiple models collaborate. And, importantly, at the same cost. This project is an attempt to meaasure this properly. Developed with a lot of help from Claude (and reviews along the way from other models). And description of the details below are also mostly written by Claude.
+Elsewhere I describe my usage of multiple models in software development. Separating writing and reviewing of artifacts, sometimes having multiple models review the same artifact or write tests, and seeing if the diversity of the models, i.e. different families, improves results. At the time I'm writing this I haven't done the careful evaluation of this, but from my informal experience, it has been helping. This made me wonder more generally what improvement, if any, we can gain by having multiple models collaborate. And, importantly, at the same cost. This project is an attempt to measure this properly. Developed with a lot of help from Claude (and reviews along the way from other models). And the description of the details below is also mostly written by Claude.
 
 ## Introduction
 
