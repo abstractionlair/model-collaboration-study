@@ -225,6 +225,24 @@ complete.
 
 ## Currently routed to
 
+**Round-7 cross-model review COMPLETE 2026-07-23.** Four
+fresh-context reviews by the new model generation: Fable 5,
+GPT-5.6 Sol, Grok 4.5, Kimi K3 (first xAI and Moonshot lineage
+reviews). **4/4 Revise-and-re-review; design core sound.**
+Synthesis with per-finding verification status:
+`docs/reviews/synthesis-round7-2026-07-23.md`. Headline
+convergent findings (verified in code): task-blind aggregation
+prompts (PickOne/ParScore lack the query; E still
+PEERS_GROUPED), no finish-reason/truncation telemetry on any
+provider, tier caps unenforced (compute-matching holds only for
+B↔D′), abort-denominator inconsistency, ParScore 0.5 hardcode.
+**The pilot was PAUSED mid-B** (A-columns complete and clean:
+gemini 0.797 / haiku 0.545 / gpt 0.523 mean_frac at N=86; gpt
+truncation concern empirically refuted, zero cap-saturated
+calls) pending a patch-then-resume decision.
+
+---
+
 **In progress 2026-07-23: pilot-run prep (blog-postable pilot).**
 Scott green-lit an overnight pilot on the LCB medium+hard pool
 (N=86, test6) with conditions A×3 subjects, B (n dollar-matched
@@ -232,10 +250,15 @@ to D's realized cost), C, D, D′, E. This session: confirm pricing
 (gemini-3-flash especially), upgrade `run_livecodebench.py`
 (multi-difficulty filter, B/C/D′ wiring, checkpoint/resume),
 3-task smoke run, then report a safe budget number.
-**Full-run launch waits for Scott to confirm his provider
-spending limits are set.** Track-Q items (SWE-bench adapter,
-LCB pool pull to N≈400, run-manifest schema) unchanged, not
-touched here.
+**Launched 2026-07-23 with Scott's approval:** full condition
+set (A×3, B n=8, C, D, D′, E) × 86 tasks, seed 0. B at n=8 is
+dollar-matched to D′ (homogeneous control); D's ~6× realized
+cost over D′ (Gemini thinking tokens) is treated as a finding,
+not matched away. Expected ~$59 / worst case ~$119 / ~22 h
+wall. Checkpoint: `data/pilot_checkpoint.json` (per-task
+resumable). A $115 spend watchdog kills the run as a safety
+net. Track-Q items (SWE-bench adapter, LCB pool pull to N≈400,
+run-manifest schema) unchanged, not touched here.
 
 Two findings so far this session:
 1. **gemini-3-flash pricing was stale.** Live rates are
