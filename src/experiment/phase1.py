@@ -54,29 +54,29 @@ from src.protocols.conditions import (
 GPT_MINI = "gpt-5.4-mini"
 HAIKU = "claude-haiku-4-5"
 # Per the 2026-07-04 kickoff decisions (`docs/decisions.md`):
-# gemini-2.5-flash replaced by gemini-3-flash. Requires one cheap
-# recalibration of the Gemini cells before kickoff.
-FLASH = "gemini-3-flash"
+# gemini-2.5-flash replaced by Gemini 3 Flash. The API serves it
+# only under the `-preview` suffix (verified against the live
+# ListModels endpoint 2026-07-23; bare `gemini-3-flash` 404s).
+FLASH = "gemini-3-flash-preview"
 
 SUBJECT_MODELS = [GPT_MINI, HAIKU, FLASH]
 
-# Pricing anchors captured during the exploratory phase.
-# **NOT verified pricing.** Caller must explicitly pass a
-# `PricingTable` (which they may construct from this draft, but
-# only after confirming rates against current vendor docs) to
-# `build_phase1_spec`. Named with `_DRAFT` suffix to remind
-# callers that bare use would violate the "verify before kickoff"
-# rule from the design.
+# Pricing anchors. All three entries verified against current
+# vendor-published rates on 2026-07-23 (gpt-5.4-mini $0.75/$4.50,
+# claude-haiku-4-5 $1.00/$5.00, gemini-3-flash $0.50/$3.00).
+# The `_DRAFT` suffix is retained deliberately: rates drift, and
+# callers of `build_phase1_spec` must still make an explicit
+# choice to trust these numbers (re-verify if meaningful time has
+# passed since the date above).
 PHASE1_PRICING_DRAFT = PricingTable(
     entries={
         GPT_MINI: PricingEntry(GPT_MINI, input_per_1m=0.75, output_per_1m=4.50),
         HAIKU: PricingEntry(HAIKU, input_per_1m=1.00, output_per_1m=5.00),
-        # Carried over from the April gemini-2.5-flash capture when the
-        # subject moved to gemini-3-flash (2026-07-04 kickoff decision).
-        # These rates were never quoted for gemini-3-flash — confirming
-        # them against current vendor docs is part of the required
-        # Gemini recalibration, not optional.
-        FLASH: PricingEntry(FLASH, input_per_1m=0.30, output_per_1m=2.50),
+        # Confirmed against published gemini-3-flash rates 2026-07-23
+        # (two independent pricing trackers agree: $0.50 in / $3.00 out
+        # per 1M tokens). Replaces the stale gemini-2.5-flash carry-over
+        # ($0.30 / $2.50) that rode along with the 2026-07-04 model swap.
+        FLASH: PricingEntry(FLASH, input_per_1m=0.50, output_per_1m=3.00),
     }
 )
 

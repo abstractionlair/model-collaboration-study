@@ -1,6 +1,6 @@
 # Project Status
 
-**Last updated:** 2026-07-05
+**Last updated:** 2026-07-23
 
 The volatile top of the stack. Read at session start to know what's
 happening and what to do next. Write at *task start*, not task end:
@@ -224,6 +224,55 @@ complete.
 
 
 ## Currently routed to
+
+**In progress 2026-07-23: pilot-run prep (blog-postable pilot).**
+Scott green-lit an overnight pilot on the LCB medium+hard pool
+(N=86, test6) with conditions A×3 subjects, B (n dollar-matched
+to D's realized cost), C, D, D′, E. This session: confirm pricing
+(gemini-3-flash especially), upgrade `run_livecodebench.py`
+(multi-difficulty filter, B/C/D′ wiring, checkpoint/resume),
+3-task smoke run, then report a safe budget number.
+**Full-run launch waits for Scott to confirm his provider
+spending limits are set.** Track-Q items (SWE-bench adapter,
+LCB pool pull to N≈400, run-manifest schema) unchanged, not
+touched here.
+
+Two findings so far this session:
+1. **gemini-3-flash pricing was stale.** Live rates are
+   $0.50/$3.00 per MTok (two trackers agree), not the
+   $0.30/$2.50 gemini-2.5-flash carry-over.
+   `PHASE1_PRICING_DRAFT` corrected; gpt-5.4-mini and
+   claude-haiku-4-5 entries verified unchanged.
+2. **The API ID for Gemini 3 Flash is
+   `gemini-3-flash-preview`.** Bare `gemini-3-flash` 404s
+   (caught by the first smoke run; confirmed against the live
+   ListModels endpoint). `FLASH` in `src/experiment/phase1.py`
+   and the decision-pin test updated. The 2026-07-04 decision
+   (use Gemini 3 Flash) is unchanged — this is an ID-surface
+   resolution, not a model change.
+3. **Gemini calls were silently truncated by the harness —
+   major.** Gemini thinking tokens count against
+   `max_output_tokens`; at the shared 4096 cap the visible
+   answer truncated mid-code-fence (~160 tokens), scoring 0.00,
+   and `thoughts_token_count` was excluded from billing so the
+   failure also looked implausibly cheap. Fixed in
+   `ApiClient._call_google` (8x headroom on the Google cap +
+   thoughts tokens billed as output). Post-fix,
+   gemini-3-flash-preview goes **3/3 full-pass** on the smoke
+   tasks where gpt went 1/3 — so (a) the calibration-era
+   "gemini essentially unusable on LCB" finding is at least
+   partly this artifact (gemini-2.5-flash also thinks by
+   default), and (b) `best_model=gpt-5.4-mini` for the LCB
+   bucket is now in doubt. The pilot keeps best_model=gpt per
+   the recorded calibration (n=3 is not evidence to re-anchor);
+   the pilot's Condition-A columns at N=86 are the proper
+   recalibration and will settle the ranking. gpt/haiku output
+   sit well under their caps (no truncation on their side);
+   the per-vendor cap asymmetry (Gemini 32768 incl. thinking
+   vs. 4096 visible elsewhere) is a named harness property,
+   alongside the vendor-default-temperature confound.
+
+---
 
 **Done 2026-04-24: per-bucket calibration + harder-subset
 selection.** Both parts ran. Combined: 1,086 calls, $1.61,

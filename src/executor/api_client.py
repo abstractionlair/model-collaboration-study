@@ -370,9 +370,19 @@ class ApiClient:
     ) -> tuple[str, int, int]:
         """Call Google GenAI API. Returns (text, input_tokens, output_tokens)."""
         client = self._get_google()
+        # Gemini 3 models think by default, and thinking tokens
+        # count against `max_output_tokens`. At the shared
+        # `self.max_tokens` bound the thinking swallows the budget
+        # and the visible answer truncates mid-code-fence (caught
+        # by the 2026-07-23 pilot smoke: ~160 candidate tokens,
+        # unclosed ```python). Give Google calls 8x headroom so
+        # thinking + answer fit on hard tasks (4x still saturated
+        # on LCB/hard); the dollar bound stays finite. A call that
+        # exhausts even this budget scores as a capability failure
+        # of the bounded harness, documented rather than hidden.
         config_kwargs: dict[str, Any] = {
             "system_instruction": system,
-            "max_output_tokens": self.max_tokens,
+            "max_output_tokens": 8 * self.max_tokens,
         }
         if self.temperature is not None:
             config_kwargs["temperature"] = self.temperature
@@ -392,7 +402,14 @@ class ApiClient:
         text = response.text or ""
         usage = response.usage_metadata
         input_tok = (usage.prompt_token_count or 0) if usage else 0
-        output_tok = (usage.candidates_token_count or 0) if usage else 0
+        # Google bills thinking tokens as output but reports them
+        # separately from `candidates_token_count`; omitting them
+        # under-bills every thinking-enabled Gemini call (also
+        # caught by the 2026-07-23 smoke: $0.0008/task).
+        output_tok = (
+            (usage.candidates_token_count or 0)
+            + (usage.thoughts_token_count or 0)
+        ) if usage else 0
         return (text, input_tok, output_tok)
 
     # ------------------------------------------------------------------

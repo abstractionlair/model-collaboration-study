@@ -101,11 +101,14 @@ def test_build_spec_checks_pricing_covers_subject_models() -> None:
 def test_builder_matches_2026_07_04_kickoff_decisions() -> None:
     """The builder constants must track the committed kickoff
     decisions (`docs/decisions.md`, 2026-07-04): BFCL is dropped
-    from Phase 1, and the Gemini subject is gemini-3-flash. This
-    pin exists because the builder previously drifted from the
-    decision log — an executable spec that contradicts the
-    pre-registration is a measurement-integrity bug."""
-    assert FLASH == "gemini-3-flash"
+    from Phase 1, and the Gemini subject is Gemini 3 Flash. The
+    API serves that model only under the `-preview` suffix
+    (verified live 2026-07-23; bare `gemini-3-flash` 404s), so
+    the ID pin carries the suffix. This pin exists because the
+    builder previously drifted from the decision log — an
+    executable spec that contradicts the pre-registration is a
+    measurement-integrity bug."""
+    assert FLASH == "gemini-3-flash-preview"
     assert [b.benchmark for b in PHASE1_TASKS] == [
         "swe-bench-verified",
         "livecodebench",
