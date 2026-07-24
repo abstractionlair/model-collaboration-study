@@ -1,6 +1,6 @@
 # Project Status
 
-**Last updated:** 2026-07-23
+**Last updated:** 2026-07-24
 
 The volatile top of the stack. Read at session start to know what's
 happening and what to do next. Write at *task start*, not task end:

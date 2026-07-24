@@ -66,6 +66,92 @@ The July 2026 kickoff decisions (`docs/decisions.md`, 2026-07-04) resolved four 
 
 Remaining pre-kickoff work: SWE-bench Verified adapter, run-manifest schema, and the expanded LiveCodeBench data pull.
 
+### Pilot results (2026-07-24) — automated interim update
+
+> *This section was written by Claude (the project's implementation
+> assistant) as a quick, facts-only record that pilot results exist.
+> A fuller write-up by Scott, with interpretation and context, is in
+> progress. Every claim below is taken from
+> `docs/research/pilot-findings.md` (rev. 2), whose contents were
+> audited against the raw data by four independent frontier models
+> (`docs/reviews/synthesis-round8-2026-07-24.md`).*
+
+A pilot of the full Phase 1 condition matrix ran 2026-07-23/24:
+all six macro-model conditions (A×3 subjects, B, C, D, D′, E) on
+the LiveCodeBench test6 medium+hard pool, N=86 tasks, single
+seed, executable scoring, $62.00 total API spend. It is a
+descriptive machinery-validation run, not the pre-registered
+test (N is ~5× too small, and the pool turned out not to be
+middle-band — see below).
+
+**Instrument events during the run.** A harness bug was found
+and fixed mid-pilot: Gemini's thinking tokens count against
+`max_output_tokens`, so at the original shared 4096-token cap
+its answers were silently truncated and scored ~0, and thinking
+tokens went unbilled. This invalidated the April 2026
+calibration (which had concluded Gemini-class models were
+unusable on this benchmark) and, combined with the
+2.5-flash → 3-flash model swap, flipped the best-subject
+ranking: `gemini-3-flash-preview` scores 0.797 mean-fraction on
+this pool vs. ~0.53–0.55 for the other two subjects. Gemini
+remained budget-bounded at 32,768 tokens for the whole run, and
+that bound binds on roughly 30% of its hard-task calls. Two
+review rounds ran alongside: four current-generation models
+(Claude Fable 5 fresh-context, GPT-5.6 Sol, Grok 4.5, Kimi K3)
+audited the plan and code (round 7), and later the conclusions
+against the raw data (round 8). All eight reviews and both
+syntheses are in `docs/reviews/`.
+
+**Results** (mean-fraction / strict pass / $ per task):
+
+| Condition | mean_frac | strict | $/task |
+|---|---|---|---|
+| A gemini-3-flash-preview | 0.797 | 0.70 | $0.077 |
+| A claude-haiku-4-5 | 0.545 | 0.22 | $0.008 |
+| A gpt-5.4-mini | 0.529 | 0.26 | $0.004 |
+| B (gpt ×8 + pick) | 0.617 | 0.40 | $0.036 |
+| C (3 drafts + pick) | 0.605 | 0.38 | $0.091 |
+| D (heterogeneous ReConcile) | 0.816 | 0.69 | $0.301 |
+| D′ (homogeneous ReConcile) | 0.588 | 0.35 | $0.039 |
+| E (hierarchical synthesis) | 0.638 | 0.43 | $0.166 |
+
+**Review-audited findings, stated at the strength the data
+supports:**
+
+- No collaboration condition demonstrated a win over the best
+  single model. C and E score significantly below it while
+  costing 1.2×/2.2× more. D is statistically indistinguishable
+  from it (+0.019, 95% CI [−0.068, +0.109]) while spending
+  3.9× — and no compute-matched single-model comparator at D's
+  budget was run, so that comparison is unresolved rather than
+  negative.
+- D's apparent parity is concentrated entirely in the 26 tasks
+  where Gemini's single attempt was cut by the 32k output
+  budget (D−gemini = +0.228 there, −0.072 on the other 60
+  tasks). On tasks where the best model was not cap-limited,
+  the per-task best-of-pool exceeds the best model by +0.0004
+  mean-fraction — the pool contains essentially no
+  complementarity for selection to recover.
+- C's task-visible judge selected at the 27th percentile of a
+  random-pick baseline — at or below chance.
+- B (8 samples + same-model pick) gained +0.094 over its own
+  base model (nominal significance only; it does not survive
+  multiplicity correction on the primary metric) and is the
+  only condition that beats the best single model on dollars
+  per solved task ($0.091 vs $0.110).
+- An ex-post oracle router (cheapest model matching the best
+  model's per-task score) reaches equivalent quality at 49% of
+  the best model's cost — an upper bound; no deployable router
+  was tested.
+
+**Caveats carried by all of the above:** single seed and a
+single generation sample per task at vendor-default
+temperature; N=86 on one benchmark; the pool sits above the
+design's pre-registered difficulty bands for the actual best
+subject; budget-tier caps were not enforced; candidate
+execution is not yet sandboxed. Raw data:
+`data/mini_bench_runs/pilot-lcb-2026-07-24T20-46-16.json`.
+
 ## Repository layout
 
 ```
