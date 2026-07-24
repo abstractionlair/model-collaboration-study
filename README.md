@@ -4,6 +4,14 @@
 
 Elsewhere I describe my usage of multiple models in software development. Separating writing and reviewing of artifacts, sometimes having multiple models review the same artifact or write tests, and seeing if the diversity of the models, i.e. different families, improves results. At the time I'm writing this I haven't done the careful evaluation of this, but from my informal experience, it has been helping. This made me wonder more generally what improvement, if any, we can gain by having multiple models collaborate. And, importantly, at the same cost. This project is an attempt to measure this properly. Developed with a lot of help from Claude (and reviews along the way from other models). And the description of the details below is also mostly written by Claude.
 
+## Updates
+
+### 2026-07-24
+
+Kicked off yesterday. I expected to just be able to have a note about that today with a decription of the still-pending steps. But I think
+the results will be in tonight. Mostly negative, but some interesting data and good indications of how to follow-up with improvements.
+
+
 ## Introduction
 
 A pre-registered experiment asking: **at matched compute budget, when does a heterogeneous multi-model collaboration protocol outperform the best single model in the pool, and which structural properties drive the difference?**
