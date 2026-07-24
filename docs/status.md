@@ -253,6 +253,69 @@ B/C/D/D′/E. Confirmatory-phase items (recalibration protocol,
 cap-policy decision entry, fractional power analysis, sandbox
 fix, decision-log amendments) deliberately NOT in this patch.
 
+**2026-07-24 complementarity-ceiling analysis** (question-level
+review discussion with Scott): the oracle per-task best-of-pool
+on the current pool scores 0.854 mean_frac vs best-single
+(gemini) 0.797 — only **+0.056 recoverable headroom** for
+one-draw-per-member selection, below the pre-declared +10pp
+effect. **Scope correction (Scott's catch, 2026-07-24):** this
+ceiling binds C only. It grows with the draft set (B's 8-draw
+ceiling is a different quantity; a selection protocol at D's
+realized budget could afford ~50 drafts), and it never bound
+D/E at all — their vote/synthesis operate on revised or fresh
+artifacts. Correct use: a *decomposition baseline* — any
+protocol gain splits into a selection component (≤0.056 here)
+and a generation component (revision/synthesis beating every
+original draft; uncapped, and the interesting finding if
+present). Analysis-phase implication: retain and offline-score
+unchosen candidate drafts in the confirmatory runs (free —
+local execution only) so the split is measurable; added to the
+run-manifest wishlist. Same analysis on April
+calibration data would have shown 0.111 (a marginal green
+light) — the truncation bug corrupted the complementarity
+structure, not just levels, so even the foresighted check
+would have been fooled. Two additions to the confirmatory
+gate: (a) **pool selection must require measured
+complementarity ceiling ≥ assumed effect size**, recomputed at
+every recalibration; (b) note that on mean_fraction (the
+adopted metric) April's best subject was haiku 0.606, not gpt
+0.539 — the best-model anchor was never recomputed when
+scoring switched, a third anchor-staleness instance. Also
+queued for the confirmatory design discussion: a native
+inference-scaling A⁺ arm and a pre-hoc router baseline (the
+two rival hypotheses to any collaboration win).
+
+**Correction 2026-07-24 (mid-run forensic):** A(gemini) was
+silently cap-limited on ~26/86 tasks (≥32,000 of 32,768
+tokens; ≥10 pinned at 32,763–4 with frac 0.00 — truncation
+signature). Those rows predate the truncation flag; the
+earlier "zero cap-saturated calls" check covered gpt/haiku
+only. Consequences: gemini's 0.797 is a lower bound (its
+dominance is understated); part of the measured
+complementarity ceiling (incl. showcase task arc190_c) is a
+cap artifact, so true selection headroom is below 0.056; the
+32k budget is BINDING for gemini-3-flash on hard LCB (~30% of
+tasks), making the deferred cap-policy decision empirical,
+not philosophical. Course: pilot finishes as-is (every
+condition faces the same bounded gemini — internally
+consistent; framed as "gemini at a 32k thinking+answer
+budget"); confirmatory recalibration must settle cap policy
+first and verify truncation ≈ 0 per provider (or declare the
+bound), per the round-7 remedies.
+
+**Pool-balance recommendation (discussion with Scott,
+2026-07-24):** the gemini dominance is a measurement artifact
+twice over (truncation bug shaped the 2026-07-04 pool
+decision; metric-switch anchor drift). The recalibration wave
+should include **gemini-2.5-flash under the fixed harness**
+(~$3): if it lands near the other two subjects, a near-peer
+pool (2.5-flash / gpt-5.4-mini / haiku-4-5) becomes the main
+pre-registered instrument — pool selected on A-column data
+only, complementarity-ceiling gate applied, declared as a
+scope condition — while the dominant-member pool (3-flash)
+is kept as a named secondary cell (weak-reviewer/oversight
+regime), not discarded.
+
 ---
 
 **In progress 2026-07-23: pilot-run prep (blog-postable pilot).**
@@ -262,6 +325,18 @@ to D's realized cost), C, D, D′, E. This session: confirm pricing
 (gemini-3-flash especially), upgrade `run_livecodebench.py`
 (multi-difficulty filter, B/C/D′ wiring, checkpoint/resume),
 3-task smoke run, then report a safe budget number.
+**PILOT COMPLETE 2026-07-24, 20:46 UTC.** 688/688 pairs,
+$62.00 total (google $47.03 / openai $9.83 / anthropic $5.15),
+1 abort, 76 truncated calls (all counted). Full write-up:
+`docs/research/pilot-findings.md`; raw log
+`data/mini_bench_runs/pilot-lcb-2026-07-24T20-46-16.json`.
+Headline: no collaboration condition beats A(gemini) at
+matched compute — D reaches parity (+0.019, CI [−0.068,
++0.109]) at 3.9× cost; E and C significantly below; B's
++0.094 lift over its own base model is the one significant
+positive (repeat-sampling works). Next: findings review,
+blog-post draft, then the confirmatory-phase decision stack.
+
 **Launched 2026-07-23 with Scott's approval:** full condition
 set (A×3, B n=8, C, D, D′, E) × 86 tasks, seed 0. B at n=8 is
 dollar-matched to D′ (homogeneous control); D's ~6× realized

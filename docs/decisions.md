@@ -689,7 +689,24 @@ capability). This enables a mostly-automated evaluation pipeline. The
 capability gap is a feature, not a limitation — it simulates the
 weak-overseer-strong-agent dynamic the oversight literature cares about.
 
-**Status:** Active
+**Status:** Partially superseded (annotated 2026-07-24; see below)
+
+**Annotation 2026-07-24:** the 2026-04-14 design split this
+decision's judge role in two, and this entry was never updated
+to say so (caught in discussion with Scott during the round-7
+review period). (a) Judge-as-evaluation-instrument: removed
+from Phase 1 in favor of executable scoring (walk-before-run);
+frontier judges deferred to Phase 2 per
+`docs/research/judge-design-notes_draft.md`, where this entry's
+scheme and rationale remain the plan. (b) Judge-as-in-protocol-
+aggregator: pinned to peer models drawn from the subject pool
+(macro-model framing — the aggregator is part of the measured
+macro-model and its cost counts toward the dollar budget; a
+frontier judge would import capability from outside the pool
+and change the claim). A frontier-judge-at-true-cost arm is a
+candidate for the confirmatory phase alongside the router and
+native-inference-scaling baselines. The subjects-side of this
+decision (small models, three lineages) remains active.
 
 ## 2026-07-04 Kickoff decisions: LCB pool, BFCL dropped, fractional scoring, Gemini replaced
 

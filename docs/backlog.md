@@ -98,3 +98,116 @@ any of these can run is the experiment-spec layer plus a real
   disposition was." Codex flagged this; worth building when the
   first formal reviews land on the rewritten experimental-design
   draft.
+
+
+## Follow-on experiments and retrospective improvements (2026-07-24)
+
+Captured from the round-7 review period and the question-level
+design discussion with Scott. These are "ways the experiment
+could have been done better" that are now follow-on work rather
+than retrofits; several are pre-conditions for the confirmatory
+phase (marked ⚑), the rest are candidate arms or analyses.
+
+### Rival-baseline arms the matrix lacks
+
+- **A⁺: native inference-scaling of the best single model —
+  as an allocation sweep, not a single point.** The fair "best
+  single model at $2X/$4X" includes the vendor's own compute
+  dial (thinking budget / reasoning effort), not just B's
+  repeat-and-select. Design as a grid over budget divisions at
+  matched dollars — e.g. at 4× budget: 1 call × 4× thinking,
+  2 × 2×, 4 × 1× + pick — per difficulty stratum. Literature
+  (Snell et al. 2024 compute-optimal test-time scaling; Brown
+  et al. 2024 repeated-sampling coverage) says neither pure
+  strategy dominates: sequential thinking tends to win on tasks
+  a single attempt can't finish, parallel sampling wins where
+  attempts fail decorrelated and selection is possible, and the
+  optimal mix shifts with difficulty. "Think N× longer beats
+  repeat N times" is NOT a known truth — the allocation curve
+  is the real object of study, and it doubles as the strongest
+  honest baseline for any collaboration claim.
+- **Pre-hoc router baseline.** A cheap dispatcher that picks
+  *which single model* answers each task, at ~1× cost. If a
+  router captures most of the oracle-ensemble gap, the
+  collaboration category loses to dispatch. C is post-hoc
+  routing at N× cost; the matrix has no pre-hoc arm.
+- **Frontier-judge-at-true-cost arm.** Scott's original
+  2026-04-08 scheme, dollar-honest: small pool + frontier
+  aggregator, judge's real price counted, vs. single model at
+  the same total dollars. Doubles as the first oversight-framing
+  test. See the 2026-07-24 annotation on the 2026-04-08
+  decision entry.
+
+### Measurement upgrades
+
+- ⚑ **Complementarity-ceiling gate on pool selection.** The
+  oracle-minus-best gap (per-task max across subjects vs. best
+  subject mean) must be ≥ the assumed effect size for
+  selection-shaped conditions, recomputed at every
+  recalibration. Five lines of analysis; its absence let a pool
+  with +0.056 selection headroom carry a +10pp pre-registered
+  effect. Caveat learned 2026-07-24: the ceiling binds
+  one-draw-per-member selection (C) only — it scales with the
+  affordable draft set and never bound D/E; use it as a
+  decomposition baseline (selection component vs. generation
+  component of any protocol gain).
+- ⚑ **Retain and offline-score unchosen candidate drafts.**
+  Costs nothing but local execution; makes the
+  selection-vs-generation decomposition measurable (realized
+  recovery rate vs. ceiling; whether D/E wins come from picking
+  or from improving). Fold into the run-manifest schema.
+- **Score-all-drafts diagnostics for B.** B's ceiling is
+  E[max over its n same-model draws] — currently unmeasurable
+  because losing drafts are discarded. Same retention fix.
+
+### Process rules (cheap, learned the hard way)
+
+- ⚑ **Recalibration protocol.** Re-run Condition-A columns on
+  the current harness immediately before any confirmatory run;
+  if the best subject changed, re-anchor and re-stratify from
+  A-column data only; disclose task overlap with any
+  already-observed condition-level results.
+- ⚑ **Anchor recomputation on metric change.** Any change to
+  the scoring rule (e.g. strict → mean_fraction, 2026-07-04)
+  invalidates "best subject" determinations made under the old
+  rule; recompute at decision time (April's best subject under
+  mean_fraction was haiku, not gpt — discovered 2026-07-24).
+- **Contamination-window check.** Record each subject's
+  training cutoff against the benchmark release window at
+  calibration time (Kimi K3, round 7).
+
+- **Repeat-variance diagnostic (Scott, 2026-07-24).** k≈5
+  repeats × 20–30 middle-band tasks × 3 subjects (~$12–15):
+  per-task outcome distributions (prices the sampling lever —
+  expected-max-of-n curves per task), and failure-pattern
+  overlap across repeats (same tests failing = correlated =
+  depth wall → thinking; different tests = decorrelated →
+  sampling). Pair with a 2–3-level thinking sweep to price the
+  sequential axis, which repeat statistics cannot predict.
+  Together these let the A⁺ allocation curve be predicted, not
+  just measured. Doubles as the design's "variance across
+  seeds" metric (vendor stochasticity is the actual variance
+  source; harness seeds don't reach generation). Requires
+  retaining per-test pass vectors in ScoreResult (currently
+  discarded; one-line adapter change).
+
+- **Cost-side objective flip (Scott + Mijan conversation,
+  2026-07-24).** Re-pose the experiment as "equivalent results
+  for fewer dollars" instead of "better results for the same
+  dollars": fix the quality bar at the best single model's
+  level, minimize spend. Empirical hook from the pilot
+  A-columns: an oracle per-task router achieves gemini-level
+  quality (0.832 vs 0.797 mean_frac) at **49% of all-gemini
+  cost**, routing 48/86 tasks to 10–20x cheaper models — on
+  the same pool where the capability objective returned
+  "nothing to gain." Capability gaps are routing opportunities
+  inverted; the imbalanced pool that broke the capability
+  instrument is this experiment's ideal input. Conditions:
+  cascades (cheap-first + escalate) and learned routers
+  (FrugalGPT / RouteLLM lineage), evaluated with the same
+  honesty machinery (oracle bounds, realized recovery rates,
+  matched-quality discipline). Note the durability asymmetry:
+  capability scaffolds compete with frontier quality (moving
+  target); cost scaffolds only need price dispersion (stable
+  market property) — plausibly the longer-lived research
+  direction under continued scaling.
