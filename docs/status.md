@@ -325,6 +325,15 @@ to D's realized cost), C, D, D′, E. This session: confirm pricing
 (gemini-3-flash especially), upgrade `run_livecodebench.py`
 (multi-difficulty filter, B/C/D′ wiring, checkpoint/resume),
 3-task smoke run, then report a safe budget number.
+**DONE 2026-07-24: round-8 review — conclusions given
+the data.** Same four reviewers (Fable 5 fresh-context, GPT-5.6
+Sol, Grok 4.5, Kimi K3) audit `docs/research/pilot-findings.md`
+against the raw pilot data before the blog post draws on it.
+Brief: `docs/reviews/review-brief-round8-2026-07-24.md`; all
+reviewers explicitly invited to run their own analyses on the
+data. Artifacts will land as
+`docs/reviews/conclusions-review-<model>-2026-07-24.md`.
+
 **PILOT COMPLETE 2026-07-24, 20:46 UTC.** 688/688 pairs,
 $62.00 total (google $47.03 / openai $9.83 / anthropic $5.15),
 1 abort, 76 truncated calls (all counted). Full write-up:
