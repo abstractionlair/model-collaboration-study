@@ -725,3 +725,61 @@ benchmark (longest delay); strict scoring (kills the middle band); keeping
 pre-kickoff work is the SWE-bench Verified adapter (multi-session),
 run-manifest schema (~½ session), the LCB pool pull, and the gemini-3-flash
 recalibration run.
+
+
+## 2026-07-23 Round-7 pre-resume patch set: task-visible aggregation, truncation telemetry, abort taxonomy
+
+**Context.** The round-7 cross-model review (Fable 5, GPT-5.6
+Sol, Grok 4.5, Kimi K3 — 4/4 Revise-and-re-review; synthesis at
+`docs/reviews/synthesis-round7-2026-07-23.md`) converged on a
+set of verified measurement-integrity defects while the N=86
+pilot was mid-flight. The pilot was paused (A-columns complete)
+and this patch set applied before resuming. Confirmatory-phase
+items (recalibration protocol, cap-policy decision, fractional
+power analysis, execution sandboxing) are deliberately NOT
+included and remain open.
+
+**Decisions.**
+
+1. **Aggregation steps see the task.** `_PICK_ONE_USER` and
+   `_SCORE_USER` now carry `{query}`; Condition E's peer review
+   moved from `PEERS_GROUPED` to `ALL_VISIBLE`. Extends the
+   2026-04-21 principle (hermetic sealing from ground truth ≠
+   hiding the task from participants) to the selection layer,
+   where three of four reviewers independently found it missing.
+2. **ParScore parse failure is an AST-level policy.** Same
+   `ParseFailurePolicy` enum as PickOne; RANDOM now draws a
+   seeded uniform value instead of the previous hardcoded 0.5
+   (which fabricated deterministic mid-confidence). Completes
+   the 2026-04-19 decision's half-applied lesson.
+3. **Truncation is telemetry, not silence.** All four provider
+   adapters read the finish/stop reason; `CallRecord.truncated`
+   plus per-task `truncated_calls` make length-cut responses
+   visible. Policy: a truncated response still scores as-is —
+   a bounded harness is part of the measured system — but the
+   event is always counted. The Google visible/thoughts token
+   split is recorded (`CallRecord.thoughts_tokens`); billing
+   already included thoughts.
+4. **Three-way abort taxonomy with one denominator rule.**
+   New `ProviderRefusal` class for provider-side moderation
+   declines (neither capability nor infra; vendor-asymmetric at
+   scale). Rule, applied identically in `ConditionResults.
+   pass_rate` and driver summaries: capability failures score 0
+   and are INCLUDED; infra failures, provider refusals, and
+   unexpected harness errors are EXCLUDED and reported as
+   separate counts. Previously the library excluded all aborts
+   while the pilot summary included them.
+5. **PickOne presents candidates in seeded-shuffled order**,
+   mapping the parsed index back through the permutation, so
+   judge position bias cannot systematically favor a vendor (C)
+   or early samples (B). Reviewer-rotation for D is deferred to
+   the confirmatory phase and documented as a known asymmetry.
+6. **In-process spend cap** (`--max-dollars`) in the pilot
+   driver; graceful stop with resumable checkpoint.
+
+**Alternatives rejected for now.** Equalizing all providers to
+one giant shared output cap (Grok/Fable's preference) — kept
+the 8x Google asymmetry as an instrumented, now-measurable
+deviation pending the cap-policy decision entry; retrying
+truncated calls with larger budgets — changes the measured
+system mid-pilot.

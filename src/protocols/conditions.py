@@ -27,6 +27,7 @@ from __future__ import annotations
 
 from src.ir.ast import Expr
 from src.ir.surface import (
+    ALL_VISIBLE,
     FRESH,
     PEERS_GROUPED,
     bind,
@@ -174,7 +175,10 @@ def condition_e(
     """
     q = query()
     drafts = par_gen(subject_models, q)
-    critiques = par_peer_review(subject_models, drafts, FRESH, PEERS_GROUPED)
+    # ALL_VISIBLE so reviewers see the task alongside the drafts —
+    # same rationale as the 2026-04-21 reconcile() fix; E was left
+    # on PEERS_GROUPED then and caught by the round-7 review.
+    critiques = par_peer_review(subject_models, drafts, FRESH, ALL_VISIBLE)
     # `drafts` is referenced twice (here and inside `critiques`);
     # identity-based memoization in the executor guarantees the
     # meta-reviewer sees the same drafts that were peer-reviewed.

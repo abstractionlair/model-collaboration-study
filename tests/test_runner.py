@@ -18,7 +18,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from src.executor.api_client import ApiClient
+from src.executor.api_client import ApiClient, _ProviderResult
 from src.experiment.benchmarks import ScoreResult, Task
 from src.experiment.runner import run_condition
 from src.experiment.spec import (
@@ -67,7 +67,12 @@ def _stub_anthropic_client(
     client = ApiClient(max_retries=0, backoff_base=0, backoff_max=0)
     client._route = lambda model: "anthropic"  # type: ignore[method-assign]
     client._call_anthropic = MagicMock(  # type: ignore[method-assign]
-        return_value=(response_text, input_tokens, output_tokens),
+        return_value=_ProviderResult(
+            text=response_text,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            truncated=False,
+        ),
     )
     return client
 
@@ -193,3 +198,55 @@ def test_runner_pass_rate_ignores_aborted_tasks() -> None:
     results = run_condition(condition, bench, client, _PRICING)
     assert results.pass_rate == 1.0
     assert results.abort_count == 0
+
+
+# ----------------------------------------------------------------
+# Round-7 review fixes: abort taxonomy and denominator rule
+# ----------------------------------------------------------------
+
+
+def test_provider_refusal_excluded_capability_included() -> None:
+    """One denominator rule: capability failures score 0 and stay
+    in the mean; provider refusals are excluded and surfaced via
+    abort_count."""
+    from src.executor import ProviderRefusal
+
+    bench = _StubBench(
+        _tasks=[
+            Task(id="t1", query_text="q1"),
+            Task(id="t2", query_text="q2"),
+            Task(id="t3", query_text="q3"),
+        ],
+        _scores={
+            "t1": ScoreResult(passed=True, fraction=1.0),
+            "t2": ScoreResult(passed=True, fraction=1.0),
+            "t3": ScoreResult(passed=True, fraction=1.0),
+        },
+    )
+    client = ApiClient(max_retries=0, backoff_base=0, backoff_max=0)
+    client._route = lambda model: "anthropic"  # type: ignore[method-assign]
+    scripted: list[_ProviderResult | Exception] = [
+        _ProviderResult("good code", 10, 5, False),   # t1 scores 1.0
+        _ProviderResult("", 8, 0, False),             # t2 capability failure
+        ProviderRefusal("prompt flagged"),            # t3 refusal
+    ]
+    responses = iter(scripted)
+
+    def _next(*a: object, **k: object) -> _ProviderResult:
+        item = next(responses)
+        if isinstance(item, Exception):
+            raise item
+        return item
+
+    client._call_anthropic = _next  # type: ignore[method-assign]
+    condition = ConditionSpec(
+        name="A", label="a", protocol=condition_a("claude-test"),
+        budget_tier=BudgetTier.X, models=["claude-test"],
+    )
+    results = run_condition(condition, bench, client, _PRICING)
+    assert results.abort_count == 2  # capability + refusal both aborted
+    # capability failure included as 0 alongside t1's 1.0; refusal excluded
+    assert results.pass_rate == 0.5
+    kinds = [r.aborted or "" for r in results.task_results]
+    assert any(k.startswith("capability_failure") for k in kinds)
+    assert any(k.startswith("provider_refusal") for k in kinds)

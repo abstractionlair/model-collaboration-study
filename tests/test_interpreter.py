@@ -21,6 +21,8 @@ pin exact call counts and sequences.
 
 from __future__ import annotations
 
+import re
+
 import pytest
 
 from src.executor import FakeClient, Interpreter, ParseFailure, run
@@ -282,10 +284,20 @@ def test_weighted_vote_tie_break_is_not_positional() -> None:
 
 def test_pick_one_selects_parsed_candidate() -> None:
     """PickOne parses the judge's 1-indexed response and returns
-    that candidate."""
+    the candidate at that PRESENTED position. Candidates are
+    shown in seeded-shuffled order (2026-07-23 position-bias
+    fix), so the judge names whichever presented number holds
+    m2's draft, and the mapped-back result must be m2's draft.
+    The prompt must also carry the original task."""
     def responder(model: str, system: str, user: str) -> str:
         if "pick the single best one" in user.lower():
-            return "Candidate 2"
+            assert "The original task was" in user
+            for block in user.split("\n---\n"):
+                if "draft-from-m2" in block:
+                    m = re.search(r"Candidate (\d+):", block)
+                    assert m is not None
+                    return f"Candidate {m.group(1)}"
+            raise AssertionError("m2 draft not presented")
         return f"draft-from-{model}"
 
     client = FakeClient(responder=responder)
@@ -575,3 +587,80 @@ def test_pick_one_default_on_parse_failure_is_random() -> None:
     )
     assert result.text.startswith("draft-from-")
     assert telemetry.pick_parse_failures == 1
+
+
+# ----------------------------------------------------------------
+# Round-7 review fixes: task context in scoring, ParScore policy
+# ----------------------------------------------------------------
+
+
+def test_par_score_prompt_contains_task() -> None:
+    """Score prompts carry the original task (round-7 fix): a
+    scorer asked whether an answer is correct must see the
+    question it answers."""
+    seen: list[str] = []
+
+    def responder(model: str, system: str, user: str) -> str:
+        if "Rate your confidence" in user:
+            seen.append(user)
+            return "0.7"
+        return f"draft-from-{model}"
+
+    client = FakeClient(responder=responder)
+    q = query()
+    drafts = par_gen(["m1", "m2"], q)
+    protocol = bind(
+        drafts,
+        lambda ds: weighted_vote(ds, par_score(["m1", "m2"], ds)),
+    )
+    run(Finalize(draft=protocol), client, "the-actual-task")
+    assert seen and all("The original task was" in u for u in seen)
+    assert all("the-actual-task" in u for u in seen)
+
+
+def test_par_score_parse_failure_random_is_seeded_draw_not_half() -> None:
+    """A score parse failure under RANDOM policy draws a seeded
+    uniform value instead of the pre-round-7 hardcoded 0.5, and
+    telemetry counts the event."""
+    def responder(model: str, system: str, user: str) -> str:
+        if "Rate your confidence" in user:
+            return "no number in sight"
+        return f"draft-from-{model}"
+
+    client = FakeClient(responder=responder)
+    q = query()
+    drafts = par_gen(["m1", "m2"], q)
+    protocol = bind(
+        drafts,
+        lambda ds: weighted_vote(ds, par_score(["m1", "m2"], ds)),
+    )
+    _, telemetry = run(Finalize(draft=protocol), client, "q", seed=7)
+    assert telemetry.score_parse_failures == 2
+
+
+def test_par_score_parse_failure_raise_policy() -> None:
+    """RAISE policy surfaces ParseFailure instead of substituting
+    a value (AST-level policy, aligned with PickOne per the
+    2026-04-19 decision)."""
+    from src.ir.types import ParseFailurePolicy
+
+    def responder(model: str, system: str, user: str) -> str:
+        if "Rate your confidence" in user:
+            return "unparseable"
+        return f"draft-from-{model}"
+
+    client = FakeClient(responder=responder)
+    q = query()
+    drafts = par_gen(["m1", "m2"], q)
+    protocol = bind(
+        drafts,
+        lambda ds: weighted_vote(
+            ds,
+            par_score(
+                ["m1", "m2"], ds,
+                on_parse_failure=ParseFailurePolicy.RAISE,
+            ),
+        ),
+    )
+    with pytest.raises(ParseFailure):
+        run(Finalize(draft=protocol), client, "q")

@@ -24,6 +24,7 @@ from src.executor.api_client import (
     CapabilityFailure,
     InfrastructureError,
     _is_google_infra,
+    _ProviderResult,
 )
 
 
@@ -93,7 +94,9 @@ def test_empty_response_raises_capability_failure() -> None:
     client = ApiClient(max_retries=1)
     # Stub the route + call_fn to return empty text
     client._route = lambda model: "anthropic"  # type: ignore[method-assign]
-    fake_call = MagicMock(return_value=("   \n  ", 100, 0))
+    fake_call = MagicMock(
+        return_value=_ProviderResult("   \n  ", 100, 0, False),
+    )
     client._call_anthropic = fake_call  # type: ignore[method-assign]
 
     with pytest.raises(CapabilityFailure):
@@ -109,7 +112,7 @@ def test_successful_call_records_status_success() -> None:
     client = ApiClient(max_retries=1)
     client._route = lambda model: "anthropic"  # type: ignore[method-assign]
     client._call_anthropic = MagicMock(  # type: ignore[method-assign]
-        return_value=("hello", 50, 20),
+        return_value=_ProviderResult("hello", 50, 20, False),
     )
 
     text = client.complete("claude-test", "sys", "user")
@@ -131,7 +134,7 @@ def test_exhausted_infra_retries_record_call() -> None:
     client = ApiClient(max_retries=1, backoff_base=0, backoff_max=0)
     client._route = lambda model: "anthropic"  # type: ignore[method-assign]
 
-    def always_fail(*args: object, **kwargs: object) -> tuple[str, int, int]:
+    def always_fail(*args: object, **kwargs: object) -> _ProviderResult:
         raise InfrastructureError("boom")
 
     client._call_anthropic = always_fail  # type: ignore[method-assign]
@@ -157,10 +160,10 @@ def test_status_count_properties() -> None:
     client = ApiClient(max_retries=0, backoff_base=0, backoff_max=0)
     client._route = lambda model: "anthropic"  # type: ignore[method-assign]
 
-    calls: list[tuple[str, int, int]] = [
-        ("ok", 10, 5),
-        ("", 8, 0),  # capability failure
-        ("ok", 10, 5),
+    calls: list[_ProviderResult] = [
+        _ProviderResult("ok", 10, 5, False),
+        _ProviderResult("", 8, 0, False),  # capability failure
+        _ProviderResult("ok", 10, 5, False),
     ]
     call_iter = iter(calls)
     client._call_anthropic = lambda *a, **k: next(call_iter)  # type: ignore[method-assign]
@@ -276,3 +279,35 @@ def test_google_key_fallback_raises_when_nothing_set(
     client = ApiClient()
     with pytest.raises(ValueError, match="GOOGLE_API_KEY"):
         client._get_google()
+
+
+# ----------------------------------------------------------------
+# Round-7 review fixes: truncation telemetry
+# ----------------------------------------------------------------
+
+
+def test_truncated_flag_recorded_on_call_record() -> None:
+    """A provider result with truncated=True lands on the
+    CallRecord (the 2026-07-23 Gemini truncation stayed invisible
+    for a calibration cycle for lack of this flag)."""
+    client = ApiClient(max_retries=0, backoff_base=0, backoff_max=0)
+    client._route = lambda model: "anthropic"  # type: ignore[method-assign]
+    client._call_anthropic = MagicMock(  # type: ignore[method-assign]
+        return_value=_ProviderResult("partial answer", 10, 4096, True),
+    )
+    client.complete("claude-test", "sys", "user")
+    assert client.calls[0].truncated is True
+    assert client.calls[0].status == "success"
+
+
+def test_thoughts_tokens_recorded() -> None:
+    """The Google visible/thoughts decomposition is preserved on
+    the CallRecord; output_tokens stays the billed total."""
+    client = ApiClient(max_retries=0, backoff_base=0, backoff_max=0)
+    client._route = lambda model: "google"  # type: ignore[method-assign]
+    client._call_google = MagicMock(  # type: ignore[method-assign]
+        return_value=_ProviderResult("ok", 10, 5000, False, 4200),
+    )
+    client.complete("gemini-test", "sys", "user")
+    assert client.calls[0].output_tokens == 5000
+    assert client.calls[0].thoughts_tokens == 4200

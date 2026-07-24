@@ -163,18 +163,25 @@ _FUSE_WITH_CRITIQUES_USER = (
     "— do not just pick one or paraphrase a single draft."
 )
 
-# Confidence scoring
+# Confidence scoring. Carries the original task: a scorer asked
+# "is this answer correct?" without the question can only rate
+# plausibility (round-7 review, all lineages; same context-
+# discipline principle as the 2026-04-21 revise fix).
 _SCORE_USER = (
-    "Rate your confidence (0.0-1.0) that the following answer is "
-    "correct. Return only the number.\n\nAnswer:\n{draft}"
+    "The original task was:\n{query}\n\n"
+    "Rate your confidence (0.0-1.0) that the following answer "
+    "to that task is correct. Return only the number.\n\n"
+    "Answer:\n{draft}"
 )
 
-# Comparative selection — judge sees all candidates and picks one
+# Comparative selection — judge sees the task and all candidates.
 _PICK_ONE_USER = (
-    "The following are candidate answers to a task, produced by "
-    "different peer AIs. Read each carefully, compare them, then "
-    "pick the single best one. Respond with ONLY the candidate "
-    "number (1-indexed), nothing else.\n\n{candidates}"
+    "The original task was:\n{query}\n\n"
+    "The following are candidate answers to that task, produced "
+    "by different peer AIs. Read each carefully, compare them "
+    "against the task, then pick the single best one. Respond "
+    "with ONLY the candidate number (1-indexed), nothing "
+    "else.\n\n{candidates}"
 )
 
 

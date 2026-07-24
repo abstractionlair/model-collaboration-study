@@ -544,7 +544,9 @@ class Interpreter:
                     models, drafts_resolved, context, vis
                 )
 
-            case ParScore(models=models, drafts=ds):
+            case ParScore(
+                models=models, drafts=ds, on_parse_failure=on_parse_failure,
+            ):
                 answers = self.evaluate(ds, env)
                 if len(models) != len(answers):
                     raise ValueError(
@@ -559,16 +561,27 @@ class Interpreter:
                     text = self.client.complete(
                         m,
                         self.prompts.gen_system,
-                        self.prompts.score_user.format(draft=ans.text),
+                        self.prompts.score_user.format(
+                            query=ans.production_query, draft=ans.text,
+                        ),
                     )
                     parsed = _parse_score(text)
                     if parsed is None:
                         self.telemetry.score_parse_failures += 1
                         logger.warning(
-                            "score parse failure from %s: %r (using 0.5 fallback)",
-                            m, text[:120],
+                            "score parse failure from %s: %r (policy=%s)",
+                            m, text[:120], on_parse_failure.value,
                         )
-                        parsed = 0.5
+                        if on_parse_failure is ParseFailurePolicy.RAISE:
+                            raise ParseFailure(
+                                f"score parse failure from {m}: "
+                                f"{text[:200]!r}"
+                            )
+                        # RANDOM: seeded uniform draw. A fixed 0.5
+                        # substitute is not neutral — it fabricates
+                        # mid-confidence that can outrank real scores
+                        # deterministically (round-7 review).
+                        parsed = self._rng.random()
                     scores.append(RScore(value=parsed))
                 return scores
 
@@ -593,15 +606,23 @@ class Interpreter:
                 judge=judge, drafts=ds, on_parse_failure=on_parse_failure,
             ):
                 answers = self.evaluate(ds, env)
+                # Present candidates in seeded-shuffled order so a
+                # judge's position bias cannot systematically favor
+                # one vendor (C: pool order) or early samples (B).
+                # The parsed index is mapped back through the
+                # permutation (round-7 review, 3 lineages).
+                order = list(range(len(answers)))
+                self._rng.shuffle(order)
                 candidates_text = "\n---\n".join(
-                    f"Candidate {i+1}:\n{a.text}"
-                    for i, a in enumerate(answers)
+                    f"Candidate {i+1}:\n{answers[j].text}"
+                    for i, j in enumerate(order)
                 )
                 text = self.client.complete(
                     judge,
                     self.prompts.gen_system,
                     self.prompts.pick_one_user.format(
-                        candidates=candidates_text
+                        query=answers[0].production_query,
+                        candidates=candidates_text,
                     ),
                 )
                 idx = _parse_pick(text, n=len(answers))
@@ -615,7 +636,7 @@ class Interpreter:
                     idx = self._recover_parse_failure(
                         on_parse_failure, len(answers), judge, text,
                     )
-                return answers[idx]
+                return answers[order[idx]]
 
             case Var(name=name):
                 return env.lookup(name)

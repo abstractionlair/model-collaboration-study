@@ -183,9 +183,12 @@ def peer_rounds(
 def par_score(
     models: list[str],
     drafts: Expr[list[Answer[Draft]]],
+    on_parse_failure: ParseFailurePolicy = ParseFailurePolicy.RANDOM,
 ) -> Expr[list[Score[Answer[Draft]]]]:
     """Each model produces a confidence score for its own draft."""
-    return ParScore(models=models, drafts=drafts)
+    return ParScore(
+        models=models, drafts=drafts, on_parse_failure=on_parse_failure,
+    )
 
 
 def fuse(

@@ -15,6 +15,7 @@ from .api_client import (
     CallRecord,
     CapabilityFailure,
     InfrastructureError,
+    ProviderRefusal,
 )
 from .client import FakeClient, ModelClient
 from .interpreter import Env, Interpreter, InterpreterTelemetry, ParseFailure, run
@@ -26,6 +27,7 @@ __all__ = [
     "CallRecord",
     "CapabilityFailure",
     "InfrastructureError",
+    "ProviderRefusal",
     "FakeClient",
     "ModelClient",
     "TracingClient",

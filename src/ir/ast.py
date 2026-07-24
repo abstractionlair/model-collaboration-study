@@ -361,10 +361,20 @@ class ParScore(Expr[list[Score[Answer[Draft]]]]):
 
     Aligned with the models list: result[i] is the confidence
     models[i] assigns to drafts[i].
+
+    `on_parse_failure` controls what happens when a scorer's
+    response can't be parsed into a float in [0,1]. Default
+    RANDOM draws a seeded uniform [0,1) value (recorded in
+    telemetry); RAISE surfaces a ParseFailure. Added 2026-07-23
+    (round-7 review): the previous behavior — a hardcoded 0.5
+    substitute in the interpreter — was an executor-level
+    fallback affecting measurement, which the 2026-04-19
+    decision placed at the AST level for exactly this reason.
     """
     result_type: ClassVar[Any] = list[Score[Answer[Draft]]]
     models: list[str]
     drafts: Expr[list[Answer[Draft]]]
+    on_parse_failure: ParseFailurePolicy = ParseFailurePolicy.RANDOM
 
 
 # ============================================================================

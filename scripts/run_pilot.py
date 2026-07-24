@@ -204,6 +204,7 @@ def task_row(
         "successful_calls": r.successful_calls,
         "capability_failures": r.capability_failures,
         "infra_failures": r.infra_failures,
+        "truncated_calls": r.truncated_calls,
         "score_parse_failures": r.score_parse_failures,
         "pick_parse_failures": r.pick_parse_failures,
         "weighted_vote_ties": r.weighted_vote_ties,
@@ -218,18 +219,29 @@ def summarise(rows: list[dict[str, Any]], n_pool: int) -> str:
 
     header = (
         f"{'Condition':<32}  {'Full pass':>10}  {'Mean frac':>9}  "
-        f"{'Abort':>5}  {'Dollars':>8}  {'$/task':>7}"
+        f"{'Excl':>4}  {'Trunc':>5}  {'Dollars':>8}  {'$/task':>7}"
     )
     lines = [header, "-" * len(header)]
     for cond, cond_rows in by_cond.items():
-        n = len(cond_rows)
-        full_pass = sum(1 for r in cond_rows if r["passed"])
-        mean_frac = sum(r["fraction"] for r in cond_rows) / n if n else 0.0
-        aborts = sum(1 for r in cond_rows if r["aborted"])
+        # One denominator rule (matches ConditionResults.pass_rate):
+        # capability failures are scored zeros and included; infra /
+        # provider-refusal / unexpected aborts are excluded and
+        # counted in the Excl column.
+        scored = [
+            r for r in cond_rows
+            if not r["aborted"]
+            or str(r["aborted"]).startswith("capability_failure")
+        ]
+        n = len(scored)
+        full_pass = sum(1 for r in scored if r["passed"])
+        mean_frac = sum(r["fraction"] for r in scored) / n if n else 0.0
+        excluded = len(cond_rows) - n
+        trunc = sum(r.get("truncated_calls", 0) for r in cond_rows)
         dollars = sum(r["dollars"] for r in cond_rows)
+        per_task = dollars / len(cond_rows) if cond_rows else 0.0
         lines.append(
             f"{cond:<32}  {full_pass:>4}/{n:<5}  {mean_frac:>9.3f}  "
-            f"{aborts:>5}  ${dollars:>7.3f}  ${dollars / n if n else 0.0:>6.4f}"
+            f"{excluded:>4}  {trunc:>5}  ${dollars:>7.3f}  ${per_task:>6.4f}"
         )
 
     provider_totals: dict[str, float] = {}
@@ -280,6 +292,11 @@ def main() -> int:
     parser.add_argument(
         "--checkpoint", type=str, default=None,
         help="Per-(condition, task) resumable checkpoint path.",
+    )
+    parser.add_argument(
+        "--max-dollars", type=float, default=None,
+        help="In-process spend cap: stop gracefully (checkpoint "
+             "intact) once cumulative recorded dollars exceed this.",
     )
     args = parser.parse_args()
 
@@ -429,6 +446,18 @@ def main() -> int:
             for r in cr.task_results:
                 rows.append(task_row(r, provider_dollars))
             write_checkpoint()
+            if args.max_dollars is not None:
+                spent = sum(r["dollars"] for r in rows)
+                if spent > args.max_dollars:
+                    logger.error(
+                        "SPEND CAP: $%.2f recorded > --max-dollars "
+                        "%.2f. Stopping gracefully; checkpoint is "
+                        "resumable.", spent, args.max_dollars,
+                    )
+                    break
+        else:
+            continue
+        break
 
     elapsed = time.monotonic() - t0
 

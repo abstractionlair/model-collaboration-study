@@ -26,6 +26,7 @@ from src.executor import (
     CapabilityFailure,
     InfrastructureError,
     InterpreterTelemetry,
+    ProviderRefusal,
     run,
 )
 from src.experiment.benchmarks.base import Benchmark, ScoreResult
@@ -52,6 +53,9 @@ class TaskResult:
     successful_calls: int
     capability_failures: int
     infra_failures: int
+    # Calls whose provider finish reason reported a length cut.
+    # They score normally (bounded harness) but must be visible.
+    truncated_calls: int
     # Non-fatal event counters from the interpreter.
     score_parse_failures: int
     pick_parse_failures: int
@@ -71,7 +75,21 @@ class ConditionResults:
 
     @property
     def pass_rate(self) -> float:
-        scored = [r for r in self.task_results if r.aborted is None]
+        """Mean fraction over scoreable tasks.
+
+        One denominator rule, applied here and in every driver
+        summary (round-7 review): capability failures are scored
+        zeros and INCLUDED (per the design — the macro-model's
+        response function failed on that input); infra failures,
+        provider refusals, and unexpected harness errors are
+        EXCLUDED (they say nothing about the macro-model) and
+        reported via `abort_count`.
+        """
+        scored = [
+            r for r in self.task_results
+            if r.aborted is None
+            or r.aborted.startswith("capability_failure")
+        ]
         if not scored:
             return 0.0
         return sum(r.fraction for r in scored) / len(scored)
@@ -117,6 +135,12 @@ def run_condition(
             response_text = result.text
         except CapabilityFailure as e:
             aborted = f"capability_failure: {e}"
+        except ProviderRefusal as e:
+            # Provider-side moderation refusal: neither a capability
+            # statement about the model nor infrastructure. Recorded
+            # under its own label; excluded from success-rate
+            # denominators (round-7 review).
+            aborted = f"provider_refusal: {e}"
         except InfrastructureError as e:
             aborted = f"infra_failure: {e}"
         except Exception as e:
@@ -188,6 +212,7 @@ def run_condition(
             infra_failures=sum(
                 1 for c in task_calls if c.status == "infra_failure"
             ),
+            truncated_calls=sum(1 for c in task_calls if c.truncated),
             score_parse_failures=telemetry.score_parse_failures,
             pick_parse_failures=telemetry.pick_parse_failures,
             weighted_vote_ties=telemetry.weighted_vote_ties,

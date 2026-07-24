@@ -239,7 +239,19 @@ B↔D′), abort-denominator inconsistency, ParScore 0.5 hardcode.
 **The pilot was PAUSED mid-B** (A-columns complete and clean:
 gemini 0.797 / haiku 0.545 / gpt 0.523 mean_frac at N=86; gpt
 truncation concern empirically refuted, zero cap-saturated
-calls) pending a patch-then-resume decision.
+calls). **Scott approved patch-then-resume 2026-07-23.**
+Pre-resume patch set now in progress: task context into
+PickOne/ParScore prompts + E to ALL_VISIBLE; ParScore
+parse-failure policy at AST level; finish-reason/truncation
+telemetry on all providers + Google visible/thoughts token
+split; provider-refusal abort class + one aggregate
+denominator rule (capability failures scored 0 and included,
+infra/refusal/unexpected excluded and reported); seeded
+PickOne candidate shuffle; in-process spend cap in the pilot
+driver. Then: re-smoke, delete B's 32 task-blind rows, resume
+B/C/D/D′/E. Confirmatory-phase items (recalibration protocol,
+cap-policy decision entry, fractional power analysis, sandbox
+fix, decision-log amendments) deliberately NOT in this patch.
 
 ---
 

@@ -26,7 +26,7 @@ import logging
 import os
 import time
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, NamedTuple
 
 import anthropic
 import google.genai
@@ -68,6 +68,17 @@ class CallRecord:
     retries: int
     status: str = "success"
     error: str | None = None
+    # True when the provider reported a length/max-tokens finish
+    # reason: the visible text was cut off by the output cap. The
+    # call still scores normally (a bounded harness is part of
+    # the measured system) but the event must be visible — the
+    # 2026-07-23 Gemini truncation bug stayed invisible for a
+    # full calibration cycle for lack of exactly this flag.
+    truncated: bool = False
+    # Google-only split: thinking tokens billed as output.
+    # output_tokens already includes them; this records the
+    # decomposition for reporting (round-7 review).
+    thoughts_tokens: int = 0
 
 
 # ============================================================================
@@ -96,6 +107,35 @@ class CapabilityFailure(Exception):
     "capability_failure" before the raise.
     """
     pass
+
+
+class ProviderRefusal(Exception):
+    """Provider-side content-policy refusal (e.g., moderation 400).
+
+    A third failure class distinct from both capability and
+    infrastructure (round-7 review): the provider's safety layer
+    declined the request before the model ran. Not retryable, not
+    a statement about the model's capability, and potentially
+    vendor-asymmetric at scale — so it must be recorded under its
+    own label and excluded from success-rate denominators rather
+    than folded into either existing class.
+    """
+    pass
+
+
+class _ProviderResult(NamedTuple):
+    """What one provider call returns to `complete()`.
+
+    `output_tokens` is total billed output (for Google this
+    includes thinking); `thoughts_tokens` is the Google-only
+    decomposition; `truncated` is True when the provider's
+    finish reason says the output hit the length cap.
+    """
+    text: str
+    input_tokens: int
+    output_tokens: int
+    truncated: bool
+    thoughts_tokens: int = 0
 
 
 # ============================================================================
@@ -272,8 +312,8 @@ class ApiClient:
 
     def _call_anthropic(
         self, model: str, system: str, user: str
-    ) -> tuple[str, int, int]:
-        """Call Anthropic API. Returns (text, input_tokens, output_tokens)."""
+    ) -> "_ProviderResult":
+        """Call Anthropic API."""
         client = self._get_anthropic()
         kwargs: dict[str, Any] = {
             "model": model,
@@ -294,21 +334,26 @@ class ApiClient:
             if hasattr(block, "text"):
                 text = block.text
                 break
-        return (
-            text,
-            response.usage.input_tokens,
-            response.usage.output_tokens,
+        return _ProviderResult(
+            text=text,
+            input_tokens=response.usage.input_tokens,
+            output_tokens=response.usage.output_tokens,
+            truncated=(response.stop_reason == "max_tokens"),
         )
 
     def _call_openai(
         self, model: str, system: str, user: str
-    ) -> tuple[str, int, int]:
-        """Call OpenAI API. Returns (text, input_tokens, output_tokens).
+    ) -> "_ProviderResult":
+        """Call OpenAI API.
 
         Uses `max_completion_tokens` rather than `max_tokens`:
         GPT-5 family models (including gpt-5.4-mini) reject the
         older `max_tokens` parameter as unsupported. Surfaced by
         the HumanEval validation run 2026-04-21.
+
+        A moderation 400 ("prompt was flagged") is raised as
+        ProviderRefusal — the provider's safety layer declined
+        the request; neither a capability statement nor infra.
         """
         client = self._get_openai()
         kwargs: dict[str, Any] = {
@@ -325,19 +370,30 @@ class ApiClient:
             response = client.chat.completions.create(**kwargs)
         except _OPENAI_INFRA as e:
             raise InfrastructureError(str(e)) from e
+        except openai.BadRequestError as e:
+            msg = str(e).lower()
+            if "flagged" in msg or "usage policy" in msg or (
+                "invalid_prompt" in msg
+            ):
+                raise ProviderRefusal(str(e)) from e
+            raise
 
+        finish = (
+            response.choices[0].finish_reason if response.choices else None
+        )
         text = response.choices[0].message.content or "" if response.choices else ""
         usage = response.usage
-        return (
-            text,
-            usage.prompt_tokens if usage else 0,
-            usage.completion_tokens if usage else 0,
+        return _ProviderResult(
+            text=text,
+            input_tokens=usage.prompt_tokens if usage else 0,
+            output_tokens=usage.completion_tokens if usage else 0,
+            truncated=(finish == "length"),
         )
 
     def _call_xai(
         self, model: str, system: str, user: str
-    ) -> tuple[str, int, int]:
-        """Call xAI API (OpenAI-compatible). Returns (text, input_tokens, output_tokens)."""
+    ) -> "_ProviderResult":
+        """Call xAI API (OpenAI-compatible)."""
         client = self._get_xai()
         # xAI Grok accepts `max_tokens`; newer xAI models may
         # eventually require `max_completion_tokens` like OpenAI
@@ -357,18 +413,22 @@ class ApiClient:
         except _OPENAI_INFRA as e:
             raise InfrastructureError(str(e)) from e
 
+        finish = (
+            response.choices[0].finish_reason if response.choices else None
+        )
         text = response.choices[0].message.content or "" if response.choices else ""
         usage = response.usage
-        return (
-            text,
-            usage.prompt_tokens if usage else 0,
-            usage.completion_tokens if usage else 0,
+        return _ProviderResult(
+            text=text,
+            input_tokens=usage.prompt_tokens if usage else 0,
+            output_tokens=usage.completion_tokens if usage else 0,
+            truncated=(finish == "length"),
         )
 
     def _call_google(
         self, model: str, system: str, user: str
-    ) -> tuple[str, int, int]:
-        """Call Google GenAI API. Returns (text, input_tokens, output_tokens)."""
+    ) -> "_ProviderResult":
+        """Call Google GenAI API."""
         client = self._get_google()
         # Gemini 3 models think by default, and thinking tokens
         # count against `max_output_tokens`. At the shared
@@ -406,11 +466,23 @@ class ApiClient:
         # separately from `candidates_token_count`; omitting them
         # under-bills every thinking-enabled Gemini call (also
         # caught by the 2026-07-23 smoke: $0.0008/task).
+        thoughts_tok = (usage.thoughts_token_count or 0) if usage else 0
         output_tok = (
-            (usage.candidates_token_count or 0)
-            + (usage.thoughts_token_count or 0)
+            (usage.candidates_token_count or 0) + thoughts_tok
         ) if usage else 0
-        return (text, input_tok, output_tok)
+        finish = (
+            response.candidates[0].finish_reason
+            if response.candidates else None
+        )
+        return _ProviderResult(
+            text=text,
+            input_tokens=input_tok,
+            output_tokens=output_tok,
+            truncated=(
+                finish == google.genai.types.FinishReason.MAX_TOKENS
+            ),
+            thoughts_tokens=thoughts_tok,
+        )
 
     # ------------------------------------------------------------------
     # Main entry point (satisfies ModelClient protocol)
@@ -451,33 +523,45 @@ class ApiClient:
 
         for attempt in range(self.max_retries + 1):
             try:
-                text, input_tokens, output_tokens = call_fn(model, system, user)
+                result = call_fn(model, system, user)
                 latency = time.monotonic() - t0
-                if not text.strip():
+                if result.truncated:
+                    logger.warning(
+                        "TRUNCATED response from %s: output hit the "
+                        "length cap (%d output tokens, %d thinking). "
+                        "Scored as-is; flagged on the CallRecord.",
+                        model, result.output_tokens,
+                        result.thoughts_tokens,
+                    )
+                if not result.text.strip():
                     err = (
                         f"empty/whitespace-only response from {model} "
                         f"(tokens billed; treated as capability failure)"
                     )
                     self.calls.append(CallRecord(
                         model=model,
-                        input_tokens=input_tokens,
-                        output_tokens=output_tokens,
+                        input_tokens=result.input_tokens,
+                        output_tokens=result.output_tokens,
                         latency_seconds=latency,
                         retries=retries,
                         status="capability_failure",
                         error=err,
+                        truncated=result.truncated,
+                        thoughts_tokens=result.thoughts_tokens,
                     ))
                     logger.warning(err)
                     raise CapabilityFailure(err)
                 self.calls.append(CallRecord(
                     model=model,
-                    input_tokens=input_tokens,
-                    output_tokens=output_tokens,
+                    input_tokens=result.input_tokens,
+                    output_tokens=result.output_tokens,
                     latency_seconds=latency,
                     retries=retries,
                     status="success",
+                    truncated=result.truncated,
+                    thoughts_tokens=result.thoughts_tokens,
                 ))
-                return text
+                return result.text
 
             except InfrastructureError as e:
                 retries += 1
