@@ -24,7 +24,7 @@ The project tests whether structured collaboration among language models—debat
 
 The Phase 1 experiment is restricted to **verifiable tasks with executable scoring** (passing tests, BFCL-style function-call correctness, accepted patches). No LLM-as-judge apparatus is used in Phase 1; that is deferred to Phase 2.
 
-The experiment has **not yet run**. The current repository contains the implementation, calibration, and power analysis, but contains no experimental results.
+The pre-registered confirmatory experiment has **not yet run**. A descriptive pilot of the full condition matrix completed 2026-07-24 — see *Current status → Pilot results* below; the repository contains the implementation, calibration, power analysis, and the pilot's data and findings.
 
 ## Design
 
