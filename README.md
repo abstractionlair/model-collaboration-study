@@ -103,8 +103,9 @@ The D → D' comparison is the cleanest heterogeneity control. A → B isolates 
 
 ### Protocol expression
 
-All six conditions are typed IR programs (see *The typed protocol
-IR and executor* above); the split between the abstract IR and
+All six conditions are typed IR programs (see *A typed
+intermediate representation for collaboration protocols* above);
+the split between the abstract IR and
 the concrete experiment-spec layer is documented in
 `docs/design/system-architecture.md`.
 
