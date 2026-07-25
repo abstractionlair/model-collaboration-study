@@ -26,6 +26,65 @@ The Phase 1 experiment is restricted to **verifiable tasks with executable scori
 
 The pre-registered confirmatory experiment has **not yet run**. A descriptive pilot of the full condition matrix completed 2026-07-24 — see *Current status → Pilot results* below; the repository contains the implementation, calibration, power analysis, and the pilot's data and findings.
 
+## The typed protocol IR and executor
+
+The piece of this repository with the longest expected life is not
+any single experiment: it is the **typed intermediate
+representation for model-collaboration protocols** in `src/ir/`,
+and the executor that runs it. The premise: a collaboration
+protocol — who drafts, who critiques, who revises, how a final
+answer is committed — is a *program*, and it should be written in
+a language whose type system catches malformed protocols before
+any API dollar is spent.
+
+- **Typed AST.** Protocols compose from nodes like `Gen`,
+  `ParGen`, `Review`, `Revise`, `PeerReviseRound`,
+  `ParPeerReview`, `FuseWithCritiques`, `WeightedVote`,
+  `PickOne`, and `Let`, with phantom stage tags (`Draft`,
+  `Final`) and parameterized judgment types (`Critique[T]`,
+  `Score[T]`) enforced under `mypy --strict`. A pipeline that
+  aggregates unscored drafts, or finalizes a critique, fails to
+  type-check rather than failing at runtime.
+- **Measurement policy lives in the AST.** Decisions that can
+  silently shape results — tie-breaking, parse-failure recovery —
+  are node-level fields (`TieBreakPolicy`, `ParseFailurePolicy`),
+  not interpreter accidents. This principle was applied twice
+  after independent model reviews caught executor-level fallbacks
+  affecting measurement (`docs/decisions.md`, 2026-04-19 and
+  2026-07-23).
+- **Structural invariants by construction.** The executable
+  evaluator can never act as a protocol's aggregation step
+  (avoiding Pass@N contamination); participant identities are
+  blinded in every critique; every internal call — generation,
+  critique, revision, judging — is billed to the protocol's
+  dollar budget.
+- **A small surface layer** (`src/ir/surface.py`) keeps protocols
+  readable: each of the six experimental conditions in
+  `src/protocols/conditions.py` is a few lines. Published
+  protocols (ReConcile; cross-context review) are already
+  expressed in the same vocabulary, and
+  `docs/research/protocol-inventory.md` catalogs 37+ protocol
+  variants across 19 structural variables as the target space.
+- **The executor** (`src/executor/`) is a minimal tree-walking
+  interpreter over an injected `ModelClient`: a `FakeClient`
+  makes the whole protocol layer hermetically testable (165 unit
+  tests, no network), a `TracingClient` captures full
+  request/response traces, and the real `ApiClient` speaks to
+  four providers with retry classification, per-call cost
+  accounting, and truncation/finish-reason telemetry.
+- **Looking ahead**, the IR carries runtime type reification
+  specifically so that *automated structural search* over
+  protocol space — type-preserving mutation of protocol subtrees
+  — is possible later, and macro-models compose recursively
+  (a pool member can itself be a protocol subgraph; see
+  `docs/backlog.md`). A reference Haskell implementation
+  (`src/ir_haskell/`) documents the type discipline in a language
+  built for it.
+
+The IR and executor have now been exercised by eight independent
+model reviews across two rounds and by a 688-execution pilot run;
+the architecture write-up is `docs/design/system-architecture.md`.
+
 ## Design
 
 ### Collaboration structures under test
@@ -41,11 +100,12 @@ Phase 1 compares six macro-model conditions, each pinned to a single IR specific
 
 The D → D' comparison is the cleanest heterogeneity control. A → B isolates inference-time compute scaling within a single model. See `docs/research/experimental-design.md` § Macro-Model Conditions for the full specification.
 
-### Typed protocol IR
+### Protocol expression
 
-Protocols are expressed as a typed Python AST in `src/ir/` with a surface authoring layer in `src/ir/surface.py`. Nodes include `Gen`, `Review`, `Revise`, `ParGen`, `SelfReviseRound`, `PeerReviseRound`, `ParPeerReview`, `FuseWithCritiques`, `WeightedVote`, `PickOne`, and `Let`. Stage tags (`Draft`, `Final`) and parameterized judgment types (`Critique[T]`, `Score[T]`) are enforced by `mypy --strict`.
-
-The split between the abstract IR and the concrete experiment spec is documented in `docs/design/system-architecture.md`.
+All six conditions are typed IR programs (see *The typed protocol
+IR and executor* above); the split between the abstract IR and
+the concrete experiment-spec layer is documented in
+`docs/design/system-architecture.md`.
 
 ### Scoring and budget matching
 
