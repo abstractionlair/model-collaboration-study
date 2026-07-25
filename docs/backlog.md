@@ -191,7 +191,7 @@ phase (marked ⚑), the rest are candidate arms or analyses.
   retaining per-test pass vectors in ScoreResult (currently
   discarded; one-line adapter change).
 
-- **Cost-side objective flip (Scott + Mijan conversation,
+- **Cost-side objective flip (Scott + a friend conversation,
   2026-07-24).** Re-pose the experiment as "equivalent results
   for fewer dollars" instead of "better results for the same
   dollars": fix the quality bar at the best single model's
