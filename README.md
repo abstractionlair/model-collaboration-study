@@ -26,16 +26,17 @@ The Phase 1 experiment is restricted to **verifiable tasks with executable scori
 
 The pre-registered confirmatory experiment has **not yet run**. A descriptive pilot of the full condition matrix completed 2026-07-24 — see *Current status → Pilot results* below; the repository contains the implementation, calibration, power analysis, and the pilot's data and findings.
 
-## The typed protocol IR and executor
+## A typed intermediate representation for collaboration protocols
 
 The piece of this repository with the longest expected life is not
 any single experiment: it is the **typed intermediate
-representation for model-collaboration protocols** in `src/ir/`,
-and the executor that runs it. The premise: a collaboration
-protocol — who drafts, who critiques, who revises, how a final
-answer is committed — is a *program*, and it should be written in
-a language whose type system catches malformed protocols before
-any API dollar is spent.
+representation (IR) for model-collaboration protocols** in
+`src/ir/`, and the executor that runs it — an IR in the compiler
+sense (as in LLVM), not information retrieval. The premise: a
+collaboration protocol — who drafts, who critiques, who revises,
+how a final answer is committed — is a *program*, and it should
+be written in a language whose type system catches malformed
+protocols before any API dollar is spent.
 
 - **Typed AST.** Protocols compose from nodes like `Gen`,
   `ParGen`, `Review`, `Revise`, `PeerReviseRound`,
