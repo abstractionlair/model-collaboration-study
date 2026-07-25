@@ -211,3 +211,26 @@ phase (marked ⚑), the rest are candidate arms or analyses.
   target); cost scaffolds only need price dispersion (stable
   market property) — plausibly the longer-lived research
   direction under continued scaling.
+
+- **Capability-leveled pools via composite members (Scott,
+  2026-07-25).** Replace weak pool members with macro-model
+  subgraphs of themselves (e.g. best-of-n) sized at calibration
+  time to match the strongest member — manufacturing the
+  near-peer pool the market doesn't offer, and isolating
+  diversity from capability gap by construction. Recursive
+  application of the project's own macro-model framing.
+  Feasibility check first: the repeat-variance diagnostic
+  predicts each member's sampling-saturation ceiling (if below
+  the target level, boost via the A⁺ compute-optimal allocation
+  instead of samples alone). Open empirical questions: does
+  leveling preserve the decorrelated-error diversity
+  heterogeneity feeds on (best-of-n narrows the output
+  distribution), and does the member-internal judge hold up
+  (pilot: same-model judge worked (+0.09), cross-model judge
+  ≤ chance)? Cost note: B(gpt,8) ≈ $0.036/draft vs gemini's
+  ≈ $0.07 — leveling capability roughly levels per-draft cost
+  on the pilot pool. Implementation: condition factories take
+  model names for pool slots; needs IR extension to accept
+  sub-expressions as members + semantics for composite-member
+  revise/critique. Complementarity-ceiling gate applies to
+  boosted A-columns unchanged.
