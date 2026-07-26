@@ -26,13 +26,18 @@ The Phase 1 experiment is restricted to **verifiable tasks with executable scori
 
 The pre-registered confirmatory experiment has **not yet run**. A descriptive pilot of the full condition matrix completed 2026-07-24 — see *Current status → Pilot results* below; the repository contains the implementation, calibration, power analysis, and the pilot's data and findings.
 
-## A typed intermediate representation for collaboration protocols
+## A typed language for collaboration protocols
 
-The piece of this repository with the longest expected life is not
-any single experiment: it is the **typed intermediate
-representation (IR) for model-collaboration protocols** in
-`src/ir/`, and the executor that runs it — an IR in the compiler
-sense (as in LLVM), not information retrieval. The premise: a
+The piece of this repository with the longest expected life is
+not any single experiment: it is the **typed language for
+model-collaboration protocols** in `src/ir/`, and the executor
+that runs it. It has the classic two-layer shape: a small
+**embedded DSL** for authoring (`surface.py` — what humans
+write), which builds a **typed intermediate representation**
+(IR, in the compiler sense — what tools manipulate). The
+distinction matters: most agent-orchestration DSLs have no
+manipulable typed substrate underneath, and the IR layer is
+where this project's longer-term ambitions live. The premise: a
 collaboration protocol — who drafts, who critiques, who revises,
 how a final answer is committed — is a *program*, and it should
 be written in a language whose type system catches malformed
@@ -103,9 +108,9 @@ The D → D' comparison is the cleanest heterogeneity control. A → B isolates 
 
 ### Protocol expression
 
-All six conditions are typed IR programs (see *A typed
-intermediate representation for collaboration protocols* above);
-the split between the abstract IR and
+All six conditions are typed IR programs (see *A typed language
+for collaboration protocols* above); the split between the
+abstract IR and
 the concrete experiment-spec layer is documented in
 `docs/design/system-architecture.md`.
 
