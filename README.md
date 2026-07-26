@@ -2,13 +2,19 @@
 
 ## Background and Motivation
 
-Elsewhere I describe my usage of multiple models in software development. Separating writing and reviewing of artifacts, sometimes having multiple models review the same artifact or write tests, and seeing if the diversity of the models, i.e. different families, improves results. At the time I'm writing this I haven't done the careful evaluation of this, but from my informal experience, it has been helping. This made me wonder more generally what improvement, if any, we can gain by having multiple models collaborate. And, importantly, at the same cost. This project is an attempt to measure this properly. Developed with a lot of help from Claude (and reviews along the way from other models). And the description of the details below is also mostly written by Claude.
+Elsewhere I describe my usage of multiple models in software development. Separating writing and reviewing of artifacts, sometimes having multiple models review the same artifact or write tests, and seeing if the diversity of the models, i.e. different families, improves results. At the time I'm writing this I haven't done the careful evaluation of this, but from my informal experience, it has been helping. This made me wonder more generally what improvement, if any, we can gain by having multiple models collaborate. And, importantly, at the same cost. This project is an attempt to measure this properly.
+
+There is no limit to the number of ways we could attempt to get models to collaborate and I wanted to be able to test many of them, not just a small pre-chosen set.
+So I decided to create a DSL for representing different variations. Initially I'm using it to test some already known protocols.
+If it works _really_ well I can imagine hill-climbing in the space of collaborative structures, with some kind of boundary.
+
+Developed with a lot of help from Claude (and reviews along the way from other models). And the description of the details below is also mostly written by Claude.
 
 ## Updates
 
 ### 2026-07-24
 
-Kicked off yesterday. I expected to just be able to have a note about that today with a decription of the still-pending steps. But I think
+Kicked off yesterday. I expected to just be able to have a note about that today with a description of the still-pending steps. But I think
 the results will be in tonight. Mostly negative, but some interesting data and good indications of how to follow-up with improvements.
 
 
@@ -16,7 +22,7 @@ the results will be in tonight. Mostly negative, but some interesting data and g
 
 A pre-registered experiment asking: **at matched compute budget, when does a heterogeneous multi-model collaboration protocol outperform the best single model in the pool, and which structural properties drive the difference?**
 
-The research question is committed in `docs/decisions.md` (2026-04-14) and the experimental design is promoted in `docs/research/experimental-design.md`. The compute-matched constraint is central: any multi-model result that does not beat a compute-matched single-model baseline is treated as a non-result. The study is pre-registered: the design, power analysis, and analysis plan were fixed before data collection.
+The research question is committed in `docs/decisions.md` (2026-04-14) and the experimental design is promoted in `docs/research/experimental-design.md`. The compute-matched constraint is central: any multi-model result that does not beat a compute-matched single-model baseline is treated as a non-result. The Phase 1 design and its analysis plan were pre-registered before any data collection. Following the descriptive pilot (see *Pilot results* below), the confirmatory analysis plan is being re-registered for the adopted fractional scoring before the confirmatory run.
 
 ## What this is
 
