@@ -19,6 +19,19 @@ appropriate artifact (if it's work).
   replacements, not just field tweaks. See
   `docs/design/system-architecture.md` § "Looking ahead" for the
   foundation work already done (runtime type reification).
+  **Boundary notes (Scott + Claude, 2026-07-26):** unbounded
+  structural growth (GP "bloat") is handled natively by the
+  budget-tier discipline — dollars are parsimony pressure in the
+  objective's own unit ("best protocol at $kX" is a bounded
+  search). Caveat: dollars bound *execution*, and only bound
+  *description* because the current IR has no control flow (every
+  node runs, every call has a floor cost); if conditionals or
+  recursion are added, add an explicit node/type-level bound as
+  the second fence. The real binding constraint is
+  fitness-evaluation economics under task-level noise: each
+  candidate's evaluation is a mini power-analysis problem —
+  design the search as cheap noisy screens at small task-N with
+  promotion of survivors to larger N.
 
 - **Recursion prediction.** Applying collaborative protocols to
   their own sub-tasks probably doesn't help at Phase 1 difficulty
