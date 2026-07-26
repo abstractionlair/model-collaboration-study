@@ -6,7 +6,9 @@ Elsewhere I describe my usage of multiple models in software development. Separa
 
 There is no limit to the number of ways we could attempt to get models to collaborate and I wanted to be able to test many of them, not just a small pre-chosen set.
 So I decided to create a DSL for representing different variations. Initially I'm using it to test some already known protocols.
-If it works _really_ well I can imagine hill-climbing in the space of collaborative structures, with some kind of boundary.
+If it works _really_ well I can imagine hill-climbing in the space of collaborative structures, with some kind of constraint(s) to avoid bloat.
+(Who wants a one million line structure description or one million calls to each of two models followed by a search for the best answer.)
+(Replace "one million" by whatever corresponds to insanely too big in whatever circumstances you find yourself in.)
 
 Developed with a lot of help from Claude (and reviews along the way from other models). And the description of the details below is also mostly written by Claude.
 
