@@ -2,7 +2,7 @@
 
 ## Background and Motivation
 
-Elsewhere I describe my usage of multiple models in software development. Separating writing and reviewing of artifacts, sometimes having multiple models review the same artifact or write tests, and seeing if the diversity of the models, i.e. different families, improves results. At the time I'm writing this I haven't done the careful evaluation of this, but from my informal experience, it has been helping. This made me wonder more generally what improvement, if any, we can gain by having multiple models collaborate. And, importantly, at the same cost. This project is an attempt to measure this properly.
+[Elsewhere](https://github.com/abstractionlair/review-diversity) I describe my usage of multiple models in software development. Separating writing and reviewing of artifacts, sometimes having multiple models review the same artifact or write tests, and seeing if the diversity of the models, i.e. different families, improves results. At the time I'm writing this I haven't done the careful evaluation of this, but from my informal experience, it has been helping. This made me wonder more generally what improvement, if any, we can gain by having multiple models collaborate. And, importantly, at the same cost. This project is an attempt to measure this properly.
 
 There is no limit to the number of ways we could attempt to get models to collaborate and I wanted to be able to test many of them, not just a small pre-chosen set.
 So I decided to create a DSL for representing different variations. Initially I'm using it to test some already known protocols.
