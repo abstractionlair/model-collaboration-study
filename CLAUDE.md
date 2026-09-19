@@ -103,7 +103,7 @@ stored in the vault as `GOOGLE_EMBEDDING_API_KEY` /
 `GEMINI_EMBEDDING_API_KEY`, not under the canonical
 `GOOGLE_API_KEY` / `GEMINI_API_KEY` names. It **is** a
 generic key that works for generation — the embedding-style
-naming is deliberate, to prevent the `gemini` CLI from
+naming is deliberate, to prevent Antigravity (`agy`, formerly the `gemini` CLI) from
 automatically switching to it whenever the env var is in
 scope. `src/executor/api_client.py`'s `_get_google()` reads
 the canonical names first, then falls back to the
